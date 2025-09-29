@@ -13,9 +13,13 @@ namespace FridgeManagementSystem.Models
         public string FaultDescription { get; set; }
 
         [StringLength(50, ErrorMessage = "Status cannot exceed 50 characters")]
-        public string Status { get; set; } = "Pending"; // Default value
+        [Required]
+        [Display(Name = "Status")]
+        public string Status { get; set; } = "Pending"; // Pending, Diagnosing, Repairing, Testing, Resolved
 
-        public string Priority { get; set; } = "Low";
+        [Required]
+        [Display(Name = "Priority")]
+        public string Priority { get; set; } = "Medium"; // Low, Medium, High
 
         public DateTime ScheduledDate { get; set; }
 
@@ -29,6 +33,21 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Appliance Type")]
         public string ApplianceType { get; set; } = string.Empty;
 
+        // Additional fields for fault processing
+        [Display(Name = "Initial Assessment")]
+        [StringLength(1000)]
+        public string InitialAssessment { get; set; }
+
+        [Display(Name = "Estimated Repair Time (hours)")]
+        [Range(0.5, 24, ErrorMessage = "Repair time must be between 0.5 and 24 hours")]
+        public decimal? EstimatedRepairTime { get; set; }
+
+        [Display(Name = "Required Parts")]
+        [StringLength(500)]
+        public string RequiredParts { get; set; }
+
+        [Display(Name = "Is Urgent?")]
+        public bool IsUrgent { get; set; } = false;
         [Required(ErrorMessage = "Customer is required")]
         [Display(Name = "Customer ID")]
         public string CustomerID { get; set; } = string.Empty;
@@ -37,6 +56,19 @@ namespace FridgeManagementSystem.Models
         [StringLength(200, ErrorMessage = "Customer Name cannot exceed 200 characters")]
         [Display(Name = "Customer Name")]
         public string CustomerName { get; set; } = string.Empty;
+        // Audit fields
+        [Display(Name = "Created Date")]
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        [Display(Name = "Updated Date")]
+        public DateTime UpdatedDate { get; set; } = DateTime.Now;
+
+        // Technician who is processing the fault
+        [Display(Name = "Technician")]
+        public int? TechnicianID { get; set; }
+
+        [ForeignKey("TechnicianID")]
+        public virtual FaultTechnicians Technician { get; set; }
 
         [Required(ErrorMessage = "Category is required")]
         [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]

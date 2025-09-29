@@ -9,18 +9,39 @@ namespace FridgeManagementSystem.Models
         [Key]
         public int TechnicianID { get; set; }
 
-        [Required(ErrorMessage = "Technician Name is required")]
+        [Required]
+        [StringLength(50)]
         public string FirstName { get; set; }
 
+        [Required]
+        [StringLength(50)]
         public string LastName { get; set; }
 
+        [EmailAddress]
+        [StringLength(100)]
         public string Email { get; set; }
-        public string PhoneNumber {  get; set; }
-        public string Specialization {  get; set; } 
-        public string EmployeeNumber {  get; set; }
-        [ForeignKey("RepairSchedule")]
-        public int RepairID { get; set; }
 
-        public ICollection<FaultReport> AssignedFaults { get; set; } = new List<FaultReport>();
+        [Phone]
+        [StringLength(20)]
+        public string PhoneNumber { get; set; }
+
+        [StringLength(50)]
+        public string Specialization { get; set; } // Electrical, Mechanical, Refrigeration
+
+        public bool IsActive { get; set; } = true;
+
+        [Display(Name = "Hire Date")]
+        [DataType(DataType.Date)]
+        public DateTime HireDate { get; set; } = DateTime.Today;
+
+        // Navigation properties
+        public virtual ICollection<Fault> Faults { get; set; } = new List<Fault>();
+        public virtual ICollection<RepairSchedule> RepairSchedules { get; set; } = new List<RepairSchedule>();
+
+        [NotMapped]
+        public string FullName => $"{FirstName} {LastName}";
+
+        [NotMapped]
+        public int CompletedRepairsCount => RepairSchedules?.Count(r => r.Status == "Completed") ?? 0;
     }
 }
