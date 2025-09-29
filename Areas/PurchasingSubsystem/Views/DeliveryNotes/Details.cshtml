@@ -1,0 +1,28 @@
+﻿@model PurchasingSubsystem.Models.DeliveryNote
+
+@{
+    ViewData["Title"] = "Delivery Note Details";
+}
+
+<h2>Delivery Note Details</h2>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Delivery Note ID</dt>
+        <dd class="col-sm-10">@Model.DeliveryNoteID</dd>
+        
+        <dt class="col-sm-2">Purchase Order</dt>
+        <dd class="col-sm-10">@Model.PurchaseOrderId</dd>
+        
+        <dt class="col-sm-2">Supplier</dt>
+        <dd class="col-sm-10">@Model.Supplier?.Name</dd>
+        
+        <dt class="col-sm-2">Delivery Date</dt>
+        <dd class="col-sm-10">@Model.DeliveryDate.ToString("yyyy-MM-dd")</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.DeliveryNoteID" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

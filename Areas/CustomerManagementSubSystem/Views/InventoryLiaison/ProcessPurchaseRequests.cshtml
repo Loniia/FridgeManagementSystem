@@ -1,0 +1,58 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.PurchaseRequestViewModel>
+
+<h2>Pending Purchase Requests</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info">@TempData["InfoMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<table class="table table-striped table-bordered mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Request Number</th>
+            <th>Customer</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th>Requested Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var request in Model)
+        {
+            <tr>
+                <td>@request.PurchaseRequestID</td>
+                <td>@request.CustomerName</td>
+                <td>@request.ItemName</td>
+                <td>@request.Quantity</td>
+                <td>@request.Status</td>
+                <td>@request.RequestDate.ToString("yyyy-MM-dd")</td>
+                <td>
+                    @if (request.Status == "Pending")
+                    {
+                       
+                        <span class="text-warning">Pending</span>
+                    }
+                    else if (request.Status == "Approved")
+                    {
+                        <span class="text-success">Approved</span>
+                    }
+                    else if (request.Status == "Rejected")
+                    {
+                        <span class="text-danger">Rejected</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

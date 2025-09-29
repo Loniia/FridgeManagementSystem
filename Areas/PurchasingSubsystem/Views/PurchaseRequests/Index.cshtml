@@ -1,0 +1,89 @@
+﻿@model IEnumerable<PurchasingSubsystem.Models.PurchaseRequest>
+
+
+@{
+    ViewData["Title"] = "Purchase Requests";
+}
+
+<h2>Purchase Requests</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New Request</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Request ID</th>
+            <th>Inventory Liaison</th>
+            <th>Request Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.PurchaseRequestID</td>
+                <td>@item.InventoryLiaison?.Name</td>
+                <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <span class="badge bg-@(item.Status == "Approved" ? "success" : item.Status == "Rejected" ? "danger" : "warning")">
+                        @item.Status
+                    </span>
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.PurchaseRequestID" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.PurchaseRequestID" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.PurchaseRequestID" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@* @{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.RequestDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.InventoryLiaison)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.RequestDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InventoryLiaison.Email)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.PurchaseRequestID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.PurchaseRequestID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.PurchaseRequestID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table> *@

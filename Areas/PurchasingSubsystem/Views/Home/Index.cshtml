@@ -1,0 +1,515 @@
+﻿@{
+    ViewData["Title"] = "Purchasing Dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Frost-Tech Purchasing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+            .logo i {
+                margin-right: 10px;
+                font-size: 32px;
+            }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+            nav ul li {
+                margin-left: 25px;
+            }
+
+                nav ul li a {
+                    text-decoration: none;
+                    color: white;
+                    font-weight: 500;
+                    transition: color 0.3s;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                }
+
+                    nav ul li a:hover, nav ul li a.active {
+                        background-color: rgba(255, 255, 255, 0.1);
+                    }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Dashboard Section */
+        .dashboard {
+            padding: 50px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            font-size: 32px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            }
+
+        .card-header {
+            background: #3498db;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+            .card-body ul {
+                list-style: none;
+                margin-bottom: 20px;
+            }
+
+                .card-body ul li {
+                    padding: 10px 0;
+                    border-bottom: 1px solid #eee;
+                    display: flex;
+                    align-items: center;
+                }
+
+                    .card-body ul li i {
+                        margin-right: 10px;
+                        color: #3498db;
+                    }
+
+                    .card-body ul li:last-child {
+                        border-bottom: none;
+                    }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+            .btn:hover {
+                background: #3498db;
+            }
+
+        /* Stats Section */
+        .stats {
+            background: #2c3e50;
+            color: white;
+            padding: 50px 0;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stat-title {
+            font-size: 18px;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a252f;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .footer-section p, .footer-section a {
+            margin-bottom: 10px;
+            color: #ddd;
+            text-decoration: none;
+            display: block;
+        }
+
+            .footer-section a:hover {
+                color: #3498db;
+            }
+
+        .footer-bottom {
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Design - FIXED MEDIA QUERY */
+        @@media screen and (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav ul {
+                margin-top: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+                nav ul li {
+                    margin: 10px;
+                }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+
+        @@media screen and (max-width: 480px) {
+            .logo {
+                font-size: 22px;
+            }
+
+                .logo i {
+                    font-size: 26px;
+                }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+                nav ul li {
+                    margin: 5px 0;
+                }
+
+            .hero {
+                padding: 50px 0;
+            }
+
+                .hero h1 {
+                    font-size: 28px;
+                }
+
+                .hero p {
+                    font-size: 16px;
+                }
+
+            .section-title {
+                font-size: 26px;
+            }
+
+            .stat-number {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-snowflake"></i>
+                    <span>Dynamic Ice </span>
+                </div>
+                <nav>
+                    @* <ul>
+                        <li><a asp-controller="Home" asp-action="Index" class="active">Home</a></li>
+                        <li><a asp-controller="Home" asp-action="About">About Us</a></li>
+                        <li><a asp-controller="Home" asp-action="Services">Services</a></li>
+                        <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
+                        <li><a asp-controller="Account" asp-action="Login">Sign In</a></li>
+                    </ul *@>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Dynamic-Ice Purchasing Subsystem</h1>
+                <p>Streamlining procurement processes for efficient business operations</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard">
+        <div class="container">
+            <h2 class="section-title">Purchasing Dashboard</h2>
+            <div class="cards">
+                <!-- Purchase Orders Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-file-invoice-dollar"></i> Purchase Orders
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li><i class="fas fa-list"></i> View all purchase orders</li>
+                            <li><i class="fas fa-plus"></i> Create new purchase order</li>
+                            <li><i class="fas fa-search"></i> Track order status</li>
+                            <li><i class="fas fa-history"></i> Order history</li>
+                        </ul>
+                        <a asp-controller="PurchaseOrders" asp-action="Index" class="btn">Manage Purchase Orders</a>
+                    </div>
+                </div>
+
+                <!-- Purchase Requests Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-clipboard-list"></i> Purchase Requests
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li><i class="fas fa-plus-circle"></i> Create new request</li>
+                            <li><i class="fas fa-tasks"></i> Approve pending requests</li>
+                            <li><i class="fas fa-history"></i> Request history</li>
+                            <li><i class="fas fa-chart-bar"></i> Request analytics</li>
+                        </ul>
+                        <a asp-controller="PurchaseRequests" asp-action="Index" class="btn">Manage Purchase Requests</a>
+                    </div>
+                </div>
+
+                <!-- Quotations Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-file-contract"></i> Quotations
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li><i class="fas fa-envelope"></i> Request quotations</li>
+                            <li><i class="fas fa-inbox"></i> Received quotations</li>
+                            <li><i class="fas fa-check-circle"></i> Approve quotations</li>
+                            <li><i class="fas fa-file-download"></i> Download quotes</li>
+                        </ul>
+                        <a asp-controller="Quotations" asp-action="Index" class="btn">Manage Quotations</a>
+                    </div>
+                </div>
+
+                <!-- Delivery Notes Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-truck-loading"></i> Delivery Notes
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li><i class="fas fa-eye"></i> View delivery notes</li>
+                            <li><i class="fas fa-plus-square"></i> Create delivery note</li>
+                            <li><i class="fas fa-check-double"></i> Verify deliveries</li>
+                            <li><i class="fas fa-archive"></i> Archive records</li>
+                        </ul>
+                        <a asp-controller="DeliveryNotes" asp-action="Index" class="btn">Manage Delivery Notes</a>
+                    </div>
+                </div>
+
+                <!-- Suppliers Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-handshake"></i> Suppliers
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li><i class="fas fa-address-book"></i> Supplier directory</li>
+                            <li><i class="fas fa-user-plus"></i> Add new supplier</li>
+                            <li><i class="fas fa-star"></i> Rate suppliers</li>
+                            <li><i class="fas fa-file-alt"></i> Supplier contracts</li>
+                        </ul>
+                        <a asp-controller="Suppliers" asp-action="Index" class="btn">Manage Suppliers</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    @* <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-number">@ViewData["ActiveOrders"]</div>
+                    <div class="stat-title">Active Purchase Orders</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">@ViewData["PendingApprovals"]</div>
+                    <div class="stat-title">Pending Approvals</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">@ViewData["WeeklyDeliveries"]</div>
+                    <div class="stat-title">Delivery Notes This Week</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">R @ViewData["MonthlySpending"]</div>
+                    <div class="stat-title">Monthly Spending</div>
+                </div>
+            </div>
+        </div>
+    </section>
+ *@
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Frost-Tech Purchasing</h3>
+                    <p>Building 201, North Campus</p>
+                    <p>Nelson Mandela University, Summerstrand</p>
+                    <p>info@frost-tech.co.za</p>
+                    <p>+27 41 123 4567</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <a asp-controller="PurchaseOrders" asp-action="Index">Purchase Orders</a>
+                    <a asp-controller="PurchaseRequests" asp-action="Index">Purchase Requests</a>
+                    <a asp-controller="Quotations" asp-action="Index">Quotations</a>
+                    <a asp-controller="DeliveryNotes" asp-action="Index">Delivery Notes</a>
+                </div>
+               
+            <div class="footer-bottom">
+                <p>&copy; Dyna,ic-Ice Purchasing Subsystem. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple JavaScript for interactive elements
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                card.addEventListener('click', function () {
+                    const btn = this.querySelector('.btn');
+                    if (btn) {
+                        window.location.href = btn.getAttribute('href');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

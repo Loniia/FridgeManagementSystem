@@ -1,0 +1,343 @@
+﻿@* Views/Shared/_Layout.cshtml *@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Dynamic Ice Inc</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            padding-bottom: 50px;
+            transition: transform 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 1040;
+            transform: translateX(0);
+        }
+
+        .sidebar-collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            background-color: #23272b;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+            .sidebar-header h3 {
+                margin: 0;
+                font-size: 1.2rem;
+                white-space: nowrap;
+            }
+
+        .toggle-sidebar-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        /* User panel */
+        .user-panel {
+            padding: 1rem;
+        }
+
+        .user-card {
+            background-color: #495057;
+            border-radius: 8px;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+            .user-card img {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-bottom: 0.5rem;
+            }
+
+            .user-card h4 {
+                margin: 0;
+                font-size: 0.9rem;
+            }
+
+            .user-card p {
+                margin: 0;
+                font-size: 0.75rem;
+                color: #adb5bd;
+            }
+        /* Sidebar menu */
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+            .sidebar-menu li {
+                width: 100%;
+            }
+
+                .sidebar-menu li a {
+                    display: block;
+                    color: white;
+                    padding: 0.75rem 1rem;
+                    text-decoration: none;
+                }
+
+                    .sidebar-menu li a:hover,
+                    .sidebar-menu li a.active {
+                        background-color: #495057;
+                    }
+
+            .sidebar-menu .menu-header {
+                display: block;
+                padding: 0.75rem 1rem;
+                font-weight: bold;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                color: #adb5bd;
+                cursor: pointer;
+            }
+        /* Main content stays fixed, no shifting */
+        .main-content {
+            flex: 1;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar-collapsed ~ .main-content {
+            margin-left: 0;
+        }
+
+        main {
+            flex: 1;
+            padding: 1rem;
+        }
+        /* Fixed toggle button */
+        #sidebarFixedToggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1050;
+            display: none;
+            background-color: #343a40;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="toggle-sidebar-btn" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h3>Customer <br /> Management<br> SubSystem</h3>
+        </div>
+
+        <!-- Single user card -->
+        <div class="user-panel">
+            <div class="user-card">
+                <img src="~/images/IMG_0822.jpg" alt="Customer Manager" />
+                <h4>Munyai Idah</h4>
+                <p>Customer Manager</p>
+            </div>
+        </div>
+
+        <!-- Inventory Liaison -->
+        <ul class="sidebar-menu">
+            <li>
+                <span class="menu-header" id="inventoryHeader">
+                    <a asp-controller="InventoryLiaison" asp-action="MonthlyDashboard" class="text-decoration-none">
+                        <i class="fas fa-boxes"></i> Inventory Liaison
+                    </a>
+                    <i class="fas fa-chevron-down float-end" data-bs-toggle="collapse" data-bs-target="#inventoryLiaisonSubmenu"></i>
+                </span>
+
+                <ul class="collapse list-unstyled" id="inventoryLiaisonSubmenu">
+                    <li>
+                        <a asp-controller="InventoryLiaison" asp-action="Index">
+                            <i class="fas fa-warehouse"></i> View Stock
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="InventoryLiaison" asp-action="Receive">
+                            <i class="fas fa-truck-arrow-right"></i> Receive New Fridges
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="InventoryLiaison" asp-action="ProcessPendingAllocations">
+                            <i class="fas fa-list-check"></i> Process Pending Allocations
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="InventoryLiaison" asp-action="CreatePurchaseRequest">
+                            <i class="fas fa-file-invoice"></i> Create Purchase Request
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="InventoryLiaison" asp-action="ProcessPurchaseRequests">
+                            <i class="fas fa-clipboard-check"></i> Pending Purchase Requests
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <!-- Customer Liaison -->
+        <ul class="sidebar-menu">
+            <li>
+                <span class="menu-header" id="customerHeader">
+                    <i class="fas fa-people-group"></i> Customer Liaison
+                    <i class="fas fa-chevron-down float-end"></i>
+                </span>
+                <ul class="collapse list-unstyled" id="customerLiaisonSubmenu">
+                    <li>
+                        <a asp-controller="CustomerLiaison" asp-action="Index">
+                            <i class="fas fa-user"></i> Manage Customers
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <!-- Account -->
+        <ul class="sidebar-menu">
+            <li class="menu-header">Account</li>
+            <li>
+                <a asp-controller="Account" asp-action="Logout">
+                    <i class="fas fa-sign-out-alt"></i> <span>Sign Out</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Fixed toggle button for collapsed sidebar -->
+    <button id="sidebarFixedToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Main content -->
+    <div class="main-content" id="mainContent">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container-fluid">
+                <a asp-controller="CustomerManagementHome" asp-action="Index" class="navbar-brand">Dynamic Ice Inc</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar" aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="topNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a asp-controller="CustomerManagementHome" asp-action="Index" class="nav-link">Home</a></li>
+                        <li class="nav-item"><a asp-controller="CustomerManagementHome" asp-action="About" class="nav-link">About Us</a></li>
+                        <li class="nav-item"><a asp-controller="CustomerManagementHome" asp-action="Services" class="nav-link">Services</a></li>
+                        <li class="nav-item"><a asp-controller="CustomerManagementHome" asp-action="Contact" class="nav-link">Contact Us</a></li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <form asp-area="Identity" asp-page="/Account/Logout" method="post" id="logoutForm">
+                            <button type="submit" class="btn btn-link">Logout</button>
+                        </form>
+
+                    </ul>
+                </div>
+                
+            </div>
+        </nav>
+
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(function () {
+            var path = window.location.pathname.toLowerCase();
+
+            // Navbar active state
+            $('.navbar .nav-link').each(function () {
+                var href = $(this).attr('href') || '';
+                if (href !== '#' && path.startsWith(href.toLowerCase())) $(this).addClass('active');
+            });
+
+            // Sidebar menu item active state
+            $('.sidebar-menu a').on('click', function () {
+                $('.sidebar-menu a').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Customer Liaison toggle
+            $('#customerHeader').on('click', function () {
+                $('#customerLiaisonSubmenu').collapse('toggle');
+            });
+
+            // Sidebar toggle
+            $('#sidebarToggle').on('click', function () {
+                $('#sidebar').toggleClass('sidebar-collapsed');
+                updateFixedToggle();
+            });
+
+            // Fixed toggle button
+            $('#sidebarFixedToggle').on('click', function () {
+                $('#sidebar').removeClass('sidebar-collapsed');
+                updateFixedToggle();
+            });
+
+            function updateFixedToggle() {
+                if ($('#sidebar').hasClass('sidebar-collapsed')) {
+                    $('#sidebarFixedToggle').show();
+                } else {
+                    $('#sidebarFixedToggle').hide();
+                }
+            }
+
+            // Initialize fixed toggle visibility
+            updateFixedToggle();
+        });
+    </script>
+
+    @* TempData Alerts *@
+    <script>
+        @if (TempData["StockLow"] != null)
+        {
+            <text>alert("⚠️ @TempData["StockLow"]"); </text>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <text>alert("✅ @TempData["Success"]"); </text>
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

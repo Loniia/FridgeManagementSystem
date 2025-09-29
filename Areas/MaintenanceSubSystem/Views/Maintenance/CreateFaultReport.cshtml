@@ -1,0 +1,350 @@
+﻿@model FridgeManagementSystem.Models.FaultReport
+
+<style>
+    /* Main container styling */
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Header styling */
+    h2 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    h2 i {
+        color: #e74c3c;
+    }
+
+    /* Alert styling */
+    .alert {
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        border: none;
+        font-weight: 500;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .alert-success {
+        background-color: #e6f7ee;
+        color: #28a745;
+        border-left: 4px solid #28a745;
+    }
+
+    .alert-danger {
+        background-color: #ffe6e6;
+        color: #d9534f;
+        border-left: 4px solid #d9534f;
+    }
+
+    /* Form styling */
+    form {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Form group styling */
+    .mb-3 {
+        margin-bottom: 1.5rem !important;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    /* Form controls styling */
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid #e1e5eb;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    .form-control[readonly] {
+        background-color: #e9ecef;
+        color: #495057;
+        border-color: #ced4da;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Radio button styling */
+    .form-check-inline {
+        margin-right: 20px;
+        margin-bottom: 10px;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        border: 2px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+
+    .form-check-input:checked {
+        background-color: #3498db;
+        border-color: #3498db;
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        border-color: #3498db;
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        color: #495057;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    /* Button styling */
+    .btn {
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+        box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
+        margin-left: 15px;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    /* Button container */
+    .button-container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    /* Validation styling */
+    .text-danger {
+        font-size: 0.85rem;
+        margin-top: 5px;
+        font-weight: 500;
+        color: #d9534f !important;
+    }
+
+    .field-validation-error {
+        color: #d9534f;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+        }
+
+        form {
+            padding: 20px;
+        }
+
+        .mb-3 {
+            padding: 12px;
+        }
+
+        .button-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn {
+            width: 100%;
+            margin-left: 0 !important;
+            margin-bottom: 10px;
+        }
+
+        .form-check-inline {
+            margin-right: 15px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        h2 {
+            font-size: 1.4rem;
+        }
+
+        .container {
+            padding: 10px;
+        }
+
+        form {
+            padding: 15px;
+        }
+
+        .form-control, .form-select {
+            padding: 10px 12px;
+        }
+
+        .form-check-inline {
+            display: block;
+            margin-right: 0;
+            margin-bottom: 8px;
+        }
+    }
+
+    /* Animation for form elements */
+    .form-control, .form-select, .btn, .form-check-input {
+        transition: all 0.3s ease;
+    }
+
+    /* Focus states for accessibility */
+    .btn:focus, .form-control:focus, .form-select:focus, .form-check-input:focus {
+        outline: 2px solid #3498db;
+        outline-offset: 2px;
+    }
+
+    /* Custom radio button styling */
+    .form-check-input[type="radio"] {
+        border-radius: 50%;
+    }
+
+    .form-check-input:checked[type="radio"] {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e");
+    }
+</style>
+
+<div class="container my-5">
+    <h2 class="mb-4"><i class="fas fa-exclamation-triangle me-2"></i>Fault Report</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+
+    <form asp-action="SaveFaultReport" method="post">
+        @Html.AntiForgeryToken()
+        @if (TempData["ModelErrors"] != null)
+        {
+            <div class="alert alert-danger">
+                <strong>Errors:</strong> @TempData["ModelErrors"]
+            </div>
+        }
+
+        <input type="hidden" asp-for="MaintenanceVisitId" />
+        <input type="hidden" asp-for="FridgeID" />
+
+        <div class="mb-3">
+            <label>Technician Name:</label>
+            <input type="text" class="form-control" value="@ViewBag.EmployeeName" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label>Customer Name:</label>
+            <input type="text" class="form-control" value="@ViewBag.CustomerName" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label>Fridge Model:</label>
+            <input type="text" class="form-control" value="@ViewBag.FridgeModel" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label>Address:</label>
+            <input type="text" class="form-control" value="@ViewBag.Address" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ReportDate"></label>
+            <input asp-for="ReportDate" class="form-control" type="date" />
+            <span asp-validation-for="ReportDate" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="FaultType"></label>
+            <select asp-for="FaultType" class="form-select" asp-items="Html.GetEnumSelectList<FridgeManagementSystem.Models.FaultType>()">
+                <option value="">-- Select Fault Type --</option>
+            </select>
+            <span asp-validation-for="FaultType" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="FaultDescription"></label>
+            <textarea asp-for="FaultDescription" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="FaultDescription" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Urgency Level:</label><br />
+            @foreach (FridgeManagementSystem.Models.UrgencyLevel level in Enum.GetValues(typeof(FridgeManagementSystem.Models.UrgencyLevel)))
+            {
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" asp-for="UrgencyLevel" value="@level" />
+                    <label class="form-check-label">@level</label>
+                </div>
+            }
+            <span asp-validation-for="UrgencyLevel" class="text-danger"></span>
+        </div>
+
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">Save Report</button>
+            <a asp-controller="Maintenance" asp-action="PerformMaintenance" asp-route-visitId="@Model.MaintenanceVisitId" class="btn btn-secondary">Back</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

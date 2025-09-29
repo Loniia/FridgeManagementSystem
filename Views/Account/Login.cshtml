@@ -1,0 +1,78 @@
+﻿@model FridgeManagementSystem.Models.LoginViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="main-content mt-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Login</h2>
+
+                        <!-- Tabs for roles -->
+                        <div class="d-flex justify-content-center mb-3">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active tab" data-role="Customer">Customer</button>
+                                <button type="button" class="btn btn-outline-primary tab" data-role="Employee">Employee</button>
+                                <button type="button" class="btn btn-outline-primary tab" data-role="Administrator">Admin</button>
+                            </div>
+                        </div>
+
+                        <form asp-action="Login" method="post">
+                            <input type="hidden" asp-for="Role" id="role" value="Customer" />
+
+                            <div class="mb-3">
+                                <label asp-for="Username" class="form-label"></label>
+                                <input asp-for="Username" class="form-control" />
+                                <span asp-validation-for="Username" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <input asp-for="Password" class="form-control" type="password" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <label asp-for="RememberMe" class="form-check-label"></label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+
+                            <div class="text-center mt-3">
+                                Not a member? <a asp-controller="Account" asp-action="RegisterCustomer">Register here</a>.
+                            </div>
+
+                            <div class="text-danger mt-2">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <div>@error.ErrorMessage</div>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById("role").value = this.dataset.role;
+            });
+        });
+    </script>
+}

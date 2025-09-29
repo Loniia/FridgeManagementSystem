@@ -1,0 +1,39 @@
+﻿@model IEnumerable<PurchasingSubsystem.Models.Quotation>
+
+@{
+    ViewData["Title"] = "Quotations";
+}
+
+<h2>Quotations</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New Quotation</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Quotation ID</th>
+            <th>Supplier</th>
+            <th>Received Date</th>
+            <th>Amount</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.QuotationID</td>
+                <td>@item.Supplier?.Name</td>
+                <td>@item.ReceivedDate.ToString("yyyy-MM-dd")</td>
+                <td>@item.QuotationAmount.ToString("C")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.QuotationID" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.QuotationID" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.QuotationID" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

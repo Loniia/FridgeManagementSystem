@@ -1,0 +1,352 @@
+﻿@* @model IEnumerable<Faults>
+
+@{
+    ViewData["Title"] = "View Faults";
+}
+
+ <!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">FMS</a>
+        <div class="navbar-nav me-auto">
+            <a class="nav-link active" href="#">Home</a>
+            <a class="nav-link" href="#">About Us</a>
+            <a class="nav-link" href="#">Services</a>
+            <a class="nav-link" href="#">Contact Us</a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="#">Sign Out</a>
+        </div>
+    </div>
+</nav> 
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">View Faults</h1>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search...">
+                <button class="btn btn-primary" type="button">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faults Table -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Fault Number</th>
+                            <th>Customer Number</th>
+                            <th>Customer Name</th>
+                            <th>Category</th>
+                            <th>Date Reported</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>F@(item.FaultID.ToString())</td>
+                                <td>C@(item.Fridge?.Customer?.CustomerID.ToString())</td>
+                                <td>@(item.Fridge?.Customer?.CustomerName)</td>
+                                <td>@item.FaultDescription</td>
+                                <td>@item.ReportDate.ToString()</td>
+                                <td>
+                                    <span class="badge @(item.Priority == "High" ? "bg-danger" :
+                                                    item.Priority == "Medium" ? "bg-warning" :
+                                                    "bg-info")">
+                                        @item.Priority
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge @(item.Status == "Unattended" ? "bg-danger" :
+                                                    item.Status == "In Progress" ? "bg-warning" :
+                                                    item.Status == "Resolved" ? "bg-success" : "bg-secondary")">
+                                        @item.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <!-- PDF Action Button -->
+                                        <a asp-action="GeneratePdf" asp-route-id="@item.FaultID" class="btn btn-info btn-sm" title="View PDF">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+
+                                        <!-- Visible action buttons -->
+                                        <a asp-action="Details" asp-route-id="@item.FaultID" class="btn btn-outline-info btn-sm" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.FaultID" class="btn btn-outline-warning btn-sm" title="Edit Fault">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Schedule" asp-route-id="@item.FaultID" class="btn btn-outline-primary btn-sm" title="Schedule Repair">
+                                            <i class="fas fa-calendar-plus"></i>
+                                        </a>
+                                        @if (item.Status != "Resolved" && item.Status != "Closed")
+                                        {
+                                            <a asp-action="MarkComplete" asp-route-id="@item.FaultID" class="btn btn-outline-success btn-sm" title="Mark Complete">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        }
+                                        <a asp-action="Delete" asp-route-id="@item.FaultID" class="btn btn-outline-danger btn-sm" title="Delete Fault">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Text -->
+    <div class="alert alert-info mt-4">
+        <strong>Note:</strong> When pressed it takes you to a pdf doc with information concerning the fault being handled.
+    </div>
+</div>
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    .table th {
+        background-color: #f8f9fc;
+        font-weight: 600;
+        border-bottom: 2px solid #e3e6f0;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.6em;
+    }
+
+    .btn-group .btn {
+        margin-right: 0.1rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+    }
+
+    .btn-sm {
+        font-size: 0.75rem;
+    }
+
+</style>*@
+
+@model IEnumerable<FridgeManagementSystem.Models.Fault>
+
+@{
+    ViewData["Title"] = "View Faults";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FMS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
+        .sidebar { width: 220px; background-color: #1a237e; color: white; padding: 1rem; position: fixed; top: 0; left: 0; height: 100vh; }
+        .sidebar-header { text-align: center; padding-bottom: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-header img { width: 60px; height: 60px; object-fit: contain; background-color: white; padding: 5px; border-radius: 8px; }
+        .sidebar-header h6 { color: white; margin-top: 0.5rem; font-weight: 500; }
+        .sidebar .nav-link { color: rgba(255, 255, 255, 0.85) !important; padding: 0.75rem 1rem; margin: 0.25rem 0; border-radius: 5px; transition: all 0.3s; display: flex; align-items: center; }
+        .sidebar .nav-link:hover { color: white !important; background-color: #283593; }
+        .sidebar .nav-link.active { color: white !important; background-color: #3949ab; font-weight: 500; }
+        .sidebar .nav-link i { margin-right: 0.75rem; width: 20px; text-align: center; }
+        .sidebar .btn-signout { background-color: #d32f2f; border: none; color: white; margin-top: 1.5rem; padding: 0.75rem; width: 100%; }
+        .sidebar .btn-signout:hover { background-color: #b71c1c; }
+        .main-content { margin-left: 220px; padding: 1.5rem; min-height: 100vh; }
+        .table th { background-color: #f8f9fc; font-weight: 600; border-bottom: 2px solid #e3e6f0; }
+        .table td { vertical-align: middle; }
+        .badge { font-size: 0.85em; padding: 0.4em 0.6em; }
+        .btn-group .btn { margin-right: 0.1rem; padding: 0.25rem 0.5rem; }
+        .card { border: 1px solid #e3e6f0; border-radius: 0.35rem; }
+        .btn-sm { font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="~/images/Cozy.jpg" alt="Logo" />
+                <h6>Onke Boyce</h6>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a asp-controller="Faults" asp-action="Dashboard"
+                       class="nav-link @(currentController=="Faults" && currentAction=="Dashboard" ? "active" : "")">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Faults" asp-action="Index"
+                       class="nav-link @(currentController=="Faults" && currentAction=="Index" ? "active" : "")">
+                        <i class="fas fa-exclamation-triangle"></i> View Fault Reports
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle @(currentController=="Schedules" ? "active" : "")" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-calendar-alt"></i> Scheduling
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a asp-controller="Schedules" asp-action="Create"
+                               class="dropdown-item @(currentController=="Schedules" && currentAction=="Create" ? "active" : "")">
+                                <i class="fas fa-plus-circle"></i> Schedule a Repair
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Schedules" asp-action="Details"
+                               class="dropdown-item @(currentController=="Schedules" && currentAction=="Details" ? "active" : "")">
+                                <i class="fas fa-list"></i> Scheduled Repairs
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Report" asp-action="Create"
+                       class="nav-link @(currentController=="Report" ? "active" : "")">
+                        <i class="fas fa-file-alt"></i> Generate Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Schedules" asp-action="Index"
+                       class="nav-link @(currentController=="Schedules" && currentAction=="Index" ? "active" : "")">
+                        <i class="fas fa-check-circle"></i> Completed Repairs
+                    </a>
+                </li>
+            </ul>
+            <a asp-controller="UserAcc" asp-action="Login" class="btn btn-signout">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container-fluid">
+                <h1 class="h3 mb-4 text-gray-800">View Faults</h1>
+
+                <!-- Search Bar -->
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search...">
+                            <button class="btn btn-primary" type="button">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faults Table -->
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Fault Number</th>
+                                        <th>Customer Number</th>
+                                        <th>Customer Name</th>
+                                        <th>Category</th>
+                                        <th>Date Reported</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>F@(item.FaultID)</td>
+                                            <td>C@(item.Fridge?.Customer?.CustomerID)</td>
+                                            <td>@(item.Fridge?.Customer?.FullName)</td>
+                                            <td>@item.FaultDescription</td>
+                                            <td>@item.ReportDate.ToString("yyyy-MM-dd")</td>
+                                            <td>
+                                                <span class="badge @(item.Priority == "High" ? "bg-danger" :
+                                                                item.Priority == "Medium" ? "bg-warning" : "bg-info")">
+                                                    @item.Priority
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(item.Status == "Unattended" ? "bg-danger" :
+                                                                item.Status == "In Progress" ? "bg-warning" :
+                                                                item.Status == "Resolved" ? "bg-success" : "bg-secondary")">
+                                                    @item.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="GeneratePdf" asp-route-id="@item.FaultID" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </a>
+                                                    <a asp-action="Details" asp-route-id="@item.FaultID" class="btn btn-outline-info btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.FaultID" class="btn btn-outline-warning btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a asp-action="Schedule" asp-route-id="@item.FaultID" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-calendar-plus"></i>
+                                                    </a>
+                                                    @if (item.Status != "Resolved" && item.Status != "Closed")
+                                                    {
+                                                        <a asp-action="MarkComplete" asp-route-id="@item.FaultID" class="btn btn-outline-success btn-sm">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+                                                    }
+                                                    <a asp-action="Delete" asp-route-id="@item.FaultID" class="btn btn-outline-danger btn-sm">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <strong>Note:</strong> Clicking PDF generates a document about the fault.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

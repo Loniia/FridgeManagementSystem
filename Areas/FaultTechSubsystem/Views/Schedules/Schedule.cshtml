@@ -1,0 +1,150 @@
+﻿@model FridgeManagementSystem.Models.RepairSchedule
+
+@{
+    ViewData["Title"] = "Schedule Repairs";
+}
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">FMS</a>
+        <div class="navbar-nav me-auto">
+            <a class="nav-link" href="#">Home</a>
+            <a class="nav-link" href="#">About Us</a>
+            <a class="nav-link" href="#">Services</a>
+            <a class="nav-link" href="#">Contact Us</a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="#">Sign Out</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Schedule Repairs</h1>
+    </div>
+
+    <!-- Schedule Repairs Form -->
+    <div class="card shadow">
+        <div class="card-header">
+            <h4 class="m-0 font-weight-bold text-primary">Schedule Repairs</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Schedule" method="post">
+                <!-- Hidden fields for functionality -->
+                <input type="hidden" asp-for="FaultID" />
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Fault No:</strong></label>
+                        <input class="form-control" value="F@(ViewBag.FaultInfo?.FaultID.ToString("D3") ?? "N/A")" disabled />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Employee No:</strong></label>
+                        <select asp-for="TechnicianID" asp-items="ViewBag.TechnicianID" class="form-control">
+                            <option value="">Select Technician</option>
+                        </select>
+                        <span asp-validation-for="TechnicianID" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="RepairDate" class="form-label"><strong>Repair Date:</strong></label>
+                        <input asp-for="RepairDate" type="date" class="form-control" />
+                        <span asp-validation-for="RepairDate" class="text-danger"></span>
+                        <small class="form-text text-muted">The date must match the advised format and cannot be a past date or weekends.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ScheduleTime" class="form-label"><strong>Repair Time:</strong></label>
+                        <input asp-for="ScheduleTime" type="time" class="form-control" />
+                        <span asp-validation-for="ScheduleTime" class="text-danger"></span>
+                        <small class="form-text text-muted">The time must be set for work and opening hours only.</small>
+                    </div>
+                </div>
+
+                <!-- Hidden original fields that maintain functionality -->
+                <div class="form-group d-none">
+                    <label asp-for="Diagnosis"></label>
+                    <input asp-for="Diagnosis" class="form-control" />
+                    <span asp-validation-for="Diagnosis" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary me-2">Schedule</button>
+                    <a asp-controller="Schedules" asp-action="Index" class="btn btn-secondary">Close</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Text -->
+    <div class="alert alert-info mt-4">
+        <strong>Information:</strong> This section allows the technician to schedule fridge repairs based on reported issues.
+        It ensures timely maintenance by assigning a technician and setting a repair date.
+    </div>
+</div>
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    .card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Client-side validation for date (no weekends or past dates)
+        document.addEventListener('DOMContentLoaded', function() {
+            const repairDateInput = document.getElementById('RepairDate');
+            const today = new Date().toISOString().split('T')[0];
+
+            // Set min date to today
+            repairDateInput.min = today;
+
+            repairDateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const dayOfWeek = selectedDate.getDay();
+
+                // Check if weekend (0 = Sunday, 6 = Saturday)
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    alert('Repairs cannot be scheduled on weekends. Please select a weekday.');
+                    this.value = '';
+                }
+            });
+
+            // Client-side validation for time (business hours 8:00-17:00)
+            const repairTimeInput = document.getElementById('ScheduleTime');
+
+            repairTimeInput.addEventListener('change', function() {
+                const time = this.value;
+                const hours = parseInt(time.split(':')[0]);
+
+                if (hours < 8 || hours > 17) {
+                    alert('Repairs can only be scheduled during working hours (8:00 AM - 5:00 PM).');
+                    this.value = '';
+                }
+            });
+        });
+    </script>
+}

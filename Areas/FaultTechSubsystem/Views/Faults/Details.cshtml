@@ -1,0 +1,161 @@
+﻿@model FridgeManagementSystem.Models.Fault
+
+@{
+    ViewData["Title"] = "Fault Details";
+}
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">FMS</a>
+        <div class="navbar-nav me-auto">
+            <a class="nav-link" href="#">Home</a>
+            <a class="nav-link" href="#">About Us</a>
+            <a class="nav-link" href="#">Services</a>
+            <a class="nav-link" href="#">Contact Us</a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="#">Sign Out</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Fault Details Page</h1>
+    </div>
+
+    <!-- Fault Summary Section -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Fault No:</strong> F@(Model.FaultID.ToString("D3"))
+                </div>
+                <div class="col-md-4">
+                    <strong>Priority:</strong>
+                    <span class="badge @(Model.Priority == "High" ? "bg-danger" :
+                                      Model.Priority == "Medium" ? "bg-warning" : "bg-info")">
+                        @Model.Priority
+                    </span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Date Reported:</strong> @Model.ReportDate.ToString("yyyy/MM/dd")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="mb-4">
+
+    <!-- Details Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h5 class="m-0 font-weight-bold text-primary">Details</h5>
+        </div>
+        <div class="card-body">
+            <!-- Fridge Information -->
+            <h6 class="font-weight-bold">Fridge Information:</h6>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <strong>Serial Number:</strong> @(Model.Fridge?.SerialNumber ?? "N/A")
+                </div>
+                <div class="col-md-3">
+                    <strong>Model:</strong> @(Model.Fridge?.Model ?? "N/A")
+                </div>
+                <div class="col-md-3">
+                    <strong>Brand:</strong> @(Model.Fridge?.Brand ?? "N/A")
+                </div>
+                <div class="col-md-3">
+                    <strong>Type:</strong> @(Model.Fridge?.Type ?? "N/A")
+                </div>
+            </div>
+
+            <!-- Customer Information Table -->
+            <h6 class="font-weight-bold mt-4">Customer Information:</h6>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone No</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@(Model.Fridge?.Customer?.FullName)</td>
+                            <td>@(Model.Fridge?.Customer?.Email)</td>
+                            <td>@(Model.Fridge?.Customer?.PhoneNumber)</td>
+                            <td>@(Model.Fridge?.Customer?.LocationId )</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr class="mb-4">
+
+    <!-- Repair History Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h5 class="m-0 font-weight-bold text-primary">Repair History:</h5>
+        </div>
+        <div class="card-body">
+            <p>@(string.IsNullOrEmpty(Model.Notes) ? "First time repair for this fridge." : Model.Notes)</p>
+            <p><strong>Fault Description:</strong> @Model.FaultDescription</p>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-end mb-4">
+        <!-- Print Button -->
+        <button onclick="window.print()" class="btn btn-primary me-2">
+            <i class="fas fa-print"></i> Print
+        </button>
+
+        <!-- Close/Back Button -->
+        <a asp-action="Index" class="btn btn-secondary me-2">
+            Close
+        </a>
+
+        <!-- Hidden original functionality buttons -->
+        <a asp-action="Edit" asp-route-id="@Model.FaultID" class="btn btn-warning d-none">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+    </div>
+</div>
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    .card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .table th {
+        background-color: #f8f9fc;
+        font-weight: 600;
+    }
+
+    hr {
+        border: 0;
+        border-top: 2px solid #e3e6f0;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.6em;
+    }
+</style>
+

@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2>
+    Welcome, @(User.Identity?.Name ?? "Guest")
+</h2>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Customers</div>
+            <div class="card-body">
+                <h5 class="card-title">Manage Customers</h5>
+                <p class="card-text">View, edit, or remove customer accounts.</p>
+                <a asp-controller="Customer" asp-action="Index" class="btn btn-light">Go</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Employees</div>
+            <div class="card-body">
+                <h5 class="card-title">Manage Employees</h5>
+                <p class="card-text">Create and assign employees to roles.</p>
+                <a asp-action="ManageEmployees" class="btn btn-light">Go</a>
+            </div>
+        </div>
+    </div>
+</div>
+

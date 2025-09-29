@@ -1,0 +1,33 @@
+﻿@model FridgeManagementSystem.Models.Fault
+
+@{
+    ViewData["Title"] = "Mark Fault as Complete";
+}
+
+<div class="card shadow border-success">
+    <div class="card-header bg-success text-white">
+        <h4><i class="fas fa-check-circle"></i> Mark Complete - F@(Model.FaultID.ToString("D4"))</h4>
+    </div>
+    <div class="card-body">
+        <h5>Are you sure you want to mark this fault as <strong>Resolved</strong>?</h5>
+        <dl class="row">
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">@Model.FaultDescription</dd>
+
+            <dt class="col-sm-3">Fridge</dt>
+            <dd class="col-sm-9">@Model.Fridge?.Model</dd>
+        </dl>
+
+        <form asp-action="MarkComplete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="FaultID" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-check"></i> Yes, Mark Complete
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+        </form>
+    </div>
+</div>
+

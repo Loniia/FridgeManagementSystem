@@ -1,0 +1,228 @@
+﻿@model List<FridgeManagementSystem.Models.FaultReport>
+
+<style>
+    /* Main container styling */
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Header styling */
+    h2 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+        font-size: 2rem;
+    }
+
+        h2 i {
+            color: #e74c3c;
+        }
+
+    /* Table container */
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    /* Table styling */
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+        .table thead {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .table th {
+            padding: 16px 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border: none;
+            text-align: left;
+        }
+
+        .table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+    /* Striped rows */
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #fafafa;
+    }
+
+        .table-striped tbody tr:nth-of-type(odd):hover {
+            background-color: #f1f3f5;
+        }
+
+    /* Urgency level styling */
+    td:contains("High"),
+    td:contains("Urgent") {
+        color: #e74c3c;
+        font-weight: 600;
+    }
+
+    td:contains("Medium") {
+        color: #f39c12;
+        font-weight: 600;
+    }
+
+    td:contains("Low") {
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 1200px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            min-width: 1000px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            text-align: center;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            font-size: 0.9rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        h2 {
+            font-size: 1.4rem;
+        }
+
+        .container {
+            padding: 10px;
+        }
+
+        .table th,
+        .table td {
+            padding: 10px 12px;
+            font-size: 0.85rem;
+        }
+    }
+
+    /* Animation for table rows */
+    .table tbody tr {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Custom scrollbar for table container */
+    .table-container::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+    /* Focus states for accessibility */
+    .table tbody tr:focus {
+        outline: 2px solid #3498db;
+        outline-offset: -2px;
+    }
+</style>
+
+<div class="container my-4">
+    <h2><i class="fas fa-exclamation-circle me-2"></i>Reported Faults</h2>
+
+    <div class="table-container">
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Technician</th>
+                    <th>Customer</th>
+                    <th>Fridge</th>
+                    <th>Fault Type</th>
+                    <th>Description</th>
+                    <th>Urgency</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var fault in Model)
+                {
+                    <tr>
+                        <td>@fault.ReportDate.ToShortDateString()</td>
+                        <td>@fault.MaintenanceVisit?.Employee?.FullName</td>
+                        <td>@fault.Fridge?.Customer?.FullName</td>
+                        <td>@fault.Fridge?.Model</td>
+                        <td>@fault.FaultType</td>
+                        <td>@fault.FaultDescription</td>
+                        <td>@fault.UrgencyLevel</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

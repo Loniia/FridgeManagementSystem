@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "CustomerManagementHome";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Welcome to Dynamic Ice Inc.</h2>
+    <p>
+        Manage your customers, fridge allocations, and stock with ease.
+        Choose one of the options below to continue:
+    </p>
+
+    <div class="row g-3">
+        <!-- Inventory Liaison Card -->
+        <div class="col-md-6">
+            <a asp-controller="InventoryLiaison" asp-action="Index" class="text-decoration-none text-dark">
+                <div class="card shadow-sm h-100">
+                    <img src="~/images/Stock.jpg" class="card-img-top" alt="Inventory Liaison" style="height:200px; object-fit:cover;" />
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Inventory Liaison</h5>
+                        <p class="card-text">Track and manage stock levels.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Customer Liaison Card -->
+        <div class="col-md-6">
+            <a asp-controller="CustomerLiaison" asp-action="Index" class="text-decoration-none text-dark">
+                <div class="card shadow-sm h-100">
+                    <img src="~/images/Customer Service.jpg" class="card-img-top" alt="Customer Liaison" style="height:200px; object-fit:cover;" />
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Customer Liaison</h5>
+                        <p class="card-text">Manage customers and fridge allocations.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

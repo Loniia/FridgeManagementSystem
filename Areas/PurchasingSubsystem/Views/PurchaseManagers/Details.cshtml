@@ -1,0 +1,25 @@
+﻿@model PurchasingSubsystem.Models.PurchaseManager
+
+@{
+    ViewData["Title"] = "Purchase Manager Details";
+}
+
+<h2>Purchase Manager Details</h2>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Manager ID</dt>
+        <dd class="col-sm-10">@Model.PurchaseManagerID</dd>
+
+        <dt class="col-sm-2">Name</dt>
+        <dd class="col-sm-10">@Model.PurchaseManagerName</dd>
+
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.PurchaseManagerEmail</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.PurchaseManagerID" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

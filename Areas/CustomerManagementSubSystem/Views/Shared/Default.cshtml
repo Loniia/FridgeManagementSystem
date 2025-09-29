@@ -1,0 +1,18 @@
+﻿@using FridgeManagementSystem.Models
+@model IEnumerable<MenuItem>
+
+<ul class="sidebar-menu">
+    @foreach (var category in Model.Select(m => m.MenuCategory).Distinct())
+    {
+        <li class="menu-header">@category</li>
+        @foreach (var item in Model.Where(m => m.MenuCategory == category))
+        {
+            <li>
+                <a href="@Url.Action(item.Action, item.Controller)">
+                    <i class="@item.IconClass"></i>
+                    <span>@item.Name</span>
+                </a>
+            </li>
+        }
+    }
+</ul>

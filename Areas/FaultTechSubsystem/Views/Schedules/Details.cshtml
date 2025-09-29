@@ -1,0 +1,177 @@
+﻿@model FridgeManagementSystem.Models.RepairSchedule
+
+@{
+    ViewData["Title"] = "Repair Details";
+}
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">FMS</a>
+        <div class="navbar-nav me-auto">
+            <a class="nav-link" href="#">Home</a>
+            <a class="nav-link" href="#">About Us</a>
+            <a class="nav-link" href="#">Services</a>
+            <a class="nav-link" href="#">Contact Us</a>
+        </div>
+        <div class="navbar-nav">
+            <a class="nav-link" href="#">Sign Out</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Repair Details</h1>
+    </div>
+
+    <!-- Main Repair Details Card -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <!-- Fault Header Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="font-weight-bold">Fault No: F@(Model.Fault?.FaultID.ToString("D3"))</h5>
+                </div>
+                <div class="col-md-6 text-right">
+                    <p class="mb-1"><strong>Date Created:</strong> @Model.RepairDate.ToString("yyyy/MM/dd")</p>
+                    <p class="mb-0"><strong>Technician Name:</strong> @(Model.FaultTechnician != null ? $"{Model.FaultTechnician.FirstName} {Model.FaultTechnician.LastName}" : "Not assigned")</p>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <h6 class="font-weight-bold text-primary">Customer Information:</h6>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <strong>Full Name:</strong> @(Model.Fault?.Fridge?.Customer?.FullName)
+                </div>
+                <div class="col-md-3">
+                    <strong>Address:</strong> @(Model.Fault?.Fridge?.Customer?.Location)
+                </div>
+                <div class="col-md-3">
+                    <strong>Phone No:</strong> @(Model.Fault?.Fridge?.Customer?.PhoneNumber)
+                </div>
+                <div class="col-md-3">
+                    <strong>Email:</strong> @(Model.Fault?.Fridge?.Customer?.Email)
+                </div>
+            </div>
+
+            <!-- Fridge Information -->
+            <h6 class="font-weight-bold text-primary">Fridge Information:</h6>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <strong>Serial Number:</strong> @(Model.Fault?.Fridge?.SerialNumber)
+                </div>
+                <div class="col-md-3">
+                    <strong>Model:</strong> @(Model.Fault?.Fridge?.Model)
+                </div>
+                <div class="col-md-3">
+                    <strong>Brand:</strong> @(Model.Fault?.Fridge?.Brand)
+                </div>
+                <div class="col-md-3">
+                    <strong>Type:</strong> @(Model.Fault?.Fridge?.Type)
+                </div>
+            </div>
+
+            <hr class="mb-4">
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center mb-4">
+                <button onclick="window.print()" class="btn btn-primary mx-2">
+                    <i class="fas fa-file-pdf"></i> Print PDF
+                </button>
+                <button class="btn btn-success mx-2">
+                    <i class="fas fa-envelope"></i> Send Email
+                </button>
+                <a asp-action="Index" class="btn btn-secondary mx-2">Close</a>
+
+                <!-- Hidden original functionality buttons -->
+                <a asp-action="Edit" asp-route-id="@Model.RepairID" class="btn btn-warning d-none">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </div>
+
+            <hr class="mb-4">
+
+            <!-- Fault Details Section -->
+            <h6 class="font-weight-bold text-primary">Fault Details:</h6>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Description:</strong> @(Model.Fault?.FaultDescription ?? Model.Diagnosis)
+                </div>
+                <div class="col-md-6">
+                    <strong>Date Reported:</strong> @(Model.Fault?.ReportDate.ToString("yyyy/MM/dd"))
+                </div>
+            </div>
+
+            <!-- Scheduled Repair Details -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Scheduled Repair Details:</strong><br>
+                    <span class="ml-3">Schedule Date: @Model.RepairDate.ToString("yyyy/MM/dd")</span><br>
+                    <span class="ml-3">Scheduled Time: @(Model.ScheduleTime.ToString(@"hh\:mm\:ss"))</span>
+                </div>
+            </div>
+
+            <!-- Contact & Support Details -->
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Contact & Support Details:</strong><br>
+                    <span class="ml-3">+27 21 677 6587</span><br>
+                    <span class="ml-3">Support@dynfrost@gmail.com</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    .card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    hr {
+        border: 0;
+        border-top: 2px solid #e3e6f0;
+    }
+
+    .font-weight-bold {
+        font-weight: 600;
+    }
+
+    .text-primary {
+        color: #4e73df !important;
+    }
+
+    .ml-3 {
+        margin-left: 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1.5rem;
+    }
+</style>
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Scheduled" => "bg-primary",
+            "In Progress" => "bg-warning text-dark",
+            "Completed" => "bg-success",
+            "On Hold" => "bg-secondary",
+            _ => "bg-info"
+        };
+    }
+}
+

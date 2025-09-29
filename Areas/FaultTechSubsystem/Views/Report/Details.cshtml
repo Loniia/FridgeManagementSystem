@@ -1,0 +1,32 @@
+﻿@model FridgeManagementSystem.Models.FaultReport
+
+@{
+    ViewData["Title"] = "Report Details";
+}
+
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <h4 class="m-0 font-weight-bold">
+            <i class="fas fa-eye"></i> @ViewData["Title"] - R@(Model.FaultReportId.ToString("D4"))
+        </h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Report Date</dt>
+            <dd class="col-sm-9">@Model.ReportDate.ToString("yyyy/MM/dd")</dd>
+
+            <dt class="col-sm-3">Report Details</dt>
+            <dd class="col-sm-9">@Model.FaultType</dd>
+
+            <dt class="col-sm-3">Fault</dt>
+            <dd class="col-sm-9">@Model.Fault?.FaultDescription</dd>
+        </dl>
+
+        <a asp-action="Edit" asp-route-id="@Model.FaultReportId" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>

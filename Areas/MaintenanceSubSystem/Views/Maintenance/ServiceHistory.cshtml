@@ -1,0 +1,416 @@
+﻿@model List<FridgeManagementSystem.Models.MaintenanceVisit>
+
+@{
+    ViewData["Title"] = "Service History";
+}
+
+<style>
+    :root {
+        --primary: #2c3e50;
+        --secondary: #3498db;
+        --success: #2ecc71;
+        --warning: #f39c12;
+        --light: #ecf0f1;
+        --dark: #2c3e50;
+        --accent: #e74c3c;
+        --light-gray: #f8f9fa;
+        --border-radius: 8px;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 20px;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    /* Report Header */
+    .report-header {
+        border-bottom: 2px solid var(--secondary);
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+        .report-header h2 {
+            color: var(--primary);
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+
+    .report-details {
+        margin-top: 5px;
+        font-size: 0.95rem;
+        background-color: rgba(52, 152, 219, 0.05);
+        padding: 15px;
+        border-radius: var(--border-radius);
+        border-left: 4px solid var(--secondary);
+    }
+
+        .report-details p {
+            margin: 8px 0;
+            display: flex;
+        }
+
+        .report-details strong {
+            color: var(--primary);
+            min-width: 120px;
+            display: inline-block;
+        }
+
+    .company-logo {
+        height: 70px;
+        padding: 10px;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Section Headers */
+    h3 {
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--light);
+        display: flex;
+        align-items: center;
+    }
+
+        h3 i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+
+    /* Cards */
+    .card {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .card-header {
+        border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+        font-weight: bold;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, var(--primary) 0%, #3c5a7d 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+    }
+
+        .card-header i {
+            margin-right: 8px;
+        }
+
+    .card-body {
+        padding: 25px;
+        background-color: #fff;
+    }
+
+        .card-body h6 {
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+
+            .card-body h6 i {
+                margin-right: 10px;
+                color: var(--secondary);
+            }
+
+        .card-body ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .card-body li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 5px;
+        }
+
+            .card-body li:before {
+                content: "•";
+                color: var(--secondary);
+                font-weight: bold;
+                display: inline-block;
+                width: 1em;
+                margin-left: -1em;
+            }
+
+    .badge {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .bg-success {
+        background-color: var(--success) !important;
+    }
+
+    .bg-warning {
+        background-color: var(--warning) !important;
+    }
+
+    /* Alert styling */
+    .alert-info {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-left: 4px solid var(--secondary);
+        border-radius: var(--border-radius);
+        padding: 15px;
+    }
+
+        .alert-info i {
+            color: var(--secondary);
+        }
+
+    /* Buttons */
+    .no-print {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+        background-color: var(--primary);
+        border: none;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+        .btn-secondary:hover {
+            background-color: #243342;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        .btn-secondary i {
+            margin-right: 8px;
+        }
+
+    /* Print styles */
+    @@media print {
+        .no-print {
+            display: none;
+        }
+
+        .container {
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .card {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+            .card:hover {
+                transform: none;
+            }
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .report-header {
+            flex-direction: column;
+        }
+
+        .company-logo {
+            margin-top: 20px;
+            align-self: flex-start;
+        }
+
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .no-print {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <div id="printableArea">
+
+        <!-- Report Header -->
+        <div class="report-header">
+            <div>
+                <h2>Service History Report</h2>
+                <div class="report-details">
+                    @if (Model.Any())
+                    {
+                        var fridge = Model.First().MaintenanceRequest.Fridge;
+                        var employee = Model.First().Employee;
+
+                        <p><strong>Fridge Model:</strong> @fridge.Model</p>
+                        <p><strong>Address:</strong> @fridge.Customer?.Location?.Address</p>
+                        <p><strong>Technician:</strong> @employee?.FullName</p>
+                        <p><strong>Latest Service Date:</strong> @Model.First().ScheduledDate.ToShortDateString()</p>
+                    }
+                </div>
+            </div>
+            <div>
+                <img src="~/images/logo.jpg" alt="Company Logo" class="company-logo">
+            </div>
+        </div>
+
+        <!-- Service History Cards -->
+        <h3><i class="fas fa-history me-2"></i>Service History</h3>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No service history found for this fridge.
+            </div>
+        }
+        else
+        {
+            @foreach (var visit in Model)
+            {
+                <div class="card mb-3">
+                    <div class="card-header text-white">
+                        <div>
+                            <i class="fas fa-calendar-alt me-2"></i> Visit on @visit.ScheduledDate.ToShortDateString() at @visit.ScheduledTime.ToString(@"hh\:mm")
+                        </div>
+                        <span class="badge @(visit.Status == FridgeManagementSystem.Models.TaskStatus.Complete ? "bg-success" : "bg-warning")">
+                            @visit.Status
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h6><i class="fas fa-clipboard-list"></i> Checklist</h6>
+                        @if (visit.MaintenanceChecklist != null)
+                        {
+                            <ul>
+                                <li>Temperature Status: @visit.MaintenanceChecklist.TemperatureStatus</li>
+                                <li>Condenser Coils Cleaned: @(visit.MaintenanceChecklist.CondenserCoilsCleaned ? "Yes" : "No")</li>
+                                <li>Coolant Level: @visit.MaintenanceChecklist.CoolantLevel</li>
+                                <li>Door Seal Condition: @visit.MaintenanceChecklist.DoorSealCondition</li>
+                                <li>Lighting Status: @visit.MaintenanceChecklist.LightingStatus</li>
+                                <li>Power Cable Condition: @visit.MaintenanceChecklist.PowerCableCondition</li>
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No checklist completed for this visit.</p>
+                        }
+
+                        <h6><i class="fas fa-cogs"></i> Components Used</h6>
+                        @if (visit.ComponentUsed != null && visit.ComponentUsed.Any())
+                        {
+                            <ul>
+                                @foreach (var c in visit.ComponentUsed)
+                                {
+                                    <li>@c.ComponentName - Quantity: @c.Quantity - Condition: @c.Condition</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No components recorded for this visit.</p>
+                        }
+
+                        <h6><i class="fas fa-exclamation-triangle"></i> Fault Reports</h6>
+                        @if (visit.FaultReport != null && visit.FaultReport.Any())
+                        {
+                            <ul>
+                                @foreach (var f in visit.FaultReport)
+                                {
+                                    <li>@f.ReportDate.ToShortDateString() - @f.FaultType - @f.FaultDescription</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No faults reported for this visit.</p>
+                        }
+
+                        <!-- ✅ Visit Notes -->
+                        <h6><i class="fas fa-sticky-note"></i> Visit Notes</h6>
+                        @if (!string.IsNullOrEmpty(visit.VisitNotes))
+                        {
+                            <p>@visit.VisitNotes</p>
+                        }
+                        else
+                        {
+                            <p>No notes for this visit.</p>
+                        }
+                    </div>
+                </div>
+            }
+
+        }
+    </div>
+    
+
+    <!-- Buttons -->
+    <div class="no-print">
+        <button onclick="printDiv()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+        <a asp-action="DownloadServiceHistory" asp-route-fridgeId="@Model.FirstOrDefault()?.MaintenanceRequest.FridgeId"
+           class="btn btn-secondary">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </a>
+        <a asp-controller="Maintenance" asp-action="MaintenanceRequests" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Requests
+        </a>
+    </div>
+</div>
+
+<script>
+    function printDiv() {
+        var printContents = document.getElementById('printableArea').innerHTML;
+        var originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+        location.reload(); // To restore any dynamic functionality
+    }
+</script>

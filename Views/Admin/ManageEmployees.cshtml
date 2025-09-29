@@ -1,0 +1,34 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.Employee>
+
+@{
+    ViewData["Title"] = "Manage Employees";
+}
+
+<h2>Manage Employees</h2>
+
+<p>
+    <a asp-action="CreateEmployee" class="btn btn-primary">Add New Employee</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr>
+                <td>@emp.FullName</td>
+                <td>@emp.ContactInfo</td>
+                <td>@emp.Role</td>
+                <td>@emp.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

@@ -1,0 +1,54 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.FridgeAllocationViewModel>
+
+<h2>Pending Allocations</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info">@TempData["InfoMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Fridge Brand</th>
+            <th>Fridge Model</th>
+            <th>Status</th>
+            <th>Requested Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.CustomerName</td>
+                <td>@(item.Brand ?? "Not Allocated")</td>
+                <td>@(item.Model ?? "Not Allocated")</td>
+                <td>@item.Status</td>
+                <td>@item.AllocationDate?.ToString("yyyy-MM-dd")</td>
+                <td>
+                    @if (item.Status == "Pending")
+                    {
+                        <form asp-action="AllocateFridge" method="post">
+                            <input type="hidden" name="allocationId" value="@item.AllocationID" />
+                            <button type="submit" class="btn btn-primary btn-sm">Allocate</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Allocated</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

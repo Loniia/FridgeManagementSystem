@@ -1,0 +1,366 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.MaintenanceRequest>
+@{
+    ViewData["Title"] = "MaintenanceRequests";
+}
+
+<style>
+    /* Page container */
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Alert styling */
+    .alert {
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        border: none;
+        font-weight: 500;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+
+    .alert-success {
+        background-color: #e6f7ee;
+        color: #28a745;
+        border-left: 4px solid #28a745;
+    }
+
+    .alert-danger {
+        background-color: #ffe6e6;
+        color: #d9534f;
+        border-left: 4px solid #d9534f;
+    }
+
+    /* Header styling */
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 2.2rem;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    /* Search form styling */
+    form.d-flex {
+        margin-bottom: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+    }
+
+        form.d-flex input.form-control {
+            flex: 1;
+            border-radius: 8px 0 0 8px;
+            padding: 12px 15px;
+            border: 1px solid #e1e5eb;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+            form.d-flex input.form-control:focus {
+                border-color: #3498db;
+                box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+                outline: none;
+            }
+
+        form.d-flex button.btn {
+            border-radius: 0 8px 8px 0;
+            padding: 12px 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            border: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+            form.d-flex button.btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            }
+
+    /* Table styling */
+    .table-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    table.table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+        table.table thead {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+        }
+
+        table.table th {
+            padding: 15px 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        table.table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            color: #495057;
+        }
+
+        table.table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+            table.table tbody tr:hover {
+                background-color: #f8f9fa;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            table.table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+    /* Button styling */
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+            color: white;
+        }
+
+        .btn-info i {
+            margin-right: 5px;
+        }
+
+    /* Status badge styling - ADDED COLORS */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        text-align: center;
+        min-width: 90px;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #000;
+        border: 1px solid #ffc107;
+    }
+
+    .status-scheduled {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+        border: 1px solid #17a2b8;
+    }
+
+    .status-inprogress {
+        background: linear-gradient(135deg, #fd7e14 0%, #e36407 100%);
+        color: white;
+        border: 1px solid #fd7e14;
+    }
+
+    .status-complete {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        color: white;
+        border: 1px solid #28a745;
+    }
+
+    .status-cancelled {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+        color: white;
+        border: 1px solid #dc3545;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 992px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table.table {
+            min-width: 800px;
+        }
+
+        form.d-flex {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+            form.d-flex input.form-control {
+                border-radius: 8px;
+                width: 100%;
+            }
+
+            form.d-flex button.btn {
+                border-radius: 8px;
+                width: 100%;
+            }
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        table.table th,
+        table.table td {
+            padding: 12px 15px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        h1 {
+            font-size: 1.6rem;
+        }
+
+        .alert {
+            padding: 12px 15px;
+        }
+
+        form.d-flex {
+            padding: 15px;
+        }
+    }
+
+    /* Animation for table rows */
+    table.table tbody tr {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <h1>Maintenance Requests</h1>
+
+    <form asp-action="Search" method="get" class="d-flex">
+        <input class="form-control me-2" type="text" name="query" placeholder="Search by fridge, customer, address, or fridge model..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="table-container">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Address</th>
+                    <th>Fridge</th>
+                    <th>Model</th>
+                    <th>Date</th>
+                    <th>Task Status</th>
+                    <th>Service History</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var requests in Model)
+                {
+                    <tr>
+                        <td>@requests.Fridge.Customer?.FullName</td>
+                        <td>@requests.Fridge.Customer?.Location?.Address</td>
+                        <td>@requests.Fridge?.FridgeName</td>
+                        <td>@requests.Fridge?.Model</td>
+                        <td>@requests.RequestDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @if (requests.TaskStatus.ToString() == "Pending")
+                            {
+                                <span class="status-badge status-pending">@requests.TaskStatus</span>
+                            }
+                            else if (requests.TaskStatus.ToString() == "Scheduled")
+                            {
+                                <span class="status-badge status-scheduled">@requests.TaskStatus</span>
+                            }
+                            else if (requests.TaskStatus.ToString() == "InProgress")
+                            {
+                                <span class="status-badge status-inprogress">@requests.TaskStatus</span>
+                            }
+                            else if (requests.TaskStatus.ToString() == "Complete")
+                            {
+                                <span class="status-badge status-complete">@requests.TaskStatus</span>
+                            }
+                            else if (requests.TaskStatus.ToString() == "Cancelled")
+                            {
+                                <span class="status-badge status-cancelled">@requests.TaskStatus</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge">@requests.TaskStatus</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-controller="Maintenance"
+                               asp-action="ServiceHistory"
+                               asp-route-fridgeId="@requests.FridgeId"
+                               class="btn btn-info btn-sm">
+                                <i class="fas fa-history"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

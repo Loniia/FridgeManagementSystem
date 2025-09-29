@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">@ViewData["Title"]</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            Get in Touch
+        </div>
+        <div class="card-body">
+            <p>
+                We’d love to hear from you! Whether you have a question about our services,
+                need support, or want to learn more about <strong>Dynamic Ice Inc.</strong>,
+                feel free to reach out:
+            </p>
+            <p>
+                📧 Email: <a href="mailto:info@dynamicice.com">info@dynamicice.com</a> <br />
+                ☎️ Phone: +27 71 234 5678 <br />
+                📍 Address: 123 Main Street, Pretoria, South Africa
+            </p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-header bg-primary text-white">
+            Send Us a Message
+        </div>
+        <div class="card-body">
+            <form>
+                <div class="mb-3">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-control" placeholder="Enter your name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Your Email</label>
+                    <input type="email" class="form-control" placeholder="Enter your email" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-control" rows="4" placeholder="Write your message here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
+</div>
+

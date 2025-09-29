@@ -1,0 +1,518 @@
+﻿@model List<FridgeManagementSystem.Models.MaintenanceVisit>
+
+@{
+    ViewData["Title"] = "Scheduled Visits";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    /* Main container styling */
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Header styling */
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 2.2rem;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+        background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Table container */
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+        border: 1px solid #e1e5eb;
+    }
+
+    /* Table styling */
+    table.table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+        table.table thead {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+        }
+
+        table.table th {
+            padding: 18px 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            border: none;
+            text-align: center;
+        }
+
+        table.table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            color: #495057;
+            text-align: center;
+        }
+
+        table.table tbody tr {
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+            table.table tbody tr:hover {
+                background-color: #f8f9fa;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            }
+
+            table.table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+    /* Button styling */
+    .btn {
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: none;
+        margin: 2px;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #000;
+    }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+    /* Badge styling */
+    .badge {
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .bg-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+    }
+
+    /* Modal styling */
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        border: none;
+        padding: 20px;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 20px;
+        border-radius: 0 0 15px 15px;
+    }
+
+    .btn-close {
+        filter: invert(1);
+    }
+
+    /* Form controls */
+    .form-control {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid #e1e5eb;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+    /* Animation for table rows */
+    table.table tbody tr {
+        animation: fadeInUp 0.6s ease-in-out;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive design */
+    @@media (max-width: 992px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table.table {
+            min-width: 800px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+        }
+
+        table.table th,
+        table.table td {
+            padding: 14px 16px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        h2 {
+            font-size: 1.6rem;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Status indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    .status-scheduled {
+        background: #17a2b8;
+    }
+
+    .status-rescheduled {
+        background: #6f42c1;
+    }
+
+    /* Action buttons container */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="container">
+    <h2><i class="fas fa-calendar-check me-2"></i>Scheduled Visits</h2>
+
+    <div class="table-container">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-calendar-day me-1"></i>Date</th>
+                    <th><i class="fas fa-clock me-1"></i>Time</th>
+                    <th><i class="fas fa-refrigerator me-1"></i>Fridge</th>
+                    <th><i class="fas fa-user me-1"></i>Customer</th>
+                    <th><i class="fas fa-tools me-1"></i>Technician</th>
+                    <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                    <th><i class="fas fa-wrench me-1"></i>Maintenance</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var visit in Model)
+                {
+                    <tr id="visit-@visit.MaintenanceVisitId">
+                        <td>@visit.ScheduledDate.ToShortDateString()</td>
+                        <td>@visit.ScheduledTime.ToString(@"hh\:mm")</td>
+                        <td>@visit.Fridge?.FridgeName</td>
+                        <td>@visit.Fridge?.Customer?.FullName</td>
+                        <td>@visit.Employee?.FullName</td>
+
+                        <!-- Actions Column -->
+                        <td>
+                            <div class="action-buttons d-flex gap-2">
+                                @* Show Reschedule button only if not already rescheduled *@
+                                @if (visit.MaintenanceRequest.TaskStatus != FridgeManagementSystem.Models.TaskStatus.Rescheduled)
+                                {
+                                    <button class="btn btn-warning reschedule-btn"
+                                            data-id="@visit.MaintenanceVisitId"
+                                            data-date="@visit.ScheduledDate.ToString("yyyy-MM-dd")"
+                                            data-time="@visit.ScheduledTime.ToString(@"hh\:mm")">
+                                        <i class="fas fa-calendar-alt me-1"></i>Reschedule
+                                    </button>
+                                }
+
+                                @* Show badge if rescheduled *@
+                                @if (visit.MaintenanceRequest.TaskStatus == FridgeManagementSystem.Models.TaskStatus.Rescheduled)
+                                {
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-sync-alt me-1"></i>Rescheduled
+                                    </span>
+                                }
+
+                                @* Cancel button *@
+                                <button class="btn btn-danger cancel-btn" data-id="@visit.MaintenanceVisitId">
+                                    <i class="fas fa-times-circle me-1"></i>Cancel
+                                </button>
+                            </div>
+                        </td>
+
+                        <!-- Maintenance Column -->
+                        <td>
+                            @if (visit.MaintenanceRequest.TaskStatus == FridgeManagementSystem.Models.TaskStatus.InProgress )
+                            {
+                                <a asp-controller="Maintenance" asp-action="PerformMaintenance"
+                                   asp-route-visitId="@visit.MaintenanceVisitId"
+                                   class="btn btn-primary">
+                                    <i class="fas fa-play me-1"></i>Continue Maintenance
+                                </a>
+                            }
+                            else if (visit.MaintenanceRequest.TaskStatus == FridgeManagementSystem.Models.TaskStatus.Scheduled || visit.MaintenanceRequest.TaskStatus == FridgeManagementSystem.Models.TaskStatus.Rescheduled)
+                            {
+                                <a asp-controller="Maintenance" asp-action="PerformMaintenance"
+                                   asp-route-visitId="@visit.MaintenanceVisitId"
+                                   class="btn btn-success">
+                                    <i class="fas fa-wrench me-1"></i>Perform Maintenance
+                                </a>
+                            }
+                            else if (visit.MaintenanceRequest.TaskStatus == FridgeManagementSystem.Models.TaskStatus.Complete)
+                            {
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-check me-1"></i>Completed
+                                </span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Reschedule Modal -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-calendar-alt me-2"></i>Reschedule Visit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalVisitId" />
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-calendar-day me-1"></i>Date</label>
+                    <input type="date" id="modalDate" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-clock me-1"></i>Time</label>
+                    <input type="time" id="modalTime" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Close
+                </button>
+                <button id="saveReschedule" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        var modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
+
+        // Open modal
+        $('.reschedule-btn').click(function () {
+            var id = $(this).data('id');
+            var date = $(this).data('date');
+            var time = $(this).data('time');
+
+            $('#modalVisitId').val(id);
+            $('#modalDate').val(date);
+            $('#modalTime').val(time);
+
+            modal.show();
+        });
+
+        // Save reschedule
+        $('#saveReschedule').click(function () {
+            var visitId = $('#modalVisitId').val();
+            var newDate = $('#modalDate').val();
+            var newTime = $('#modalTime').val();
+
+            if (newTime && newTime.length === 5) {
+                newTime = newTime + ":00";
+            }
+
+            $.post('/MaintenanceSubSystem/Maintenance/RescheduleVisit',
+                { visitId: visitId, newDate: newDate, newTime: newTime })
+                .done(function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message || "Something went wrong.");
+                    }
+                })
+                .fail(function (xhr, status, error) {
+                    alert("Request failed: " + error);
+                });
+        });
+
+        // Cancel visit
+        $('.cancel-btn').click(function () {
+            if (!confirm("Are you sure you want to cancel this visit?")) return;
+
+            var visitId = $(this).data('id');
+
+            $.post('/MaintenanceSubSystem/Maintenance/CancelVisit', { visitId: visitId })
+                .done(function (res) {
+                    if (res.success) {
+                        $('#visit-' + visitId).fadeOut(300, function () {
+                            $(this).remove();
+                        });
+                    } else {
+                        alert(res.message);
+                    }
+                })
+                .fail(function (xhr, status, error) {
+                    alert("Request failed: " + error);
+                });
+        });
+    });
+</script>
+
+
+@* @model IEnumerable<FinalYearProject.Models.MaintenanceVisit>
+
+@{
+    ViewData["Title"] = "Monthly Visits Planner";
+    var visitsByDate = Model
+        .GroupBy(v => v.ScheduledDate.Date)
+        .ToDictionary(g => g.Key, g => g.ToList());
+
+    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    var daysInMonth = DateTime.DaysInMonth(firstDayOfMonth.Year, firstDayOfMonth.Month);
+}
+
+<h2 class="text-center">@firstDayOfMonth.ToString("MMMM yyyy")</h2>
+
+<div class="monthly-planner">
+    @for (int i = 1; i <= daysInMonth; i++)
+    {
+        var date = new DateTime(firstDayOfMonth.Year, firstDayOfMonth.Month, i);
+        <div class="day-cell">
+            <div class="date-header">@date.Day</div>
+            <div class="visits">
+                @if (visitsByDate.ContainsKey(date))
+                {
+                    foreach (var visit in visitsByDate[date])
+                    {
+                        <div class="visit-card">
+                            <strong>@visit.Fridge?.FridgeName</strong><br />
+                            @visit.Fridge?.Customer?.CustomerName<br />
+                            @visit.ScheduledTime
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .monthly-planner {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr); /* 7 days per week */
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .day-cell {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 5px;
+        min-height: 120px;
+        background-color: #f8f9fa;
+    }
+
+    .date-header {
+        font-weight: 600;
+        margin-bottom: 5px;
+        text-align: center;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        padding: 2px 0;
+    }
+
+    .visit-card {
+        background-color: #ffffff;
+        border-left: 4px solid #28a745;
+        margin-bottom: 3px;
+        padding: 3px 5px;
+        font-size: 0.85rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        border-radius: 3px;
+    }
+</style>
+
+ *@

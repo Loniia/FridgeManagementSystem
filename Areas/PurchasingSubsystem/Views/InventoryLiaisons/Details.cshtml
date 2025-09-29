@@ -1,0 +1,25 @@
+﻿@model PurchasingSubsystem.Models.InventoryLiaison
+
+@{
+    ViewData["Title"] = "Inventory Liaison Details";
+}
+
+<h2>Inventory Liaison Details</h2>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Liaison ID</dt>
+        <dd class="col-sm-10">@Model.InventoryLiaisonID</dd>
+
+        <dt class="col-sm-2">Name</dt>
+        <dd class="col-sm-10">@Model.Name</dd>
+
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Email</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.InventoryLiaisonID" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

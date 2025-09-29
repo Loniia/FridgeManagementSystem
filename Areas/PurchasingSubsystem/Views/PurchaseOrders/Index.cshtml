@@ -1,0 +1,36 @@
+﻿@model IEnumerable<PurchasingSubsystem.Models.PurchaseOrder>
+@{
+    ViewData["Title"] = "Purchase Orders";
+}
+
+<h2>Purchase Orders</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New Purchase Order</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>PO Number</th>
+            <th>Quotation ID</th>
+            <th>Order Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.PurchaseOrderID</td>
+                <td>@item.QuotationId</td>
+                <td>@item.OrderDate.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.PurchaseOrderID" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.PurchaseOrderID" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.PurchaseOrderID" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

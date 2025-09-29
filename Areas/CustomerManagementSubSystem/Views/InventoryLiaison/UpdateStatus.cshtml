@@ -1,0 +1,36 @@
+﻿@model FridgeManagementSystem.Models.Fridge
+
+@{
+    ViewData["Title"] = "Update Fridge Status";
+}
+
+<h2>Update Fridge Status</h2>
+
+<form asp-action="UpdateStatus" method="post">
+    <input type="hidden" asp-for="FridgeId" />
+
+    <div class="mb-3">
+        <label asp-for="Brand" class="form-label"></label>
+        <input asp-for="Brand" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Model" class="form-label"></label>
+        <input asp-for="Model" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label">Current Status</label>
+        <select asp-for="Status" asp-items="ViewBag.StatusOptions" class="form-control"></select>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        <i class="fas fa-sync"></i> Update Status
+    </button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

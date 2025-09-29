@@ -1,0 +1,149 @@
+﻿@model MonthlyDashboardViewModel
+@{
+    ViewData["Title"] = "Monthly Dashboard";
+}
+
+<h2>Monthly Fridge Dashboard - @ViewBag.SelectedYear</h2>
+
+<div class="mb-3">
+    <label for="yearSelect">Select Year:</label>
+    <select id="yearSelect" class="form-select" style="width: auto; display: inline-block;">
+        @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 5; y--)
+        {
+            if (y == ViewBag.SelectedYear)
+            {
+                <option value="@y" selected>@y</option>
+            }
+            else
+            {
+                <option value="@y">@y</option>
+            }
+        }
+    </select>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4" id="summaryCards">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3 card-filter" data-filter="all">
+            <div class="card-body">
+                <h5 class="card-title">Total Received</h5>
+                <p class="card-text" id="totalReceived">@ViewBag.TotalReceived</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3 card-filter" data-filter="all">
+            <div class="card-body">
+                <h5 class="card-title">Total Allocated</h5>
+                <p class="card-text" id="totalAllocated">@ViewBag.TotalAllocated</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3 card-filter" data-filter="all">
+            <div class="card-body">
+                <h5 class="card-title">Total Returned</h5>
+                <p class="card-text" id="totalReturned">@ViewBag.TotalReturned</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3 card-filter" data-filter="lowStock">
+            <div class="card-body">
+                <h5 class="card-title">Low Stock Months</h5>
+                <p class="card-text" id="lowStockMonths">@ViewBag.LowStockMonths</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart -->
+<canvas id="fridgeChart" height="100"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('fridgeChart').getContext('2d');
+        var data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        var fridgeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.Months,
+                datasets: [
+                    {
+                        label: 'Received',
+                        data: data.ReceivedCounts,
+                        backgroundColor: data.ReceivedColors
+                    },
+                    {
+                        label: 'Allocated',
+                        data: data.AllocatedCounts,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                    },
+                    {
+                        label: 'Returned',
+                        data: data.ReturnedCounts,
+                        backgroundColor: 'rgba(255, 206, 86, 0.6)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Monthly Fridge Stats (' + @ViewBag.SelectedYear + ')' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.dataset.label || '';
+                                var value = context.parsed.y;
+                                if (label === 'Received' && value < 5) {
+                                    return label + ': ' + value + ' ⚠️ Low Stock!';
+                                }
+                                return label + ': ' + value;
+                            }
+                        }
+                    }
+                },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Year selection
+        $('#yearSelect').on('change', function() {
+            var selectedYear = $(this).val();
+            $.getJSON('@Url.Action("GetMonthlyStats", "InventoryLiaison")', { year: selectedYear }, function (data) {
+                fridgeChart.data.labels = data.months;
+                fridgeChart.data.datasets[0].data = data.receivedCounts;
+                fridgeChart.data.datasets[0].backgroundColor = data.receivedColors;
+                fridgeChart.data.datasets[1].data = data.allocatedCounts;
+                fridgeChart.data.datasets[2].data = data.returnedCounts;
+                fridgeChart.options.plugins.title.text = 'Monthly Fridge Stats (' + selectedYear + ')';
+                fridgeChart.update();
+
+                // Update summary cards
+                $('#totalReceived').text(data.totalReceived);
+                $('#totalAllocated').text(data.totalAllocated);
+                $('#totalReturned').text(data.totalReturned);
+                $('#lowStockMonths').text(data.lowStockMonths);
+            });
+        });
+
+        // Clickable summary cards
+        $('.card-filter').on('click', function () {
+            var filterType = $(this).data('filter');
+
+            if (filterType === 'lowStock') {
+                fridgeChart.data.datasets[0].backgroundColor = fridgeChart.data.datasets[0].data.map(function(value){
+                    return value < 5 ? "rgba(255, 99, 132, 0.6)" : "rgba(200, 200, 200, 0.3)";
+                });
+            } else {
+                fridgeChart.data.datasets[0].backgroundColor = data.ReceivedColors;
+            }
+
+            fridgeChart.update();
+        });
+    </script>
+}

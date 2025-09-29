@@ -1,0 +1,40 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.Fridge>
+
+@{
+    ViewData["Title"] = "Receive & Track Fridges";
+}
+
+<div style="width:700px; margin:auto; padding:20px; border:1px solid #ccc; border-radius:10px; background:#f4faff;">
+    <h2 style="text-align:center; margin-bottom:20px;">Receive & Track Fridges</h2>
+
+    @foreach (var fridge in Model)
+    {
+        <div style="margin-bottom:25px; padding:15px; border:1px solid #bbb; border-radius:8px; background:#fff;">
+            <p><strong>Customer Name:</strong> @fridge.Customer?.FullName</p>
+            <p><strong>Phone Number:</strong> @fridge.Customer?.PhoneNumber</p>
+            <p><strong>Email:</strong> @fridge.Customer?.Email</p>
+            <p><strong>Address:</strong> @fridge.Customer.Location?.Address</p>
+
+            <p><strong>Fridge Type:</strong> @fridge.FridgeType</p>
+            <p><strong>Brand:</strong> @fridge.Brand</p>
+            <p><strong>Model:</strong> @fridge.Model</p>
+            <p><strong>Type:</strong> @fridge.Type</p>
+            <p><strong>Serial Number:</strong> @fridge.SerialNumber</p>
+
+            <p><strong>Supplier ID:</strong> @fridge.SupplierID</p>
+            <p><strong>Customer ID:</strong> @fridge.CustomerId</p>
+            <p><strong>No. of Fridges:</strong> @fridge.Quantity</p>
+
+            <p><strong>Date Added:</strong> @fridge.DateAdded</p>
+            <p><strong>Delivery Date:</strong> @fridge.DeliveryDate.ToString("yyyy/MM/dd")</p>
+            <p><strong>Status:</strong> @fridge.Status</p>
+
+            <div style="margin-top:10px;">
+                <button class="btn btn-success">Mark as Received</button>
+                <button class="btn btn-primary">Update Status</button>
+                <button class="btn btn-danger">Cancel Order</button>
+            </div>
+        </div>
+    }
+</div>
+
