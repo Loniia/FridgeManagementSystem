@@ -10,8 +10,6 @@ namespace FridgeManagementSystem.Models
     {
         public int FridgeId { get; set; }
 
-
-
         [Required(ErrorMessage = "Fridge name is required")]
         [StringLength(100, ErrorMessage = "Fridge name cannot exceed 100 characters")]
 
@@ -21,8 +19,36 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Model is required")]
         [StringLength(50, ErrorMessage = "Model cannot exceed 50 characters")]
         public string Model { get; set; }
-        public string Type { get; set; }
         public string SerialNumber {  get; set; }
+        [Required]
+        [Display(Name = "Condition")]
+        public string Condition { get; set; } = "Working"; // Working, Under Repair, Faulty, Scrapped
+
+        [Display(Name = "Installation Date")]
+        [DataType(DataType.Date)]
+        public DateTime? InstallationDate { get; set; }
+
+        [Display(Name = "Warranty Expiry")]
+        [DataType(DataType.Date)]
+        public DateTime? WarrantyExpiry { get; set; }
+
+        [Display(Name = "Capacity (L)")]
+        [Range(0, 1000, ErrorMessage = "Capacity must be between 0 and 1000 liters")]
+        public int? Capacity { get; set; }
+
+        [Display(Name = "Energy Rating")]
+        [StringLength(10)]
+        public string EnergyRating { get; set; } // A++, A+, A, B, etc.
+
+        [Display(Name = "Notes")]
+        [StringLength(1000)]
+        public string Notes { get; set; }
+        // Audit fields
+        [Display(Name = "Created Date")]
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        [Display(Name = "Updated Date")]
+        public DateTime UpdatedDate { get; set; } = DateTime.Now;
         public DateOnly DateAdded { get; set; }= DateOnly.FromDateTime(DateTime.Now);
         [ForeignKey("Supplier")]
         public int SupplierID { get; set; }
@@ -45,5 +71,17 @@ namespace FridgeManagementSystem.Models
 
         public virtual ICollection<FaultReport> FaultReport { get; set; }
         public ICollection<Fault> Fault { get; set; }
+
+        [NotMapped]
+        public bool IsUnderWarranty
+        {
+            get
+            {
+                return WarrantyExpiry.HasValue && WarrantyExpiry.Value > DateTime.Today;
+            }
+        }
+
+        [NotMapped]
+        public int ActiveFaultsCount => Fault?.Count(f => f.Status != "Resolved") ?? 0;
     }
 }

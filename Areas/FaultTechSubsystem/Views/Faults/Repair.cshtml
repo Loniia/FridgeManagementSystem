@@ -1,0 +1,119 @@
+﻿@model FridgeManagementSystem.Models.RepairSchedule
+@{
+    ViewData["Title"] = "Repair Fridge";
+    var faultInfo = ViewBag.FaultInfo as FridgeManagementSystem.Models.Fault;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Repair Fridge</h1>
+        <a asp-action="Process" asp-route-id="@faultInfo?.FaultID" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Process
+        </a>
+    </div>
+
+    @if (faultInfo != null)
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-warning">
+                <h6 class="m-0 font-weight-bold">Repair Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Fault No:</strong> F@(faultInfo.FaultID.ToString("D3"))<br>
+                        <strong>Fridge:</strong> @(faultInfo.Fridge?.Model ?? "N/A")
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Serial No:</strong> @(faultInfo.Fridge?.SerialNumber ?? "N/A")<br>
+                        <strong>Brand:</strong> @(faultInfo.Fridge?.Brand ?? "N/A")
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Customer:</strong> @(faultInfo.Fridge?.Customer?.FullName ?? "N/A") @(faultInfo.Fridge?.Customer?.FullName ?? "")<br>
+                        <strong>Contact:</strong> @(faultInfo.Fridge?.Customer?.PhoneNumber ?? "N/A")
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Repair Details</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Repair" asp-route-id="@faultInfo?.FaultID">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="FaultID" />
+                        <input type="hidden" asp-for="FridgeID" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="RepairType" class="control-label">Repair Type</label>
+                            <select asp-for="RepairType" class="form-control" asp-items="ViewBag.RepairTypes">
+                                <option value="">-- Select Repair Type --</option>
+                            </select>
+                            <span asp-validation-for="RepairType" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="PartsUsed" class="control-label">Parts Used</label>
+                            <textarea asp-for="PartsUsed" class="form-control" rows="2"
+                                      placeholder="List all parts used in the repair..."></textarea>
+                            <span asp-validation-for="PartsUsed" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="RepairNotes" class="control-label">Repair Procedure & Notes</label>
+                            <textarea asp-for="RepairNotes" class="form-control" rows="4"
+                                      placeholder="Describe the repair procedure, challenges, and solutions..."></textarea>
+                            <span asp-validation-for="RepairNotes" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="RepairCost" class="control-label">Repair Cost (R)</label>
+                                    <input type="number" asp-for="RepairCost" class="form-control" step="0.01" min="0"
+                                           placeholder="0.00" />
+                                    <span asp-validation-for="RepairCost" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-wrench"></i> Complete Repair
+                            </button>
+                            <a asp-action="Process" asp-route-id="@faultInfo?.FaultID" class="btn btn-secondary">Cancel</a>
+                            <a asp-action="UpdateCondition" asp-route-id="@faultInfo?.FaultID" class="btn btn-info">
+                                <i class="fas fa-thermometer-half"></i> Update Condition
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Common Repairs</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-lightbulb"></i> Quick Reference</h6>
+                        <ul class="mb-0 small">
+                            <li><strong>Electrical:</strong> Wiring, controls, power issues</li>
+                            <li><strong>Mechanical:</strong> Doors, hinges, shelves</li>
+                            <li><strong>Refrigeration:</strong> Cooling system, gas leaks</li>
+                            <li><strong>Thermostat:</strong> Temperature control issues</li>
+                            <li><strong>Compressor:</strong> Motor, starting components</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

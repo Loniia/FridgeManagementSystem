@@ -155,7 +155,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<ScrappedFridge>().HasQueryFilter(s => s.Fridge.IsActive);
             builder.Entity<PurchaseRequest>().HasQueryFilter(p => p.Customer.IsActive);
             builder.Entity<FaultReport>().HasQueryFilter(fr => fr.Fridge.IsActive);
-            builder.Entity<RepairSchedule>().HasQueryFilter(rs => rs.Customer.IsActive);
+           // builder.Entity<RepairSchedule>().HasQueryFilter(rs => rs.Customer.IsActive);
 
             // Configure enum conversions
             builder.Entity<MaintenanceRequest>()

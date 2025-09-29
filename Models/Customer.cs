@@ -1,4 +1,5 @@
 ﻿using CustomerManagementSubSystem.Models;
+using FridgeManagementSystem.Migrations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 #nullable disable
@@ -52,5 +53,8 @@ namespace FridgeManagementSystem.Models
         // Add computed property for display
         [NotMapped] // This won't be stored in database
         public string StatusDisplay => IsActive ? "Active" : "Inactive";
+
+        [NotMapped]
+        public int TotalFridges => Fridge?.Count ?? 0;
     }
 }

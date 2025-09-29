@@ -1,0 +1,159 @@
+﻿@model FridgeManagementSystem.Models.Fridge
+@{
+    ViewData["Title"] = "Update Fridge Condition";
+    var faultInfo = ViewBag.FaultInfo as FridgeManagementSystem.Models.Fault;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Update Fridge Condition</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Faults
+        </a>
+    </div>
+
+    @if (faultInfo != null)
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-info text-white">
+                <h6 class="m-0 font-weight-bold">Fridge Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Fridge ID:</strong> @Model.FridgeId<br>
+                        <strong>Model:</strong> @Model.Model<br>
+                        <strong>Serial No:</strong> @Model.SerialNumber
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Brand:</strong> @Model.Brand<br>
+                        <strong>Type:</strong> @Model.FridgeType<br>
+                        <strong>Current Condition:</strong>
+                        <span class="badge @GetConditionBadgeClass(Model.Condition)">@Model.Condition</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Related Fault:</strong> F@(faultInfo.FaultID.ToString("D3"))<br>
+                        <strong>Fault Status:</strong>
+                        <span class="badge @GetStatusBadgeClass(faultInfo.Status)">@faultInfo.Status</span><br>
+                        <strong>Description:</strong> @faultInfo.FaultDescription
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Update Condition</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateCondition" asp-route-id="@Model.FridgeId">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="FridgeId" />
+                        <input type="hidden" name="Model" value="@Model.Model" />
+                        <input type="hidden" asp-for="SerialNumber" />
+                        <input type="hidden" asp-for="Brand" />
+                        <input type="hidden" asp-for="FridgeType" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Condition" class="control-label">Fridge Condition</label>
+                            <select asp-for="Condition" class="form-control" asp-items="ViewBag.ConditionOptions">
+                                <option value="">-- Select Condition --</option>
+                            </select>
+                            <span asp-validation-for="Condition" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Notes" class="control-label">Condition Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="4"
+                                      placeholder="Add any notes about the fridge condition, repairs done, or recommendations..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Update Condition
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                            @if (faultInfo != null)
+                            {
+                                <a asp-action="Process" asp-route-id="@faultInfo.FaultID" class="btn btn-primary">
+                                    <i class="fas fa-cogs"></i> Back to Process
+                                </a>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Condition Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Condition Definitions</h6>
+                        <ul class="mb-0 small">
+                            <li><strong class="text-success">Working:</strong> Fully functional, ready for use</li>
+                            <li><strong class="text-warning">Under Repair:</strong> Currently being repaired</li>
+                            <li><strong class="text-danger">Faulty:</strong> Has issues, needs repair</li>
+                            <li><strong class="text-secondary">Scrapped:</strong> Beyond repair, for disposal</li>
+                        </ul>
+                    </div>
+
+                    @if (Model.Customer != null)
+                    {
+                        <div class="mt-3">
+                            <h6 class="font-weight-bold">Customer Information</h6>
+                            <p class="mb-1"><strong>Name:</strong> @Model.Customer.FullName</p>
+                            <p class="mb-1"><strong>Phone:</strong> @Model.Customer.PhoneNumber</p>
+                            <p class="mb-1"><strong>Email:</strong> @Model.Customer.Email</p>
+                            <p class="mb-0"><strong>Address:</strong> @Model.Customer.Location</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetConditionBadgeClass(string condition)
+    {
+        return condition?.ToLower() switch
+        {
+            "working" => "bg-success",
+            "under repair" => "bg-warning",
+            "faulty" => "bg-danger",
+            "scrapped" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "in progress" => "bg-info",
+            "resolved" => "bg-success",
+            "closed" => "bg-secondary",
+            "diagnosing" => "bg-primary",
+            "awaiting parts" => "bg-warning",
+            "repairing" => "bg-danger",
+            "testing" => "bg-info",
+            "completed" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

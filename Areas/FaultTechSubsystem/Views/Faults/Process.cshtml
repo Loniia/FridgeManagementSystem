@@ -1,0 +1,160 @@
+﻿@model FridgeManagementSystem.Models.RepairSchedule
+@{
+    ViewData["Title"] = "Process Fault";
+    var faultInfo = ViewBag.FaultInfo as FridgeManagementSystem.Models.Fault;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Process Fault</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Faults
+        </a>
+    </div>
+
+    @if (faultInfo != null)
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-primary text-white">
+                <h6 class="m-0 font-weight-bold">Fault Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Fault No:</strong> F@(faultInfo.FaultID.ToString("D3"))<br>
+                        <strong>Priority:</strong> <span class="badge @GetPriorityBadgeClass(faultInfo.Priority)">@faultInfo.Priority</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Status:</strong> <span class="badge @GetStatusBadgeClass(faultInfo.Status)">@faultInfo.Status</span><br>
+                        <strong>Reported:</strong> @faultInfo.CreatedDate.ToString("yyyy/MM/dd")
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Description:</strong> @faultInfo.FaultDescription<br>
+                        <strong>Fridge:</strong> @(faultInfo.Fridge?.Model ?? "N/A") - @(faultInfo.Fridge?.SerialNumber ?? "N/A")
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Fault Processing</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Process" asp-route-id="@faultInfo?.FaultID">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="FaultID" />
+                        <input type="hidden" asp-for="FridgeID" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Diagnosis" class="control-label">Initial Diagnosis</label>
+                            <textarea asp-for="Diagnosis" class="form-control" rows="3"
+                                      placeholder="Enter initial diagnosis findings..."></textarea>
+                            <span asp-validation-for="Diagnosis" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="RepairNotes" class="control-label">Repair Notes & Observations</label>
+                            <textarea asp-for="RepairNotes" class="form-control" rows="3"
+                                      placeholder="Enter repair notes and observations..."></textarea>
+                            <span asp-validation-for="RepairNotes" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Status" class="control-label">Process Status</label>
+                                    <select asp-for="Status" class="form-control" asp-items="ViewBag.StatusOptions">
+                                        <option value="">-- Select Status --</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Fridge Condition</label>
+                                    <select name="fridgeCondition" class="form-control" asp-items="ViewBag.ConditionOptions">
+                                        <option value="">-- Select Condition --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Process
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+
+                            @if (faultInfo?.Status != "Resolved")
+                            {
+                                <a asp-action="Repair" asp-route-id="@faultInfo?.FaultID" class="btn btn-warning">
+                                    <i class="fas fa-tools"></i> Start Repair
+                                </a>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Process Guide</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Processing Steps</h6>
+                        <ol class="mb-0 small">
+                            <li><strong>Diagnosing:</strong> Initial assessment and testing</li>
+                            <li><strong>Awaiting Parts:</strong> Waiting for replacement parts</li>
+                            <li><strong>Repairing:</strong> Active repair work in progress</li>
+                            <li><strong>Testing:</strong> Post-repair verification</li>
+                            <li><strong>Completed:</strong> Fault resolved and verified</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "in progress" => "bg-info",
+            "resolved" => "bg-success",
+            "closed" => "bg-secondary",
+            "diagnosing" => "bg-primary",
+            "awaiting parts" => "bg-warning",
+            "repairing" => "bg-danger",
+            "testing" => "bg-info",
+            "completed" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetPriorityBadgeClass(string priority)
+    {
+        return priority?.ToLower() switch
+        {
+            "high" => "bg-danger",
+            "medium" => "bg-warning",
+            "low" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
