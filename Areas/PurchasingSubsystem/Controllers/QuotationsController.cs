@@ -8,9 +8,9 @@ namespace PurchasingSubsystem.Controllers
 {
     public class QuotationsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly FridgeDbContext _context;
 
-        public QuotationsController(ApplicationDbContext context)
+        public QuotationsController(FridgeDbContext context)
         {
             _context = context;
         }

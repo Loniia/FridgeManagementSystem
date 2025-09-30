@@ -7,9 +7,9 @@ namespace PurchasingSubsystem.Controllers
 {
     public class PurchaseManagersController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly FridgeDbContext _context;
 
-        public PurchaseManagersController(ApplicationDbContext context)
+        public PurchaseManagersController(FridgeDbContext context)
         {
             _context = context;
         }
