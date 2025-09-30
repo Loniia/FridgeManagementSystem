@@ -35,7 +35,7 @@
   <ItemGroup>
     <Folder Include="Areas\PurchasingSubsystem\Views\NewFolder\" />
     <Folder Include="Areas\PurchasingSubsystem\Views\Quotation\" />
-    <Folder Include="Administrator\" />
+    <Folder Include="Areas\Administrator\" />
   </ItemGroup>
 
 </Project>
