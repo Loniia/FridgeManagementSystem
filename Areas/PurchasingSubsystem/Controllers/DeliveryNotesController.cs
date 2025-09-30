@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PurchasingSubsystem.Models;
 #nullable disable
-namespace PurchasingSubsystem.Controllers
+namespace FridgeManagementSystem.Controllers
 {
     public class DeliveryNotesController : Controller
     {

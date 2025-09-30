@@ -1,16 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using PurchasingSubsystem.Data;
-using PurchasingSubsystem.Models;
-using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using FridgeManagementSystem.Data;
 
 namespace PurchasingSubsystem.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly FridgeDbContext _context;
 
-        public HomeController(ApplicationDbContext context)
+        public HomeController(FridgeDbContext context)
         {
             _context = context;
         }

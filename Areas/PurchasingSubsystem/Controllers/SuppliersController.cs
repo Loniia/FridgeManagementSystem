@@ -1,23 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSubsystem.Data;
 using PurchasingSubsystem.Models;
 
-namespace PurchasingSubsystem.Controllers
-{
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-    using PurchasingSubsystem.Data;
-    using PurchasingSubsystem.Models;
 
     namespace PurchasingSubsystem.Areas.Purchasing.Controllers
     {
         [Area("Purchasing")] // ADD THIS for area routing
         public class SuppliersController : Controller
         {
-            private readonly ApplicationDbContext _context;
+            private readonly FridgeDbContext _context;
 
-            public SuppliersController(ApplicationDbContext context)
+            public SuppliersController(FridgeDbContext context)
             {
                 _context = context;
             }
@@ -163,4 +158,4 @@ namespace PurchasingSubsystem.Controllers
             }
         }
     }
-}
+
