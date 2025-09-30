@@ -18,28 +18,27 @@ namespace FridgeManagementSystem.Models
 
         [Required(ErrorMessage = "Contact info is required")]
         [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-            ErrorMessage = "Contact info must be a valid email address")]
-        public string ContactInfo { get; set; }
-        [EmailAddress(ErrorMessage = "Invalid email address format")]
-        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
+         ErrorMessage = "Provide valid email address")]
         public string Email { get; set; }
+
         [ForeignKey("Location")]
         public int LocationId { get; set; }
-        [Required]
-        [RegularExpression("^(Active|Inactive)$",
-            ErrorMessage = "Status must be either 'Active' or 'Inactive'")]
-        public string Status { get; set; }
+
         [Required(ErrorMessage = "Phone number is required.")]
         [StringLength(10, ErrorMessage = "Phone number cannot be longer than 10 characters.")]
         [Phone(ErrorMessage = "Invalid Phone Number")]
         public string PhoneNumber { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
         [ForeignKey("ApplicationUserId")]
         [Required]
         public int ApplicationUserId { get; set; }
+
         [Required]
         [DataType(DataType.Date)]
         public DateOnly RegistrationDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+
         public ApplicationUser UserAccount { get; set; }
        
         public bool IsActive { get; set; } = true;
