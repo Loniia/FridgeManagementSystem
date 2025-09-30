@@ -28,6 +28,9 @@ namespace FridgeManagementSystem.Models
         public string Status { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        [ForeignKey("Location")]
+        public int LocationId { get; set; }
+        public virtual Location Location { get; set; }
         [ForeignKey("ApplicationUserId")]
         [Required]
         public int ApplicationUserId { get; set; }
