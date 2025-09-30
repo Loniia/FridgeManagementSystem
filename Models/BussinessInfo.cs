@@ -2,7 +2,7 @@
 
 namespace FridgeManagementSystem.Models
 {
-    public class BusinessInfo
+    public class BussinessInfo
     {
 
     }
