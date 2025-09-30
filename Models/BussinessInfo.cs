@@ -4,8 +4,9 @@ namespace FridgeManagementSystem.Models
 {
     public class BussinessInfo
     {
+<<<<<<<<< Temporary merge branch 1
         [Key]
-        public int BusinessInfoId { get; set; }
+        public int BusinnessInfoId { get; set; }
 
         [Required, MaxLength(300)]
         public string CompanyName { get; set; }
@@ -27,5 +28,8 @@ namespace FridgeManagementSystem.Models
 
         [MaxLength(500)]
         public string LogoUrl { get; set; }
+=========
+
+>>>>>>>>> Temporary merge branch 2
     }
 }
