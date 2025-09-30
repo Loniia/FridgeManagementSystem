@@ -54,6 +54,8 @@ namespace FridgeManagementSystem.Models
         public int SupplierID { get; set; }
         [ForeignKey("Customer")]
         public int CustomerId {  get; set; }
+        [ForeignKey("Location")]
+        public int LocationId { get; set; }
         public int FaultID { get; set; }
         public int Quantity { get; set; }
         public DateTime DeliveryDate { get; set; }

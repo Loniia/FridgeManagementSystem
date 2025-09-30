@@ -21,18 +21,6 @@ namespace FridgeManagementSystem.Models
         public string Role { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        //[Key]
-        //public int AdminID { get; set; }
-
-        //[Required]
-        //public string Name { get; set; }
-
-        //[Required, EmailAddress]
-        //public string Email { get; set; }
-
-        //public string Role { get; set; } // Optional: SuperAdmin, etc.
-
-        //// Navigation
-        //public ICollection<Employee> Employees { get; set; }
+       
     }
 }
