@@ -31,6 +31,22 @@
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
 
+                        <!-- Contact Person -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ContactPerson" class="form-label fw-bold"></label>
+                            <input asp-for="ContactPerson" class="form-control" placeholder="e.g., John Smith" />
+                            <span asp-validation-for="ContactPerson" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Email -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control" placeholder="e.g., orders@supplier.co.za" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
                         <!-- Phone -->
                         <div class="col-md-6 mb-3">
                             <label asp-for="Phone" class="form-label fw-bold"></label>
@@ -39,14 +55,7 @@
                         </div>
                     </div>
 
-                    <!-- Email -->
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label fw-bold"></label>
-                        <input asp-for="Email" class="form-control" placeholder="e.g., orders@supplier.co.za" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-
-                    <!-- Address - NEW FIELD -->
+                    <!-- Address -->
                     <div class="mb-3">
                         <label asp-for="Address" class="form-label fw-bold"></label>
                         <textarea asp-for="Address" class="form-control" rows="3" placeholder="Full physical address for delivery and invoicing..."></textarea>
@@ -72,51 +81,3 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
-
-
-@* @model PurchasingSubsystem.Models.Supplier
-
-@{
-    ViewData["Title"] = "Create Supplier";
-}
-
-<h2>Create New Supplier</h2>
-
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
-                <span asp-validation-for="Phone" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mt-3">
-                <input type="submit" value="Create" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-            </div>
-        </form>
-    </div>
-</div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
- *@
