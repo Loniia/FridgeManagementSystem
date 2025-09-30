@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FridgeManagementSystem.Models
+#nullable disable
 {
     public class ComponentUsed
     {

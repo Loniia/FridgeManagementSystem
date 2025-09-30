@@ -11,6 +11,12 @@ namespace FridgeManagementSystem.Models
         public string City { get; set; }    
         public string Province { get; set; }
         public string PostalCode { get; set; }
-
+        // Soft delete flag
+        public bool IsActive { get; set; } = true;
+        public virtual ICollection<Customer> Customer { get; set; }
+        public virtual ICollection<Employee> Employee { get; set; }
+        public virtual ICollection<Fridge> Fridge { get; set; }
     }
+
 }
+
