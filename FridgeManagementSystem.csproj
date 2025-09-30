@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\Administrator\**" />
+    <Content Remove="Areas\Administrator\**" />
+    <EmbeddedResource Remove="Areas\Administrator\**" />
+    <None Remove="Areas\Administrator\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
@@ -35,7 +42,6 @@
   <ItemGroup>
     <Folder Include="Areas\PurchasingSubsystem\Views\NewFolder\" />
     <Folder Include="Areas\PurchasingSubsystem\Views\Quotation\" />
-    <Folder Include="Areas\Administrator\" />
   </ItemGroup>
 
 </Project>
