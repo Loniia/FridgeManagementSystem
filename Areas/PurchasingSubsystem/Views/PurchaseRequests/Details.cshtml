@@ -1,4 +1,4 @@
-﻿@model PurchasingSubsystem.Models.PurchaseRequest
+﻿@model FridgeManagementSystem.Models.PurchaseRequest
 
 @{
     ViewData["Title"] = "Purchase Request Details";
@@ -12,8 +12,8 @@
         <dt class="col-sm-2">Request ID</dt>
         <dd class="col-sm-10">@Model.PurchaseRequestID</dd>
         
-        <dt class="col-sm-2">Inventory Liaison</dt>
-        <dd class="col-sm-10">@Model.InventoryLiaison?.Name</dd>
+       @*  <dt class="col-sm-2">Inventory Liaison</dt>
+        <dd class="col-sm-10">@Model.InventoryLiaisonID.Name</dd> *@
         
         <dt class="col-sm-2">Request Date</dt>
         <dd class="col-sm-10">@Model.RequestDate.ToString("yyyy-MM-dd")</dd>

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using FridgeManagementSystem.Models;
+using FridgeManagementSystem.Data;
 #nullable disable
 namespace PurchasingSubsystem.Models
 {
@@ -30,7 +32,10 @@ namespace PurchasingSubsystem.Models
         public RequestForQuotation RequestForQuotation { get; set; }
 
         [ForeignKey("SupplierId")]
-        public Supplier Supplier { get; set; }
+        public int SupplierID { get; set; }
+
+        //navigation property
+ 
 
     }
 }

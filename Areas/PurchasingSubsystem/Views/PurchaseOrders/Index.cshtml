@@ -1,4 +1,4 @@
-﻿@model IEnumerable<PurchasingSubsystem.Models.PurchaseOrder>
+﻿@model IEnumerable<FridgeManagementSystem.Models.PurchaseOrder>
 @{
     ViewData["Title"] = "Purchase Orders";
 }
@@ -23,7 +23,7 @@
         {
             <tr>
                 <td>@item.PurchaseOrderID</td>
-                <td>@item.QuotationId</td>
+                <td>@item.QuotationID</td>
                 <td>@item.OrderDate.ToString("yyyy-MM-dd")</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.PurchaseOrderID" class="btn btn-warning btn-sm">Edit</a>
