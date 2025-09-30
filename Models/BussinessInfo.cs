@@ -2,10 +2,10 @@
 
 namespace FridgeManagementSystem.Models
 {
-    public class BusinessInfo
+    public class BussinessInfo
     {
         [Key]
-        public int BusinnessInfoId { get; set; }
+        public int BusinessInfoId { get; set; }
 
         [Required, MaxLength(300)]
         public string CompanyName { get; set; }
