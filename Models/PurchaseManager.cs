@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 #nullable disable
-namespace PurchasingSubsystem.Models
+namespace FridgeManagementSystem.Models
 {
     public class PurchaseManager
     {

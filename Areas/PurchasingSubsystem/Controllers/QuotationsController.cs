@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
-using PurchasingSubsystem.Models;
+using FridgeManagementSystem.Models;
 #nullable disable
-namespace PurchasingSubsystem.Controllers
+namespace FridgeManagementSystem.Controllers
 {
     public class QuotationsController : Controller
     {

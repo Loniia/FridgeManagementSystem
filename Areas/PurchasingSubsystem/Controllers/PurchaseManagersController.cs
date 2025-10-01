@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSubsystem.Models;
+using FridgeManagementSystem.Models;
 using FridgeManagementSystem.Data;
 
 #nullable disable
-namespace PurchasingSubsystem.Controllers
+namespace FridgeManagementSystem.Controllers
 {
     public class PurchaseManagersController : Controller
     {

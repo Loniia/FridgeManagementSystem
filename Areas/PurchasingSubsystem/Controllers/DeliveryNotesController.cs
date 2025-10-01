@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSubsystem.Models;
+using FridgeManagementSystem.Models;
 #nullable disable
 namespace FridgeManagementSystem.Controllers
 {

@@ -2,7 +2,6 @@
 using FridgeManagementSystem.Migrations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-#nullable disable
 
 namespace FridgeManagementSystem.Models
 {
@@ -20,7 +19,8 @@ namespace FridgeManagementSystem.Models
         [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$",
          ErrorMessage = "Provide valid email address")]
         public string Email { get; set; }
-
+        public int? FridgeId { get; set; }
+       // public Fridge Fridge { get; set; }
         [ForeignKey("Location")]
         public int LocationId { get; set; }
 

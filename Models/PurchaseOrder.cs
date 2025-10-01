@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 #nullable disable
-namespace PurchasingSubsystem.Models
+namespace FridgeManagementSystem.Models
 {
     public class PurchaseOrder
     {
