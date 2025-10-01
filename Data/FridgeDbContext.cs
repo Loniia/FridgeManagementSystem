@@ -36,7 +36,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<FaultTechnicians> FaultTechnicians { get; set; }
         public DbSet<PurchaseManager> PurchaseManagers { get; set; }
         public DbSet<InventoryLiaison> InventoryLiaisons { get; set; }
-        public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
+        //public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
         public DbSet<RequestForQuotation> RequestsForQuotation { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
