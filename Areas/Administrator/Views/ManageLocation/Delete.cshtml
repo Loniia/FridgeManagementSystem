@@ -1,0 +1,18 @@
+﻿@model FridgeManagementSystem.Models.Location
+
+@{
+    ViewData["Title"] = "Deactivate Location";
+}
+
+<h2>Deactivate Location</h2>
+
+<div>
+    <h4>@Model.Address, @Model.City</h4>
+    <p>Are you sure you want to deactivate this location?</p>
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="LocationId" />
+    <button type="submit" class="btn btn-danger">Deactivate</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
