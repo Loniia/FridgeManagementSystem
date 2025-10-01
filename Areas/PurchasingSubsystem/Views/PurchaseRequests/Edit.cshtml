@@ -1,4 +1,4 @@
-﻿@model PurchasingSubsystem.Models.PurchaseRequest
+﻿@model FridgeManagementSystem.Models.PurchaseRequest
 
 @{
     ViewData["Title"] = "Edit Purchase Request";
@@ -14,11 +14,11 @@
             <input type="hidden" asp-for="PurchaseRequestID" />
             
             <div class="form-group mb-3">
-                <label asp-for="InventoryLiaisonId" class="control-label">Inventory Liaison</label>
-                <select asp-for="InventoryLiaisonId" class="form-control" asp-items="ViewBag.InventoryLiaisons">
+                <label asp-for="InventoryLiaisonID" class="control-label">Inventory Liaison</label>
+                <select asp-for="InventoryLiaisonID" class="form-control" asp-items="ViewBag.InventoryLiaisons">
                     <option value="">-- Select Liaison --</option>
                 </select>
-                <span asp-validation-for="InventoryLiaisonId" class="text-danger"></span>
+                <span asp-validation-for="InventoryLiaisonID" class="text-danger"></span>
             </div>
             
             <div class="form-group mb-3">

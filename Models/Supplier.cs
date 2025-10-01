@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FridgeManagementSystem.Data;
 
 namespace FridgeManagementSystem.Models
 #nullable disable
@@ -35,7 +36,8 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Address is required for delivery and invoicing.")]
         [StringLength(200, ErrorMessage = "Address cannot be longer than 200 characters.")]
         public string Address { get; set; }
-
+        public int PurchaseOrderID { get; set; }
+        public int QuotationID { get; set; }
        
         // Soft delete flag
         public bool IsActive { get; set; } = true;
@@ -44,7 +46,7 @@ namespace FridgeManagementSystem.Models
         public virtual ICollection<Fridge> Fridges { get; set; } 
         public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
 
-      // Critical for purchasing workflow
+        // Critical for purchasing workflow
         public virtual ICollection<Quotation> Quotations { get; set; }
     }
 

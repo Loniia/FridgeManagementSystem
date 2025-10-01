@@ -1,5 +1,4 @@
-﻿using PurchasingSubsystem.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 #nullable disable
 
@@ -37,6 +36,7 @@ namespace FridgeManagementSystem.Models
         [Required]
         public int Quantity { get; set; }
         public bool IsActive { get; set; } = true;
+        public int CustomerID { get; set; }
 
         // fields for tracking the Purchase from Purchasing Manager
         public bool IsViewed { get; set; } // True if manager has opened it
@@ -47,7 +47,7 @@ namespace FridgeManagementSystem.Models
         public virtual Fridge Fridge { get; set; }
 
         [ForeignKey("InventoryLiaisonId")]
-        public InventoryLiaison InventoryLiaison { get; set; }
+        public int InventoryLiaisonID { get; set; }
 
     }
 }

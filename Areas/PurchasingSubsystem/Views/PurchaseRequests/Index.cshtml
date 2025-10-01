@@ -1,4 +1,4 @@
-﻿@model IEnumerable<PurchasingSubsystem.Models.PurchaseRequest>
+﻿@model IEnumerable<FridgeManagementSystem.Models.PurchaseRequest>
 
 
 @{
@@ -26,7 +26,7 @@
         {
             <tr>
                 <td>@item.PurchaseRequestID</td>
-                <td>@item.InventoryLiaison?.Name</td>
+                <td>@item.InventoryLiaisonID</td>
                 <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
                 <td>
                     <span class="badge bg-@(item.Status == "Approved" ? "success" : item.Status == "Rejected" ? "danger" : "warning")">

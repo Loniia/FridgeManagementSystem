@@ -5,10 +5,8 @@ namespace FridgeManagementSystem.Models
     public class BussinessInfo
     {
 
-
-
         [Key]
-        public int BusinnessInfoId { get; set; }
+        public int BusinessInfoId { get; set; }
 
         [Required, MaxLength(300)]
         public string CompanyName { get; set; }
@@ -30,10 +28,6 @@ namespace FridgeManagementSystem.Models
 
         [MaxLength(500)]
         public string LogoUrl { get; set; }
-
-
-
-
 
     }
 }
