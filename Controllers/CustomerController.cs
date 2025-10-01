@@ -136,6 +136,32 @@ namespace FridgeManagementSystem.Controllers
                 .ToList(); 
             return View(fridges);
         }
+        // customer views service history 
+        public IActionResult MyServiceHistory(int customerId)
+        {
+            var visits = _context.MaintenanceVisit
+                .Include(v => v.Fridge)
+                .Include(v => v.MaintenanceChecklist)
+                .Include(v => v.ComponentUsed)
+                .Include(v => v.FaultReport)
+                .Where(v => v.Fridge.CustomerId == customerId)
+                .OrderByDescending(v => v.ScheduledDate)
+                .ToList();
+
+            return View(visits);
+        }
+        // customer views upcoming maintenance visits
+        public IActionResult MyUpcomingVisits(int customerId)
+        {
+            var visits = _context.MaintenanceVisit
+                .Include(v => v.Fridge)
+                .Where(v => v.Fridge.CustomerId == customerId &&
+                            (v.Status == Models.TaskStatus.Scheduled || v.Status == Models.TaskStatus.Rescheduled))
+                .OrderBy(v => v.ScheduledDate)
+                .ToList();
+
+            return View(visits);
+        }
 
         //// Create Faults
         //public IActionResult CreateFault()
