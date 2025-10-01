@@ -83,8 +83,8 @@ namespace FridgeManagementSystem.Data
 
             builder.Entity<Fridge>()
                 .HasMany(f => f.FridgeAllocation)
-                .WithOne(a => a.fridge)
-                .HasForeignKey(a => a.FridgeID);
+                .WithOne(a => a.Fridge)
+                .HasForeignKey(a => a.FridgeId);
 
             builder.Entity<Customer>()
                 .HasMany(c => c.PurchaseRequest)
@@ -181,7 +181,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
             builder.Entity<Customer>().HasQueryFilter(c => c.IsActive);
             builder.Entity<Fridge>().HasQueryFilter(f => f.IsActive);
-            builder.Entity<FridgeAllocation>().HasQueryFilter(a => a.fridge.IsActive);
+            builder.Entity<FridgeAllocation>().HasQueryFilter(a => a.Fridge.IsActive);
             builder.Entity<Inventory>().HasQueryFilter(i => i.Fridge.IsActive);
             builder.Entity<ScrappedFridge>().HasQueryFilter(s => s.Fridge.IsActive);
             builder.Entity<PurchaseRequest>().HasQueryFilter(p => p.Customer.IsActive);

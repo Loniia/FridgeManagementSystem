@@ -37,7 +37,7 @@
             @foreach (var allocation in Model.FridgeAllocations.OrderByDescending(a => a.AllocationDate))
             {
                 <tr>
-                    <td>@($"{allocation.fridge?.Brand} - {allocation.fridge?.Model}")</td>
+                    <td>@($"{allocation.Fridge?.Brand} - {allocation.Fridge?.Model}")</td>
                     <td>@allocation.QuantityAllocated</td>
                     <td>@allocation.AllocationDate.ToString()</td>
                     <td>@(allocation.ReturnDate.HasValue ? allocation.ReturnDate.Value.ToString("yyyy/MM/dd") : "N/A")</td>

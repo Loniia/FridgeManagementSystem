@@ -15,7 +15,7 @@ namespace FridgeManagementSystem.Models
         // ========== CRUD-Like ==========
         public async Task<List<Fridge>> GetAllFridgesAsync()
         {
-            return await _context.Fridges
+            return await _context.Fridge
                 .Include(f => f.Supplier)
                 .Include(f => f.Location)
                 .ToListAsync();
@@ -23,7 +23,7 @@ namespace FridgeManagementSystem.Models
 
         public async Task<Fridge?> GetFridgeByIdAsync(int id)
         {
-            return await _context.Fridges
+            return await _context.Fridge
                 .Include(f => f.Supplier)
                 .Include(f => f.Location)
                 .FirstOrDefaultAsync(f => f.FridgeId == id);
@@ -34,14 +34,14 @@ namespace FridgeManagementSystem.Models
             fridge.Status = "Active";
             fridge.PurchaseDate = DateTime.UtcNow;
 
-            _context.Fridges.Add(fridge);
+            _context.Fridge.Add(fridge);
             await _context.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> UpdateFridgeAsync(Fridge fridge)
         {
-            if (!_context.Fridges.Any(f => f.FridgeId == fridge.FridgeId)) return false;
+            if (!_context.Fridge.Any(f => f.FridgeId == fridge.FridgeId)) return false;
             _context.Update(fridge);
             await _context.SaveChangesAsync();
             return true;
@@ -49,10 +49,10 @@ namespace FridgeManagementSystem.Models
 
         public async Task<bool> DeleteFridgeAsync(int id)
         {
-            var fridge = await _context.Fridges.FindAsync(id);
+            var fridge = await _context.Fridge.FindAsync(id);
             if (fridge == null) return false;
 
-            _context.Fridges.Remove(fridge);
+            _context.Fridge.Remove(fridge);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -60,7 +60,7 @@ namespace FridgeManagementSystem.Models
         // ========== BUSINESS LOGIC ==========
         public async Task<bool> AllocateToCustomerAsync(int fridgeId, int customerId)
         {
-            var fridge = await _context.Fridges.FindAsync(fridgeId);
+            var fridge = await _context.Fridge.FindAsync(fridgeId);
             var customer = await _context.Customers.FindAsync(customerId);
 
             if (fridge == null || customer == null) return false;
@@ -87,7 +87,7 @@ namespace FridgeManagementSystem.Models
 
         public async Task<bool> ScheduleMaintenanceAsync(int fridgeId, int employeeId, DateTime scheduledDate)
         {
-            var fridge = await _context.Fridges.FindAsync(fridgeId);
+            var fridge = await _context.Fridge.FindAsync(fridgeId);
             var employee = await _context.Employees.FindAsync(employeeId);
 
             if (fridge == null || employee == null) return false;
@@ -111,7 +111,7 @@ namespace FridgeManagementSystem.Models
 
         public async Task<bool> CompleteMaintenanceAsync(int fridgeId, int scheduleId)
         {
-            var fridge = await _context.Fridges.FindAsync(fridgeId);
+            var fridge = await _context.Fridge.FindAsync(fridgeId);
             var schedule = await _context.RepairSchedules.FindAsync(scheduleId);
 
             if (fridge == null || schedule == null) return false;
@@ -129,7 +129,7 @@ namespace FridgeManagementSystem.Models
         // ========== REPORTING ==========
         public async Task<List<InventoryReportVM>> GetInventoryReportAsync()
         {
-            return await _context.Fridges
+            return await _context.Fridge
                 .Include(f => f.Location)
                 .GroupBy(f => f.Location.City)
                 .Select(g => new InventoryReportVM
@@ -145,7 +145,7 @@ namespace FridgeManagementSystem.Models
 
         public async Task<List<SupplierReportVM>> GetSupplierReportAsync()
         {
-            return await _context.Fridges
+            return await _context.Fridge
                 .Include(f => f.Supplier)
                 .GroupBy(f => f.Supplier.Name)
                 .Select(g => new SupplierReportVM

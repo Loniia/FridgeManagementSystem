@@ -14,9 +14,9 @@
     <thead>
         <tr>
             <th>@Html.DisplayNameFor(model => model.FullName)</th>
-            <th>@Html.DisplayNameFor(model => model.ContactInfo)</th>
+            <th>@Html.DisplayNameFor(model => model.PhoneNumber)</th>
             <th>@Html.DisplayNameFor(model => model.LocationId)</th>
-            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
             <th>@Html.DisplayNameFor(model => model.CreatedAt)</th>
             <th></th>
         </tr>
@@ -26,9 +26,9 @@
         {
             <tr>
                 <td>@Html.DisplayFor(modelItem => item.FullName)</td>
-                <td>@Html.DisplayFor(modelItem => item.ContactInfo)</td>
+                <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
                 <td>@Html.DisplayFor(modelItem => item.LocationId)</td>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>@Html.DisplayFor(modelItem => item.Email)</td>
                 <td>@item.CreatedAt.ToShortDateString()</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@item.CustomerID" class="btn btn-info btn-sm">Details</a>

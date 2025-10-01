@@ -398,7 +398,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
         // ✅ Fault Report
         public IActionResult CreateFaultReport(int visitId, int fridgeId)
         {
-            var fridge = _context.Fridges
+            var fridge = _context.Fridge
                 .Include(f => f.Customer)
                 .FirstOrDefault(f => f.FridgeId == fridgeId);
 
@@ -412,7 +412,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
             var report = new FaultReport
             {
                 MaintenanceVisitId = visitId,
-                FridgeID = fridgeId,
+                FridgeId = fridgeId,
                 ReportDate = DateTime.Now
             };
 
@@ -429,8 +429,8 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var fridge = _context.Fridges.Include(f => f.Customer)
-                    .FirstOrDefault(f => f.FridgeId == report.FridgeID);
+                var fridge = _context.Fridge.Include(f => f.Customer)
+                    .FirstOrDefault(f => f.FridgeId == report.FridgeId);
 
                 var visit = _context.MaintenanceVisit.Include(v => v.Employee)
                     .FirstOrDefault(v => v.MaintenanceVisitId == report.MaintenanceVisitId);

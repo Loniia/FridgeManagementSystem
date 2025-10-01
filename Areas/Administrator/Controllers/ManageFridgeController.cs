@@ -79,7 +79,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         [HttpGet]
         public async Task<IActionResult> AllocateToCustomer(int id)
         {
-            var fridge = await _context.Fridges.FindAsync(id);
+            var fridge = await _context.Fridge.FindAsync(id);
             if (fridge == null) return NotFound();
 
             var customers = await _context.Customers
@@ -108,7 +108,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         [HttpGet]
         public async Task<IActionResult> ScheduleMaintenance(int id)
         {
-            var fridge = await _context.Fridges.FindAsync(id);
+            var fridge = await _context.Fridge.FindAsync(id);
             if (fridge == null) return NotFound();
 
             var vm = new ScheduleMaintenanceViewModel
