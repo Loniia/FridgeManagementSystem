@@ -33,7 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Administrator\Views\" />
     <Folder Include="Areas\PurchasingSubsystem\Views\NewFolder\" />
     <Folder Include="Areas\PurchasingSubsystem\Views\Quotation\" />
   </ItemGroup>

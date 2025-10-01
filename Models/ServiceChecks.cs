@@ -30,5 +30,7 @@ namespace FridgeManagementSystem.Models
         public int FridgeId { get; set; }
         [ForeignKey("Technician")]
         public int TechnicianID { get; set; }
+
+        //since we have ServiChecks in Customer, cant we ad the CustomerID here? because we will use servicechecks in the customer details page instead of ServiceHistories class that we dot have
     }
 }

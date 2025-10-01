@@ -1,0 +1,123 @@
+﻿@model FridgeManagementSystem.Models.Customer
+
+@{
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<h2>@Model.FullName - Dashboard</h2>
+
+<div class="row">
+
+    <!-- Profile -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Profile</h5>
+                <p><strong>Name:</strong> @Model.FullName</p>
+                <p><strong>Shop Type:</strong> @Model.ShopType</p>
+                <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>Address:</strong> @Model.LocationId</p>
+                <p><strong>Status:</strong> @(Model.IsActive ? "Active" : "Inactive")</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fridge Allocations -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Fridge Allocations</h5>
+                @if (Model.FridgeAllocation.Any())
+                {
+                    <ul>
+                        @foreach (var allocation in Model.FridgeAllocation)
+                        {
+                            <li>@allocation.fridge.Model (@allocation.fridge.SerialNumber) - @allocation.fridge.Status</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No fridges allocated.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Fault Reports -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Fault Reports</h5>
+                @if (Model.FaultReports.Any())
+                {
+                    <ul>
+                        @foreach (var fault in Model.FaultReports)
+                        {
+                            <li>@fault.ReportDate.ToShortDateString() - @fault.FaultDescription (@fault.StatusFilter)</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No faults reported.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Service History -->
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Service History</h5>
+                @if (Model.ServiceHistories.Any())
+                {
+                    <ul>
+                        @foreach (var service in Model.ServiceHistories)
+                        {
+                            <li>@service.LastServiced.ToShortDateString() - @service.ServiceDetails by @service.TechnicianID</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No service history available.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes / Customer Communication -->
+    <div class="col-md-12 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Notes / Customer Communication</h5>
+                @if (Model.CustomerNote.Any())
+                {
+                    <ul>
+                        @foreach (var note in Model.CustomerNote)
+                        {
+                            <li>@note.CreatedAt.ToShortDateString(): @note.Note</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No notes recorded.</p>
+                }
+
+                <!-- Optional: Add message form to send new note -->
+                <form asp-controller="CustomerManagement" asp-action="AddNote" method="post">
+                    <input type="hidden" name="CustomerId" value="@Model.CustomerID" />
+                    <div class="mb-2">
+                        <textarea name="Note" class="form-control" placeholder="Write a note or message"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Send / Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

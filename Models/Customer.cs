@@ -43,6 +43,14 @@ namespace FridgeManagementSystem.Models
        
         public bool IsActive { get; set; } = true;
 
+        //Added by Idah
+        public string ShopType { get; set; }   //shebeen,Spaza,Restaurant,Supermarket 
+        [ForeignKey("ServiceCheck")]
+        public int ServiceCheckId { get; set; }
+        public ICollection<FaultReport> FaultReports { get; set; }
+        public ICollection<ServiceChecks> ServiceHistories { get; set; }
+        public ICollection<CustomerNote> CustomerNote { get; set; }
+
         //Navigation Property
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
         public virtual ICollection<PurchaseRequest> PurchaseRequest { get; set; }
