@@ -1,8 +1,12 @@
-﻿namespace FridgeManagementSystem.Models
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations.Schema;
+namespace FridgeManagementSystem.Models
 #nullable disable
 {
     public class FridgeViewModel
     {
+        [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }

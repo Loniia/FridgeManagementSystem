@@ -24,12 +24,12 @@ namespace CustomerManagementSubSystem.Controllers
         // --------------------------
         public async Task<IActionResult> Index()
         {
-            var fridges = await _context.Fridges
+            var fridges = await _context.Fridge
                 .Include(f => f.FridgeAllocation)
                     .ThenInclude(a => a.Customer)
                 .Select(f => new FridgeViewModel
                 {
-                    FridgeID = f.FridgeId,
+                    FridgeId = f.FridgeId,
                     Brand = f.Brand,
                     Model = f.Model,
                     Status = f.Status,
@@ -75,7 +75,7 @@ namespace CustomerManagementSubSystem.Controllers
             fridge.DateAdded = DateOnly.FromDateTime(DateTime.Now);
             fridge.IsActive = true;
 
-            _context.Fridges.Add(fridge);
+            _context.Fridge.Add(fridge);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Fridge received successfully!";
@@ -87,7 +87,9 @@ namespace CustomerManagementSubSystem.Controllers
         // --------------------------
         public async Task<IActionResult> UpdateStatus(int id)
         {
-            var fridge = await _context.Fridges.FindAsync(id);
+            var fridge = await _context.Fridge
+                .FindAsync(id);
+
             if (fridge == null) return NotFound();
 
             ViewBag.StatusOptions = new SelectList(new List<string> { "Available", "Damaged", "Scrapped" }, fridge.Status);
@@ -100,7 +102,9 @@ namespace CustomerManagementSubSystem.Controllers
         {
             if (updatedFridge == null || updatedFridge.FridgeId == 0) return NotFound();
 
-            var fridge = await _context.Fridges.FindAsync(updatedFridge.FridgeId);
+            var fridge = await _context.Fridge
+                .FindAsync(updatedFridge.FridgeId);
+
             if (fridge == null) return NotFound();
 
             fridge.Status = updatedFridge.Status;
@@ -117,7 +121,7 @@ namespace CustomerManagementSubSystem.Controllers
         {
             var pendingAllocations = await _context.FridgeAllocation
                 .Include(ca => ca.Customer)
-                .Include(ca => ca.fridge)
+                .Include(ca => ca.Fridge)
                 .Where(ca => ca.Status == "Pending")
                 .ToListAsync();
 
@@ -125,8 +129,8 @@ namespace CustomerManagementSubSystem.Controllers
             {
                 AllocationID = ca.AllocationID,
                 CustomerName = ca.Customer.FullName,
-                FridgeID = ca.fridge?.FridgeId ?? 0,
-                Model = ca.fridge?.Model ?? "Not Allocated",
+                FridgeId = ca.Fridge?.FridgeId ?? 0,
+                Model = ca.Fridge?.Model ?? "Not Allocated",
                 Status = ca.Status,
                 AllocationDate = ca.AllocationDate,
                 ReturnDate = ca.ReturnDate
@@ -141,7 +145,7 @@ namespace CustomerManagementSubSystem.Controllers
         {
             var allocation = await _context.FridgeAllocation
                 .Include(ca => ca.Customer)
-                .Include(ca => ca.fridge)
+                .Include(ca => ca.Fridge)
                 .FirstOrDefaultAsync(ca => ca.AllocationID == allocationId);
 
             if (allocation == null)
@@ -150,7 +154,7 @@ namespace CustomerManagementSubSystem.Controllers
                 return RedirectToAction(nameof(ProcessPendingAllocations));
             }
 
-            var availableFridge = await _context.Fridges
+            var availableFridge = await _context.Fridge
                 .FirstOrDefaultAsync(f => f.Status == "Available" && f.IsActive);
 
             if (availableFridge == null)
@@ -159,7 +163,7 @@ namespace CustomerManagementSubSystem.Controllers
                 return RedirectToAction(nameof(ProcessPendingAllocations));
             }
 
-            allocation.FridgeID = availableFridge.FridgeId;
+            allocation.FridgeId = availableFridge.FridgeId;
             allocation.Status = "Allocated";
             allocation.AllocationDate = DateOnly.FromDateTime(DateTime.Now);
 
@@ -177,7 +181,7 @@ namespace CustomerManagementSubSystem.Controllers
         public async Task<IActionResult> CheckStock()
         {
             int threshold = 5;
-            int availableCount = await _context.Fridges.CountAsync(f => f.Status == "Available" && f.IsActive);
+            int availableCount = await _context.Fridge.CountAsync(f => f.Status == "Available" && f.IsActive);
 
             if (availableCount < threshold)
             {
@@ -248,7 +252,7 @@ namespace CustomerManagementSubSystem.Controllers
 
             var viewModel = requests.Select(r => new PurchaseRequestViewModel
             {
-                PurchaseRequestID = r.RequestID,
+                PurchaseRequestID = r.PurchaseRequestID,
                 RequestDate = r.RequestDate,
                 Status = r.Status,
                 CustomerName = r.Customer?.FullName,
@@ -296,7 +300,7 @@ namespace CustomerManagementSubSystem.Controllers
 
                 for (int month = 1; month <= 12; month++)
                 {
-                    int received = await _context.Fridges.CountAsync(f => f.DateAdded.Year == selectedYear && f.DateAdded.Month == month);
+                    int received = await _context.Fridge.CountAsync(f => f.DateAdded.Year == selectedYear && f.DateAdded.Month == month);
                     int allocated = await _context.FridgeAllocation.CountAsync(a => a.AllocationDate.Year == selectedYear && a.AllocationDate.Month == month && a.Status == "Allocated");
                     int returned = await _context.FridgeAllocation.CountAsync(a => a.ReturnDate.HasValue && a.ReturnDate.Value.Year == selectedYear && a.ReturnDate.Value.Month == month);
 
@@ -342,7 +346,7 @@ namespace CustomerManagementSubSystem.Controllers
 
                 for (int month = 1; month <= 12; month++)
                 {
-                    int received = await _context.Fridges.CountAsync(f => f.DateAdded.Year == year && f.DateAdded.Month == month);
+                    int received = await _context.Fridge.CountAsync(f => f.DateAdded.Year == year && f.DateAdded.Month == month);
                     int allocated = await _context.FridgeAllocation.CountAsync(a => a.AllocationDate.Year == year && a.AllocationDate.Month == month && a.Status == "Allocated");
                     int returned = await _context.FridgeAllocation.CountAsync(a => a.ReturnDate.HasValue && a.ReturnDate.Value.Year == year && a.ReturnDate.Value.Month == month);
 

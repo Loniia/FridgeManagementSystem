@@ -1,4 +1,5 @@
 ﻿using FridgeManagementSystem.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FridgeManagementSystem.Models
 #nullable disable
@@ -6,6 +7,7 @@ namespace FridgeManagementSystem.Models
     public class FridgeAllocationViewModel
     {
         public int AllocationID { get; set; }
+        [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }
@@ -14,7 +16,7 @@ namespace FridgeManagementSystem.Models
         public int QuantityAllocated { get; set; }
         public DateOnly? AllocationDate { get; set; }
         public DateOnly? ReturnDate { get; set; }
-        public FridgeViewModel fridge { get; set; }
+        public FridgeViewModel Fridge { get; set; }
 
     }
 }

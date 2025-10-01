@@ -34,7 +34,7 @@ namespace FridgeManagementSystem.Models
        
         //Navigation Property
         public virtual Customer Customer { get; set; }
-        public virtual Fridge Fridges { get; set; }
+        public virtual Fridge Fridge { get; set; }
 
       
     }

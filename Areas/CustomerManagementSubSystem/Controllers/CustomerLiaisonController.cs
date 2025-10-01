@@ -33,7 +33,7 @@ namespace CustomerManagementSubSystem.Controllers
             var customers = await _context.Customers
                                           .IgnoreQueryFilters()
                                           .Include(c => c.FridgeAllocation)
-                                          .ThenInclude(a => a.fridge)
+                                          .ThenInclude(a => a.Fridge)
                                           .ToListAsync();
 
             var model = customers.Select(c => new CustomerViewModel
@@ -49,17 +49,17 @@ namespace CustomerManagementSubSystem.Controllers
                                      .Select(a => new FridgeAllocationViewModel
                                      {
                                          AllocationID = a.AllocationID,
-                                         FridgeID = a.FridgeID,
+                                         FridgeId = a.FridgeId,
                                          QuantityAllocated = a.QuantityAllocated,
                                          AllocationDate = a.AllocationDate,
                                          ReturnDate = a.ReturnDate,
                                          Status = a.Status,
-                                         fridge = new FridgeViewModel
+                                         Fridge = new FridgeViewModel
                                          {
-                                             FridgeID = a.FridgeID,
-                                             Brand = a.fridge?.Brand,
-                                             Model = a.fridge?.Model,
-                                             Status = a.fridge?.Status
+                                             FridgeId = a.FridgeId,
+                                             Brand = a.Fridge?.Brand,
+                                             Model = a.Fridge?.Model,
+                                             Status = a.Fridge?.Status
                                          }
                                      }).ToList()
             }).ToList();
@@ -179,7 +179,7 @@ namespace CustomerManagementSubSystem.Controllers
                 CustomerId = customer.CustomerID,
                 CustomerName = customer.FullName,
                 Status = "Allocated",
-                AvailableFridges = await _context.Fridges
+                AvailableFridges = await _context.Fridge
                                                 .Where(f => f.IsActive && f.Status == "Available" && f.Quantity > 0)
                                                 .ToListAsync()
             };
@@ -203,7 +203,7 @@ namespace CustomerManagementSubSystem.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.AvailableFridges = _context.Fridges
+                model.AvailableFridges = _context.Fridge
                                                  .Where(f => f.IsActive && f.Status != "Scrapped" && f.Quantity > 0)
                                                  .ToList();
                 return View(model);
@@ -216,7 +216,9 @@ namespace CustomerManagementSubSystem.Controllers
                 return RedirectToAction("Index");
             }
 
-            var fridge = _context.Fridges.Find(model.SelectedFridgeID);
+            var fridge = _context.Fridge
+                .Find(model.SelectedFridgeID);
+
             if (fridge == null || !fridge.IsActive || fridge.Status == "Scrapped")
             {
                 TempData["ErrorMessage"] = "Selected fridge is invalid.";
@@ -226,7 +228,7 @@ namespace CustomerManagementSubSystem.Controllers
             if (fridge.Quantity < model.QuantityAllocated)
             {
                 ModelState.AddModelError("", $"Not enough stock available. Only {fridge.Quantity} left.");
-                model.AvailableFridges = _context.Fridges
+                model.AvailableFridges = _context.Fridge
                                                  .Where(f => f.IsActive && f.Status != "Scrapped" && f.Quantity > 0)
                                                  .ToList();
                 return View(model);
@@ -236,7 +238,7 @@ namespace CustomerManagementSubSystem.Controllers
             var allocation = new FridgeAllocation
             {
                 CustomerID = model.CustomerId,
-                FridgeID = model.SelectedFridgeID,
+                FridgeId = model.SelectedFridgeID,
                 AllocationDate = DateOnly.FromDateTime(DateTime.Now),
                 ReturnDate = model.ReturnDate,
                 Status = "Allocated",
@@ -248,7 +250,7 @@ namespace CustomerManagementSubSystem.Controllers
             // Update fridge stock
             fridge.Quantity -= model.QuantityAllocated;
             fridge.Status = fridge.Quantity > 0 ? "Available" : "Allocated";
-            _context.Fridges.Update(fridge);
+            _context.Fridge.Update(fridge);
 
             _context.SaveChanges();
             // Create initial maintenance request 
@@ -280,7 +282,7 @@ namespace CustomerManagementSubSystem.Controllers
         public async Task<IActionResult> ReturnFridge(int allocationId)
         {
             var allocation = await _context.FridgeAllocation
-                                           .Include(a => a.fridge)
+                                           .Include(a => a.Fridge)
                                            .FirstOrDefaultAsync(a => a.AllocationID == allocationId);
 
             if (allocation == null || allocation.Status != "Allocated")
@@ -289,8 +291,8 @@ namespace CustomerManagementSubSystem.Controllers
             allocation.Status = "Returned";
             allocation.ReturnDate = DateOnly.FromDateTime(DateTime.Now);
 
-            if (allocation.fridge != null)
-                allocation.fridge.Status = "Available";
+            if (allocation.Fridge != null)
+                allocation.Fridge.Status = "Available";
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Fridge returned successfully!";
@@ -303,7 +305,7 @@ namespace CustomerManagementSubSystem.Controllers
         public async Task<IActionResult> ScrapFridge(int allocationId)
         {
             var allocation = await _context.FridgeAllocation
-                                           .Include(a => a.fridge)
+                                           .Include(a => a.Fridge)
                                            .FirstOrDefaultAsync(a => a.AllocationID == allocationId);
 
             if (allocation == null || allocation.Status != "Allocated")
@@ -312,8 +314,8 @@ namespace CustomerManagementSubSystem.Controllers
             allocation.Status = "Scrapped";
             allocation.ReturnDate = DateOnly.FromDateTime(DateTime.Now);
 
-            if (allocation.fridge != null)
-                allocation.fridge.Status = "Scrapped";
+            if (allocation.Fridge != null)
+                allocation.Fridge.Status = "Scrapped";
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Fridge scrapped successfully!";
@@ -330,7 +332,7 @@ namespace CustomerManagementSubSystem.Controllers
             var customer = await _context.Customers
                                          .IgnoreQueryFilters()
                                          .Include(c => c.FridgeAllocation)
-                                         .ThenInclude(a => a.fridge)
+                                         .ThenInclude(a => a.Fridge)
                                          .FirstOrDefaultAsync(c => c.CustomerID == id);
 
             if (customer == null) return NotFound();
@@ -339,17 +341,17 @@ namespace CustomerManagementSubSystem.Controllers
                 .Select(a => new FridgeAllocationViewModel
                 {
                     AllocationID = a.AllocationID,
-                    FridgeID = a.FridgeID,
+                    FridgeId = a.FridgeId,
                     AllocationDate = a.AllocationDate,
                     ReturnDate = a.ReturnDate,
                     Status = a.Status,
                     QuantityAllocated = a.QuantityAllocated,
-                    fridge = new FridgeViewModel
+                    Fridge = new FridgeViewModel
                     {
-                        FridgeID = a.FridgeID,
-                        Brand = a.fridge?.Brand,
-                        Model = a.fridge?.Model,
-                        Status = a.fridge?.Status
+                        FridgeId = a.FridgeId,
+                        Brand = a.Fridge?.Brand,
+                        Model = a.Fridge?.Model,
+                        Status = a.Fridge?.Status
                     }
                 }).ToList() ?? new List<FridgeAllocationViewModel>();
 
@@ -375,7 +377,7 @@ namespace CustomerManagementSubSystem.Controllers
             var query = _context.Customers
                                 .IgnoreQueryFilters()
                                 .Include(c => c.FridgeAllocation)
-                                .ThenInclude(a => a.fridge)
+                                .ThenInclude(a => a.Fridge)
                                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -401,17 +403,17 @@ namespace CustomerManagementSubSystem.Controllers
                                      .Select(a => new FridgeAllocationViewModel
                                      {
                                          AllocationID = a.AllocationID,
-                                         FridgeID = a.FridgeID,
+                                         FridgeId = a.FridgeId,
                                          AllocationDate = a.AllocationDate,
                                          ReturnDate = a.ReturnDate,
                                          Status = a.Status,
                                          QuantityAllocated = a.QuantityAllocated,
-                                         fridge = new FridgeViewModel
+                                         Fridge = new FridgeViewModel
                                          {
-                                             FridgeID = a.FridgeID,
-                                             Brand = a.fridge?.Brand,
-                                             Model = a.fridge?.Model,
-                                             Status = a.fridge?.Status
+                                             FridgeId = a.FridgeId,
+                                             Brand = a.Fridge?.Brand,
+                                             Model = a.Fridge?.Model,
+                                             Status = a.Fridge?.Status
                                          }
                                      }).ToList()
             }).ToList();
@@ -423,7 +425,7 @@ namespace CustomerManagementSubSystem.Controllers
         {
             var customer = _context.Customers
                 .Include(c => c.FridgeAllocation)
-                .ThenInclude(a => a.fridge)
+                .ThenInclude(a => a.Fridge)
                 .FirstOrDefault(c => c.CustomerID == id);
 
             if (customer == null) return NotFound();
@@ -477,7 +479,7 @@ namespace CustomerManagementSubSystem.Controllers
                             // Table rows
                             foreach (var allocation in customer.FridgeAllocation)
                             {
-                                table.Cell().Text($"{allocation.fridge?.Brand} - {allocation.fridge?.Model}");
+                                table.Cell().Text($"{allocation.Fridge?.Brand} - {allocation.Fridge?.Model}");
                                 table.Cell().Text(allocation.QuantityAllocated.ToString());
                                 table.Cell().Text(allocation.AllocationDate.ToString("yyyy/MM/dd"));
                                 table.Cell().Text(allocation.ReturnDate?.ToString("yyyy/MM/dd") ?? "N/A");

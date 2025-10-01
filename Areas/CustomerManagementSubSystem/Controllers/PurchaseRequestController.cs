@@ -18,7 +18,7 @@ namespace CustomerManagementSubSystem.Controllers
         // Check stock before creating purchase request
         public IActionResult CheckStock(int fridgeId)
         {
-            var fridge = _context.Fridges.Find(fridgeId);
+            var fridge = _context.Fridge.Find(fridgeId);
 
             if (fridge == null) return NotFound();
 
@@ -44,11 +44,11 @@ namespace CustomerManagementSubSystem.Controllers
             // Pre-select fridge if coming from CheckStock
             if (fridgeId.HasValue)
             {
-                model.FridgeID = fridgeId.Value;
+                model.FridgeId = fridgeId.Value;
             }
 
             // Populate dropdowns
-            PopulateDropdowns(model.CustomerID, model.FridgeID);
+            PopulateDropdowns(model.CustomerID, model.FridgeId);
 
             return View(model);
         }
@@ -73,7 +73,7 @@ namespace CustomerManagementSubSystem.Controllers
             }
 
             // Reload dropdowns if model state is invalid
-            PopulateDropdowns(request.CustomerID, request.FridgeID);
+            PopulateDropdowns(request.CustomerID, request.FridgeId);
 
             return View(request);
         }
@@ -91,7 +91,7 @@ namespace CustomerManagementSubSystem.Controllers
         private void PopulateDropdowns(int? selectedCustomerId = null, int? selectedFridgeId = null)
         {
             ViewBag.Customers = new SelectList(_context.Customers.Where(c => c.IsActive), "CustomerID", "FullNames", selectedCustomerId);
-            ViewBag.Fridges = new SelectList(_context.Fridges, "FridgeID", "FridgeName", selectedFridgeId);
+            ViewBag.Fridges = new SelectList(_context.Fridge, "FridgeId", "FridgeName", selectedFridgeId);
         }
     }
 }

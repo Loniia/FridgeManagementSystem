@@ -16,11 +16,11 @@ namespace FridgeManagementSystem.Data
         // Core Tables
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<Fridge> Fridges { get; set; }
+        public DbSet<Fridge> Fridge { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<ServiceChecks> ServiceChecks { get; set; }
-        //public DbSet<Fault> Faults { get; set; }
+        public DbSet<Fault> Faults { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<FridgeAllocation> FridgeAllocation { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -36,7 +36,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<FaultTechnicians> FaultTechnicians { get; set; }
         public DbSet<PurchaseManager> PurchaseManagers { get; set; }
         public DbSet<InventoryLiaison> InventoryLiaisons { get; set; }
-        //public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
+        public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
         public DbSet<RequestForQuotation> RequestsForQuotation { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }

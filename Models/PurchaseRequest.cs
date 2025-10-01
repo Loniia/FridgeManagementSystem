@@ -9,6 +9,8 @@ namespace FridgeManagementSystem.Models
         [Key]
         public int PurchaseRequestID { get; set; }
 
+        [ForeignKey("Fridge")]
+        public int FridgeId { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
