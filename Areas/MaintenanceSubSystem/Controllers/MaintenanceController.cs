@@ -1,5 +1,6 @@
 ﻿using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
+using FridgeManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,11 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
     public class MaintenanceController : Controller
     {
         private readonly FridgeDbContext _context;
-
-        public MaintenanceController(FridgeDbContext context)
+        private readonly IMaintenanceRequestService _mrService;
+        public MaintenanceController(FridgeDbContext context, IMaintenanceRequestService mrService)
         {
             _context = context;
+            _mrService = mrService;
         }
 
         // ✅ Helper property – only Active Maintenance Technicians
@@ -248,7 +250,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
         }
 
         [HttpPost]
-        public IActionResult CompleteMaintenance(int visitId)
+        public async Task< IActionResult> CompleteMaintenance(int visitId)
         {
             var visit = _context.MaintenanceVisit
                 .Include(v => v.MaintenanceRequest)
@@ -257,8 +259,18 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
             if (visit == null) return NotFound();
 
             UpdateVisitAndRequestStatus(visit, Models.TaskStatus.Complete);
+            // Create the next month's maintenance request (if none exists)
+            var created = await _mrService.CreateNextMonthlyRequestAsync(visit.FridgeId);
 
-            TempData["Message"] = "Maintenance completed!";
+            if (created != null)
+            {
+                TempData["Message"] = $"Maintenance completed — next maintenance request created for {created.RequestDate:yyyy-MM-dd}.";
+            }
+            else
+            {
+                TempData["Message"] = "Maintenance completed. No new request created because a pending/scheduled request already exists.";
+            }
+
             return RedirectToAction("PerformMaintenance", new { visitId });
         }
 

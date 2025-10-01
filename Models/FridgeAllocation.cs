@@ -16,8 +16,7 @@ namespace FridgeManagementSystem.Models
         [Required]
         [ForeignKey("Fridge")]
         public int FridgeID { get; set; }
-        public string Brand { get; set; }
-
+       
         [Required]
         [DataType(DataType.Date)]
         public DateOnly AllocationDate { get; set; }= DateOnly.FromDateTime(DateTime.Now);
@@ -28,13 +27,15 @@ namespace FridgeManagementSystem.Models
 
         [Required]
         [StringLength(50, ErrorMessage = "Status cannot be longer than 50 characters")]
-        public string Status { get; set; }
+        public string Status { get; set; } 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         public int QuantityAllocated { get; set; }
-
+       
         //Navigation Property
         public virtual Customer Customer { get; set; }
-        public virtual Fridge fridge { get; set; }
+        public virtual Fridge Fridges { get; set; }
+
+      
     }
 }

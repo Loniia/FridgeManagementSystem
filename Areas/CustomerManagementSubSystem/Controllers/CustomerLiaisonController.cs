@@ -1,13 +1,15 @@
-﻿using QuestPDF.Fluent;
+﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Migrations;
+using FridgeManagementSystem.Models;
+using FridgeManagementSystem.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using FridgeManagementSystem.Models;
-using FridgeManagementSystem.Data;
-using System.IO;
 using Rotativa.AspNetCore;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using System.IO;
 
 
 namespace CustomerManagementSubSystem.Controllers
@@ -16,10 +18,11 @@ namespace CustomerManagementSubSystem.Controllers
     public class CustomerLiaisonController : Controller
     {
         private readonly FridgeDbContext _context;
-
-        public CustomerLiaisonController(FridgeDbContext context)
+        private readonly IMaintenanceRequestService _mrService;
+        public CustomerLiaisonController(FridgeDbContext context, IMaintenanceRequestService mrService)
         {
             _context = context;
+            _mrService = mrService;
         }
 
         // --------------------------
@@ -248,9 +251,27 @@ namespace CustomerManagementSubSystem.Controllers
             _context.Fridges.Update(fridge);
 
             _context.SaveChanges();
+            // Create initial maintenance request 
 
+            try
+            {
+                var created = _mrService.CreateInitialRequestForAllocationAsync(fridge.FridgeId)
+                                        .GetAwaiter()
+                                        .GetResult(); // blocks until async completes
+                if (created != null)
+                    TempData["Message"] = "Initial maintenance request created for this allocation.";
+                else
+                    TempData["Message"] = "No new maintenance request created (one already exists).";
+            }
+            catch (Exception ex)
+            {
+                TempData["Message"] = $"Failed to create initial maintenance request: {ex.Message}";
+            }
             TempData["SuccessMessage"] = $"Allocated {model.QuantityAllocated} fridge(s) successfully!";
             return RedirectToAction("Details", new { id = model.CustomerId });
+            
+            
+            
         }
 
         // --------------------------

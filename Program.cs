@@ -1,9 +1,10 @@
 ﻿using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
+using FridgeManagementSystem.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Infrastructure;
 using QuestPDF;
+using QuestPDF.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = LicenseType.Community;
 // ✅ 1. Add DbContext with SQL Server
@@ -26,7 +27,7 @@ builder.Services.AddControllersWithViews();
 
 // ✅ 4. Add ServiceHistoryPdfGenerator to DI container
 //builder.Services.AddTransient<ServiceHistoryPdfGenerator>();
-
+builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
 // ✅ 5. Configure role-based authorization
 builder.Services.ConfigureApplicationCookie(options =>
 {
