@@ -15,7 +15,7 @@ namespace FridgeManagementSystem.Models
 
         [Required]
         [ForeignKey("Fridge")]
-        public int FridgeID { get; set; }
+        public int FridgeId { get; set; }
        
         [Required]
         [DataType(DataType.Date)]
