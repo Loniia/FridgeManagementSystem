@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FridgeManagementSystem.Migrations;
+#nullable disable
 namespace FridgeManagementSystem.Models
 {
     public class FaultReport
