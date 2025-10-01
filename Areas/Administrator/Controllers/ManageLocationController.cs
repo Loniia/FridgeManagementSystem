@@ -154,5 +154,15 @@ namespace FridgeManagementSystem.Areas.Administration.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        // LIST inactive locations
+        public async Task<IActionResult> Inactive()
+        {
+            var locations = await _context.Locations
+                .Where(l => !l.IsActive)
+                .ToListAsync();
+
+            return View(locations);
+        }
+
     }
 }
