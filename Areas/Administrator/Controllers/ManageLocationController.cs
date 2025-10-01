@@ -10,11 +10,11 @@ namespace FridgeManagementSystem.Areas.Administration.Controllers
 {
     [Area("Administrator")]
     [Authorize(Roles = Roles.Admin)] // Only Admins can manage locations
-    public class LocationController : Controller
+    public class ManageLocationController : Controller
     {
         private readonly FridgeDbContext _context;
 
-        public LocationController(FridgeDbContext context)
+        public ManageLocationController(FridgeDbContext context)
         {
             _context = context;
         }
