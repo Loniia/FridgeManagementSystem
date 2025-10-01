@@ -4,6 +4,7 @@ using FridgeManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+#nullable disable
 
 namespace FridgeManagementSystem.Areas.Administrator.Controllers
 {
@@ -17,6 +18,31 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             {
                 _context = context;
             }
+
+            public IActionResult ManageCustomers(int? selectedCustomerId)
+            {
+                var customers = _context.Customers.ToList();
+
+                Customer selectedCustomer = null;
+                if (selectedCustomerId.HasValue)
+                {
+                    selectedCustomer = _context.Customers
+                        .Include(c => c.FridgeAllocation).ThenInclude(f => f.fridge)
+                        .Include(c => c.FaultReports)
+                        .Include(c => c.ServiceHistories)
+                        .Include(c => c.CustomerNote)
+                        .FirstOrDefault(c => c.CustomerID == selectedCustomerId.Value);
+                }
+
+                var viewModel = new ManageCustomersViewModel
+                {
+                    AllCustomers = customers,
+                    SelectedCustomer = selectedCustomer
+                };
+
+                return View(viewModel);
+            }
+
 
             //Show all customers (like Admin’s customer list)
             public async Task<IActionResult> Index()

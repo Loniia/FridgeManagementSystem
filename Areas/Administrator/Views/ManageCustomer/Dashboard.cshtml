@@ -12,7 +12,11 @@
     <div class="col-md-6 mb-3">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Profile</h5>
+                <h5 class="card-title">
+                    Profile
+                    <!-- Link to Customer Management Subsystem -->
+                    <a asp-controller="CustomerLiaison" asp-action="Details" asp-route-id="@Model.CustomerID" class="btn btn-link btn-sm">Go to Customer Manager</a>
+                </h5>
                 <p><strong>Name:</strong> @Model.FullName</p>
                 <p><strong>Shop Type:</strong> @Model.ShopType</p>
                 <p><strong>Phone:</strong> @Model.PhoneNumber</p>
@@ -27,7 +31,17 @@
     <div class="col-md-6 mb-3">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Fridge Allocations</h5>
+                <h5 class="card-title">
+                    Fridge Allocations
+                    <!-- Link to Customer Management / Fridge allocations -->
+                    <a asp-controller="CustomerLiaison"
+                       asp-action="Allocate"
+                       asp-route-customerId="@Model.CustomerID"
+                       class="btn btn-link btn-sm">
+                        Go to Fridge Manager
+                    </a>
+                </h5>
+
                 @if (Model.FridgeAllocation.Any())
                 {
                     <ul>
@@ -45,11 +59,16 @@
         </div>
     </div>
 
+
     <!-- Fault Reports -->
     <div class="col-md-6 mb-3">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Fault Reports</h5>
+                <h5 class="card-title">
+                    Fault Reports
+                    <!-- Link to FaultTech Subsystem -->
+                    <a asp-controller="Faults" asp-action="Index" asp-route-customerId="@Model.CustomerID" class="btn btn-link btn-sm">Go to Fault Manager</a>
+                </h5>
                 @if (Model.FaultReports.Any())
                 {
                     <ul>
@@ -71,7 +90,11 @@
     <div class="col-md-6 mb-3">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Service History</h5>
+                <h5 class="card-title">
+                    Service History
+                    <!-- Link to Maintenance Subsystem -->
+                    <a asp-controller="Maintenance" asp-action="ServiceHistory" asp-route-customerId="@Model.CustomerID" class="btn btn-link btn-sm">Go to Maintenance Manager</a>
+                </h5>
                 @if (Model.ServiceHistories.Any())
                 {
                     <ul>
