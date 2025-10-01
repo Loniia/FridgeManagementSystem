@@ -41,6 +41,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<DeliveryNote> DeliveryNotes { get; set; }
+        public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
 
         // Add any other tables as you grow (like Fridges, Suppliers, etc.)
 
@@ -108,7 +109,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<FaultReport>()
                 .HasOne(fr => fr.Fridge)
                 .WithMany()
-                .HasForeignKey(fr => fr.FridgeID)
+                .HasForeignKey(fr => fr.FridgeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // FaultReport -> Fault (many-to-1)
@@ -127,7 +128,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<RepairSchedule>()
                 .HasOne(rs => rs.Fridge)
                 .WithMany()
-                .HasForeignKey(rs => rs.FridgeID)
+                .HasForeignKey(rs => rs.FridgeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // RepairSchedule -> Fault (many-to-1)
@@ -144,7 +145,37 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(rs => rs.TechnicianID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Customer>()
+            .HasMany(c => c.Fridge)
+            .WithOne(f => f.Customer)
+            .HasForeignKey(f => f.CustomerId)
+            .OnDelete(DeleteBehavior.SetNull); // Customer deleted → fridge unallocated
 
+            // Supplier ↔ Fridge (One-to-Many)
+            builder.Entity<Supplier>()
+                .HasMany(s => s.Fridges)
+                .WithOne(f => f.Supplier)
+                .HasForeignKey(f => f.SupplierID)
+                .OnDelete(DeleteBehavior.Restrict); // don’t auto-delete fridges
+
+            // Location ↔ Fridge (One-to-Many)
+            builder.Entity<Location>()
+                .HasMany(l => l.Fridge)
+                .WithOne(f => f.Location)
+                .HasForeignKey(f => f.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Fridge ↔ MaintenanceRecord (One-to-Many)
+            builder.Entity<MaintenanceRecord>()
+                .HasOne(m => m.Fridge)
+                .WithMany(f => f.MaintenanceRecords)
+                .HasForeignKey(m => m.FridgeId);
+
+            // Fridge ↔ FaultReport (One-to-Many)
+            builder.Entity<FaultReport>()
+                .HasOne(fr => fr.Fridge)
+                .WithMany(f => f.FaultReport)
+                .HasForeignKey(fr => fr.FridgeId);
 
             // --- Soft Delete / Query Filters ---
             builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);

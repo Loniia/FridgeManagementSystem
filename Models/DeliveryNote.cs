@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 #nullable disable
-namespace PurchasingSubsystem.Models
+namespace FridgeManagementSystem.Models
 {
     public class DeliveryNote
     {
@@ -49,6 +49,11 @@ namespace PurchasingSubsystem.Models
         [DataType(DataType.DateTime)]
         [Display(Name = "Inventory Receipt Date")]
         public DateTime? InventoryReceiptDate { get; set; }
+        public int PurchaseOrderId { get; set; }
+        public PurchaseOrder purchaseOrder { get; set; }
+
+        public int SupplierId { get; set; }
+        public Supplier Supplier { get; set; }
 
         // Notes
         [StringLength(500)]

@@ -15,7 +15,7 @@ namespace FridgeManagementSystem.Models
 
         [Required]
         [Display(Name = "Fridge")]
-        public int FridgeID { get; set; }
+        public int FridgeId { get; set; }
 
         [Required]
         [Display(Name = "Status")]
@@ -69,6 +69,9 @@ namespace FridgeManagementSystem.Models
         public DateTime? RepairDate { get; set; }
 
         // Technician information
+        public int EmployeeId { get; set; }
+        public virtual Employee Employee { get; set; }
+
         [Display(Name = "Technician")]
         public int? TechnicianID { get; set; }
 
@@ -83,7 +86,7 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("FaultID")]
         public virtual Fault Fault { get; set; }
 
-        [ForeignKey("FridgeID")]
+        [ForeignKey("FridgeId")]
         public virtual Fridge Fridge { get; set; }
 
         [ForeignKey("TechnicianID")]

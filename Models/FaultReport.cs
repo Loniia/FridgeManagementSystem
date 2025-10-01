@@ -27,7 +27,7 @@ namespace FridgeManagementSystem.Models
         public string FaultDescription { get; set; }
         [Required]
         [ForeignKey("Fridge")]
-        public int FridgeID { get; set; }
+        public int FridgeId { get; set; }
         public string StatusFilter { get; set; }
 
         public virtual Fridge Fridge { get; set; }

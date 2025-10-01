@@ -24,6 +24,8 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Condition")]
         public string Condition { get; set; } = "Working"; // Working, Under Repair, Faulty, Scrapped
 
+        public DateTime PurchaseDate { get; set; }
+
         [Display(Name = "Installation Date")]
         [DataType(DataType.Date)]
         public DateTime? InstallationDate { get; set; }
@@ -54,8 +56,8 @@ namespace FridgeManagementSystem.Models
         public int SupplierID { get; set; }
         [ForeignKey("Customer")]
         public int CustomerId {  get; set; }
-        [ForeignKey("Location")]
         public int LocationId { get; set; }
+        public Location Location { get; set; }  
         public int FaultID { get; set; }
         public int Quantity { get; set; }
         public DateTime DeliveryDate { get; set; }
@@ -70,7 +72,7 @@ namespace FridgeManagementSystem.Models
         public virtual Customer Customer { get; set; }
         public virtual ICollection<MaintenanceRequest> MaintenanceRequest { get; set; }
         public virtual ICollection<MaintenanceVisit> MaintenanceVisit { get; set; }
-
+        public ICollection<MaintenanceRecord> MaintenanceRecords { get; set; }
         public virtual ICollection<FaultReport> FaultReport { get; set; }
         public ICollection<Fault> Fault { get; set; }
 

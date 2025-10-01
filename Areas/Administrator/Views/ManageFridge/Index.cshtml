@@ -1,0 +1,46 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.Fridge>
+
+@{
+    ViewData["Title"] = "Fridge Inventory";
+}
+
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4>Fridge Inventory</h4>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Serial #</th>
+                    <th>Status</th>
+                    <th>Customer</th>
+                    <th>Supplier</th>
+                    <th>Location</th>
+                    <th>Purchase Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var fridge in Model)
+                {
+                    <tr>
+                        <td>@fridge.SerialNumber</td>
+                        <td>@fridge.Status</td>
+                        <td>@fridge.Customer?.FullName ?? "Unallocated"</td>
+                        <td>@fridge.Supplier?.Name</td>
+                        <td>@fridge.Location?.Address</td>
+                        <td>@fridge.PurchaseDate.ToShortDateString()</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-info">Details</a>
+                            <a asp-action="Edit" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-warning">Edit</a>
+                            <a asp-action="Retire" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-danger">Retire</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a asp-action="Create" class="btn btn-success">Add New Fridge</a>
+    </div>
+</div>
+
