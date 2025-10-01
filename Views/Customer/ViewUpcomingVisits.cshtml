@@ -1,0 +1,34 @@
+﻿@model IEnumerable<YourNamespace.Models.MaintenanceVisit>
+@{
+    ViewData["Title"] = "My Upcoming Visits";
+}
+
+<h2>My Upcoming Maintenance Visits</h2>
+
+@if (!Model.Any())
+{
+    <p>No upcoming visits scheduled.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Scheduled Date</th>
+                <th>Fridge</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var visit in Model)
+            {
+                <tr>
+                    <td>@visit.ScheduledDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@visit.Fridge?.SerialNumber</td>
+                    <td>@visit.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

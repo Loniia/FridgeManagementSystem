@@ -1,0 +1,81 @@
+﻿@model IEnumerable<YourNamespace.Models.MaintenanceVisit>
+@{
+    ViewData["Title"] = "My Service History";
+}
+
+<h2>My Service History</h2>
+
+@if (!Model.Any())
+{
+    <p>No service history found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Scheduled Date</th>
+                <th>Fridge</th>
+                <th>Status</th>
+                <th>Checklist</th>
+                <th>Components Used</th>
+                <th>Fault Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var visit in Model)
+            {
+                <tr>
+                    <td>@visit.ScheduledDate.ToString("yyyy-MM-dd")</td>
+                    <td>@visit.Fridge?.SerialNumber</td>
+                    <td>@visit.Status</td>
+                    <td>
+                        @if (visit.MaintenanceChecklist != null)
+                        {
+                            <ul>
+                                @foreach (var item in visit.MaintenanceChecklist.Items)
+                                {
+                                    <li>@item.Description</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>None</span>
+                        }
+                    </td>
+                    <td>
+                        @if (visit.ComponentUsed != null && visit.ComponentUsed.Any())
+                        {
+                            <ul>
+                                @foreach (var comp in visit.ComponentUsed)
+                                {
+                                    <li>@comp.Name - Qty: @comp.Quantity</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>None</span>
+                        }
+                    </td>
+                    <td>
+                        @if (visit.FaultReport != null)
+                        {
+                            <ul>
+                                @foreach (var fault in visit.FaultReport)
+                                {
+                                    <li>@fault.Description</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>None</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
