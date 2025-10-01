@@ -47,7 +47,7 @@
                     <form asp-action="Process" asp-route-id="@faultInfo?.FaultID">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="FaultID" />
-                        <input type="hidden" asp-for="FridgeID" />
+                        <input type="hidden" asp-for="FridgeId" />
 
                         <div class="form-group mb-3">
                             <label asp-for="Diagnosis" class="control-label">Initial Diagnosis</label>

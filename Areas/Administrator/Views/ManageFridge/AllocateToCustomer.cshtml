@@ -1,0 +1,22 @@
+﻿@model FridgeManagementSystem.ViewModels.AllocateFridgeViewModel
+
+@{
+    ViewData["Title"] = "Allocate Fridge";
+}
+
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4>Allocate Fridge - @Model.Fridge.SerialNumber</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="AllocateToCustomer">
+            <input type="hidden" asp-for="FridgeId" />
+            <div class="form-group">
+                <label for="CustomerId">Select Customer</label>
+                <select asp-for="CustomerId" asp-items="Model.Customers" class="form-control"></select>
+            </div>
+            <button type="submit" class="btn btn-success">Allocate</button>
+        </form>
+    </div>
+</div>
+

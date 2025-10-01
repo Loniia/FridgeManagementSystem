@@ -81,7 +81,7 @@ namespace FridgeManagementSystem.Controllers
                 .FirstOrDefaultAsync(r => r.FaultID == id) ?? new RepairSchedule
                 {
                     FaultID = fault.FaultID,
-                    FridgeID = fault.FridgeId,
+                    FridgeId = fault.FridgeId,
                     Status = "Diagnosing"
                 };
 
@@ -149,7 +149,9 @@ namespace FridgeManagementSystem.Controllers
                     }
 
                     // Update fridge condition
-                    var fridge = await _context.Fridges.FindAsync(repairSchedule.FridgeID);
+                    var fridge = await _context.Fridge
+                        .FindAsync(repairSchedule.FridgeId);
+
                     if (fridge != null && !string.IsNullOrEmpty(fridgeCondition))
                     {
                         fridge.Condition = fridgeCondition;
@@ -229,7 +231,7 @@ namespace FridgeManagementSystem.Controllers
                 .FirstOrDefaultAsync(r => r.FaultID == id) ?? new RepairSchedule
                 {
                     FaultID = fault.FaultID,
-                    FridgeID = fault.FridgeId,
+                    FridgeId = fault.FridgeId,
                     Status = "Repairing"
                 };
 
@@ -371,7 +373,9 @@ namespace FridgeManagementSystem.Controllers
             {
                 try
                 {
-                    var existingFridge = await _context.Fridges.FindAsync(id);
+                    var existingFridge = await _context.Fridge
+                        .FindAsync(id);
+
                     if (existingFridge != null)
                     {
                         existingFridge.Condition = fridge.Condition;
@@ -524,7 +528,7 @@ namespace FridgeManagementSystem.Controllers
 
         private bool FridgeExists(int id)
         {
-            return _context.Fridges.Any(e => e.FridgeId == id);
+            return _context.Fridge.Any(e => e.FridgeId == id);
         }
     }
 

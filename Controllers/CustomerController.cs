@@ -132,7 +132,7 @@ namespace FridgeManagementSystem.Controllers
         // Receive & Track Fridges
         public IActionResult ReceiveTrack()
         {
-            var fridges = _context.Fridges
+            var fridges = _context.Fridge
                 .ToList(); 
             return View(fridges);
         }

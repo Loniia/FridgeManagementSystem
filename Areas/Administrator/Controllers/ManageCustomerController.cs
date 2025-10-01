@@ -27,7 +27,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 if (selectedCustomerId.HasValue)
                 {
                     selectedCustomer = _context.Customers
-                        .Include(c => c.FridgeAllocation).ThenInclude(f => f.fridge)
+                        .Include(c => c.FridgeAllocation).ThenInclude(f => f.Fridge)
                         .Include(c => c.FaultReports)
                         .Include(c => c.ServiceHistories)
                         .Include(c => c.CustomerNote)
@@ -56,7 +56,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             {
                 var customer = await _context.Customers
                     .Include(c => c.FridgeAllocation)
-                    .ThenInclude(fa => fa.fridge)
+                    .ThenInclude(fa => fa.Fridge)
                     .Include(c => c.FaultReports)
                     .Include(c => c.ServiceHistories)
                     .Include(c => c.CustomerNote)

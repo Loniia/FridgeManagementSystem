@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using FridgeManagementSystem.Models;
 using FridgeManagementSystem.Data;
 #nullable disable
-namespace PurchasingSubsystem.Models
+namespace FridgeManagementSystem.Models
 {
     public class Quotation
     {
@@ -29,13 +29,12 @@ namespace PurchasingSubsystem.Models
 
         // Navigation Properties
         [ForeignKey("RequestForQuotationId")]
-        public RequestForQuotation RequestForQuotation { get; set; }
+        public virtual RequestForQuotation RequestForQuotation { get; set; }
 
-        [ForeignKey("SupplierId")]
-        public int SupplierID { get; set; }
+        public virtual Supplier Supplier { get; set; }
 
         //navigation property
- 
+    
 
     }
 }

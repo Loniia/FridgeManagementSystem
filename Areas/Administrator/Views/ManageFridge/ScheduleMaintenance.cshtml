@@ -1,0 +1,30 @@
+﻿@model FridgeManagementSystem.ViewModels.ScheduleMaintenanceViewModel
+
+@{
+    ViewData["Title"] = "Schedule Maintenance";
+}
+
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4>Schedule Maintenance - @Model.Fridge.SerialNumber</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="ScheduleMaintenance">
+            <input type="hidden" asp-for="FridgeId" />
+
+            <div class="form-group">
+                <label asp-for="ScheduledDate"></label>
+                <input asp-for="ScheduledDate" class="form-control" type="date" />
+                <span asp-validation-for="ScheduledDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">Schedule</button>
+        </form>
+    </div>
+</div>
+
