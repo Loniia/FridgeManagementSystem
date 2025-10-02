@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FridgeManagementSystem.Areas.Administrator.Controllers
 {
+    [Area("Administrator")]
+    [Authorize(Roles = Roles.Admin)]
     public class ManageCustomerController : Controller
     {
         public class CustomerManagementController : Controller

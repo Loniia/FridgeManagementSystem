@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 
-namespace PurchasingSubsystem.Controllers
+namespace FridgeManagementSystem.Controllers
 {
-    public class HomeController : Controller
+    public class PurchaseController : Controller
     {
         private readonly FridgeDbContext _context;
 
-        public HomeController(FridgeDbContext context)
+        public PurchaseController(FridgeDbContext context)
         {
             _context = context;
         }
