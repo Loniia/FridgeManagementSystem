@@ -52,7 +52,12 @@ namespace FridgeManagementSystem.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // 🔗 ApplicationUser to Customer (One-to-One)
-            
+            builder.Entity<Customer>()
+                .HasOne(c => c.UserAccount)
+                .WithOne(u => u.CustomerProfile)
+                .HasForeignKey<Customer>(c => c.ApplicationUserId) //i added this (Idah)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // --- 1-to-1 relationships ---
             builder.Entity<Fridge>()
                 .HasOne(f => f.Inventories)
@@ -129,6 +134,7 @@ namespace FridgeManagementSystem.Data
             .WithOne(f => f.Customer)
             .HasForeignKey(f => f.CustomerId)
             .OnDelete(DeleteBehavior.SetNull); // Customer deleted → fridge unallocated
+
 
             //// Supplier ↔ Fridge (One-to-Many)
             //builder.Entity<Supplier>()

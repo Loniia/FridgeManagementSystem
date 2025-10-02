@@ -2,6 +2,7 @@
 using FridgeManagementSystem.Migrations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+#nullable disable
 
 namespace FridgeManagementSystem.Models
 {
@@ -44,6 +45,11 @@ namespace FridgeManagementSystem.Models
         public ShopType ShopType { get; set; }
         //shebeen,Spaza,Restaurant,Supermarket 
 
+        //Idah added this for customer in DbContext we need it 
+        //Once you add ApplicationUserId in Customer, EF will correctly understand:
+        // Customer depends on ApplicationUser.
+        //When you delete a user, their Customer profile is also deleted.
+        public int ApplicationUserId { get; set; }
         public ICollection<FaultReport> FaultReports { get; set; }
        
         public ICollection<CustomerNote> CustomerNote { get; set; }
