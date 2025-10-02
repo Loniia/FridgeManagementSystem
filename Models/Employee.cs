@@ -17,17 +17,25 @@ namespace FridgeManagementSystem.Models
         [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$",
             ErrorMessage = "Contact info must be a valid email")]
         public string ContactInfo { get; set; }
-
+        [Required]
+        [StringLength(20)]
+        public string PhoneNumber{ get; set; }
+        public string Department {  get; set; }
         [Required]
         [StringLength(50)]
         public string Role { get; set; } // Example: "Technician", "Customer Liaison", etc.
+        [Required]
+        [StringLength(50)]
+        public DateTime HireDate { get; set; }
+      
+        public decimal PayRate { get; set; } // Example: "Technician", "Customer Liaison", etc.
 
         [Required]
         [RegularExpression("^(Active|Inactive)$",
             ErrorMessage = "Status must be 'Active' or 'Inactive'")]
         public string Status { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        
         [ForeignKey("Location")]
         public int LocationId { get; set; }
         public virtual Location Location { get; set; }

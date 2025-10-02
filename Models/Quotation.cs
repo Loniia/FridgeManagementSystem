@@ -27,14 +27,13 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Quotation Amount")]
         public decimal QuotationAmount { get; set; }
 
+        [StringLength(20)]
+        [Display(Name ="Status")]
+        public string Status { get; set; }
         // Navigation Properties
-        [ForeignKey("RequestForQuotationId")]
-        public RequestForQuotation RequestForQuotation { get; set; }
+        public virtual RequestForQuotation RequestForQuotation { get; set; }
 
-        [ForeignKey("SupplierId")]
-        public int SupplierID { get; set; }
-
-        public Supplier Supplier { get; set; }
+        public virtual Supplier Supplier { get; set; }
 
         //navigation property
  

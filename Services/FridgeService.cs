@@ -57,28 +57,13 @@ namespace FridgeManagementSystem.Models
             return true;
         }
 
-        // ========== BUSINESS LOGIC ==========
-        public async Task<bool> AllocateToCustomerAsync(int fridgeId, int customerId)
-        {
-            var fridge = await _context.Fridge.FindAsync(fridgeId);
-            var customer = await _context.Customers.FindAsync(customerId);
-
-            if (fridge == null || customer == null) return false;
-            if (fridge.Status != "Active") return false;
-
-            customer.FridgeId = fridgeId;
-            _context.Update(customer);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
 
         public async Task<bool> DeallocateFromCustomerAsync(int customerId)
         {
             var customer = await _context.Customers.FindAsync(customerId);
-            if (customer == null || customer.FridgeId == null) return false;
+            if (customer == null || customer.Fridge == null) return false;
 
-            customer.FridgeId = null;
+            customer.Fridge = null;
             _context.Update(customer);
             await _context.SaveChangesAsync();
 

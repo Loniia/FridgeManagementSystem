@@ -29,7 +29,6 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                     selectedCustomer = _context.Customers
                         .Include(c => c.FridgeAllocation).ThenInclude(f => f.Fridge)
                         .Include(c => c.FaultReports)
-                        .Include(c => c.ServiceHistories)
                         .Include(c => c.CustomerNote)
                         .FirstOrDefault(c => c.CustomerID == selectedCustomerId.Value);
                 }
@@ -58,7 +57,6 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                     .Include(c => c.FridgeAllocation)
                     .ThenInclude(fa => fa.Fridge)
                     .Include(c => c.FaultReports)
-                    .Include(c => c.ServiceHistories)
                     .Include(c => c.CustomerNote)
                     .FirstOrDefaultAsync(c => c.CustomerID == id);
 

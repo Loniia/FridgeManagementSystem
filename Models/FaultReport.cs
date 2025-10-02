@@ -36,8 +36,6 @@ namespace FridgeManagementSystem.Models
         public int MaintenanceVisitId { get; set; }
        
         public virtual MaintenanceVisit? MaintenanceVisit{ get; set; }
-        public virtual Fault Fault { get; set; }
-        [Required]
-        public int FaultID { get; set; }
+       
     }
 }

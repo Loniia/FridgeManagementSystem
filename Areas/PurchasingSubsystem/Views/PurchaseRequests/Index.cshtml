@@ -26,7 +26,7 @@
         {
             <tr>
                 <td>@item.PurchaseRequestID</td>
-                <td>@item.InventoryLiaisonID</td>
+                <td>@item.InventoryID </td>
                 <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
                 <td>
                     <span class="badge bg-@(item.Status == "Approved" ? "success" : item.Status == "Rejected" ? "danger" : "warning")">

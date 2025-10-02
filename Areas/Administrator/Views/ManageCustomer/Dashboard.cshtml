@@ -95,7 +95,7 @@
                     <!-- Link to Maintenance Subsystem -->
                     <a asp-controller="Maintenance" asp-action="ServiceHistory" asp-route-customerId="@Model.CustomerID" class="btn btn-link btn-sm">Go to Maintenance Manager</a>
                 </h5>
-                @if (Model.ServiceHistories.Any())
+                @* @if (Model.ServiceHistories.Any())
                 {
                     <ul>
                         @foreach (var service in Model.ServiceHistories)
@@ -104,7 +104,7 @@
                         }
                     </ul>
                 }
-                else
+                else *@
                 {
                     <p>No service history available.</p>
                 }

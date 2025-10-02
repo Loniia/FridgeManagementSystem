@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FridgeManagementSystem.Models
 {
@@ -28,6 +29,9 @@ namespace FridgeManagementSystem.Models
 
         [MaxLength(500)]
         public string LogoUrl { get; set; }
+        [ForeignKey("Customer")]
+        public int CustomerID {  get; set; }
+         public virtual Customer Customer { get; set; }
 
     }
 }

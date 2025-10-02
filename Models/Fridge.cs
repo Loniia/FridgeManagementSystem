@@ -26,28 +26,20 @@ namespace FridgeManagementSystem.Models
 
         public DateTime PurchaseDate { get; set; }
 
-        [Display(Name = "Installation Date")]
-        [DataType(DataType.Date)]
-        public DateTime? InstallationDate { get; set; }
+       
 
         [Display(Name = "Warranty Expiry")]
         [DataType(DataType.Date)]
         public DateTime? WarrantyExpiry { get; set; }
 
-        [Display(Name = "Capacity (L)")]
-        [Range(0, 1000, ErrorMessage = "Capacity must be between 0 and 1000 liters")]
-        public int? Capacity { get; set; }
-
-        [Display(Name = "Energy Rating")]
-        [StringLength(10)]
-        public string EnergyRating { get; set; } // A++, A+, A, B, etc.
+        
+       
 
         [Display(Name = "Notes")]
         [StringLength(1000)]
         public string Notes { get; set; }
         // Audit fields
-        [Display(Name = "Created Date")]
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+      
 
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
@@ -72,7 +64,7 @@ namespace FridgeManagementSystem.Models
         public virtual Customer Customer { get; set; }
         public virtual ICollection<MaintenanceRequest> MaintenanceRequest { get; set; }
         public virtual ICollection<MaintenanceVisit> MaintenanceVisit { get; set; }
-        public ICollection<MaintenanceRecord> MaintenanceRecords { get; set; }
+    
         public virtual ICollection<FaultReport> FaultReport { get; set; }
         public ICollection<Fault> Fault { get; set; }
 

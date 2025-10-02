@@ -11,10 +11,12 @@ namespace FridgeManagementSystem.Models
 
         [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
+        [ForeignKey("Inventory")]
+        public int InventoryID { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
-        public DateOnly RequestDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateOnly RequestDate { get; set; } 
        
         [Required]
         [StringLength(100)]
@@ -48,8 +50,7 @@ namespace FridgeManagementSystem.Models
         public virtual Customer Customer { get; set; }
         public virtual Fridge Fridge { get; set; }
 
-        [ForeignKey("InventoryLiaison")]
-        public int InventoryLiaisonID { get; set; }
+        public virtual Inventory Inventory { get; set; }
 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using FridgeManagementSystem.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection.Metadata.Ecma335;
 
 namespace FridgeManagementSystem.Models
 #nullable disable
@@ -10,6 +11,7 @@ namespace FridgeManagementSystem.Models
         public string FullNames { get; set; }
         [ForeignKey("Location")]
         public int LocationId { get; set; }
+        public virtual Location Location { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public bool IsActive { get; set; }

@@ -48,14 +48,7 @@ namespace FridgeManagementSystem.Models
 
         [Display(Name = "Is Urgent?")]
         public bool IsUrgent { get; set; } = false;
-        [Required(ErrorMessage = "Customer is required")]
-        [Display(Name = "Customer ID")]
-        public string CustomerID { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Customer Name is required")]
-        [StringLength(200, ErrorMessage = "Customer Name cannot exceed 200 characters")]
-        [Display(Name = "Customer Name")]
-        public string CustomerName { get; set; } = string.Empty;
+        
         // Audit fields
         [Display(Name = "Created Date")]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
@@ -63,12 +56,9 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
-        // Technician who is processing the fault
-        [Display(Name = "Technician")]
-        public int? TechnicianID { get; set; }
-
-        [ForeignKey("TechnicianID")]
-        public virtual FaultTechnicians Technician { get; set; }
+        [ForeignKey("Employee")]
+        public int EmployeeID {  get; set; }
+        public Employee Employee { get; set; }
 
         [Required(ErrorMessage = "Category is required")]
         [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]

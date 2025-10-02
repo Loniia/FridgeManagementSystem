@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSubsystem.Models;
 using System.Reflection.Emit;
 namespace FridgeManagementSystem.Data
 {
@@ -19,7 +18,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<Fridge> Fridge { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<ServiceChecks> ServiceChecks { get; set; }
+        //public DbSet<ServiceChecks> ServiceChecks { get; set; }
         public DbSet<Fault> Faults { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<FridgeAllocation> FridgeAllocation { get; set; }
@@ -34,14 +33,11 @@ namespace FridgeManagementSystem.Data
         
         public DbSet<RepairSchedule> RepairSchedules { get; set; }
         public DbSet<FaultTechnicians> FaultTechnicians { get; set; }
-        public DbSet<PurchaseManager> PurchaseManagers { get; set; }
-        public DbSet<InventoryLiaison> InventoryLiaisons { get; set; }
         //public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
         public DbSet<RequestForQuotation> RequestsForQuotation { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<DeliveryNote> DeliveryNotes { get; set; }
-        public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
 
         // Add any other tables as you grow (like Fridges, Suppliers, etc.)
 
@@ -57,12 +53,7 @@ namespace FridgeManagementSystem.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // 🔗 ApplicationUser to Customer (One-to-One)
-            builder.Entity<ApplicationUser>()
-                .HasOne(a => a.CustomerProfile)
-                .WithOne(c => c.UserAccount)
-                .HasForeignKey<Customer>(c => c.ApplicationUserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
+            
             // --- 1-to-1 relationships ---
             builder.Entity<Fridge>()
                 .HasOne(f => f.Inventories)
@@ -75,12 +66,7 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey<ScrappedFridge>(s => s.FridgeID);
 
             // --- 1-to-many relationships ---
-            builder.Entity<Supplier>()
-                .HasMany(s => s.Fridges)
-                .WithOne(f => f.Supplier)
-                .HasForeignKey(f => f.SupplierID)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            
             builder.Entity<Fridge>()
                 .HasMany(f => f.FridgeAllocation)
                 .WithOne(a => a.Fridge)
@@ -113,12 +99,7 @@ namespace FridgeManagementSystem.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // FaultReport -> Fault (many-to-1)
-            builder.Entity<FaultReport>()
-                .HasOne(fr => fr.Fault)
-                .WithMany()
-                .HasForeignKey(fr => fr.FaultID)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            
             // Fridge: unique SerialNumber
             builder.Entity<Fridge>()
                 .HasIndex(f => f.SerialNumber)
@@ -151,12 +132,12 @@ namespace FridgeManagementSystem.Data
             .HasForeignKey(f => f.CustomerId)
             .OnDelete(DeleteBehavior.SetNull); // Customer deleted → fridge unallocated
 
-            // Supplier ↔ Fridge (One-to-Many)
-            builder.Entity<Supplier>()
-                .HasMany(s => s.Fridges)
-                .WithOne(f => f.Supplier)
-                .HasForeignKey(f => f.SupplierID)
-                .OnDelete(DeleteBehavior.Restrict); // don’t auto-delete fridges
+            //// Supplier ↔ Fridge (One-to-Many)
+            //builder.Entity<Supplier>()
+            //    .HasMany(s => s.Fridges)
+            //    .WithOne(f => f.Supplier)
+            //    .HasForeignKey(f => f.SupplierID)
+            //    .OnDelete(DeleteBehavior.Restrict); // don’t auto-delete fridges
 
             // Location ↔ Fridge (One-to-Many)
             builder.Entity<Location>()
@@ -166,11 +147,7 @@ namespace FridgeManagementSystem.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Fridge ↔ MaintenanceRecord (One-to-Many)
-            builder.Entity<MaintenanceRecord>()
-                .HasOne(m => m.Fridge)
-                .WithMany(f => f.MaintenanceRecords)
-                .HasForeignKey(m => m.FridgeId);
-
+           
             // Fridge ↔ FaultReport (One-to-Many)
             builder.Entity<FaultReport>()
                 .HasOne(fr => fr.Fridge)

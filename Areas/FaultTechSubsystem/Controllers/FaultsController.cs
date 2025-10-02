@@ -46,7 +46,6 @@ namespace FridgeManagementSystem.Controllers
                 RecentFaults = await _context.Faults
                     .Include(f => f.Fridge)
                     .Include(f => f.Fridge.Customer)
-                    .Include(f => f.Technician)
                     .OrderByDescending(f => f.FaultID)
                     .Take(5)
                     .ToListAsync(),
