@@ -102,13 +102,6 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(fr => fr.FridgeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // FaultReport -> Fault (many-to-1)
-            builder.Entity<FaultReport>()
-                .HasOne(fr => fr.Fault)
-                .WithMany()
-                .HasForeignKey(fr => fr.FaultID)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Fridge: unique SerialNumber
             builder.Entity<Fridge>()
                 .HasIndex(f => f.SerialNumber)
