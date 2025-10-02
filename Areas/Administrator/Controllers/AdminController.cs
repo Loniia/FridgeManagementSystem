@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FridgeManagementSystem.Controllers
+namespace FridgeManagementSystem.Areas.Administrator.Controllers
 {
-    /// <summary>
+    [Area("Administrator")]
     [Authorize(Roles = Roles.Admin)]
-    /// </summary>
     public class AdminController : Controller
     {
 
