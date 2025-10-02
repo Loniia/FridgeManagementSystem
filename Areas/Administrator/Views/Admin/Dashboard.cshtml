@@ -1,34 +1,64 @@
 ﻿@{
+    Layout = "_Layout";
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<h2>
+<h2 class="mb-4">
     Welcome, @(User.Identity?.Name ?? "Guest")
 </h2>
 
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-header">Customers</div>
-            <div class="card-body">
-                <h5 class="card-title">Manage Customers</h5>
-                <p class="card-text">View, edit, or remove customer accounts.</p>
-                <a asp-area="Administrator" asp-controller="ManageCustomer" asp-action="Index" class="btn btn-light">Go</a>
+<div class="row">
+
+    <!-- Customers Card -->
+    <div class="col-md-3 mb-3">
+        <a asp-area="Administrator" asp-controller="ManageCustomer" asp-action="Dashboard" class="text-decoration-none d-block">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-header">Customers</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Customers</h5>
+                    <p class="card-text">View, edit, or remove customer accounts.</p>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
 
-    <div class="col-md-6">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-header">Employees</div>
-            <div class="card-body">
-                <h5 class="card-title">Manage Employees</h5>
-                <p class="card-text">Create and assign employees to roles.</p>
-
-                <a asp-area="Administrator" asp-controller="Admin" asp-action="ManageEmployees" class="btn btn-light">Go</a>
-
+    <!-- Employees Card -->
+    <div class="col-md-3 mb-3">
+        <a asp-area="Administrator" asp-controller="Admin" asp-action="ManageEmployees" class="text-decoration-none d-block">
+            <div class="card text-white bg-success h-100">
+                <div class="card-header">Employees</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Employees</h5>
+                    <p class="card-text">Create and assign employees to roles.</p>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
+
+    <!-- Fridges Card -->
+    <div class="col-md-3 mb-3">
+        <a asp-area="Administrator" asp-controller="ManageFridge" asp-action="Index" class="text-decoration-none d-block">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-header">Fridges</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Fridges</h5>
+                    <p class="card-text">Manage fridges, inventory, and allocations.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Locations Card -->
+    <div class="col-md-3 mb-3">
+        <a asp-area="Administrator" asp-controller="ManageLocation" asp-action="Index" class="text-decoration-none d-block">
+            <div class="card text-white bg-info h-100">
+                <div class="card-header">Locations</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Locations</h5>
+                    <p class="card-text">Add, edit, or remove fridge locations.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
 </div>
-
