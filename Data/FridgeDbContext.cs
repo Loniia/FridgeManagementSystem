@@ -18,8 +18,9 @@ namespace FridgeManagementSystem.Data
         public DbSet<Fridge> Fridge { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
-        //public DbSet<ServiceChecks> ServiceChecks { get; set; }
+        public DbSet<ServiceChecks> ServiceChecks { get; set; }
         public DbSet<Fault> Faults { get; set; }
+        public DbSet<ServiceChecks> ServiceChecks { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<FridgeAllocation> FridgeAllocation { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -33,6 +34,8 @@ namespace FridgeManagementSystem.Data
         
         public DbSet<RepairSchedule> RepairSchedules { get; set; }
         public DbSet<FaultTechnicians> FaultTechnicians { get; set; }
+        public DbSet<PurchaseManager> PurchaseManagers { get; set; }
+        public DbSet<InventoryLiaison> InventoryLiaisons { get; set; }
         //public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
         public DbSet<RequestForQuotation> RequestsForQuotation { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
@@ -99,7 +102,12 @@ namespace FridgeManagementSystem.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // FaultReport -> Fault (many-to-1)
-            
+            builder.Entity<FaultReport>()
+                .HasOne(fr => fr.Fault)
+                .WithMany()
+                .HasForeignKey(fr => fr.FaultID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Fridge: unique SerialNumber
             builder.Entity<Fridge>()
                 .HasIndex(f => f.SerialNumber)

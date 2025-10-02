@@ -56,9 +56,12 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
-        [ForeignKey("Employee")]
-        public int EmployeeID {  get; set; }
-        public Employee Employee { get; set; }
+        // Technician who is processing the fault
+        [Display(Name = "Technician")]
+        public int? TechnicianID { get; set; }
+
+        [ForeignKey("TechnicianID")]
+        public virtual FaultTechnicians Technician { get; set; }
 
         [Required(ErrorMessage = "Category is required")]
         [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]

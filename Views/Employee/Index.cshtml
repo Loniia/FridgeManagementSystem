@@ -14,7 +14,7 @@
         <tr>
             <th>Full Name</th>
             <th>Phone Number</th>
-            <th>Email</th>
+            <th>Status</th>
             <th>User Account</th>
             <th></th>
         </tr>
@@ -24,8 +24,8 @@
         {
             <tr>
                 <td>@item.FullName</td>
-                <td>@item.PhoneNumber </td>
                 <td>@item.Email</td>
+                <td>@item.IsActive</td>
                 <td>@item.UserAccount?.UserName</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@item.CustomerID" class="btn btn-info btn-sm">Details</a>

@@ -70,46 +70,7 @@ namespace FridgeManagementSystem.Models
             return true;
         }
 
-        public async Task<bool> ScheduleMaintenanceAsync(int fridgeId, int employeeId, DateTime scheduledDate)
-        {
-            var fridge = await _context.Fridge.FindAsync(fridgeId);
-            var employee = await _context.Employees.FindAsync(employeeId);
-
-            if (fridge == null || employee == null) return false;
-            if (fridge.Status == "In Repair") return false;
-
-            fridge.Status = "In Repair";
-            _context.Update(fridge);
-
-            var schedule = new RepairSchedule
-            {
-                FridgeId = fridgeId,
-                EmployeeId = employeeId,
-                RepairDate = scheduledDate,
-                Status = "Scheduled"
-            };
-            _context.RepairSchedules.Add(schedule);
-
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> CompleteMaintenanceAsync(int fridgeId, int scheduleId)
-        {
-            var fridge = await _context.Fridge.FindAsync(fridgeId);
-            var schedule = await _context.RepairSchedules.FindAsync(scheduleId);
-
-            if (fridge == null || schedule == null) return false;
-
-            fridge.Status = "Active";
-            schedule.Status = "Completed";
-
-            _context.Update(fridge);
-            _context.Update(schedule);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
+        // Note: Admin doesn't schedule maintenance. Maintenance Technician handles this.
 
         // ========== REPORTING ==========
         public async Task<List<InventoryReportVM>> GetInventoryReportAsync()
@@ -140,9 +101,41 @@ namespace FridgeManagementSystem.Models
                 })
                 .ToListAsync();
         }
+
+        // ========== ADMIN VIEW: Fridges + Maintenance ==========
+        public async Task<List<FridgeWithMaintenanceVM>> GetAllFridgesWithMaintenanceAsync()
+        {
+            var fridges = await _context.Fridge
+                .Include(f => f.Supplier)
+                .Include(f => f.Location)
+                .Include(f => f.MaintenanceVisit) // Maintenance info
+                .ToListAsync();
+
+            // Map to ViewModel
+            var result = fridges.Select(f => new FridgeWithMaintenanceVM
+            {
+                FridgeId = f.FridgeId,
+                SerialNumber = f.SerialNumber,
+                SupplierName = f.Supplier?.Name ?? "",
+                Location = f.Location?.City ?? "",
+                Status = f.Status,
+                LastMaintenanceDate = f.MaintenanceVisit
+        .Where(r => r.Status == TaskStatus.Complete) // Use enum here
+        .OrderByDescending(r => r.ScheduledDate)
+        .Select(r => (DateTime?)r.ScheduledDate)
+        .FirstOrDefault(),
+                NextScheduledMaintenance = f.MaintenanceVisit
+        .Where(r => r.Status == TaskStatus.Scheduled) // Use enum here
+        .OrderBy(r => r.ScheduledDate)
+        .Select(r => (DateTime?)r.ScheduledDate)
+        .FirstOrDefault()
+            }).ToList();
+
+            return result;
+        }
     }
 
-    // ViewModels
+    // ===== VIEW MODELS =====
     public class InventoryReportVM
     {
         public string Location { get; set; } = "";
@@ -156,5 +149,17 @@ namespace FridgeManagementSystem.Models
     {
         public string SupplierName { get; set; } = "";
         public int TotalSupplied { get; set; }
+    }
+
+    // New ViewModel: Admin Inventory with Maintenance Info
+    public class FridgeWithMaintenanceVM
+    {
+        public int FridgeId { get; set; }
+        public string SerialNumber { get; set; } = "";
+        public string SupplierName { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string Status { get; set; } = "";
+        public DateTime? LastMaintenanceDate { get; set; }
+        public DateTime? NextScheduledMaintenance { get; set; }
     }
 }

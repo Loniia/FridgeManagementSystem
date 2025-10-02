@@ -31,12 +31,16 @@ namespace FridgeManagementSystem.Models
         [Display(Name ="Status")]
         public string Status { get; set; }
         // Navigation Properties
-        public virtual RequestForQuotation RequestForQuotation { get; set; }
+        [ForeignKey("RequestForQuotationId")]
+        public RequestForQuotation RequestForQuotation { get; set; }
 
-        public virtual Supplier Supplier { get; set; }
+        [ForeignKey("SupplierId")]
+        public int SupplierID { get; set; }
+
+        public Supplier Supplier { get; set; }
 
         //navigation property
- 
+    
 
     }
 }

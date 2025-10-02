@@ -51,7 +51,7 @@ namespace FridgeManagementSystem.Controllers
                                          Status = a.Status,
                                          Fridge = new FridgeViewModel
                                          {
-                                             FridgeId  = a.FridgeId,
+                                             FridgeId = a.FridgeId,
                                              Brand = a.Fridge?.Brand,
                                              Model = a.Fridge?.Model,
                                              Status = a.Fridge?.Status

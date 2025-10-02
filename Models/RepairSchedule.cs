@@ -15,6 +15,7 @@ namespace FridgeManagementSystem.Models
 
         [Required]
         [Display(Name = "Fridge")]
+        [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
 
         [Required]
@@ -86,11 +87,11 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("FaultID")]
         public virtual Fault Fault { get; set; }
 
-        [ForeignKey("FridgeId")]
+       
         public virtual Fridge Fridge { get; set; }
 
-        [ForeignKey("TechnicianID")]
-        public virtual FaultTechnicians FaultTechnician { get; set; }
+        [ForeignKey("Employee")]
+        public virtual Employee FaultTechnician { get; set; }
 
         // Helper methods
         [NotMapped]
