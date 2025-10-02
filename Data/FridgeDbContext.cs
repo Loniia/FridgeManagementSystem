@@ -19,8 +19,8 @@ namespace FridgeManagementSystem.Data
         public DbSet<Fridge> Fridge { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<ServiceChecks> ServiceChecks { get; set; }
         public DbSet<Fault> Faults { get; set; }
+        public DbSet<ServiceChecks> ServiceChecks { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<FridgeAllocation> FridgeAllocation { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -115,7 +115,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<FaultReport>()
                 .HasOne(fr => fr.Fault)
                 .WithMany()
-                .HasForeignKey(fr => fr.FaultID)
+                .HasForeignKey(fr => fr.FaultReportId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Fridge: unique SerialNumber
