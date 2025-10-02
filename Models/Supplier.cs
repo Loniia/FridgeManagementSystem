@@ -43,10 +43,8 @@ namespace FridgeManagementSystem.Models
         public bool IsActive { get; set; } = true;
 
         // Navigation Properties 
-        public virtual ICollection<Fridge> Fridges { get; set; } 
         public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
 
-        // Critical for purchasing workflow
         public virtual ICollection<Quotation> Quotations { get; set; }
     }
 

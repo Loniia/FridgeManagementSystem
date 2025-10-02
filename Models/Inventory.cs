@@ -19,9 +19,9 @@ namespace FridgeManagementSystem.Models
         [DataType(DataType.DateTime)]
         public DateTime LastUpdated { get; set; } = DateTime.Now;
 
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Reorder point must be at least 1")]
-        public int ReorderPoint { get; set; }
+        //[Required]
+        //[Range(1, int.MaxValue, ErrorMessage = "Reorder point must be at least 1")]
+        //public int ReorderPoint { get; set; }
 
         //Navigation Property
         public virtual ICollection<PurchaseRequest> PurchaseRequests { get; set; }

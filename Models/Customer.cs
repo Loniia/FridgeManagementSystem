@@ -19,8 +19,7 @@ namespace FridgeManagementSystem.Models
         [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$",
          ErrorMessage = "Provide valid email address")]
         public string Email { get; set; }
-        public int? FridgeId { get; set; }
-       // public Fridge Fridge { get; set; }
+ 
         [ForeignKey("Location")]
         public int LocationId { get; set; }
 
@@ -31,24 +30,22 @@ namespace FridgeManagementSystem.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        [ForeignKey("ApplicationUserId")]
-        [Required]
-        public int ApplicationUserId { get; set; }
-
         [Required]
         [DataType(DataType.Date)]
         public DateOnly RegistrationDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-
+        
         public ApplicationUser UserAccount { get; set; }
        
         public bool IsActive { get; set; } = true;
 
         //Added by Idah
-        public string ShopType { get; set; }   //shebeen,Spaza,Restaurant,Supermarket 
-        [ForeignKey("ServiceCheck")]
-        public int ServiceCheckId { get; set; }
+        [Required(ErrorMessage = "ShopType is required")]
+        [EnumDataType(typeof(ShopType))]
+        public ShopType ShopType { get; set; }
+        //shebeen,Spaza,Restaurant,Supermarket 
+
         public ICollection<FaultReport> FaultReports { get; set; }
-        public ICollection<ServiceChecks> ServiceHistories { get; set; }
+       
         public ICollection<CustomerNote> CustomerNote { get; set; }
 
         //Navigation Property
@@ -56,6 +53,7 @@ namespace FridgeManagementSystem.Models
         public virtual ICollection<PurchaseRequest> PurchaseRequest { get; set; }
         public virtual Location Location { get; set; }
         public virtual ICollection<Fridge> Fridge { get; set; }
+        public virtual ICollection<BussinessInfo> BussinessInfo { get; set; }
 
         // Add computed property for display
         [NotMapped] // This won't be stored in database

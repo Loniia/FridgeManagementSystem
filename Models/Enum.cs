@@ -171,4 +171,12 @@ namespace FridgeManagementSystem.Models
        
         LooseConnection
     }
+    public enum ShopType
+    {
+        Shebeen ,
+        Warehouse,
+        Restuarant,
+        SuperMarket,
+        Spaza
+    }
 }

@@ -2,7 +2,6 @@
 using FridgeManagementSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PurchasingSubsystem.Models;
 
 
     namespace PurchasingSubsystem.Areas.Purchasing.Controllers

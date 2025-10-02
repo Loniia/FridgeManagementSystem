@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
+    <Compile Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
+    <Content Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
+    <Content Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
+    <EmbeddedResource Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
+    <EmbeddedResource Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
+    <None Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
+    <None Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
@@ -30,11 +41,6 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
     <PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Areas\PurchasingSubsystem\Views\NewFolder\" />
-    <Folder Include="Areas\PurchasingSubsystem\Views\Quotation\" />
   </ItemGroup>
 
 </Project>

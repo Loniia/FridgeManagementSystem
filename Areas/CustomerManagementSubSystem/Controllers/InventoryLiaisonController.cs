@@ -196,7 +196,7 @@ namespace CustomerManagementSubSystem.Controllers
                     RequestBy = "InventoryLiaison",
                     RequestType = "Fridge Purchase"
                 };
-
+                
                 var year = DateTime.Now.Year;
                 int countForYear = await _context.PurchaseRequests.CountAsync(r => r.RequestDate.Year == year) + 1;
                 purchaseRequest.RequestNumber = $"PR-{year}-{countForYear:D3}";

@@ -34,7 +34,14 @@ namespace FridgeManagementSystem.Models
         [StringLength(20)]
         public string Status { get; set; } = "Draft"; // "Draft", "Sent", "Closed"
 
-        
+        [Required]
+        [Display(Name ="Description")]
+        public string Description { get; set; }
+
+        [Required]
+        [Range(1,int.MaxValue)]
+        [Display(Name ="Required Quantity")]
+        public int RequiredQuantity { get; set; }
 
         // Navigation Properties 
         public virtual ICollection<Quotation> Quotations { get; set; }

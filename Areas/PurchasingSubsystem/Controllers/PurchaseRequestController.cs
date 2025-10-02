@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 
-using PurchasingSubsystem.Models;
 using FridgeManagementSystem.Models;
 #nullable disable
 namespace PurchasingSubsystem.Controllers
@@ -44,7 +43,7 @@ namespace PurchasingSubsystem.Controllers
         // GET: PurchaseRequests/Create
         public IActionResult Create()
         {
-            ViewBag.InventoryLiaisons = new SelectList(_context.InventoryLiaisons, "InventoryLiaisonID", "Name");
+            //ViewBag.InventoryLiaisons = new SelectList(_context.InventoryLiaisons, "InventoryLiaisonID", "Name");
             return View();
         }
 
@@ -75,7 +74,7 @@ namespace PurchasingSubsystem.Controllers
             {
                 return NotFound();
             }
-            ViewBag.InventoryLiaisons = new SelectList(_context.InventoryLiaisons, "InventoryLiaisonID", "Name");
+            //ViewBag.InventoryLiaisons = new SelectList(_context.InventoryLiaisons, "InventoryLiaisonID", "Name");
             return View(purchaseRequest);
         }
 
