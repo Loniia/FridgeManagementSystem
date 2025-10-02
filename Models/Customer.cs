@@ -1,5 +1,4 @@
 ﻿using CustomerManagementSubSystem.Models;
-using FridgeManagementSystem.Migrations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 #nullable disable

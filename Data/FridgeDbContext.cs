@@ -201,7 +201,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<ComponentUsed>()
                 .Property(c => c.Condition)
                 .HasConversion<string>();
-
+            
             builder.Entity<FaultReport>()
                 .Property(f => f.FaultType)
                 .HasConversion<string>();

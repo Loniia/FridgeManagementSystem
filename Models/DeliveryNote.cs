@@ -14,12 +14,6 @@ namespace FridgeManagementSystem.Models
         public string DeliveryNumber { get; set; } 
 
         [Required]
-        [Display(Name = "Purchase Order")]
-        [ForeignKey("PurchaseOrder")]
-        public int PurchaseOrderID { get; set; }
-        public virtual PurchaseOrder PurchaseOrder { get; set; }
-
-        [Required]
         [DataType(DataType.Date)]
         [Display(Name = "Delivery Date")]
         public DateTime DeliveryDate { get; set; } = DateTime.Today;
@@ -49,6 +43,9 @@ namespace FridgeManagementSystem.Models
         [DataType(DataType.DateTime)]
         [Display(Name = "Inventory Receipt Date")]
         public DateTime? InventoryReceiptDate { get; set; }
+        [Required]
+        [Display(Name = "Purchase Order")]
+        [ForeignKey("PurchaseOrder")]
         public int PurchaseOrderId { get; set; }
         public PurchaseOrder purchaseOrder { get; set; }
 

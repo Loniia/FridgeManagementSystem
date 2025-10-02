@@ -14,9 +14,6 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Request for Quotation")]
         public int RequestForQuotationId { get; set; }
 
-        [Required(ErrorMessage = "Supplier is required.")]
-        public int SupplierId { get; set; }
-
         [DataType(DataType.Date)]
         [Display(Name = "Received Date")]
         public DateTime ReceivedDate { get; set; } = DateTime.Now;
@@ -28,19 +25,16 @@ namespace FridgeManagementSystem.Models
         public decimal QuotationAmount { get; set; }
 
         [StringLength(20)]
-        [Display(Name ="Status")]
+        [Display(Name = "Status")]
         public string Status { get; set; }
-        // Navigation Properties
+
+        // 🔗 Navigation Properties
         [ForeignKey("RequestForQuotationId")]
         public RequestForQuotation RequestForQuotation { get; set; }
 
-        [ForeignKey("SupplierId")]
-        public int SupplierID { get; set; }
+        public int SupplierId { get; set; }
 
+        [ForeignKey("SupplierId")]   // ✅ correct placement
         public Supplier Supplier { get; set; }
-
-        //navigation property
-    
-
     }
 }

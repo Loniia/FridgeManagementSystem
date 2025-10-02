@@ -1,5 +1,4 @@
 ﻿using FridgeManagementSystem.Data;
-using FridgeManagementSystem.Migrations;
 using FridgeManagementSystem.Models;
 using FridgeManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
