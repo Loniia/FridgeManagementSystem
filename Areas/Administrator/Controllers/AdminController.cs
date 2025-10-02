@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FridgeManagementSystem.Controllers
 {
-     [Authorize(Roles = Roles.Admin)]
+    /// <summary>
+    /// [Authorize(Roles = Roles.Admin)]
+    /// </summary>
     public class AdminController : Controller
     {
 
