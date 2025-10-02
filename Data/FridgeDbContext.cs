@@ -28,9 +28,9 @@ namespace FridgeManagementSystem.Data
         public DbSet<FaultReport> FaultReport { get; set; }
         public DbSet<MaintenanceChecklist> MaintenanceChecklist { get; set; }
         public DbSet<MaintenanceRequest> MaintenanceRequest { get; set; }
-        public DbSet<MaintenanceVisit> MaintenanceVisit { get; set; } 
+        public DbSet<MaintenanceVisit> MaintenanceVisit { get; set; }
         public DbSet<ComponentUsed> ComponentUsed { get; set; }
-        
+
         public DbSet<RepairSchedule> RepairSchedules { get; set; }
         //public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
         public DbSet<RequestForQuotation> RequestsForQuotation { get; set; }
@@ -52,10 +52,10 @@ namespace FridgeManagementSystem.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // 🔗 ApplicationUser to Customer (One-to-One)
-            builder.Entity<Customer>()
-                .HasOne(c => c.UserAccount)
-                .WithOne(u => u.CustomerProfile)
-                .HasForeignKey<Customer>(c => c.ApplicationUserId) //i added this (Idah)
+            builder.Entity<ApplicationUser>()
+                .HasOne(a => a.CustomerProfile)
+                .WithOne(c => c.UserAccount)
+                .HasForeignKey<Customer>(c => c.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // --- 1-to-1 relationships ---
@@ -70,7 +70,6 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey<ScrappedFridge>(s => s.FridgeID);
 
             // --- 1-to-many relationships ---
-            
             builder.Entity<Fridge>()
                 .HasMany(f => f.FridgeAllocation)
                 .WithOne(a => a.Fridge)
@@ -98,7 +97,7 @@ namespace FridgeManagementSystem.Data
             // FaultReport -> Fridge (many-to-1)
             builder.Entity<FaultReport>()
                 .HasOne(fr => fr.Fridge)
-                .WithMany()
+                .WithMany(f => f.FaultReport)
                 .HasForeignKey(fr => fr.FridgeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -114,20 +113,11 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(rs => rs.FridgeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // RepairSchedule -> Fault (many-to-1)
-            builder.Entity<RepairSchedule>()
-                .HasOne(rs => rs.Fault)
-                .WithMany()
-                .HasForeignKey(rs => rs.FaultID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-     
             builder.Entity<Customer>()
-            .HasMany(c => c.Fridge)
-            .WithOne(f => f.Customer)
-            .HasForeignKey(f => f.CustomerId)
-            .OnDelete(DeleteBehavior.SetNull); // Customer deleted → fridge unallocated
-
+                .HasMany(c => c.Fridge)
+                .WithOne(f => f.Customer)
+                .HasForeignKey(f => f.CustomerId)
+                .OnDelete(DeleteBehavior.SetNull); // Customer deleted → fridge unallocated
 
             //// Supplier ↔ Fridge (One-to-Many)
             //builder.Entity<Supplier>()
@@ -143,13 +133,7 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(f => f.LocationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Fridge ↔ MaintenanceRecord (One-to-Many)
-           
-            // Fridge ↔ FaultReport (One-to-Many)
-            builder.Entity<FaultReport>()
-                .HasOne(fr => fr.Fridge)
-                .WithMany(f => f.FaultReport)
-                .HasForeignKey(fr => fr.FridgeId);
+            // Fridge ↔ FaultReport (One-to-Many) → already defined above
 
             // --- Soft Delete / Query Filters ---
             builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
@@ -160,7 +144,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<ScrappedFridge>().HasQueryFilter(s => s.Fridge.IsActive);
             builder.Entity<PurchaseRequest>().HasQueryFilter(p => p.Customer.IsActive);
             builder.Entity<FaultReport>().HasQueryFilter(fr => fr.Fridge.IsActive);
-           // builder.Entity<RepairSchedule>().HasQueryFilter(rs => rs.Customer.IsActive);
+            // builder.Entity<RepairSchedule>().HasQueryFilter(rs => rs.Customer.IsActive);
 
             // Configure enum conversions
             builder.Entity<MaintenanceRequest>()
@@ -194,17 +178,19 @@ namespace FridgeManagementSystem.Data
             builder.Entity<ComponentUsed>()
                 .Property(c => c.Condition)
                 .HasConversion<string>();
-            
+
             builder.Entity<FaultReport>()
                 .Property(f => f.FaultType)
                 .HasConversion<string>();
-            // Configure relationships with NoAction to prevent cascade issues
+
+            // ✅ Configure relationships with NoAction only where not explicitly set
             foreach (var relationship in builder.Model.GetEntityTypes()
-                .SelectMany(e => e.GetForeignKeys()))
+                .SelectMany(e => e.GetForeignKeys())
+                .Where(fk => fk.DeleteBehavior == DeleteBehavior.ClientCascade))
             {
                 relationship.DeleteBehavior = DeleteBehavior.NoAction;
             }
-           
+
         }
     }
 }
