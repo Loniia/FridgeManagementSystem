@@ -60,9 +60,6 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Technician")]
         public int? TechnicianID { get; set; }
 
-        [ForeignKey("TechnicianID")]
-        public virtual FaultTechnicians Technician { get; set; }
-
         [Required(ErrorMessage = "Category is required")]
         [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]
         public string Category { get; set; } = string.Empty;

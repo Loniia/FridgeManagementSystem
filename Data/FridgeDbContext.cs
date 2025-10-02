@@ -18,9 +18,8 @@ namespace FridgeManagementSystem.Data
         public DbSet<Fridge> Fridge { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<ServiceChecks> ServiceChecks { get; set; }
+
         public DbSet<Fault> Faults { get; set; }
-        public DbSet<ServiceChecks> ServiceChecks { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<FridgeAllocation> FridgeAllocation { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -33,9 +32,6 @@ namespace FridgeManagementSystem.Data
         public DbSet<ComponentUsed> ComponentUsed { get; set; }
         
         public DbSet<RepairSchedule> RepairSchedules { get; set; }
-        public DbSet<FaultTechnicians> FaultTechnicians { get; set; }
-        public DbSet<PurchaseManager> PurchaseManagers { get; set; }
-        public DbSet<InventoryLiaison> InventoryLiaisons { get; set; }
         //public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
         public DbSet<RequestForQuotation> RequestsForQuotation { get; set; }
         public DbSet<Quotation> Quotations { get; set; }
@@ -127,13 +123,7 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(rs => rs.FaultID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // RepairSchedule -> FaultTechnician (many-to-1)
-            builder.Entity<RepairSchedule>()
-                .HasOne(rs => rs.FaultTechnician)
-                .WithMany()
-                .HasForeignKey(rs => rs.TechnicianID)
-                .OnDelete(DeleteBehavior.Restrict);
-
+     
             builder.Entity<Customer>()
             .HasMany(c => c.Fridge)
             .WithOne(f => f.Customer)

@@ -45,9 +45,5 @@ namespace FridgeManagementSystem.Models
         public ApplicationUser UserAccount { get; set; }
 
         public virtual ICollection<Fault> Faults { get; set; } = new List<Fault>();
-        public virtual ICollection<RepairSchedule> RepairSchedules { get; set; } = new List<RepairSchedule>();
-
-        [NotMapped]
-        public int CompletedRepairsCount => RepairSchedules?.Count(r => r.Status == "Completed") ?? 0;
     }
 }

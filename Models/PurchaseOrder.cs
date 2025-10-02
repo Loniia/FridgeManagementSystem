@@ -58,6 +58,6 @@ namespace FridgeManagementSystem.Models
         public bool IsActive { get; set; } = true;
 
         // Navigation to Delivery Note (when goods arrive)
-        public virtual DeliveryNote DeliveryNote { get; set; }
+        //public virtual DeliveryNote DeliveryNote { get; set; }
     }
 }

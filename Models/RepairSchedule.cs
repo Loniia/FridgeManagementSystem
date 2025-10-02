@@ -69,13 +69,6 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Repair Date")]
         public DateTime? RepairDate { get; set; }
 
-        // Technician information
-        public int EmployeeId { get; set; }
-        public virtual Employee Employee { get; set; }
-
-        [Display(Name = "Technician")]
-        public int? TechnicianID { get; set; }
-
         // Audit fields
         [Display(Name = "Created Date")]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
@@ -94,13 +87,10 @@ namespace FridgeManagementSystem.Models
         public virtual Employee FaultTechnician { get; set; }
 
         // Helper methods
-        [NotMapped]
         public bool IsCompleted => Status == "Completed";
 
-        [NotMapped]
         public bool NeedsParts => !string.IsNullOrEmpty(RequiredParts) && Status == "Awaiting Parts";
 
-        [NotMapped]
         public string CurrentStage
         {
             get
@@ -118,7 +108,6 @@ namespace FridgeManagementSystem.Models
         }
 
         // Method to calculate total repair duration
-        [NotMapped]
         public TimeSpan? RepairDuration
         {
             get
