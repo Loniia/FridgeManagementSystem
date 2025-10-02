@@ -1,0 +1,31 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.SupplierReportVM>
+
+@{
+    ViewData["Title"] = "Supplier Report";
+}
+
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <h4>Supplier Report</h4>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Supplier</th>
+                    <th>Total Supplied</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var supplier in Model)
+                {
+                    <tr>
+                        <td>@supplier.SupplierName</td>
+                        <td>@supplier.TotalSupplied</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    </div>
+</div>

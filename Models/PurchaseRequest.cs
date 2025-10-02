@@ -48,7 +48,7 @@ namespace FridgeManagementSystem.Models
         public virtual Customer Customer { get; set; }
         public virtual Fridge Fridge { get; set; }
 
-        [ForeignKey("InventoryLiaisonId")]
+        [ForeignKey("InventoryLiaison")]
         public int InventoryLiaisonID { get; set; }
 
     }

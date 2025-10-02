@@ -1,0 +1,38 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.InventoryReportVM>
+
+@{
+    ViewData["Title"] = "Inventory Report";
+}
+
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <h4>Inventory Report</h4>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Location</th>
+                    <th>Total Fridges</th>
+                    <th>Active</th>
+                    <th>In Repair</th>
+                    <th>Retired</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Location</td>
+                        <td>@item.TotalFridges</td>
+                        <td>@item.Active</td>
+                        <td>@item.InRepair</td>
+                        <td>@item.Retired</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
