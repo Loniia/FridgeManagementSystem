@@ -54,7 +54,7 @@ namespace FridgeManagementSystem.Controllers
             // Admin
             if (roles.Contains(Roles.Admin))
             {
-                return RedirectToAction("Dashboard", "Admin");
+                return RedirectToAction("Dashboard", "Admin", new { area = "Administrator" });
             }
 
             // Customer
