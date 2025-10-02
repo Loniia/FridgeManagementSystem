@@ -41,8 +41,8 @@ namespace FridgeManagementSystem.Models
 
         public async Task<bool> UpdateFridgeAsync(Fridge fridge)
         {
-            if (!_context.Fridge.Any(f => f.FridgeId == fridge.FridgeId)) return false;
-            _context.Update(fridge);
+            if (!_context.Fridge.Any(f => f.FridgeId == fridge.FridgeId)) return false; 
+             _context.Update(fridge);
             await _context.SaveChangesAsync();
             return true;
         }
