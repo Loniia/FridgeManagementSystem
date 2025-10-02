@@ -13,7 +13,7 @@
             <div class="card-body">
                 <h5 class="card-title">Manage Customers</h5>
                 <p class="card-text">View, edit, or remove customer accounts.</p>
-                <a asp-controller="Customer" asp-action="Index" class="btn btn-light">Go</a>
+                <a asp-area="Administrator" asp-controller="ManageCustomer" asp-action="Index" class="btn btn-light">Go</a>
             </div>
         </div>
     </div>
@@ -24,7 +24,9 @@
             <div class="card-body">
                 <h5 class="card-title">Manage Employees</h5>
                 <p class="card-text">Create and assign employees to roles.</p>
-                <a asp-action="ManageEmployees" class="btn btn-light">Go</a>
+
+                <a asp-area="Administrator" asp-controller="Admin" asp-action="ManageEmployees" class="btn btn-light">Go</a>
+
             </div>
         </div>
     </div>
