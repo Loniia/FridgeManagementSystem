@@ -51,10 +51,10 @@ namespace FridgeManagementSystem.Controllers
                                          Status = a.Status,
                                          Fridge = new FridgeViewModel
                                          {
-                                             FridgeID = a.FridgeID,
-                                             Brand = a.fridge?.Brand,
-                                             Model = a.fridge?.Model,
-                                             Status = a.fridge?.Status
+                                             FridgeId = a.FridgeId,
+                                             Brand = a.Fridge?.Brand,
+                                             Model = a.Fridge?.Model,
+                                             Status = a.Fridge?.Status
                                          }
                                      }).ToList()
             }).ToList();
