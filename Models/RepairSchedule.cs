@@ -89,8 +89,8 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("FridgeId")]
         public virtual Fridge Fridge { get; set; }
 
-        [ForeignKey("TechnicianID")]
-        public virtual FaultTechnicians FaultTechnician { get; set; }
+        [ForeignKey("Employee")]
+        public virtual Employee FaultTechnician { get; set; }
 
         // Helper methods
         [NotMapped]

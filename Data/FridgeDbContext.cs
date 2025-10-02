@@ -33,7 +33,6 @@ namespace FridgeManagementSystem.Data
         public DbSet<ComponentUsed> ComponentUsed { get; set; }
         
         public DbSet<RepairSchedule> RepairSchedules { get; set; }
-        public DbSet<FaultTechnicians> FaultTechnicians { get; set; }
         public DbSet<PurchaseManager> PurchaseManagers { get; set; }
         public DbSet<InventoryLiaison> InventoryLiaisons { get; set; }
         //public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
