@@ -19,7 +19,7 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Payment method is required")]
         [StringLength(50)]
         [EnumDataType(typeof(Method))]
-        public string Method { get; set; } 
+        public Method Method { get; set; }  // enum, not string
 
         [Required]
         public DateTime PaymentDate { get; set; } = DateTime.Now;
