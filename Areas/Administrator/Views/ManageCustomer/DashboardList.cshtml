@@ -1,5 +1,4 @@
 ﻿@model List<FridgeManagementSystem.Models.Customer>
-
 @{
     ViewData["Title"] = "Manage Customers";
 }
@@ -12,7 +11,7 @@
         <div class="col-md-4 mb-3">
             <a asp-area="Administrator"
                asp-controller="ManageCustomer"
-               asp-action="Dashboard"
+               asp-action="DashboardList"
                asp-route-id="@customer.CustomerID"
                class="text-decoration-none text-dark">
                 <div class="card h-100 shadow-sm hover-card">
@@ -23,11 +22,9 @@
                         </span>
                     </div>
                     <div class="card-body">
-                        <p><i class="bi bi-shop me-1"></i><strong>Shop Type:</strong> @customer.ShopType</p>
-                        <p><i class="bi bi-envelope me-1"></i><strong>Email:</strong> @customer.Email</p>
-                        <p><i class="bi bi-telephone me-1"></i><strong>Phone:</strong> @customer.PhoneNumber</p>
+                        <p><strong>Email:</strong> @customer.Email</p>
+                        <p><strong>Phone:</strong> @customer.PhoneNumber</p>
                         <p>
-                            <i class="bi bi-box-seam me-1"></i>
                             <strong>Fridges Allocated:</strong>
                             @(customer.FridgeAllocation != null && customer.FridgeAllocation.Any()
                                 ? customer.FridgeAllocation.Count.ToString()
@@ -39,27 +36,3 @@
         </div>
     }
 </div>
-
-<style>
-    /* Hover effect for cards */
-    .hover-card {
-        transition: all 0.2s ease-in-out;
-    }
-
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-    /* Remove underline on hover for links */
-    a.text-decoration-none:hover {
-        text-decoration: none;
-    }
-
-    /* Optional: cursor pointer for cards */
-    a.text-decoration-none {
-        cursor: pointer;
-    }
-</style>
-
-
