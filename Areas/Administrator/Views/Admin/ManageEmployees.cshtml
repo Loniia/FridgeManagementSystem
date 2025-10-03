@@ -6,13 +6,10 @@
 }
 
 <h2 class="mb-4">Manage Employees</h2>
-
 <p>
-    <a asp-action="CreateEmployee" asp-controller="Admin" asp-area="Administrator" class="btn btn-primary mb-3">
-        <i class="bi bi-person-plus-fill"></i> Add New Employee
-    </a>
+    @Html.ActionLink("Add New Employee", "CreateEmployee", "Admin", new { area = "Administrator" }, new { @class = "btn btn-primary mb-3" })
+    <i class="bi bi-person-plus-fill"></i> Add New Employee
 </p>
-
 <div class="mb-3">
     <input type="text" id="employeeSearch" class="form-control" placeholder="Search employees...">
 </div>

@@ -47,8 +47,9 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("Supplier")]
         public int SupplierID { get; set; }
         [ForeignKey("Customer")]
-        public int CustomerId {  get; set; }
-        public int LocationId { get; set; }
+        public int? CustomerId {  get; set; }
+        [ForeignKey("Location")]
+        public int? LocationId { get; set; }
         public Location Location { get; set; }  
         public int FaultID { get; set; }
         public int Quantity { get; set; }
@@ -61,7 +62,7 @@ namespace FridgeManagementSystem.Models
         public virtual Inventory Inventories { get; set; }
         public virtual ScrappedFridge ScrappedFridges { get; set; }
         public virtual Supplier Supplier { get; set; }
-        public virtual Customer Customer { get; set; }
+        public virtual Customer? Customer { get; set; }
         public virtual ICollection<MaintenanceRequest> MaintenanceRequest { get; set; }
         public virtual ICollection<MaintenanceVisit> MaintenanceVisit { get; set; }
     
