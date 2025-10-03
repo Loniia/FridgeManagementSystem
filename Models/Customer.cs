@@ -58,7 +58,7 @@ namespace FridgeManagementSystem.Models
         public virtual ICollection<PurchaseRequest> PurchaseRequest { get; set; }
         public virtual Location Location { get; set; }
         public virtual ICollection<Fridge> Fridge { get; set; }
-        public virtual ICollection<BussinessInfo> BussinessInfo { get; set; }
+        //public virtual ICollection<BussinessInfo> BussinessInfo { get; set; }
 
         // Add computed property for display
         [NotMapped] // This won't be stored in database

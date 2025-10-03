@@ -38,6 +38,8 @@ namespace FridgeManagementSystem.Models
         public string Address { get; set; }
         public int PurchaseOrderID { get; set; }
         public int QuotationID { get; set; }
+
+        public Fridge Fridge { get; set; }
        
         // Soft delete flag
         public bool IsActive { get; set; } = true;
