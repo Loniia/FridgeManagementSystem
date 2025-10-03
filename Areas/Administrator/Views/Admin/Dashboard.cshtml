@@ -1,6 +1,11 @@
 ﻿@{
     Layout = "_Layout";
     ViewData["Title"] = "Admin Dashboard";
+
+    var customersUrl = Url.Action("DashboardList", "ManageCustomer", new { area = "Administrator" });
+    var employeesUrl = Url.Action("ManageEmployees", "Admin", new { area = "Administrator" });
+    var fridgesUrl = Url.Action("Index", "ManageFridge", new { area = "Administrator" });
+    var locationsUrl = Url.Action("Index", "ManageLocation", new { area = "Administrator" });
 }
 
 <h2 class="mb-4">
@@ -11,7 +16,7 @@
 
     <!-- Customers Card -->
     <div class="col-md-3 mb-3">
-        <a asp-area="Administrator" asp-controller="ManageCustomer" asp-action="Dashboard" class="text-decoration-none d-block">
+        <a href="@customersUrl" style="text-decoration: none;">
             <div class="card text-white bg-primary h-100">
                 <div class="card-header">Customers</div>
                 <div class="card-body">
@@ -24,7 +29,7 @@
 
     <!-- Employees Card -->
     <div class="col-md-3 mb-3">
-        <a asp-area="Administrator" asp-controller="Admin" asp-action="ManageEmployees" class="text-decoration-none d-block">
+        <a href="@employeesUrl" style="text-decoration: none;">
             <div class="card text-white bg-success h-100">
                 <div class="card-header">Employees</div>
                 <div class="card-body">
@@ -37,7 +42,7 @@
 
     <!-- Fridges Card -->
     <div class="col-md-3 mb-3">
-        <a asp-area="Administrator" asp-controller="ManageFridge" asp-action="Index" class="text-decoration-none d-block">
+        <a href="@fridgesUrl" style="text-decoration: none;">
             <div class="card text-white bg-warning h-100">
                 <div class="card-header">Fridges</div>
                 <div class="card-body">
@@ -50,7 +55,7 @@
 
     <!-- Locations Card -->
     <div class="col-md-3 mb-3">
-        <a asp-area="Administrator" asp-controller="ManageLocation" asp-action="Index" class="text-decoration-none d-block">
+        <a href="@locationsUrl" style="text-decoration: none;">
             <div class="card text-white bg-info h-100">
                 <div class="card-header">Locations</div>
                 <div class="card-body">
@@ -62,3 +67,4 @@
     </div>
 
 </div>
+

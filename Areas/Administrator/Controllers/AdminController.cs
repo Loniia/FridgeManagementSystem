@@ -11,18 +11,21 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
     [Authorize(Roles = Roles.Admin)]
     public class AdminController : Controller
     {
-
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly FridgeDbContext _context;
 
-        public AdminController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<int>> roleManager, FridgeDbContext context)
+        public AdminController(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole<int>> roleManager,
+            FridgeDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
         }
 
+        // Default page → Dashboard
         public IActionResult Index()
         {
             return View("Dashboard");
@@ -33,8 +36,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             return View();
         }
 
-
-        // List all employees
+        // 🔹 List all employees
         public async Task<IActionResult> ManageEmployees()
         {
             var employees = await _context.Employees
@@ -44,13 +46,27 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             return View(employees);
         }
 
-        // ✅ GET: Create Employee
+        // 🔹 Details
+        public async Task<IActionResult> DetailsEmployee(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var employee = await _context.Employees
+                .Include(e => e.UserAccount)
+                .FirstOrDefaultAsync(m => m.EmployeeID == id);
+
+            if (employee == null) return NotFound();
+
+            return View(employee);
+        }
+
+        // 🔹 GET: Create
         public IActionResult CreateEmployee()
         {
             return View(new RegisterEmployeeViewModel());
         }
 
-        // ✅ POST: Create Employee
+        // 🔹 POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEmployee(RegisterEmployeeViewModel model)
@@ -60,35 +76,31 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             try
             {
-                // Create ApplicationUser
                 var user = new ApplicationUser
                 {
                     UserName = model.UserName,
                     Email = model.Email,
                     FullName = model.FullName,
                     UserType = Roles.Employee,
-                    EmployeeRole = model.EmployeeRole // <-- important
+                    EmployeeRole = model.EmployeeRole
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
-                    // Ensure "Employee" role exists
                     if (!await _roleManager.RoleExistsAsync(Roles.Employee))
                     {
                         await _roleManager.CreateAsync(new IdentityRole<int>(Roles.Employee));
                     }
 
-                    // Assign role
                     await _userManager.AddToRoleAsync(user, Roles.Employee);
 
-                    // Create Employee entity
                     var employee = new Employee
                     {
                         FullName = model.FullName,
                         ContactInfo = model.Email,
-                        Role = model.EmployeeRole, // <-- store subsystem role
+                        Role = model.EmployeeRole,
                         Status = "Active",
                         ApplicationUserId = user.Id
                     };
@@ -99,7 +111,6 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                     return RedirectToAction(nameof(ManageEmployees));
                 }
 
-                // If errors from Identity
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError("", error.Description);
@@ -112,5 +123,72 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return View(model);
         }
+
+        // 🔹 GET: Edit
+        public async Task<IActionResult> EditEmployee(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null) return NotFound();
+
+            return View(employee);
+        }
+
+        // 🔹 POST: Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditEmployee(int id, Employee employee)
+        {
+            if (id != employee.EmployeeID) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(employee);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(ManageEmployees));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Employees.Any(e => e.EmployeeID == id))
+                        return NotFound();
+                    else
+                        throw;
+                }
+            }
+
+            return View(employee);
+        }
+
+        // 🔹 GET: Delete
+        public async Task<IActionResult> DeleteEmployee(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var employee = await _context.Employees
+                .Include(e => e.UserAccount)
+                .FirstOrDefaultAsync(m => m.EmployeeID == id);
+
+            if (employee == null) return NotFound();
+
+            return View(employee);
+        }
+
+        // 🔹 POST: Delete
+        [HttpPost, ActionName("DeleteEmployee")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteEmployeeConfirmed(int id)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee != null)
+            {
+                _context.Employees.Remove(employee);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(ManageEmployees));
+        }
     }
 }
+
