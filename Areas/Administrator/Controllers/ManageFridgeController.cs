@@ -10,12 +10,12 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 {
     [Area("Administrator")]
     [Authorize(Roles = Roles.Admin)]
-    public class AdminFridgeController : Controller
+    public class ManageFridgeController : Controller
     {
         private readonly FridgeService _fridgeService;
         private readonly FridgeDbContext _context;
 
-        public AdminFridgeController(FridgeService fridgeService, FridgeDbContext context)
+        public ManageFridgeController(FridgeService fridgeService, FridgeDbContext context)
         {
             _fridgeService = fridgeService;
             _context = context;
