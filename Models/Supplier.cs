@@ -36,8 +36,8 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Address is required for delivery and invoicing.")]
         [StringLength(200, ErrorMessage = "Address cannot be longer than 200 characters.")]
         public string Address { get; set; }
-        public int PurchaseOrderID { get; set; }
-        public int QuotationID { get; set; }
+        //public int PurchaseOrderID { get; set; }
+        //public int QuotationID { get; set; }
        
         // Soft delete flag
         public bool IsActive { get; set; } = true;
