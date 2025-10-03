@@ -9,6 +9,8 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 {
     [Area("Administrator")]
     [Authorize(Roles = Roles.Admin)]
+    [Route("Administrator/[controller]")]
+    [Route("Administrator")]
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -26,17 +28,20 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // Default page → Dashboard
+        [HttpGet("Administrator/Admin")]
+        [HttpGet("Administrator")]
         public IActionResult Index()
         {
             return View("Dashboard");
         }
-
+        [HttpGet("Administrator/Admin/Dashboard")]
         public IActionResult Dashboard()
         {
             return View();
         }
 
         // 🔹 List all employees
+        [HttpGet("Administrator/Admin/ManageEmployees")]
         public async Task<IActionResult> ManageEmployees()
         {
             var employees = await _context.Employees
@@ -47,6 +52,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 Details
+        [HttpGet("Administrator/Admin/Details/{id}")]
         public async Task<IActionResult> DetailsEmployee(int? id)
         {
             if (id == null) return NotFound();
@@ -61,6 +67,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 GET: Create
+        [HttpGet("Administrator/Admin/CreateEmployee")]
         public IActionResult CreateEmployee()
         {
             return View(new RegisterEmployeeViewModel());
@@ -69,6 +76,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         // 🔹 POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HttpPost("Administrator/Admin/CreateEmployee")]
         public async Task<IActionResult> CreateEmployee(RegisterEmployeeViewModel model)
         {
             if (!ModelState.IsValid)
@@ -125,6 +133,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 GET: Edit
+        [HttpGet("Administrator/Admin/Edit/{id}")]
         public async Task<IActionResult> EditEmployee(int? id)
         {
             if (id == null) return NotFound();
