@@ -179,4 +179,8 @@ namespace FridgeManagementSystem.Models
         SuperMarket,
         Spaza
     }
+    public enum Method
+    {
+        Card, EFT, CashOnDelivery, Wallet
+    }
 }

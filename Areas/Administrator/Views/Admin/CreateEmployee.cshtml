@@ -1,7 +1,7 @@
 ﻿@model FridgeManagementSystem.Models.RegisterEmployeeViewModel
 
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml"; // or the area-specific layout
+    Layout = "~/Views/Shared/_Layout.cshtml"; 
 }
 
 @{
@@ -16,10 +16,10 @@
                     <i class="bi bi-person-plus-fill me-2"></i> Add New Employee
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="CreateEmployee" method="post" novalidate>
+                    <form asp-action="CreateEmployee" asp-controller="Admin" asp-area="Ädminstrator" method="Post">
                         @Html.AntiForgeryToken()
-                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
-
+    
+                        <!-- all your input fields here -->
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label asp-for="FullName" class="form-label fw-semibold"></label>
@@ -64,12 +64,14 @@
                             </div>
                         </div>
 
+
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm">
                                 <i class="bi bi-person-plus me-2"></i> Register Employee
                             </button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

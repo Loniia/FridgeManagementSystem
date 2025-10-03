@@ -56,6 +56,19 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CategoryName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.CategoryId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Locations",
                 columns: table => new
                 {
@@ -212,6 +225,28 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    ProductId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.ProductId);
+                    table.ForeignKey(
+                        name: "FK_Products_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "CategoryId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Customers",
                 columns: table => new
                 {
@@ -275,26 +310,19 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BussinessInfo",
+                name: "Carts",
                 columns: table => new
                 {
-                    BusinessInfoId = table.Column<int>(type: "int", nullable: false)
+                    CartId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CompanyName = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    RegistrationNumber = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    TaxNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    LogoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    CustomerID = table.Column<int>(type: "int", nullable: false)
+                    CustomerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BussinessInfo", x => x.BusinessInfoId);
+                    table.PrimaryKey("PK_Carts", x => x.CartId);
                     table.ForeignKey(
-                        name: "FK_BussinessInfo_Customers_CustomerID",
-                        column: x => x.CustomerID,
+                        name: "FK_Carts_Customers_CustomerId",
+                        column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "CustomerID");
                 });
@@ -337,8 +365,8 @@ namespace FridgeManagementSystem.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateAdded = table.Column<DateOnly>(type: "date", nullable: false),
                     SupplierID = table.Column<int>(type: "int", nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    LocationId = table.Column<int>(type: "int", nullable: false),
+                    CustomerId = table.Column<int>(type: "int", nullable: true),
+                    LocationId = table.Column<int>(type: "int", nullable: true),
                     FaultID = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     DeliveryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -352,7 +380,8 @@ namespace FridgeManagementSystem.Migrations
                         name: "FK_Fridge_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
-                        principalColumn: "CustomerID");
+                        principalColumn: "CustomerID",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Fridge_Locations_LocationId",
                         column: x => x.LocationId,
@@ -363,6 +392,74 @@ namespace FridgeManagementSystem.Migrations
                         column: x => x.SupplierID,
                         principalTable: "Suppliers",
                         principalColumn: "SupplierID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    OrderId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DeliveryAddress = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.OrderId);
+                    table.ForeignKey(
+                        name: "FK_Orders_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    ReviewId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerID");
+                    table.ForeignKey(
+                        name: "FK_Reviews_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CartItems",
+                columns: table => new
+                {
+                    CartItemId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CartId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CartItems", x => x.CartItemId);
+                    table.ForeignKey(
+                        name: "FK_CartItems_Carts_CartId",
+                        column: x => x.CartId,
+                        principalTable: "Carts",
+                        principalColumn: "CartId");
                 });
 
             migrationBuilder.CreateTable(
@@ -401,7 +498,8 @@ namespace FridgeManagementSystem.Migrations
                         name: "FK_Faults_Fridge_FridgeId",
                         column: x => x.FridgeId,
                         principalTable: "Fridge",
-                        principalColumn: "FridgeId");
+                        principalColumn: "FridgeId",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -492,6 +590,49 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrderItems",
+                columns: table => new
+                {
+                    OrderItemId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => x.OrderItemId);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    PaymentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Method = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.PaymentId);
+                    table.ForeignKey(
+                        name: "FK_Payments_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RepairSchedules",
                 columns: table => new
                 {
@@ -515,8 +656,7 @@ namespace FridgeManagementSystem.Migrations
                     RepairDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Employee = table.Column<int>(type: "int", nullable: true),
-                    FaultID1 = table.Column<int>(type: "int", nullable: true)
+                    Employee = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -529,11 +669,6 @@ namespace FridgeManagementSystem.Migrations
                     table.ForeignKey(
                         name: "FK_RepairSchedules_Faults_FaultID",
                         column: x => x.FaultID,
-                        principalTable: "Faults",
-                        principalColumn: "FaultID");
-                    table.ForeignKey(
-                        name: "FK_RepairSchedules_Faults_FaultID1",
-                        column: x => x.FaultID1,
                         principalTable: "Faults",
                         principalColumn: "FaultID");
                     table.ForeignKey(
@@ -862,9 +997,15 @@ namespace FridgeManagementSystem.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BussinessInfo_CustomerID",
-                table: "BussinessInfo",
-                column: "CustomerID");
+                name: "IX_CartItems_CartId",
+                table: "CartItems",
+                column: "CartId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Carts_CustomerId",
+                table: "Carts",
+                column: "CustomerId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ComponentUsed_MaintenanceVisitId",
@@ -958,7 +1099,8 @@ namespace FridgeManagementSystem.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Fridge_SupplierID",
                 table: "Fridge",
-                column: "SupplierID");
+                column: "SupplierID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_FridgeAllocation_CustomerID",
@@ -1002,6 +1144,27 @@ namespace FridgeManagementSystem.Migrations
                 table: "MaintenanceVisit",
                 column: "MaintenanceRequestId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CustomerId",
+                table: "Orders",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_OrderId",
+                table: "Payments",
+                column: "OrderId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_CategoryId",
+                table: "Products",
+                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrders_QuotationID",
@@ -1049,11 +1212,6 @@ namespace FridgeManagementSystem.Migrations
                 column: "FaultID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RepairSchedules_FaultID1",
-                table: "RepairSchedules",
-                column: "FaultID1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RepairSchedules_FridgeId",
                 table: "RepairSchedules",
                 column: "FridgeId");
@@ -1062,6 +1220,16 @@ namespace FridgeManagementSystem.Migrations
                 name: "IX_RequestsForQuotation_PurchaseRequestID",
                 table: "RequestsForQuotation",
                 column: "PurchaseRequestID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_CustomerId",
+                table: "Reviews",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_ProductId",
+                table: "Reviews",
+                column: "ProductId");
         }
 
         /// <inheritdoc />
@@ -1083,7 +1251,7 @@ namespace FridgeManagementSystem.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "BussinessInfo");
+                name: "CartItems");
 
             migrationBuilder.DropTable(
                 name: "ComponentUsed");
@@ -1107,7 +1275,16 @@ namespace FridgeManagementSystem.Migrations
                 name: "MenuItems");
 
             migrationBuilder.DropTable(
+                name: "OrderItems");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
+
+            migrationBuilder.DropTable(
                 name: "RepairSchedules");
+
+            migrationBuilder.DropTable(
+                name: "Reviews");
 
             migrationBuilder.DropTable(
                 name: "ScrappedFridges");
@@ -1116,13 +1293,22 @@ namespace FridgeManagementSystem.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Carts");
+
+            migrationBuilder.DropTable(
                 name: "PurchaseOrders");
 
             migrationBuilder.DropTable(
                 name: "MaintenanceVisit");
 
             migrationBuilder.DropTable(
+                name: "Orders");
+
+            migrationBuilder.DropTable(
                 name: "Faults");
+
+            migrationBuilder.DropTable(
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Quotations");
@@ -1132,6 +1318,9 @@ namespace FridgeManagementSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "Employees");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "RequestsForQuotation");

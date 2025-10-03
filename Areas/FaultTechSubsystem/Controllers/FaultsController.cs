@@ -80,7 +80,7 @@ namespace FridgeManagementSystem.Controllers
                 .FirstOrDefaultAsync(r => r.FaultID == id) ?? new RepairSchedule
                 {
                     FaultID = fault.FaultID,
-                    FridgeId = fault.FridgeId,
+                    FridgeId = fault.FridgeId ?? 0,
                     Status = "Diagnosing"
                 };
 
@@ -228,7 +228,7 @@ namespace FridgeManagementSystem.Controllers
                 .FirstOrDefaultAsync(r => r.FaultID == id) ?? new RepairSchedule
                 {
                     FaultID = fault.FaultID,
-                    FridgeId = fault.FridgeId,
+                    FridgeId = fault.FridgeId ?? 0,
                     Status = "Repairing"
                 };
 

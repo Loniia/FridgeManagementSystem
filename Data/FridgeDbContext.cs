@@ -34,6 +34,16 @@ namespace FridgeManagementSystem.Data
         public DbSet<Quotation> Quotations { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<DeliveryNote> DeliveryNotes { get; set; }
+        // Customer E-Commerce Tables by Idah
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -129,6 +139,55 @@ namespace FridgeManagementSystem.Data
             builder.Entity<Fridge>()
                 .HasIndex(f => f.SupplierID)
                 .IsUnique();
+            // --- Category -> Product (1-to-many) ---
+            builder.Entity<Category>()
+                .HasMany(c => c.Products)
+                .WithOne(p => p.Category)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Product -> Review (1-to-many) ---
+            builder.Entity<Product>()
+                .HasMany(p => p.Reviews)
+                .WithOne(r => r.Product)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Customer -> Cart (1-to-1) ---
+            builder.Entity<Customer>()
+                .HasOne<Cart>()
+                .WithOne()
+                .HasForeignKey<Cart>(c => c.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Cart -> CartItem (1-to-many) ---
+            builder.Entity<Cart>()
+                .HasMany(c => c.Items)
+                .WithOne()
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Customer -> Order (1-to-many) ---
+            builder.Entity<Customer>()
+                .HasMany<Order>()
+                .WithOne()
+                .HasForeignKey(o => o.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Order -> OrderItem (1-to-many) ---
+            builder.Entity<Order>()
+                .HasMany(o => o.Items)
+                .WithOne()
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Order -> Payment (1-to-1 or 1-to-many) ---
+            builder.Entity<Order>()
+                .HasOne<Payment>()
+                .WithOne()
+                .HasForeignKey<Payment>(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             // --- Soft Delete / Query Filters ---
             builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
@@ -176,6 +235,11 @@ namespace FridgeManagementSystem.Data
             builder.Entity<FaultReport>()
                 .Property(f => f.FaultType)
                 .HasConversion<string>();
+            builder.Entity<Payment>()
+                .Property(p => p.Method)
+                .HasConversion<string>();
+
+
 
             // Set default delete behavior to NoAction for any unspecified relationships
             foreach (var relationship in builder.Model.GetEntityTypes()

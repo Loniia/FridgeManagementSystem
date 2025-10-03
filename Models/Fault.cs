@@ -65,7 +65,7 @@ namespace FridgeManagementSystem.Models
         public string Category { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Fridge is required")]
-        public int FridgeId { get; set; }
+        public int? FridgeId { get; set; }
         public virtual Fridge Fridge { get; set; }
 
         // Navigation property for related repair schedules
