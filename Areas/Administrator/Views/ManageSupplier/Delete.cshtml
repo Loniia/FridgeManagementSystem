@@ -1,0 +1,170 @@
+﻿@model FridgeManagementSystem.Models.Supplier
+
+@{
+    ViewData["Title"] = "Delete Supplier";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <style>
+        .fridge-theme {
+            --primary: #4CC9F0;
+            --danger: #F72585;
+        }
+
+        .cute-header {
+            background: linear-gradient(135deg, var(--danger) 0%, #FF6B9D 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(247, 37, 133, 0.3);
+        }
+
+        .warning-card {
+            background: white;
+            border-radius: 25px;
+            border: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .warning-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--danger), #FF6B9D);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            margin: 0 auto 2rem;
+        }
+
+        .supplier-info {
+            background: linear-gradient(135deg, #fff5f7, #ffeef2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 4px solid var(--danger);
+        }
+
+        .cute-btn {
+            border-radius: 50px;
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+
+        .cute-btn-danger {
+            background: linear-gradient(135deg, var(--danger), #FF6B9D);
+            color: white;
+        }
+
+            .cute-btn-danger:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 25px rgba(247, 37, 133, 0.4);
+            }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="fridge-theme">
+    <div class="container-fluid py-4">
+        <!-- Cute Header -->
+        <div class="cute-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="text-white mb-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Delete Supplier
+                    </h1>
+                    <p class="text-white mb-0 opacity-8">
+                        Important action requiring confirmation! ⚠️
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <a asp-action="Index" class="btn btn-light btn-lg rounded-pill">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Safety
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="warning-card pulse">
+                    <!-- Warning Icon -->
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation"></i>
+                    </div>
+
+                    <!-- Warning Message -->
+                    <h2 class="text-danger mb-3">Wait! 🛑</h2>
+                    <p class="fs-5 text-muted mb-4">
+                        You're about to remove a supplier from your refrigerator network. This action will soft-delete the supplier.
+                    </p>
+
+                    <!-- Supplier Information -->
+                    <div class="supplier-info">
+                        <h4 class="text-danger mb-3">"@Model.Name"</h4>
+                        <div class="row text-start">
+                            <div class="col-6">
+                                <strong>Contact:</strong><br>
+                                @Model.ContactPerson
+                            </div>
+                            <div class="col-6">
+                                <strong>Email:</strong><br>
+                                @Model.Email
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Impact Warning -->
+                    <div class="alert alert-warning rounded-3 mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> Historical data will be preserved, but this supplier will no longer appear in active lists.
+                    </div>
+
+                    <!-- Delete Form -->
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="SupplierID" />
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a asp-action="Details" asp-route-id="@Model.SupplierID" class="cute-btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="cute-btn cute-btn-danger">
+                                <i class="fas fa-trash me-2"></i>Confirm Delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,360 @@
+﻿@model FridgeManagementSystem.Models.Supplier
+
+@{
+    ViewData["Title"] = "Add New Supplier";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <style>
+        .fridge-theme {
+            --primary: #4CC9F0;
+            --secondary: #4361EE;
+            --accent: #7209B7;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F72585;
+        }
+
+        .cute-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(76, 201, 240, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cute-header::before {
+            content: '❄️🚚';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 8rem;
+            opacity: 0.1;
+            transform: rotate(15deg);
+        }
+
+        .cute-form-card {
+            background: white;
+            border-radius: 25px;
+            border: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .form-section {
+            padding: 2.5rem;
+            border-bottom: 2px dashed #f0f0f0;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .form-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cute-input {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .cute-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.3rem rgba(76, 201, 240, 0.1);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .cute-btn {
+            border-radius: 50px;
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cute-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s;
+        }
+
+        .cute-btn:hover::before {
+            left: 100%;
+        }
+
+        .cute-btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .cute-btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(76, 201, 240, 0.4);
+        }
+
+        .cute-btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .cute-btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+        }
+
+        .floating-label {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .floating-label label {
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: white;
+            padding: 0 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1;
+        }
+
+        .validation-cute {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .validation-cute .text-danger {
+            color: var(--danger) !important;
+            font-weight: 500;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: 600;
+            color: #6c757d;
+            position: relative;
+        }
+
+        .step.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            transform: scale(1.2);
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 40px;
+            height: 2px;
+            background: #e9ecef;
+            transform: translateY(-50%);
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating-emoji {
+            animation: float 3s ease-in-out infinite;
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="fridge-theme">
+    <div class="container-fluid py-4">
+        <!-- Cute Header -->
+        <div class="cute-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="text-white mb-2">
+                        <span class="floating-emoji">🚚</span>
+                        Add New Supplier
+                    </h1>
+                    <p class="text-white mb-0 opacity-8">
+                        Let's add a new refrigerator supplier to your cool network! ❄️
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <a asp-action="Index" class="cute-btn cute-btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Suppliers
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active">1</div>
+            <div class="step">2</div>
+            <div class="step">3</div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-lg-10">
+                <div class="cute-form-card">
+                    <!-- Form Header -->
+                    <div class="form-section text-center" style="background: linear-gradient(135deg, #f8fdff, #f0f8ff);">
+                        <div class="form-icon mx-auto">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <h3 class="text-primary mb-2">Supplier Information</h3>
+                        <p class="text-muted">Fill in the details to add a new refrigerator supplier 🎯</p>
+                    </div>
+
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mx-4 mt-4 rounded-3"></div>
+                        
+                        <!-- Basic Information Section -->
+                        <div class="form-section">
+                            <h5 class="text-primary mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Basic Information
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="floating-label">
+                                        <label for="Name">Supplier Name</label>
+                                        <input asp-for="Name" class="form-control cute-input" placeholder="Cool Fridge Co." />
+                                        <span asp-validation-for="Name" class="validation-cute">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            <span class="text-danger"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label">
+                                        <label for="ContactPerson">Contact Person</label>
+                                        <input asp-for="ContactPerson" class="form-control cute-input" placeholder="John Snow" />
+                                        <span asp-validation-for="ContactPerson" class="validation-cute">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            <span class="text-danger"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="form-section">
+                            <h5 class="text-primary mb-4">
+                                <i class="fas fa-address-book me-2"></i>
+                                Contact Information
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="floating-label">
+                                        <label for="Email">Email Address</label>
+                                        <input asp-for="Email" type="email" class="form-control cute-input" placeholder="hello@coolfridges.com" />
+                                        <span asp-validation-for="Email" class="validation-cute">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            <span class="text-danger"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="floating-label">
+                                        <label for="Phone">Phone Number</label>
+                                        <input asp-for="Phone" class="form-control cute-input" placeholder="+27 12 345 6789" />
+                                        <span asp-validation-for="Phone" class="validation-cute">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            <span class="text-danger"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address Section -->
+                        <div class="form-section">
+                            <h5 class="text-primary mb-4">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Physical Address
+                            </h5>
+                            
+                            <div class="floating-label">
+                                <label for="Address">Delivery Address</label>
+                                <textarea asp-for="Address" class="form-control cute-input" rows="4" 
+                                          placeholder="Enter the full physical address for refrigerator deliveries..."></textarea>
+                                <span asp-validation-for="Address" class="validation-cute">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    <span class="text-danger"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-section text-center py-4">
+                            <div class="d-flex gap-3 justify-content-center">
+                                <a asp-action="Index" class="cute-btn cute-btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="cute-btn cute-btn-primary">
+                                    <i class="fas fa-save me-2"></i>Create Supplier
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
