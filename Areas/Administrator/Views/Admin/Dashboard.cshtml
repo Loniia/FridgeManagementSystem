@@ -6,6 +6,7 @@
     var employeesUrl = Url.Action("ManageEmployees", "Admin", new { area = "Administrator" });
     var fridgesUrl = Url.Action("Index", "ManageFridge", new { area = "Administrator" });
     var locationsUrl = Url.Action("Index", "ManageLocation", new { area = "Administrator" });
+    var suppliersUrl = Url.Action("Index", "ManageSupplier", new { area = "Administrator" });
 }
 
 <h2 class="mb-4">
@@ -65,6 +66,17 @@
             </div>
         </a>
     </div>
-
+    <!-- Suppliers Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@suppliersUrl" style="text-decoration: none;">
+            <div class="card text-white bg-secondary h-100">
+                <div class="card-header">Suppliers</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Suppliers</h5>
+                    <p class="card-text">Add, edit, or remove refrigerator suppliers.</p>
+                </div>
+            </div>
+        </a>
+    </div>
 </div>
 
