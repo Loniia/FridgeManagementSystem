@@ -460,6 +460,11 @@ namespace FridgeManagementSystem.Migrations
                         column: x => x.CartId,
                         principalTable: "Carts",
                         principalColumn: "CartId");
+                    table.ForeignKey(
+                        name: "FK_CartItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId");
                 });
 
             migrationBuilder.CreateTable(
@@ -608,6 +613,11 @@ namespace FridgeManagementSystem.Migrations
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "OrderId");
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Products_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId");
                 });
 
             migrationBuilder.CreateTable(
@@ -1000,6 +1010,11 @@ namespace FridgeManagementSystem.Migrations
                 name: "IX_CartItems_CartId",
                 table: "CartItems",
                 column: "CartId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CartItems_ProductId",
+                table: "CartItems",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Carts_CustomerId",

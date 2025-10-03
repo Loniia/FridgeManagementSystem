@@ -139,6 +139,8 @@ namespace FridgeManagementSystem.Migrations
 
                     b.HasIndex("CartId");
 
+                    b.HasIndex("ProductId");
+
                     b.ToTable("CartItems");
                 });
 
@@ -1496,6 +1498,14 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("FridgeManagementSystem.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.ComponentUsed", b =>
@@ -1743,6 +1753,14 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("FridgeManagementSystem.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Payment", b =>

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    [Migration("20251003225635_FridgeDb")]
+    [Migration("20251003232817_FridgeDb")]
     partial class FridgeDb
     {
         /// <inheritdoc />
@@ -141,6 +141,8 @@ namespace FridgeManagementSystem.Migrations
                     b.HasKey("CartItemId");
 
                     b.HasIndex("CartId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("CartItems");
                 });
@@ -1499,6 +1501,14 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("FridgeManagementSystem.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.ComponentUsed", b =>
@@ -1746,6 +1756,14 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("FridgeManagementSystem.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Payment", b =>
