@@ -1,80 +1,30 @@
 ﻿@model FridgeManagementSystem.Models.Fridge
+
 @{
-    ViewData["Title"] = "Add New Fridge";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Create Fridge";
 }
 
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Add New Fridge</h1>
-        <a asp-action="Index" class="btn btn-secondary btn-icon-split">
-            <span class="icon text-white-50">
-                <i class="fas fa-arrow-left"></i>
-            </span>
-            <span class="text">Back to List</span>
-        </a>
+<h2>Add New Fridge</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="SerialNumber" class="control-label"></label>
+        <input asp-for="SerialNumber" class="form-control" />
+        <span asp-validation-for="SerialNumber" class="text-danger"></span>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Fridge Information</h6>
-        </div>
-        <div class="card-body">
-            <form asp-action="Create" method="post">
-                @Html.AntiForgeryToken()
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="SerialNumber" class="control-label">Serial Number</label>
-                            <input asp-for="SerialNumber" class="form-control" />
-                            <span asp-validation-for="SerialNumber" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="Model" class="control-label">Model</label>
-                            <input asp-for="Model" class="form-control" />
-                            <span asp-validation-for="Model" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="SupplierID" class="control-label">Supplier</label>
-                            <select asp-for="SupplierID" class="form-control" asp-items="ViewBag.Suppliers">
-                                <option value="">-- Select Supplier --</option>
-                            </select>
-                            <span asp-validation-for="SupplierID" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="LocationId" class="control-label">Location</label>
-                            <select asp-for="LocationId" class="form-control" asp-items="ViewBag.Locations">
-                                <option value="">-- Select Location --</option>
-                            </select>
-                            <span asp-validation-for="LocationId" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary btn-icon-split">
-                        <span class="icon text-white-50">
-                            <i class="fas fa-save"></i>
-                        </span>
-                        <span class="text">Create Fridge</span>
-                    </button>
-                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
+    <div class="form-group">
+        <label>Supplier</label>
+        <select asp-for="SupplierID" asp-items="ViewBag.Suppliers" class="form-control"></select>
     </div>
-</div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
+    <div class="form-group">
+        <label>Location</label>
+        <select asp-for="LocationId" asp-items="ViewBag.Locations" class="form-control"></select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
 
 

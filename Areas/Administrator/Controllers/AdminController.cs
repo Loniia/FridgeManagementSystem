@@ -52,7 +52,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 Details
-        [HttpGet("Administrator/Admin/ManageEmployees/Details/{id}")]
+        [HttpGet("Administrator/Admin/Details/{id}")]
         public async Task<IActionResult> DetailsEmployee(int? id)
         {
             if (id == null) return NotFound();
@@ -67,7 +67,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 GET: Create
-        [HttpGet("Administrator/Admin/ManageEmployees/CreateEmployee")]
+        [HttpGet("Administrator/Admin/CreateEmployee")]
         public IActionResult CreateEmployee()
         {
             return View(new RegisterEmployeeViewModel());
@@ -76,7 +76,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         // 🔹 POST: Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HttpPost("Administrator/Admin/ManageEmployees/CreateEmployee")]
+        [HttpPost("Administrator/Admin/CreateEmployee")]
         public async Task<IActionResult> CreateEmployee(RegisterEmployeeViewModel model)
         {
             if (!ModelState.IsValid)
@@ -133,7 +133,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 GET: Edit
-        [HttpGet("Administrator/Admin/ManageEmployees/Edit/{id}")]
+        [HttpGet("Administrator/Admin/Edit/{id}")]
         public async Task<IActionResult> EditEmployee(int? id)
         {
             if (id == null) return NotFound();
@@ -145,7 +145,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 POST: Edit
-        [HttpPost("Administrator/Admin/ManageEmployees/Edit/{id}")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditEmployee(int id, Employee employee)
         {
@@ -172,7 +172,6 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 GET: Delete
-        [HttpGet("Administrator/Admin/ManageEmployees/Delete/{id}")]
         public async Task<IActionResult> DeleteEmployee(int? id)
         {
             if (id == null) return NotFound();
@@ -187,7 +186,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         // 🔹 POST: Delete
-        [HttpPost("Administrator/Admin/ManageEmployees/Delete/{id}")]
+        [HttpPost, ActionName("DeleteEmployee")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteEmployeeConfirmed(int id)
         {
