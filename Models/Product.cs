@@ -30,5 +30,7 @@ namespace FridgeManagementSystem.Models
         public Category Category { get; set; }
 
         public virtual ICollection<Review> Reviews { get; set; }
+        // Add this property
+        public virtual ICollection<Inventory> Inventory { get; set; }
     }
 }

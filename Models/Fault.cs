@@ -63,9 +63,7 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Category is required")]
         [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]
         public string Category { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Fridge is required")]
-        public int? FridgeId { get; set; }
+        public int FridgeId { get; set; }
         public virtual Fridge Fridge { get; set; }
 
         // Navigation property for related repair schedules

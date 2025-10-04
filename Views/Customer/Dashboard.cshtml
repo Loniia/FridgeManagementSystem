@@ -1,4 +1,174 @@
 ﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #ffffff; /* white background */
+        color: #333;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 220px;
+        background-color: #3a3a3a;
+        color: #fff;
+        padding-top: 20px;
+    }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+            .sidebar ul li {
+                padding: 15px 20px;
+                margin-bottom: 5px;
+                border-radius: 4px;
+                background-color: #3a3a3a;
+                transition: all 0.3s;
+            }
+
+                .sidebar ul li:hover, .sidebar ul li.active {
+                    background-color: #d3d3d3;
+                    color: #000;
+                }
+
+                .sidebar ul li a {
+                    text-decoration: none;
+                    color: inherit;
+                    display: block;
+                }
+
+    /* Main content */
+    .main-content {
+        margin-left: 220px;
+        padding: 30px;
+    }
+
+    .dashboard-welcome {
+        margin-bottom: 30px;
+    }
+
+    /* Colorful cards */
+    .card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+    /* Product cards */
+    .product-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        transition: transform 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        .product-card:hover {
+            transform: scale(1.05);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-card h4 {
+            margin: 10px 0 5px 0;
+        }
+
+        .product-card p {
+            margin: 5px 0;
+        }
+
+        .product-card .btn-primary {
+            background-color: #2196f3;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: #fff;
+            text-decoration: none;
+        }
+</style>
+
+<div class="sidebar">
+    <h2>Customer</h2>
+    <ul id="sidebar-menu">
+        <li class="active"><a asp-action="Dashboard" asp-controller="Customer">Home</a></li>
+        <li><a asp-action="ViewCart" asp-controller="Customer">My Cart</a></li>
+        <li><a asp-action="Checkout" asp-controller="Customer">Checkout</a></li>
+        <li><a asp-action="MyAccount" asp-controller="Customer">My Orders</a></li>
+        <li><a asp-action="TrackOrder" asp-controller="Customer">Track Order</a></li>
+        <li><a asp-controller="Account" asp-action="Logout">Sign Out</a></li>
+    </ul>
+</div>
+
+<div class="main-content">
+    <div class="dashboard-welcome">
+        <h2>Welcome, @(User.Identity?.Name ?? "Guest")</h2>
+        <p>This is your customer dashboard.</p>
+    </div>
+
+    <!-- ---------------- Product display section ---------------- -->
+    <h3>Available Fridges / Products</h3>
+    <div class="row">
+        @foreach (var categoryVm in Model.Categories)
+        {
+            <h4>@categoryVm.Category.Name</h4>
+            <div class="d-flex flex-wrap">
+                @foreach (var productVm in categoryVm.Products)
+                {
+                    <div class="product-card">
+                        <p>@productVm.Product.Name</p>
+                        <p>Price: @productVm.Product.Price</p>
+                        <p>Available Stock: @productVm.AvailableStock</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sidebar active highlight
+        const sidebarItems = document.querySelectorAll("#sidebar-menu li");
+        sidebarItems.forEach(item => {
+            item.addEventListener("click", () => {
+                sidebarItems.forEach(i => i.classList.remove("active"));
+                item.classList.add("active");
+            });
+        });
+    </script>
+}
+
+
+@* @{
     ViewData["Title"] = "Customer Dashboard";
 }
 
@@ -168,4 +338,4 @@
         });
     </script>
 }
-
+ *@

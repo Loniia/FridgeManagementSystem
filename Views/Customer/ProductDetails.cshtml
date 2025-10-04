@@ -1,0 +1,42 @@
+﻿@model FridgeManagementSystem.Models.Product
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" style="height:400px; object-fit:cover;">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h2>@Model.Name</h2>
+        <h4 class="text-success">@Model.Price.ToString("C")</h4>
+        <p>@Model.Description</p>
+
+        <form asp-action="AddToCart" method="post" class="mb-4">
+            <input type="hidden" name="productId" value="@Model.ProductId" />
+            <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" style="width:120px;" />
+            <button type="submit" class="btn btn-success">Add to Cart</button>
+        </form>
+
+        <h5>Customer Reviews</h5>
+        <div class="list-group">
+            @if (Model.Reviews != null && Model.Reviews.Any())
+            {
+                @foreach (var review in Model.Reviews)
+                {
+                    <div class="list-group-item mb-2 shadow-sm">
+                        <strong>@review.Rating/5</strong> - @review.Comment
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No reviews yet.</p>
+            }
+        </div>
+    </div>
+</div>
+

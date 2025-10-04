@@ -1,6 +1,8 @@
-﻿using FridgeManagementSystem.Models;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using FridgeManagementSystem.Models;
 
 namespace FridgeManagementSystem.Controllers
 {
@@ -60,6 +62,7 @@ namespace FridgeManagementSystem.Controllers
             // Customer
             if (roles.Contains(Roles.Customer))
             {
+                // No manual claims needed — Identity automatically adds ClaimTypes.NameIdentifier
                 return RedirectToAction("Dashboard", "Customer");
             }
 
@@ -130,7 +133,7 @@ namespace FridgeManagementSystem.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login","Account");
+            return RedirectToAction("Login", "Account");
         }
 
         // ✅ Access Denied

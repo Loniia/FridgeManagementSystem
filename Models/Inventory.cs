@@ -18,6 +18,11 @@ namespace FridgeManagementSystem.Models
 
         [DataType(DataType.DateTime)]
         public DateTime LastUpdated { get; set; } = DateTime.Now;
+        [Required]
+        public int ProductId { get; set; }   // Foreign key to Product
+
+        [ForeignKey("ProductId")]
+        public virtual Product Product { get; set; }
 
         //[Required]
         //[Range(1, int.MaxValue, ErrorMessage = "Reorder point must be at least 1")]

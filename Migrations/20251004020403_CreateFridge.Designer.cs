@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    [Migration("20251003232817_FridgeDb")]
-    partial class FridgeDb
+    [Migration("20251004020403_CreateFridge")]
+    partial class CreateFridge
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -416,8 +416,7 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("FridgeId")
-                        .IsRequired()
+                    b.Property<int>("FridgeId")
                         .HasColumnType("int");
 
                     b.Property<string>("InitialAssessment")
@@ -655,6 +654,9 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -662,6 +664,8 @@ namespace FridgeManagementSystem.Migrations
 
                     b.HasIndex("FridgeID")
                         .IsUnique();
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Inventory");
                 });
@@ -1597,9 +1601,9 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("EmployeeID");
 
                     b.HasOne("FridgeManagementSystem.Models.Fridge", "Fridge")
-                        .WithMany("Fault")
+                        .WithMany("Faults")
                         .HasForeignKey("FridgeId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Fridge");
@@ -1688,7 +1692,15 @@ namespace FridgeManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("FridgeManagementSystem.Models.Product", "Product")
+                        .WithMany("Inventory")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("Fridge");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.MaintenanceChecklist", b =>
@@ -2010,9 +2022,9 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Fridge", b =>
                 {
-                    b.Navigation("Fault");
-
                     b.Navigation("FaultReport");
+
+                    b.Navigation("Faults");
 
                     b.Navigation("FridgeAllocation");
 
@@ -2061,6 +2073,8 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Product", b =>
                 {
+                    b.Navigation("Inventory");
+
                     b.Navigation("Reviews");
                 });
 

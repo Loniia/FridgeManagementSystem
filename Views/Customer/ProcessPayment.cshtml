@@ -1,0 +1,58 @@
+﻿@model FridgeManagementSystem.ViewModels.PaymentViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Payment";
+}
+
+<h2 class="mb-4 text-center">Payment</h2>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm p-4">
+            <h4 class="mb-3">Order #@Model.OrderId - Amount: @Model.Amount.ToString("C")</h4>
+
+            <form asp-action="ProcessPayment" method="post">
+                <input type="hidden" asp-for="OrderId" />
+                <input type="hidden" asp-for="Amount" />
+
+                <div class="mb-3">
+                    <label asp-for="Method" class="form-label">Payment Method</label>
+                    <select asp-for="Method" class="form-select">
+                        <option value="">Select Method</option>
+                        <option value="Card">Card</option>
+                        <option value="EFT">EFT</option>
+                        <option value="CashOnDelivery">Cash on Delivery</option>
+                        <option value="Wallet">Wallet / Store Credit</option>
+                    </select>
+                    <span asp-validation-for="Method" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3" id="card-details" style="display:none;">
+                    <label class="form-label">Card Number</label>
+                    <input type="text" class="form-control" placeholder="xxxx-xxxx-xxxx-xxxx" />
+                    <label class="form-label mt-2">Expiry</label>
+                    <input type="month" class="form-control" />
+                    <label class="form-label mt-2">CVV</label>
+                    <input type="text" class="form-control" placeholder="xxx" />
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 mt-3">Pay Now</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const methodSelect = document.querySelector('select[name="Method"]');
+        const cardDetails = document.getElementById('card-details');
+
+        methodSelect.addEventListener('change', () => {
+            if (methodSelect.value === 'Card') {
+                cardDetails.style.display = 'block';
+            } else {
+                cardDetails.style.display = 'none';
+            }
+        });
+    </script>
+}

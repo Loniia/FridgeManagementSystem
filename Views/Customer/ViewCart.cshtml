@@ -1,0 +1,44 @@
+﻿@model FridgeManagementSystem.Models.Cart
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Your Cart";
+}
+
+<h2 class="mb-4">Shopping Cart</h2>
+
+@if (Model.Items == null || !Model.Items.Any())
+{
+    <p class="text-muted">Your cart is empty.</p>
+}
+else
+{
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle mb-4">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.Product.Name</td>
+                        <td>@item.Product.Price.ToString("C")</td>
+                        <td>@item.Quantity</td>
+                        <td>@(item.Product.Price * item.Quantity).ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Total: @Model.Items.Sum(i => i.Product.Price * i.Quantity).ToString("C")</h4>
+        <a asp-action="Checkout" class="btn btn-primary btn-lg">Proceed to Checkout</a>
+    </div>
+}
+
