@@ -146,6 +146,11 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<Product>()
+                .HasMany(p => p.Inventory) 
+                .WithOne(i => i.Product)
+                .HasForeignKey(i => i.ProductId);
+
             // --- Product -> Review (1-to-many) ---
             builder.Entity<Product>()
                 .HasMany(p => p.Reviews)

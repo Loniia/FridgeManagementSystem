@@ -21,9 +21,9 @@ public class CustomerController : Controller
     {
         var categories = await _context.Categories
             .Include(c => c.Products)
+                .ThenInclude(p => p.Inventory)
             .ToListAsync();
 
-        // Recommendations: simple example using past purchases
         var customerId = GetLoggedInCustomerId();
         var purchasedProductIds = await _context.Orders
             .Where(o => o.CustomerId == customerId)
@@ -34,14 +34,61 @@ public class CustomerController : Controller
             .Where(p => purchasedProductIds.Contains(p.ProductId))
             .ToListAsync();
 
+        // Map categories and products to view models
+        var categoriesVm = categories.Select(c => new CategoryViewModel
+        {
+            Category = c,
+            Products = c.Products.Select(p => new ProductViewModel
+            {
+                Product = p,
+                AvailableStock = p.Inventory?.Sum(inv => inv.Quantity) ?? 0
+            }).ToList()
+        }).ToList();
+
         var vm = new DashboardViewModel
         {
-            Categories = categories,
+            Categories = categoriesVm,
             RecommendedProducts = recommendedProducts
         };
 
         return View(vm);
     }
+
+    //public async Task<IActionResult> Dashboard()
+    //{
+    //    // Include categories and their products
+    //    var categories = await _context.Categories
+    //        .Include(c => c.Products)
+    //            .ThenInclude(p => p.Inventory) // Include inventory
+    //        .ToListAsync();
+
+    //    // Filter products with available stock
+    //    foreach (var category in categories)
+    //    {
+    //        category.Products = category.Products
+    //            .Where(p => p.Inventory.Any(i => i.Quantity > 0))
+    //            .ToList();
+    //    }
+
+    //    // Recommendations based on past purchases
+    //    var customerId = GetLoggedInCustomerId();
+    //    var purchasedProductIds = await _context.Orders
+    //        .Where(o => o.CustomerId == customerId)
+    //        .SelectMany(o => o.Items.Select(i => i.ProductId))
+    //        .ToListAsync();
+
+    //    var recommendedProducts = await _context.Products
+    //        .Where(p => purchasedProductIds.Contains(p.ProductId) && p.Inventory.Any(i => i.Quantity > 0))
+    //        .ToListAsync();
+
+    //    var vm = new DashboardViewModel
+    //    {
+    //        Categories = categories,
+    //        RecommendedProducts = recommendedProducts
+    //    };
+
+    //    return View(vm);
+    //}
 
     // --------------------------
     // 2. Browse Category

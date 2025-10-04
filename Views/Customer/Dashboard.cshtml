@@ -17,6 +17,238 @@
         left: 0;
         height: 100%;
         width: 220px;
+        background-color: #3a3a3a;
+        color: #fff;
+        padding-top: 20px;
+    }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+            .sidebar ul li {
+                padding: 15px 20px;
+                margin-bottom: 5px;
+                border-radius: 4px;
+                background-color: #3a3a3a;
+                transition: all 0.3s;
+            }
+
+                .sidebar ul li:hover, .sidebar ul li.active {
+                    background-color: #d3d3d3;
+                    color: #000;
+                }
+
+                .sidebar ul li a {
+                    text-decoration: none;
+                    color: inherit;
+                    display: block;
+                }
+
+    /* Main content */
+    .main-content {
+        margin-left: 220px;
+        padding: 30px;
+    }
+
+    .dashboard-welcome {
+        margin-bottom: 30px;
+    }
+
+    /* Colorful cards */
+    .card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+        .card.receive {
+            background-color: #4caf50;
+        }
+
+        .card.fault {
+            background-color: #f44336;
+        }
+
+        .card.maintenance {
+            background-color: #2196f3;
+        }
+
+        .card.history {
+            background-color: #9c27b0;
+        }
+
+        .card.request {
+            background-color: #ff9800;
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+    /* Product cards */
+    .product-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        transition: transform 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        .product-card:hover {
+            transform: scale(1.05);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-card h4 {
+            margin: 10px 0 5px 0;
+        }
+
+        .product-card p {
+            margin: 5px 0;
+        }
+
+        .product-card .btn-primary {
+            background-color: #2196f3;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: #fff;
+            text-decoration: none;
+        }
+</style>
+
+<div class="sidebar">
+    <h2>Customer</h2>
+    <ul id="sidebar-menu">
+        <li class="active"><a asp-action="Dashboard" asp-controller="Customer">Home</a></li>
+        <li><a asp-action="ReceiveTrack" asp-controller="Customer">Receive & Track Fridges</a></li>
+        <li><a asp-action="CreateFault" asp-controller="Customer">Create Faults</a></li>
+        <li><a asp-action="MaintenanceVisit" asp-controller="Customer">Maintenance Visit</a></li>
+        <li><a asp-action="FridgeHistory" asp-controller="Customer">View Fridge History</a></li>
+        <li><a asp-action="CreateFridgeRequest" asp-controller="Customer">Create Fridge Request</a></li>
+        <li><a asp-controller="Account" asp-action="Logout">Sign Out</a></li>
+    </ul>
+</div>
+
+<div class="main-content">
+    <div class="dashboard-welcome">
+        <h2>Welcome, @(User.Identity?.Name ?? "Guest")</h2>
+        <p>This is your customer dashboard.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card receive">
+                <h3>Receive & Track Fridges</h3>
+                <p>Track your fridge deliveries in real time. Green means go!</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card fault">
+                <h3>Create Faults</h3>
+                <p>Report issues for your fridge and request service. Red for alert!</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card maintenance">
+                <h3>Maintenance Visit</h3>
+                <p>Schedule maintenance and see upcoming visits. Calm blue vibes.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card history">
+                <h3>View Fridge History</h3>
+                <p>Check past fridge activity and repairs. Purple elegance.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card request">
+                <h3>Create Fridge Request</h3>
+                <p>Request new fridges or upgrades. Orange energy!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ---------------- Product display section ---------------- -->
+    <h3>Available Fridges / Products</h3>
+    <div class="row">
+        @foreach (var category in Model.Categories)
+        {
+            <h4>@category.Name</h4>
+            <div class="d-flex flex-wrap">
+
+                @foreach (var categoryVm in Model.Categories)
+                {
+                    <h3>@categoryVm.Category.Name</h3>
+                    @foreach (var productVm in categoryVm.Products)
+                    {
+                        <div class="product-card">
+                            <p>@productVm.Product.Name</p>
+                            <p>Price: @productVm.Product.Price</p>
+                            <p>Available Stock: @productVm.AvailableStock</p>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sidebar active highlight
+        const sidebarItems = document.querySelectorAll("#sidebar-menu li");
+        sidebarItems.forEach(item => {
+            item.addEventListener("click", () => {
+                sidebarItems.forEach(i => i.classList.remove("active"));
+                item.classList.add("active");
+            });
+        });
+    </script>
+}
+
+
+
+@* @{
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #ffffff; /* white background */
+        color: #333;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 220px;
         background-color: #3a3a3a; /* medium gray */
         color: #fff;
         padding-top: 20px;
@@ -168,4 +400,4 @@
         });
     </script>
 }
-
+ *@
