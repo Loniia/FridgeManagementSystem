@@ -413,8 +413,7 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("FridgeId")
-                        .IsRequired()
+                    b.Property<int>("FridgeId")
                         .HasColumnType("int");
 
                     b.Property<string>("InitialAssessment")
@@ -1599,9 +1598,9 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("EmployeeID");
 
                     b.HasOne("FridgeManagementSystem.Models.Fridge", "Fridge")
-                        .WithMany("Fault")
+                        .WithMany("Faults")
                         .HasForeignKey("FridgeId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Fridge");
@@ -2020,9 +2019,9 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Fridge", b =>
                 {
-                    b.Navigation("Fault");
-
                     b.Navigation("FaultReport");
+
+                    b.Navigation("Faults");
 
                     b.Navigation("FridgeAllocation");
 

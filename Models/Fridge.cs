@@ -67,7 +67,7 @@ namespace FridgeManagementSystem.Models
         public virtual ICollection<MaintenanceVisit> MaintenanceVisit { get; set; }
     
         public virtual ICollection<FaultReport> FaultReport { get; set; }
-        public ICollection<Fault> Fault { get; set; }
+        public ICollection<Fault> Faults { get; set; }
 
         [NotMapped]
         public bool IsUnderWarranty
@@ -79,6 +79,6 @@ namespace FridgeManagementSystem.Models
         }
 
         [NotMapped]
-        public int ActiveFaultsCount => Fault?.Count(f => f.Status != "Resolved") ?? 0;
+        public int ActiveFaultsCount => Faults?.Count(f => f.Status != "Resolved") ?? 0;
     }
 }

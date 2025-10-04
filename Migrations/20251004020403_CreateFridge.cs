@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FridgeManagementSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class FridgeDb : Migration
+    public partial class CreateFridge : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -503,8 +503,7 @@ namespace FridgeManagementSystem.Migrations
                         name: "FK_Faults_Fridge_FridgeId",
                         column: x => x.FridgeId,
                         principalTable: "Fridge",
-                        principalColumn: "FridgeId",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "FridgeId");
                 });
 
             migrationBuilder.CreateTable(
@@ -543,7 +542,8 @@ namespace FridgeManagementSystem.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FridgeID = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -553,6 +553,11 @@ namespace FridgeManagementSystem.Migrations
                         column: x => x.FridgeID,
                         principalTable: "Fridge",
                         principalColumn: "FridgeId");
+                    table.ForeignKey(
+                        name: "FK_Inventory_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId");
                 });
 
             migrationBuilder.CreateTable(
@@ -1134,6 +1139,11 @@ namespace FridgeManagementSystem.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Inventory_ProductId",
+                table: "Inventory",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceChecklist_MaintenanceVisitId",
                 table: "MaintenanceChecklist",
                 column: "MaintenanceVisitId",
@@ -1323,9 +1333,6 @@ namespace FridgeManagementSystem.Migrations
                 name: "Faults");
 
             migrationBuilder.DropTable(
-                name: "Products");
-
-            migrationBuilder.DropTable(
                 name: "Quotations");
 
             migrationBuilder.DropTable(
@@ -1333,9 +1340,6 @@ namespace FridgeManagementSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "Employees");
-
-            migrationBuilder.DropTable(
-                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "RequestsForQuotation");
@@ -1350,10 +1354,16 @@ namespace FridgeManagementSystem.Migrations
                 name: "Fridge");
 
             migrationBuilder.DropTable(
+                name: "Products");
+
+            migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "Suppliers");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

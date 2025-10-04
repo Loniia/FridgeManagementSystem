@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
 using FridgeManagementSystem.ViewModels;
-
+using System.Security.Claims;
 
 public class CustomerController : Controller
 {
@@ -19,19 +19,18 @@ public class CustomerController : Controller
     // --------------------------
     public async Task<IActionResult> Dashboard()
     {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        var customerId = int.Parse(userIdClaim.Value);
+
+        // Get all categories and their products (for display)
         var categories = await _context.Categories
             .Include(c => c.Products)
                 .ThenInclude(p => p.Inventory)
-            .ToListAsync();
-
-        var customerId = GetLoggedInCustomerId();
-        var purchasedProductIds = await _context.Orders
-            .Where(o => o.CustomerId == customerId)
-            .SelectMany(o => o.Items.Select(i => i.ProductId))
-            .ToListAsync();
-
-        var recommendedProducts = await _context.Products
-            .Where(p => purchasedProductIds.Contains(p.ProductId))
             .ToListAsync();
 
         // Map categories and products to view models
@@ -47,48 +46,12 @@ public class CustomerController : Controller
 
         var vm = new DashboardViewModel
         {
-            Categories = categoriesVm,
-            RecommendedProducts = recommendedProducts
+            Categories = categoriesVm
         };
 
         return View(vm);
     }
 
-    //public async Task<IActionResult> Dashboard()
-    //{
-    //    // Include categories and their products
-    //    var categories = await _context.Categories
-    //        .Include(c => c.Products)
-    //            .ThenInclude(p => p.Inventory) // Include inventory
-    //        .ToListAsync();
-
-    //    // Filter products with available stock
-    //    foreach (var category in categories)
-    //    {
-    //        category.Products = category.Products
-    //            .Where(p => p.Inventory.Any(i => i.Quantity > 0))
-    //            .ToList();
-    //    }
-
-    //    // Recommendations based on past purchases
-    //    var customerId = GetLoggedInCustomerId();
-    //    var purchasedProductIds = await _context.Orders
-    //        .Where(o => o.CustomerId == customerId)
-    //        .SelectMany(o => o.Items.Select(i => i.ProductId))
-    //        .ToListAsync();
-
-    //    var recommendedProducts = await _context.Products
-    //        .Where(p => purchasedProductIds.Contains(p.ProductId) && p.Inventory.Any(i => i.Quantity > 0))
-    //        .ToListAsync();
-
-    //    var vm = new DashboardViewModel
-    //    {
-    //        Categories = categories,
-    //        RecommendedProducts = recommendedProducts
-    //    };
-
-    //    return View(vm);
-    //}
 
     // --------------------------
     // 2. Browse Category
@@ -278,10 +241,18 @@ public class CustomerController : Controller
     // --------------------------
     private int GetLoggedInCustomerId()
     {
-        // Assuming you store ApplicationUserId in Claims
-        var userId = int.Parse(User.FindFirst("UserId").Value);
-        var customer = _context.Customers.FirstOrDefault(c => c.ApplicationUserId == userId);
-        return customer.CustomerID;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            return 0; // Claim missing or user not logged in
+        }
+
+        if (!int.TryParse(userIdClaim.Value, out int customerId))
+        {
+            return 0; // Invalid value
+        }
+
+        return customerId;
     }
 }
 

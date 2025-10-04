@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    [Migration("20251004002501_AddFridgeContext")]
-    partial class AddFridgeContext
+    [Migration("20251004020403_CreateFridge")]
+    partial class CreateFridge
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -416,8 +416,7 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("FridgeId")
-                        .IsRequired()
+                    b.Property<int>("FridgeId")
                         .HasColumnType("int");
 
                     b.Property<string>("InitialAssessment")
@@ -1602,9 +1601,9 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("EmployeeID");
 
                     b.HasOne("FridgeManagementSystem.Models.Fridge", "Fridge")
-                        .WithMany("Fault")
+                        .WithMany("Faults")
                         .HasForeignKey("FridgeId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Fridge");
@@ -2023,9 +2022,9 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Fridge", b =>
                 {
-                    b.Navigation("Fault");
-
                     b.Navigation("FaultReport");
+
+                    b.Navigation("Faults");
 
                     b.Navigation("FridgeAllocation");
 

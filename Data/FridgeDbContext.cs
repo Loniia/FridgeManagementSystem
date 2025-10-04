@@ -91,7 +91,7 @@ namespace FridgeManagementSystem.Data
 
             // Fridge Relationships (Consolidated)
             builder.Entity<Fridge>()
-                .HasMany(f => f.Fault)
+                .HasMany(f => f.Faults)
                 .WithOne(f => f.Fridge)
                 .HasForeignKey(f => f.FridgeId)
                 .OnDelete(DeleteBehavior.SetNull);
@@ -134,6 +134,12 @@ namespace FridgeManagementSystem.Data
             builder.Entity<Fridge>()
                 .HasIndex(f => f.SerialNumber)
                 .IsUnique();
+
+            builder.Entity<Fault>()
+                .HasOne(f => f.Fridge)
+                .WithMany(fr => fr.Faults)
+                .HasForeignKey(f => f.FridgeId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Supplier unique constraint (if needed)
             builder.Entity<Fridge>()
