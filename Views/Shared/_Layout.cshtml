@@ -58,7 +58,10 @@
                     }
                     else
                     {
-                        <p class="text-muted">Select a module from the menu</p>
+                        <div class="sidebar-welcome">
+                            <h4>Welcome to</h4>
+                            <h1>Dynamic Ice Inc</h1>
+                        </div>
                     }
                 </div>
             </div>
@@ -77,6 +80,36 @@
             &copy; 2025 - FridgeManagementSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
+    <style>
+        .sidebar {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* pushes content to the bottom */
+        }
+
+        .sidebar-welcome {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: black;
+        }
+
+            .sidebar-welcome h4 {
+                font-size: 1rem; /* smaller for 'Welcome to' */
+                margin: 0;
+                font-weight: 500;
+            }
+
+            .sidebar-welcome h1 {
+                font-size: 2rem; /* larger for 'Dynamic Ice Inc' */
+                margin: 0;
+                font-weight: 800;
+                line-height: 1.2;
+            }
+    </style>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
