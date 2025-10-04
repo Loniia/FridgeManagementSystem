@@ -166,7 +166,7 @@
                     <h1 class="h3 mb-2">Supplier Management</h1>
                     <p class="mb-0 opacity-8">Manage all refrigerator suppliers in the system</p>
                 </div>
-                <a asp-action="Create" class="btn btn-light">
+                <a href="@Url.Action("Create", "ManageSupplier", new { area = "Administrator" })" class="btn btn-light">
                     <i class="fas fa-plus me-2"></i>Add New Supplier
                 </a>
             </div>
