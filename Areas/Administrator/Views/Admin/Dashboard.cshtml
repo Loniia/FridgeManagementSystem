@@ -2,7 +2,7 @@
     Layout = "_Layout";
     ViewData["Title"] = "Admin Dashboard";
 
-    var customersUrl = Url.Action("DashboardList", "ManageCustomer", new { area = "Administrator" });
+    var customersUrl = Url.Action("Index", "ManageCustomer", new { area = "Administrator" });
     var employeesUrl = Url.Action("ManageEmployees", "Admin", new { area = "Administrator" });
     var fridgesUrl = Url.Action("Index", "ManageFridge", new { area = "Administrator" });
     var locationsUrl = Url.Action("Index", "ManageLocation", new { area = "Administrator" });

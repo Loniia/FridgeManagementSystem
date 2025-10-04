@@ -51,28 +51,23 @@ namespace FridgeManagementSystem.Areas.Administration.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Location location)
+        public async Task<IActionResult> Create(AddLocationViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Optional: ensure unique Address + City combo
-                bool exists = _context.Locations.Any(l =>
-                    l.Address == location.Address &&
-                    l.City == location.City &&
-                    l.IsActive);
-
-                if (exists)
+                var location = new Location
                 {
-                    ModelState.AddModelError("", "A location with this address already exists.");
-                    return View(location);
-                }
-
-                location.IsActive = true; // ensure new locations are active
+                    Address = model.Address,
+                    City = model.City,
+                    Province = model.Province,
+                    PostalCode = model.PostalCode,
+                    IsActive = true
+                };
                 _context.Add(location);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(location);
+            return RedirectToAction(nameof(Index)); 
         }
 
         // 4️⃣ EDIT an existing location

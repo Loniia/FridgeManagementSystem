@@ -12,6 +12,11 @@ namespace FridgeManagementSystem.Models
 
         [Required, EmailAddress]
         public string Email { get; set; }
+        [Required(ErrorMessage = "Phone number is required")]
+        [Phone]
+        [StringLength(10, ErrorMessage = "Phone number must be 10 digits")]
+        public string PhoneNumber { get; set; }
+        public int LocationId { get; set; }
 
         [Required, DataType(DataType.Password)]
         public string Password { get; set; }

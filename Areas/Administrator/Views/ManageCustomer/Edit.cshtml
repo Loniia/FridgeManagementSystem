@@ -1,0 +1,58 @@
+﻿@model FridgeManagementSystem.Models.Customer
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Edit Customer";
+}
+
+<h2>Edit Customer</h2>
+
+<!-- Form to edit an existing customer -->
+<form asp-action="Edit" asp-controller="CustomerLiaison" method="post">
+    @Html.AntiForgeryToken()
+    <!-- Hidden field for CustomerID -->
+    <input type="hidden" asp-for="CustomerID" />
+
+    <!-- Validation summary -->
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <!-- Full Names -->
+    <div class="form-group mb-2">
+        <label asp-for="FullName" class="form-label"></label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+
+    <!-- Address -->
+    <div class="form-group mb-2">
+        <label asp-for="LocationId" class="form-label"></label>
+        <input asp-for="LocationId" class="form-control" />
+        <span asp-validation-for="LocationId" class="text-danger"></span>
+    </div>
+
+    <!-- Phone Number -->
+    <div class="form-group mb-2">
+        <label asp-for="PhoneNumber" class="form-label"></label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group mb-2">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <!-- Registration Date -->
+    <div class="form-group mb-2">
+        <label asp-for="RegistrationDate" class="form-label"></label>
+        <input asp-for="RegistrationDate" type="date" class="form-control" />
+        <span asp-validation-for="RegistrationDate" class="text-danger"></span>
+    </div>
+
+    <!-- Buttons -->
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <!-- Updated Cancel button -->
+    <a asp-action="Index" asp-controller="CustomerLiaison" class="btn btn-secondary">Cancel</a>
+</form>

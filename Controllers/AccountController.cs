@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using FridgeManagementSystem.Models;
+using FridgeManagementSystem.Data;
 
 namespace FridgeManagementSystem.Controllers
 {
@@ -11,16 +12,20 @@ namespace FridgeManagementSystem.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
+        private readonly FridgeDbContext _context;
 
         public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole<int>> roleManager)
+             UserManager<ApplicationUser> userManager,
+             SignInManager<ApplicationUser> signInManager,
+             RoleManager<IdentityRole<int>> roleManager,
+             FridgeDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _context = context;
         }
+
 
         // ✅ GET: Login
         public IActionResult Login()
@@ -110,17 +115,35 @@ namespace FridgeManagementSystem.Controllers
 
             if (result.Succeeded)
             {
-                // Ensure role exists
+                // ✅ Step 1: Ensure the Customer role exists
                 if (!await _roleManager.RoleExistsAsync(Roles.Customer))
                 {
                     await _roleManager.CreateAsync(new IdentityRole<int>(Roles.Customer));
                 }
 
+                // ✅ Step 2: Add user to Customer role
                 await _userManager.AddToRoleAsync(user, Roles.Customer);
 
+                // ✅ Step 3: Create matching Customer profile
+                var customer = new Customer
+                {
+                    FullName = model.FullName,
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    LocationId = model.LocationId, // only if it's in your viewmodel
+                    ApplicationUserId = user.Id,   // link ApplicationUser ↔ Customer
+                    RegistrationDate = DateOnly.FromDateTime(DateTime.Now),
+                    IsActive = true
+                };
+
+                _context.Customers.Add(customer);
+                await _context.SaveChangesAsync();
+
+                // ✅ Step 4: Redirect to login
                 return RedirectToAction("Login", "Account");
             }
 
+            // ❌ If registration failed, show errors
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError("", error.Description);
