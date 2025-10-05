@@ -10,6 +10,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
     [Area("Administrator")]
     public class ManageEmployeeController : Controller
     {
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly FridgeDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<ManageEmployeeController> _logger;
@@ -17,8 +18,10 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         public ManageEmployeeController(
             FridgeDbContext context,
             UserManager<ApplicationUser> userManager,
-            ILogger<ManageEmployeeController> logger)
+            ILogger<ManageEmployeeController> logger,
+            RoleManager<IdentityRole<int>> roleManager)
         {
+            _roleManager = roleManager;
             _context = context;
             _userManager = userManager;
             _logger = logger;
@@ -46,7 +49,6 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             return View(new Employee());
         }
 
-        // ✅ POST: Create Employee
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Employee model)
@@ -68,16 +70,28 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
+
             if (!result.Succeeded)
             {
+                // Show Identity errors
                 foreach (var error in result.Errors)
+                {
                     ModelState.AddModelError("", error.Description);
-
+                }
                 PopulateDropdowns();
                 return View(model);
             }
 
-            // 2️⃣ Create Employee record
+            // 2️⃣ Ensure Employee role exists
+            if (!await _roleManager.RoleExistsAsync(Roles.Employee))
+            {
+                await _roleManager.CreateAsync(new IdentityRole<int>(Roles.Employee));
+            }
+
+            // 3️⃣ Add user to Employee role
+            await _userManager.AddToRoleAsync(user, Roles.Employee);
+
+            // 4️⃣ Create Employee record
             model.ApplicationUserId = user.Id;
             _context.Employees.Add(model);
             await _context.SaveChangesAsync();
@@ -85,6 +99,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             TempData["SuccessMessage"] = "Employee registered successfully!";
             return RedirectToAction(nameof(Index));
         }
+
 
         // ✅ Helper — populate dropdown data
         private void PopulateDropdowns()
@@ -110,6 +125,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 .ToList();
 
             ViewBag.Locations = new SelectList(locations, "LocationId", "FullAddress");
+        
         }
     }
 }

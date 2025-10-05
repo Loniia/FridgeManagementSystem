@@ -13,17 +13,20 @@ namespace FridgeManagementSystem.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly FridgeDbContext _context;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
              UserManager<ApplicationUser> userManager,
              SignInManager<ApplicationUser> signInManager,
              RoleManager<IdentityRole<int>> roleManager,
-             FridgeDbContext context)
+             FridgeDbContext context,
+             ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _context = context;
+            _logger = logger;
         }
 
 
@@ -46,9 +49,7 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                user, model.Password, model.RememberMe, false);
-
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Invalid login attempt.");
@@ -58,28 +59,29 @@ namespace FridgeManagementSystem.Controllers
             // Get roles
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Admin
+            // Log roles for debugging
+            _logger.LogInformation($"User {user.UserName} roles: {string.Join(", ", roles)}");
+
             if (roles.Contains(Roles.Admin))
-            {
                 return RedirectToAction("Dashboard", "ManageEmployee", new { area = "Administrator" });
-            }
 
-            // Customer
             if (roles.Contains(Roles.Customer))
-            {
-                // No manual claims needed — Identity automatically adds ClaimTypes.NameIdentifier
                 return RedirectToAction("Dashboard", "Customer");
-            }
 
-            // Employee
             if (roles.Contains(Roles.Employee))
             {
+                if (string.IsNullOrEmpty(user.EmployeeRole))
+                {
+                    // Fallback if EmployeeRole not set
+                    return RedirectToAction("Index", "Home");
+                }
+
                 return user.EmployeeRole switch
                 {
-                    EmployeeRoles.CustomerManager => RedirectToAction("Index", "CustomerManagementHome", new { area = "CustomerManagementSubSystem" }),
-                    EmployeeRoles.FaultTechnician => RedirectToAction("Index", "FaultTech", new { area = "FaultTechSubSystem" }),
-                    EmployeeRoles.MaintenanceTechnician => RedirectToAction("Index", "MaintenanceHome", new { area = "MaintenanceSubSystem" }),
-                    EmployeeRoles.PurchasingManager => RedirectToAction("Index", "Purchasing", new { area = "PurchasingSubSystem" }),
+                    EmployeeRoles.CustomerManager => Redirect("~/CustomerManagementSubsystem/CustomerManagementHome"),
+                    EmployeeRoles.FaultTechnician => Redirect("~/FaultTechSubsystem/FaultTech"),
+                    EmployeeRoles.MaintenanceTechnician => Redirect("~/MaintenanceSubsystem/MaintenanceHome"),
+                    EmployeeRoles.PurchasingManager => Redirect("~/PurchasingSubsystem/Purchasing"),
                     _ => RedirectToAction("Index", "Home")
                 };
             }
@@ -87,6 +89,7 @@ namespace FridgeManagementSystem.Controllers
             // Default fallback
             return RedirectToAction("Index", "Home");
         }
+
 
         // ✅ GET: Register Customer
         public IActionResult RegisterCustomer()
