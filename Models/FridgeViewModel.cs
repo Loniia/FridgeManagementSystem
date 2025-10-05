@@ -25,11 +25,21 @@ namespace FridgeManagementSystem.Models
         public DateTime DeliveryDate { get; set; }
         public string Status { get; set; }
         public bool IsActive { get; set; } = true;
+<<<<<<< HEAD
+        public string ImageUrl { get; set; } // for pictures
+        public decimal Price { get; set; }
 
         // Customer allocation info
+=======
+        // Display info
+>>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
         public string CustomerName { get; set; }
-        public DateOnly? AllocationDate { get; set; }
-        public DateOnly? ReturnDate { get; set; }
+        public string SupplierName { get; set; }
+        public string LocationName { get; set; }
+
+        // Allocation info
+        public DateTime? AllocationDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
 
         // Computed properties
         [NotMapped]

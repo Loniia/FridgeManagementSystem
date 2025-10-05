@@ -38,14 +38,17 @@ namespace FridgeManagementSystem.Models
         public string Address { get; set; }
         public int PurchaseOrderID { get; set; }
         public int QuotationID { get; set; }
+        public int FridgeId { get; set; }
        
         // Soft delete flag
         public bool IsActive { get; set; } = true;
 
-        // Navigation Properties 
+        // Navigation
+        public virtual ICollection<Fridge> Fridges { get; set; }
         public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
 
         public virtual ICollection<Quotation> Quotations { get; set; }
+        public virtual ICollection<Fridge> Fridges { get; set; }
     }
 
 }

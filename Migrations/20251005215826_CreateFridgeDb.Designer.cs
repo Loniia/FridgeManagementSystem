@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    [Migration("20251005204013_AdminNotification")]
-    partial class AdminNotification
+    [Migration("20251005215826_CreateFridgeDb")]
+    partial class CreateFridgeDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

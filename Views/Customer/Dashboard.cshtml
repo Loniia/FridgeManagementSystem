@@ -3,15 +3,9 @@
     ViewData["Title"] = "Customer Dashboard";
 }
 
-<style>
-    body {
-        margin: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #ffffff; /* white background */
-        color: #333;
-    }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    /* Sidebar */
+<style>
     .sidebar {
         position: fixed;
         top: 0;
@@ -53,67 +47,32 @@
                     display: block;
                 }
 
-    /* Main content */
     .main-content {
         margin-left: 220px;
         padding: 30px;
     }
 
-    .dashboard-welcome {
-        margin-bottom: 30px;
-    }
-
-    /* Colorful cards */
-    .card {
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        color: #fff;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-        .card h3 {
-            margin-top: 0;
-        }
-
-    /* Product cards */
     .product-card {
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px;
-        text-align: center;
         transition: transform 0.2s;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        cursor: pointer;
     }
 
         .product-card:hover {
             transform: scale(1.05);
         }
 
-        .product-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
+    .card-img-top {
+        object-fit: cover;
+        height: 200px;
+    }
 
-        .product-card h4 {
-            margin: 10px 0 5px 0;
-        }
-
-        .product-card p {
-            margin: 5px 0;
-        }
-
-        .product-card .btn-primary {
-            background-color: #2196f3;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            color: #fff;
-            text-decoration: none;
-        }
+    .badge-stock {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.9rem;
+        padding: 5px 10px;
+    }
 </style>
 
 <div class="sidebar">
@@ -124,206 +83,49 @@
         <li><a asp-action="Checkout" asp-controller="Customer">Checkout</a></li>
         <li><a asp-action="MyAccount" asp-controller="Customer">My Orders</a></li>
         <li><a asp-action="TrackOrder" asp-controller="Customer">Track Order</a></li>
+        <li><a asp-action="UpcomingVisits" asp-controller="Customer">Upcoming Maintenance Visit</a></li>
+        <li><a asp-action="FridgeServiceHistory" asp-controller="Customer">Service History</a></li>
         <li><a asp-controller="Account" asp-action="Logout">Sign Out</a></li>
     </ul>
 </div>
 
 <div class="main-content">
-    <div class="dashboard-welcome">
+    <div class="dashboard-welcome mb-4">
         <h2>Welcome, @(User.Identity?.Name ?? "Guest")</h2>
         <p>This is your customer dashboard.</p>
     </div>
 
-    <!-- ---------------- Product display section ---------------- -->
-    <h3>Available Fridges / Products</h3>
-    <div class="row">
-        @foreach (var categoryVm in Model.Categories)
-        {
-            <h4>@categoryVm.Category.Name</h4>
-            <div class="d-flex flex-wrap">
-                @foreach (var productVm in categoryVm.Products)
-                {
-                    <div class="product-card">
-                        <p>@productVm.Product.Name</p>
-                        <p>Price: @productVm.Product.Price</p>
-                        <p>Available Stock: @productVm.AvailableStock</p>
+    @foreach (var categoryVm in Model.Categories)
+    {
+        <h4 class="mt-4">@categoryVm.Category.Name</h4>
+        <div class="row">
+            @foreach (var productVm in categoryVm.Products)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="card product-card position-relative">
+                        @if (productVm.AvailableStock == 0)
+                        {
+                            <span class="badge bg-danger badge-stock">Out of Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success badge-stock">In Stock</span>
+                        }
+                        <img src="@productVm.Product.ImageUrl" class="card-img-top" alt="@productVm.Product.Name" />
+                        <div class="card-body text-center">
+                            <h5 class="card-title">@productVm.Product.Name</h5>
+                            <p class="text-success fw-bold">R@productVm.Product.Price.ToString("0.00")</p>
+                            <p>Available: @productVm.AvailableStock</p>
+                            <a class="btn btn-primary w-100"
+                               asp-action="AddToCart"
+                               asp-route-productId="@productVm.Product.ProductId"
+                               asp-route-quantity="1">Add to Cart</a>
+                        </div>
                     </div>
-                }
-            </div>
-        }
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        // Sidebar active highlight
-        const sidebarItems = document.querySelectorAll("#sidebar-menu li");
-        sidebarItems.forEach(item => {
-            item.addEventListener("click", () => {
-                sidebarItems.forEach(i => i.classList.remove("active"));
-                item.classList.add("active");
-            });
-        });
-    </script>
-}
-
-
-@* @{
-    ViewData["Title"] = "Customer Dashboard";
-}
-
-<style>
-    body {
-        margin: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #ffffff; /* white background */
-        color: #333;
-    }
-
-    /* Sidebar */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 220px;
-        background-color: #3a3a3a; /* medium gray */
-        color: #fff;
-        padding-top: 20px;
-    }
-
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 1.5rem;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-
-            .sidebar ul li {
-                padding: 15px 20px;
-                margin-bottom: 5px;
-                border-radius: 4px;
-                background-color: #3a3a3a;
-                transition: all 0.3s;
+                </div>
             }
-
-                .sidebar ul li:hover,
-                .sidebar ul li.active {
-                    background-color: #d3d3d3; /* light gray hover */
-                    color: #000;
-                }
-
-                .sidebar ul li a {
-                    text-decoration: none;
-                    color: inherit;
-                    display: block;
-                }
-
-    /* Main content */
-    .main-content {
-        margin-left: 220px;
-        padding: 30px;
+        </div>
     }
-
-    .dashboard-welcome {
-        margin-bottom: 30px;
-    }
-
-    /* Colorful cards */
-    .card {
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        color: #fff;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-        .card.receive {
-            background-color: #4caf50;
-        }
-        /* green for tracking */
-        .card.fault {
-            background-color: #f44336;
-        }
-        /* red for faults */
-        .card.maintenance {
-            background-color: #2196f3;
-        }
-        /* blue for maintenance */
-        .card.history {
-            background-color: #9c27b0;
-        }
-        /* purple for history */
-        .card.request {
-            background-color: #ff9800;
-        }
-        /* orange for requests */
-
-        .card h3 {
-            margin-top: 0;
-        }
-</style>
-
-<div class="sidebar">
-    <h2>Customer</h2>
-    <ul id="sidebar-menu">
-        <li class="active"><a asp-action="Dashboard" asp-controller="Customer">Home</a></li>
-        <li><a asp-action="ReceiveTrack" asp-controller="Customer">Receive & Track Fridges</a></li>
-        <li><a asp-action="CreateFault" asp-controller="Customer">Create Faults</a></li>
-        <li><a asp-action="MaintenanceVisit" asp-controller="Customer">Maintenance Visit</a></li>
-        <li><a asp-action="FridgeHistory" asp-controller="Customer">View Fridge History</a></li>
-        <li><a asp-action="CreateFridgeRequest" asp-controller="Customer">Create Fridge Request</a></li>
-        <li><a asp-controller="Account" asp-action="Logout">Sign Out</a></li>
-    </ul>
-</div>
-
-<div class="main-content">
-    <div class="dashboard-welcome">
-        <h2>
-        Welcome, @(User.Identity?.Name ?? "Guest")
-        </h2>
-        <p>This is your customer dashboard.</p>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card receive">
-                <h3>Receive & Track Fridges</h3>
-                <p>Track your fridge deliveries in real time. Green means go!</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card fault">
-                <h3>Create Faults</h3>
-                <p>Report issues for your fridge and request service. Red for alert!</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card maintenance">
-                <h3>Maintenance Visit</h3>
-                <p>Schedule maintenance and see upcoming visits. Calm blue vibes.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card history">
-                <h3>View Fridge History</h3>
-                <p>Check past fridge activity and repairs. Purple elegance.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card request">
-                <h3>Create Fridge Request</h3>
-                <p>Request new fridges or upgrades. Orange energy!</p>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section Scripts {
@@ -338,4 +140,3 @@
         });
     </script>
 }
- *@

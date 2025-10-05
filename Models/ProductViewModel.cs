@@ -12,5 +12,7 @@ namespace FridgeManagementSystem.Models
     {
         public Product Product { get; set; }
         public int AvailableStock { get; set; }
+        public string ImageUrl => Product?.ImageUrl;  // Or Product.Fridge.ImageUrl if linked
+        public decimal Price => Product?.Price ?? 0;
     }
 }

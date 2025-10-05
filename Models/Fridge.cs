@@ -56,6 +56,8 @@ namespace FridgeManagementSystem.Models
         public DateTime DeliveryDate { get; set; }
         public string Status { get; set; } // e.g., Received, In Transit, Delivered
         public bool IsActive { get; set; } = true;
+        public string ImageUrl { get; set; } // for pictures
+        public decimal Price { get; set; }
 
         //Navigation Property
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
