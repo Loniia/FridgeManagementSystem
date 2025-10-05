@@ -1,0 +1,35 @@
+﻿@model List<FridgeManagementSystem.Models.MaintenanceVisit>
+
+@{
+    ViewData["Title"] = "Upcoming Visits";
+}
+
+<h2>Upcoming Maintenance Visits</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You have no upcoming maintenance visits.
+    </div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var visit in Model)
+        {
+            <div class="list-group-item mb-2">
+                <h5>@visit.MaintenanceRequest.Fridge.FridgeName - @visit.MaintenanceRequest.Fridge.Model</h5>
+                <p>
+                    <strong>Date:</strong> @visit.ScheduledDate.ToShortDateString() <br />
+                    <strong>Time:</strong> @visit.ScheduledTime.ToString(@"hh\:mm") <br />
+                    <strong>Technician:</strong> @visit.Employee?.FullName <br />
+                    <strong>Status:</strong> @visit.Status
+                </p>
+                <a asp-action="FridgeServiceHistory" asp-route-fridgeId="@visit.MaintenanceRequest.FridgeId"
+                   class="btn btn-primary btn-sm">
+                    View Service History
+                </a>
+            </div>
+        }
+    </div>
+}
