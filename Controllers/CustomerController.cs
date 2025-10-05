@@ -4,6 +4,7 @@ using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
 using FridgeManagementSystem.ViewModels;
 using System.Security.Claims;
+using QuestPDF.Fluent;
 
 public class CustomerController : Controller
 {
@@ -242,19 +243,87 @@ public class CustomerController : Controller
     private int GetLoggedInCustomerId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
-        {
-            return 0; // Claim missing or user not logged in
-        }
+        if (userIdClaim == null) return 0;
 
-        if (!int.TryParse(userIdClaim.Value, out int customerId))
-        {
-            return 0; // Invalid value
-        }
+        int appUserId = int.Parse(userIdClaim.Value);
 
-        return customerId;
+        var customer = _context.Customers.FirstOrDefault(c => c.ApplicationUserId == appUserId);
+        return customer?.CustomerID ?? 0;
+    }
+
+    // --------------------------
+    // Upcoming Maintenance Visits
+    // --------------------------
+    public async Task<IActionResult> UpcomingVisits()
+    {
+        var customerId = GetLoggedInCustomerId();
+
+        var visits = await _context.MaintenanceVisit
+            .Include(v => v.MaintenanceRequest)
+                .ThenInclude(r => r.Fridge)
+            .Include(v => v.Employee)
+            .Where(v => v.MaintenanceRequest.Fridge.CustomerId == customerId &&
+                        (v.Status == FridgeManagementSystem.Models.TaskStatus.Scheduled || v.Status == FridgeManagementSystem.Models.TaskStatus.Rescheduled))
+            .OrderBy(v => v.ScheduledDate)
+            .ThenBy(v => v.ScheduledTime)
+            .ToListAsync();
+
+        return View(visits);
+    }
+    // --------------------------
+    // View Service History for a specific fridge
+    // --------------------------
+    public async Task<IActionResult> FridgeServiceHistory(int fridgeId)
+    {
+        var customerId = GetLoggedInCustomerId();
+
+        var visits = await _context.MaintenanceVisit
+            .Include(v => v.MaintenanceRequest)
+                .ThenInclude(r => r.Fridge)
+                    .ThenInclude(f => f.Customer)
+                        .ThenInclude(c => c.Location)
+            .Include(v => v.Employee)
+            .Include(v => v.MaintenanceChecklist)
+            .Include(v => v.ComponentUsed)
+            .Include(v => v.FaultReport)
+            .Where(v => v.MaintenanceRequest.FridgeId == fridgeId &&
+                        v.MaintenanceRequest.Fridge.CustomerId == customerId)
+            .OrderByDescending(v => v.ScheduledDate)
+            .ToListAsync();
+
+        return View(visits);
+    }
+    [HttpGet]
+    public IActionResult DownloadFridgeServiceHistory(int fridgeId)
+    {
+        var customerId = GetLoggedInCustomerId();
+
+        var fridge = _context.Fridge
+            .Include(f => f.Customer)
+            .FirstOrDefault(f => f.FridgeId == fridgeId && f.CustomerId == customerId);
+
+        if (fridge == null) return NotFound("Fridge not found.");
+
+        var visits = _context.MaintenanceVisit
+            .Include(v => v.MaintenanceRequest)
+            .Include(v => v.Employee)
+            .Include(v => v.MaintenanceChecklist)
+            .Include(v => v.ComponentUsed)
+            .Include(v => v.FaultReport)
+            .Where(v => v.MaintenanceRequest.FridgeId == fridgeId)
+            .OrderByDescending(v => v.ScheduledDate)
+            .ToList();
+
+        if (!visits.Any()) return NotFound("No service history for this fridge.");
+
+        var generator = new ServiceHistoryPdfGenerator(visits, fridge);
+        var pdfBytes = generator.GeneratePdf();
+        var fileName = $"ServiceHistory_{fridge.FridgeName}_{DateTime.Now:yyyyMMdd}.pdf";
+
+        return File(pdfBytes, "application/pdf", fileName);
     }
 }
+
 
 
 
@@ -431,55 +500,54 @@ public class CustomerController : Controller
 //            return View(visits);
 //        }
 
-        //// Create Faults
-        //public IActionResult CreateFault()
-        //{
-        //    return View();
-        //}
+//// Create Faults
+//public IActionResult CreateFault()
+//{
+//    return View();
+//}
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult CreateFault(Fault model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Faults.Add(model);
-        //        _context.SaveChanges();
-        //        return RedirectToAction("Dashboard");
-        //    }
-        //    return View(model);
-        //}
+//[HttpPost]
+//[ValidateAntiForgeryToken]
+//public IActionResult CreateFault(Fault model)
+//{
+//    if (ModelState.IsValid)
+//    {
+//        _context.Faults.Add(model);
+//        _context.SaveChanges();
+//        return RedirectToAction("Dashboard");
+//    }
+//    return View(model);
+//}
 
-        //// Maintenance Visit
-        //public IActionResult MaintenanceVisit()
-        //{
-        //    var visits = _context.MaintenanceVisits.ToList(); // example
-        //    return View(visits);
-        //}
+//// Maintenance Visit
+//public IActionResult MaintenanceVisit()
+//{
+//    var visits = _context.MaintenanceVisits.ToList(); // example
+//    return View(visits);
+//}
 
-        //// View Fridge History
-        //public IActionResult FridgeHistory()
-        //{
-        //    var history = _context.FridgeHistories.ToList(); // example
-        //    return View(history);
-        //}
+//// View Fridge History
+//public IActionResult FridgeHistory()
+//{
+//    var history = _context.FridgeHistories.ToList(); // example
+//    return View(history);
+//}
 
-        //// Create Fridge Request
-        //public IActionResult CreateFridgeRequest()
-        //{
-        //    return View();
-        //}
+//// Create Fridge Request
+//public IActionResult CreateFridgeRequest()
+//{
+//    return View();
+//}
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult CreateFridgeRequest(FridgeRequest model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.FridgeRequests.Add(model);
-        //        _context.SaveChanges();
-        //        return RedirectToAction("Dashboard");
-        //    }
-        //    return View(model);
-        //}
-  
+//[HttpPost]
+//[ValidateAntiForgeryToken]
+//public IActionResult CreateFridgeRequest(FridgeRequest model)
+//{
+//    if (ModelState.IsValid)
+//    {
+//        _context.FridgeRequests.Add(model);
+//        _context.SaveChanges();
+//        return RedirectToAction("Dashboard");
+//    }
+//    return View(model);
+//}
