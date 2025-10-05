@@ -72,14 +72,12 @@ app.UseAuthentication(); // Identity
 app.UseAuthorization();
 
 // ✅ 8. FIXED: Explicit Area Route Configuration
-app.MapAreaControllerRoute(
-    name: "Administrator",
-    areaName: "Administrator",
-    pattern: "Administrator/{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 await app.RunAsync();
 
