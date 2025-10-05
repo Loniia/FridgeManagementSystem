@@ -44,6 +44,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<AdminNotification> AdminNotifications { get; set; }
+        public DbSet<BusinessInfo> BusinessInfos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -250,6 +251,23 @@ namespace FridgeManagementSystem.Data
                 .Property(p => p.Method)
                 .HasConversion<string>();
 
+            // Configure relationships
+            builder.Entity<Fridge>()
+                .HasOne(f => f.Supplier)
+                .WithMany(s => s.Fridges)
+                .HasForeignKey(f => f.SupplierID);
+
+            builder.Entity<Fridge>()
+                .HasOne(f => f.Customer)
+                .WithMany(c => c.Fridge)
+                .HasForeignKey(f => f.CustomerId)
+                .IsRequired(false);
+
+            builder.Entity<Fridge>()
+                .HasOne(f => f.Location)
+                .WithMany(l => l.Fridge)
+                .HasForeignKey(f => f.LocationId)
+                .IsRequired(false);
 
 
             // Set default delete behavior to NoAction for any unspecified relationships
