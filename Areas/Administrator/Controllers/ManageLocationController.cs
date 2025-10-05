@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FridgeManagementSystem.Data;   // <-- replace with your namespace
-using FridgeManagementSystem.Models; // <-- replace with your namespace
+using FridgeManagementSystem.Data;  
+using FridgeManagementSystem.Models;
 using System.Linq;
 using System.Threading.Tasks;
 

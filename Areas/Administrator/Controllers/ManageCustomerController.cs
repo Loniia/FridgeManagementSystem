@@ -49,6 +49,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 PhoneNumber = c.PhoneNumber,
                 Email = c.Email,
                 IsActive = c.IsActive,
+                IsVerified = c.IsVerified,
                 RegistrationDate = c.RegistrationDate,
                 FridgeAllocations = c.FridgeAllocation.Select(a => new FridgeAllocationViewModel
                 {
@@ -70,7 +71,32 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return View(model);
         }
-       
+        [HttpPost]
+        public async Task<IActionResult> VerifyCustomer(int customerId)
+        {
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null) return NotFound();
+
+            customer.IsVerified = true;
+            await _context.SaveChangesAsync();
+
+            // Optionally, send notification email to customer
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RejectCustomer(int customerId)
+        {
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null) return NotFound();
+
+            customer.IsVerified = false;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // --------------------------
         // Create Customer
         // --------------------------

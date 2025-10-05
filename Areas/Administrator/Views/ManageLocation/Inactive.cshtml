@@ -5,35 +5,45 @@
     ViewData["Title"] = "Inactive Locations";
 }
 
-<h2>Inactive Locations</h2>
+<h2>Inactive (Deactivated) Locations</h2>
 
 <p>
     <a asp-action="Index" class="btn btn-secondary">← Back to Active Locations</a>
 </p>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Address</th>
-            <th>City</th>
-            <th>Province</th>
-            <th>Postal Code</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var loc in Model)
-        {
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No inactive locations found.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
             <tr>
-                <td>@loc.Address</td>
-                <td>@loc.City</td>
-                <td>@loc.Province</td>
-                <td>@loc.PostalCode</td>
-                <td>
-                    <a asp-action="Reactivate" asp-route-id="@loc.LocationId"
-                       class="btn btn-success btn-sm">Reactivate</a>
-                </td>
+                <th>Address</th>
+                <th>City</th>
+                <th>Province</th>
+                <th>Postal Code</th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var loc in Model)
+            {
+                <tr>
+                    <td>@loc.Address</td>
+                    <td>@loc.City</td>
+                    <td>@loc.Province</td>
+                    <td>@loc.PostalCode</td>
+                    <td>
+                        <a asp-action="Reactivate" asp-route-id="@loc.LocationId" class="btn btn-success btn-sm">
+                            Reactivate
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

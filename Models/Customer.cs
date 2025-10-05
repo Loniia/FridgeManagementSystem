@@ -35,7 +35,7 @@ namespace FridgeManagementSystem.Models
         public DateOnly RegistrationDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         
         public ApplicationUser UserAccount { get; set; }
-       
+        public bool IsVerified { get; set; } = false;     // Admin must verify
         public bool IsActive { get; set; } = true;
 
         //Added by Idah

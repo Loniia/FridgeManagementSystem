@@ -44,6 +44,7 @@
                 <td>@(customer.IsActive ? "Active" : "Inactive")</td>
                 <td>@customer.TotalFridgesAllocated</td> <!-- This now sums correctly -->
                 <td>@customer.RegistrationDate.ToString("yyyy/MM/dd")</td>
+
                 <td>
                     @{
                         var lastReturn = customer.FridgeAllocations?
@@ -56,6 +57,17 @@
                     <a asp-action="Edit" asp-route-id="@customer.CustomerId" class="btn btn-warning btn-sm @(customer.IsActive ? "" : "disabled")">Edit</a>
                     <a asp-action="Delete" asp-route-id="@customer.CustomerId" class="btn btn-danger btn-sm @(customer.IsActive ? "" : "disabled")">Delete</a>
                     <a asp-action="Details" asp-route-id="@customer.CustomerId" class="btn btn-info btn-sm">Details</a>
+                    @if (!customer.IsVerified)
+                    {
+                        <form asp-action="VerifyCustomer" method="post">
+                            <input type="hidden" name="customerId" value="@customer.CustomerId" />
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Verified</span>
+                    }
                 </td>
             </tr>
         }

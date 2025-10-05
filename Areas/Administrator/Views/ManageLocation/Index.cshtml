@@ -13,7 +13,9 @@
         + Add Location
     </button>
 </p>
-
+<p>
+    <a asp-action="Inactive" class="btn btn-outline-danger">View Inactive Locations</a>
+</p>
 <!-- Locations Table -->
 <table class="table table-striped table-bordered">
     <thead>
@@ -40,7 +42,7 @@
                 <td>@(item.Employee?.Count() ?? 0)</td>
                 <td>@(item.Fridge?.Count() ?? 0)</td>
                 <td>
-                    <a asp-action="LocationDetails" asp-route-id="@item.LocationId" class="btn btn-info btn-sm">Details</a>
+                    @* <a asp-action="LocationDetails" asp-route-id="@item.LocationId" class="btn btn-info btn-sm">Details</a> *@
                     <a asp-action="Edit" asp-route-id="@item.LocationId" class="btn btn-warning btn-sm">Edit</a>
                     <a asp-action="Delete" asp-route-id="@item.LocationId" class="btn btn-danger btn-sm">Deactivate</a>
                 </td>
