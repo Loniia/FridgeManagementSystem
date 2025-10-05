@@ -9,11 +9,12 @@
 
 <h2 class="mb-4">Manage Employees</h2>
 
-<p>
-    <a asp-action="Create" asp-controller="ManageEmployee" asp-area="Administrator" class="btn btn-primary mb-3">
-        Add New Employee
-    </a>
-</p>
+<a asp-area="Administrator" asp-controller="ManageEmployee" asp-action="Create"
+   class="btn btn-primary mb-3"
+   onclick="console.log('Add button clicked');">
+    <i class="bi bi-person-plus-fill"></i> Add New Employee
+</a>
+
 
 <div class="row">
     @foreach (var emp in Model)
@@ -25,7 +26,7 @@
                     @emp.FullName
                 </div>
                 <div class="card-body">
-                    <p><strong>Email:</strong> @emp.ContactInfo</p>
+                    <p><strong>Email:</strong> @emp.Email</p>
                     <p><strong>Role:</strong> @emp.Role</p>
                     <p>
                         <strong>Status:</strong>
