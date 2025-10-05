@@ -48,7 +48,6 @@ namespace FridgeManagementSystem.Models
         public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
 
         public virtual ICollection<Quotation> Quotations { get; set; }
-        public virtual ICollection<Fridge> Fridges { get; set; }
     }
 
 }

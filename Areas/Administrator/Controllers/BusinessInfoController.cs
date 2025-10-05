@@ -22,17 +22,12 @@ public class BusinessInfoController : Controller
         _environment = environment;
     }
 
-
     // GET: BusinessInfo
     public async Task<IActionResult> Index()
     {
         try
         {
-<<<<<<< HEAD
-            var businessInfo = await _context.BusinessInfo
-=======
             var businessInfo = await _context.BusinessInfos
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
@@ -57,17 +52,11 @@ public class BusinessInfoController : Controller
     {
         try
         {
-<<<<<<< HEAD
-            var businessInfo = await _context.BusinessInfo.FirstOrDefaultAsync();
-=======
             var businessInfo = await _context.BusinessInfos.FirstOrDefaultAsync();
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
             var viewModel = businessInfo != null ?
                 MapToViewModel(businessInfo) :
                 new BusinessInfoViewModel();
 
-            // Add dropdown data
-            // In your Manage GET action:
             ViewBag.Industries = await GetIndustryList();
             ViewBag.BusinessTypes = await GetBusinessTypeList();
 
@@ -90,7 +79,6 @@ public class BusinessInfoController : Controller
         {
             if (ModelState.IsValid)
             {
-                // Handle file uploads
                 if (viewModel.LogoFile != null)
                 {
                     viewModel.LogoUrl = await UploadFile(viewModel.LogoFile, "logos");
@@ -101,22 +89,16 @@ public class BusinessInfoController : Controller
                     viewModel.BannerImageUrl = await UploadFile(viewModel.BannerFile, "banners");
                 }
 
-<<<<<<< HEAD
-                var existingInfo = await _context.BusinessInfo.FirstOrDefaultAsync();
-=======
                 var existingInfo = await _context.BusinessInfos.FirstOrDefaultAsync();
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
 
                 if (existingInfo != null)
                 {
-                    // Update existing
                     MapToEntity(viewModel, existingInfo);
                     existingInfo.UpdatedDate = DateTime.Now;
                     _context.Update(existingInfo);
                 }
                 else
                 {
-                    // Create new
                     var newInfo = MapToEntity(viewModel, new BusinessInfo());
                     _context.Add(newInfo);
                 }
@@ -150,11 +132,7 @@ public class BusinessInfoController : Controller
     {
         try
         {
-<<<<<<< HEAD
-            var businessInfo = await _context.BusinessInfo
-=======
             var businessInfo = await _context.BusinessInfos
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
@@ -178,11 +156,7 @@ public class BusinessInfoController : Controller
     {
         try
         {
-<<<<<<< HEAD
-            var businessInfo = await _context.BusinessInfo
-=======
             var businessInfo = await _context.BusinessInfos
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
@@ -276,14 +250,14 @@ public class BusinessInfoController : Controller
     private Task<List<SelectListItem>> GetIndustryList()
     {
         var list = new List<SelectListItem>
-    {
-        new SelectListItem { Value = "Beverage Manufacturing", Text = "Beverage Manufacturing" },
-        new SelectListItem { Value = "Food & Beverage Distribution", Text = "Food & Beverage Distribution" },
-        new SelectListItem { Value = "Retail", Text = "Retail" },
-        new SelectListItem { Value = "Hospitality", Text = "Hospitality" },
-        new SelectListItem { Value = "Equipment Rental", Text = "Equipment Rental" },
-        new SelectListItem { Value = "Other", Text = "Other" }
-    };
+        {
+            new SelectListItem { Value = "Beverage Manufacturing", Text = "Beverage Manufacturing" },
+            new SelectListItem { Value = "Food & Beverage Distribution", Text = "Food & Beverage Distribution" },
+            new SelectListItem { Value = "Retail", Text = "Retail" },
+            new SelectListItem { Value = "Hospitality", Text = "Hospitality" },
+            new SelectListItem { Value = "Equipment Rental", Text = "Equipment Rental" },
+            new SelectListItem { Value = "Other", Text = "Other" }
+        };
 
         return Task.FromResult(list);
     }
@@ -291,31 +265,23 @@ public class BusinessInfoController : Controller
     private Task<List<SelectListItem>> GetBusinessTypeList()
     {
         var list = new List<SelectListItem>
-    {
-        new SelectListItem { Value = "Fridge Management Services", Text = "Fridge Management Services" },
-        new SelectListItem { Value = "Beverage Supplier", Text = "Beverage Supplier" },
-        new SelectListItem { Value = "Equipment Provider", Text = "Equipment Provider" },
-        new SelectListItem { Value = "Service Company", Text = "Service Company" },
-        new SelectListItem { Value = "Other", Text = "Other" }
-    };
+        {
+            new SelectListItem { Value = "Fridge Management Services", Text = "Fridge Management Services" },
+            new SelectListItem { Value = "Beverage Supplier", Text = "Beverage Supplier" },
+            new SelectListItem { Value = "Equipment Provider", Text = "Equipment Provider" },
+            new SelectListItem { Value = "Service Company", Text = "Service Company" },
+            new SelectListItem { Value = "Other", Text = "Other" }
+        };
 
         return Task.FromResult(list);
     }
-
-    // Keep your existing Create and Edit methods for backward compatibility
-    // ... [Your existing Create and Edit methods here] ...
 
     // GET: BusinessInfo/Create
     public async Task<IActionResult> Create()
     {
         try
         {
-            // Check asynchronously if business info already exists
-<<<<<<< HEAD
-            bool exists = await _context.BusinessInfo.AsNoTracking().AnyAsync();
-=======
             bool exists = await _context.BusinessInfos.AsNoTracking().AnyAsync();
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
             if (exists)
             {
                 _logger.LogWarning("Attempt to create business info when it already exists");
@@ -340,12 +306,7 @@ public class BusinessInfoController : Controller
     {
         try
         {
-            // Check existence first to avoid unnecessary validation
-<<<<<<< HEAD
-            bool exists = await _context.BusinessInfo.AsNoTracking().AnyAsync();
-=======
             bool exists = await _context.BusinessInfos.AsNoTracking().AnyAsync();
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
             if (exists)
             {
                 ModelState.AddModelError(string.Empty, "Business information already exists. Please edit it instead.");
@@ -363,7 +324,6 @@ public class BusinessInfoController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
-            // Add generic error message for validation failures
             ModelState.AddModelError(string.Empty, "Please correct the errors below.");
             TempData["ErrorMessage"] = "Please correct the validation errors.";
             return View(businessInfo);
@@ -388,11 +348,7 @@ public class BusinessInfoController : Controller
                 return BadRequest("Invalid ID");
             }
 
-<<<<<<< HEAD
-            var businessInfo = await _context.BusinessInfo.FindAsync(id);
-=======
             var businessInfo = await _context.BusinessInfos.FindAsync(id);
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
             if (businessInfo == null)
             {
                 _logger.LogWarning("Business info not found for Edit - ID: {Id}", id);
@@ -449,7 +405,6 @@ public class BusinessInfoController : Controller
         }
         catch (DbUpdateConcurrencyException)
         {
-            // Re-throw to be caught by the outer catch block
             throw;
         }
         catch (Exception ex)
@@ -464,10 +419,7 @@ public class BusinessInfoController : Controller
     // Helper method to check if business info exists
     private bool BusinessInfoExists(int id)
     {
-<<<<<<< HEAD
-        return _context.BusinessInfo.Any(e => e.BusinessInfoId == id);
-=======
         return _context.BusinessInfos.Any(e => e.BusinessInfoId == id);
->>>>>>> 4964eef6d4c4888935a65e0a65a58cadc0111ab2
     }
 }
+
