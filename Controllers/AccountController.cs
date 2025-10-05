@@ -79,7 +79,7 @@ namespace FridgeManagementSystem.Controllers
                 return user.EmployeeRole switch
                 {
                     EmployeeRoles.CustomerManager => Redirect("~/CustomerManagementSubsystem/CustomerManagementHome"),
-                    EmployeeRoles.FaultTechnician => Redirect("~/FaultTechSubsystem/FaultTech"),
+                    EmployeeRoles.FaultTechnician => Redirect("~/FaultTechSubsystem/Faults"),
                     EmployeeRoles.MaintenanceTechnician => Redirect("~/MaintenanceSubSystem/MaintenanceHome"),
                     EmployeeRoles.PurchasingManager => Redirect("~/PurchasingSubsystem/Purchasing"),
                     _ => RedirectToAction("Index", "Home")

@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 namespace FridgeManagementSystem.Controllers
 {
+    [Area("FaultTechSubsystem")]
     public class FaultTechController : Controller
     {
         private readonly ILogger<HomeController> _logger;
