@@ -1,0 +1,373 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.Employee>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    ViewData["Title"] = "Manage Employees";
+    var locations = ViewBag.Locations as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+<style>
+    /* Custom Table Styling */
+    .table-container {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border: none;
+            padding: 15px 12px;
+            position: relative;
+        }
+
+            .table thead th:after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 2px;
+                background: rgba(255,255,255,0.3);
+            }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                border-left: 3px solid #667eea;
+            }
+
+        .table tbody td {
+            padding: 15px 12px;
+            vertical-align: middle;
+            border-color: #e9ecef;
+            font-size: 0.95rem;
+        }
+
+    /* Badge Styling */
+    .badge {
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 6px 12px;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+        .badge.bg-success {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+        }
+
+        .badge.bg-secondary {
+            background: linear-gradient(135deg, #6c757d, #868e96) !important;
+        }
+
+    /* Button Styling */
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+    .btn-sm {
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8, #6f42c1);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496, #5a2d9c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+    /* Empty State Styling */
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+
+        .empty-state i {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .empty-state h5 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+        }
+
+    .btn-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+
+    /* Header Styling */
+    h2 {
+        color: #2c3e50;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem !important;
+        position: relative;
+    }
+
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .table-container {
+            border-radius: 8px;
+        }
+
+        .table thead {
+            display: none;
+        }
+
+        .table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            display: block;
+            text-align: right;
+            padding: 0.5rem;
+            border: none;
+            position: relative;
+        }
+
+            .table tbody td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                font-weight: 600;
+                color: #495057;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+            }
+
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+
+            .empty-state i {
+                font-size: 3rem;
+            }
+    }
+
+    /* Animation */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .table tbody tr {
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+        .table tbody tr:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+
+    /* Status indicator dots */
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+
+    .status-active {
+        background-color: #28a745;
+        box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+    }
+
+    .status-inactive {
+        background-color: #6c757d;
+        box-shadow: 0 0 8px rgba(108, 117, 125, 0.5);
+    }
+</style>
+
+<h2 class="mb-4">Manage Employees</h2>
+
+<!-- Add New Employee button -->
+<p>
+    <a asp-action="Create" asp-controller="ManageEmployee" asp-area="Administrator" class="btn btn-primary mb-3">
+        <i class="bi bi-plus-circle me-1"></i> Add New Employee
+    </a>
+</p>
+
+<!-- Employees Table - Always Visible -->
+<div class="table-container">
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var emp in Model)
+                {
+                    <tr>
+                        <td data-label="Name">
+                            <strong>@emp.FullName</strong>
+                        </td>
+                        <td data-label="Email">@emp.Email</td>
+                        <td data-label="Role">
+                            <span class="badge bg-info text-dark">@emp.Role</span>
+                        </td>
+                        <td data-label="Location">
+                            @{
+                                var location = locations.FirstOrDefault(l => l.Value == emp.LocationId.ToString())?.Text ?? "N/A";
+                            }
+                            @location
+                        </td>
+                        <td data-label="Status">
+                            @if (emp.Status == "Active")
+                            {
+                                <span class="status-indicator status-active"></span>
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="status-indicator status-inactive"></span>
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td data-label="Actions">
+                            <a asp-action="Edit" asp-controller="ManageEmployee" asp-area="Administrator" asp-route-id="@emp.EmployeeID" class="btn btn-sm btn-info">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="bi bi-people"></i>
+                            <h5>No Employees Found</h5>
+                            <p>Get started by adding your first employee to the system</p>
+                            <a asp-action="Create" asp-controller="ManageEmployee" asp-area="Administrator" class="btn btn-primary">
+                                <i class="bi bi-person-plus me-2"></i>Add Your First Employee
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Add this script for enhanced interactivity -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add smooth scrolling to table
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            tableContainer.style.transition = 'all 0.3s ease';
+        }
+
+        // Add hover effects to buttons
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>

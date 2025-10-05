@@ -1,0 +1,103 @@
+﻿@model FridgeManagementSystem.Models.Employee
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Register New Employee";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center fs-5 fw-bold">
+                    <i class="bi bi-person-plus-fill me-2"></i> Register New Employee
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" asp-controller="ManageEmployee" asp-area="Administrator" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row g-3">
+                            <!-- Full Name -->
+                            <div class="col-md-6">
+                                <label asp-for="FullName" class="form-label fw-semibold"></label>
+                                <input asp-for="FullName" class="form-control form-control-lg" placeholder="Enter full name..." />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label fw-semibold"></label>
+                                <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter email..." />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+                                <input asp-for="PhoneNumber" class="form-control form-control-lg" placeholder="Enter phone number..." />
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Role -->
+                            <div class="col-md-6">
+                                <label asp-for="Role" class="form-label fw-semibold">Employee Role</label>
+                                <select asp-for="Role" class="form-select form-select-lg" asp-items="ViewBag.Roles">
+                                    <option value="">-- Select Role --</option>
+                                </select>
+                                <span asp-validation-for="Role" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="col-md-6">
+                                <label asp-for="LocationId" class="form-label fw-semibold">Branch / Location</label>
+                                <select asp-for="LocationId" class="form-select form-select-lg" asp-items="ViewBag.Locations">
+                                    <option value="">-- Select Location --</option>
+                                </select>
+                                <span asp-validation-for="LocationId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Hire Date -->
+                            <div class="col-md-6">
+                                <label asp-for="HireDate" class="form-label fw-semibold"></label>
+                                <input asp-for="HireDate" class="form-control form-control-lg" type="date" />
+                                <span asp-validation-for="HireDate" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Pay Rate -->
+                            <div class="col-md-6">
+                                <label asp-for="PayRate" class="form-label fw-semibold"></label>
+                                <input asp-for="PayRate" class="form-control form-control-lg" placeholder="Enter pay rate..." />
+                                <span asp-validation-for="PayRate" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <label asp-for="Password" class="form-label fw-semibold"></label>
+                                <input asp-for="Password" class="form-control form-control-lg" type="password" placeholder="Enter password..." />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
+                                <input asp-for="ConfirmPassword" class="form-control form-control-lg" type="password" placeholder="Confirm password..." />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm">
+                                <i class="bi bi-person-plus me-2"></i> Register Employee
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+

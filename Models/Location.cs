@@ -7,9 +7,13 @@ namespace FridgeManagementSystem.Models
     {
         [Key] 
         public int LocationId { get; set; }
+        [Required(ErrorMessage = "Address is required")]
         public string Address { get; set; }
-        public string City { get; set; }    
+        [Required(ErrorMessage = "City is required")]
+        public string City { get; set; }
+        [Required(ErrorMessage = "Province is required")]
         public string Province { get; set; }
+        [Required(ErrorMessage = "Postal code is required")]
         public string PostalCode { get; set; }
         // Soft delete flag
         public bool IsActive { get; set; } = true;

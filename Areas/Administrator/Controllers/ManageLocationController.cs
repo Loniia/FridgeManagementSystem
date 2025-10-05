@@ -46,28 +46,34 @@ namespace FridgeManagementSystem.Areas.Administration.Controllers
             return View(location);
         }
 
-        // 3️⃣ CREATE a new location
-        public IActionResult Create() => View();
+        // GET: Create Location
+        public IActionResult Create()
+        {
+            return View();
+        }
 
+        // POST: Create Location
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AddLocationViewModel model)
+        public async Task<IActionResult> Create(Location model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var location = new Location
-                {
-                    Address = model.Address,
-                    City = model.City,
-                    Province = model.Province,
-                    PostalCode = model.PostalCode,
-                    IsActive = true
-                };
-                _context.Add(location);
+                return View(model);
+            }
+
+            try
+            {
+                model.IsActive = true; // Ensure new locations are active
+                _context.Locations.Add(model);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index)); 
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error saving location: {ex.Message}");
+                return View(model);
+            }
         }
 
         // 4️⃣ EDIT an existing location
