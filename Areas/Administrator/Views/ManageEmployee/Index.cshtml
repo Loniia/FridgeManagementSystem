@@ -303,11 +303,9 @@
                             <span class="badge bg-info text-dark">@emp.Role</span>
                         </td>
                         <td data-label="Location">
-                            @{
-                                var location = locations.FirstOrDefault(l => l.Value == emp.LocationId.ToString())?.Text ?? "N/A";
-                            }
-                            @location
+                            @emp.Location?.Address 
                         </td>
+
                         <td data-label="Status">
                             @if (emp.Status == "Active")
                             {

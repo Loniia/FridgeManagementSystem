@@ -46,21 +46,26 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar (renders only if a partial exists) -->
-            @if (ViewData["Sidebar"]?.ToString() == "CustomerManagement" ||
-            ViewData["Sidebar"]?.ToString() == "Purchasing" ||
-            ViewData["Sidebar"]?.ToString() == "Maintenance")
+            @if (ViewData["Sidebar"]?.ToString() == "CustomerManagementSubSystem" ||
+            ViewData["Sidebar"]?.ToString() == "PurchasingSubSystem" ||
+            ViewData["Sidebar"]?.ToString() == "FaultTechSubSystem" ||
+            ViewData["Sidebar"]?.ToString() == "MaintenanceSubSystem")
             {
                 <div class="col-3">
                     <div class="sidebar bg-light p-3 border rounded">
-                        @if (ViewData["Sidebar"]?.ToString() == "CustomerManagement")
+                        @if (ViewData["Sidebar"]?.ToString() == "CustomerManagementSubSystem")
                         {
                             <partial name="_CustomerSidebar" />
                         }
-                        else if (ViewData["Sidebar"]?.ToString() == "Purchasing")
+                        else if (ViewData["Sidebar"]?.ToString() == "PurchasingSubSystem")
                         {
                             <partial name="_PurchasingSidebar" />
                         }
-                        else if (ViewData["Sidebar"]?.ToString() == "Maintenance")
+                        else if (ViewData["Sidebar"]?.ToString() == "FaultTechSubSystem")
+                        {
+                            <partial name="_PurchasingSidebar" />
+                        }
+                        else if (ViewData["Sidebar"]?.ToString() == "MaintenanceSubSystem")
                         {
                             <partial name="_MaintenanceSidebar" />
                         }
