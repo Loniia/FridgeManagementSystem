@@ -8,7 +8,7 @@
 <h2>Edit Customer</h2>
 
 <!-- Form to edit an existing customer -->
-<form asp-action="Edit" asp-controller="CustomerLiaison" method="post">
+<form asp-action="Edit" asp-controller="ManageCustomer" method="post">
     @Html.AntiForgeryToken()
     <!-- Hidden field for CustomerID -->
     <input type="hidden" asp-for="CustomerID" />

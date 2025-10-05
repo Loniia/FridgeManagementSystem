@@ -21,9 +21,9 @@
     <p><strong>Status:</strong> @(Model.IsActive ? "Active" : "Inactive")</p>
 </div>
 
-<form asp-action="DeleteConfirmed" asp-controller="CustomerLiaison" method="post">
+<form asp-action="DeleteConfirmed" asp-controller="ManageCustomer" method="post">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="CustomerID" />
     <button type="submit" class="btn btn-danger">Yes, Delete</button>
-    <a asp-action="Index" asp-controller="CustomerLiaison" class="btn btn-secondary">No, Cancel</a>
+    <a asp-action="Index" asp-controller="ManageCustomer" class="btn btn-secondary">No, Cancel</a>
 </form>

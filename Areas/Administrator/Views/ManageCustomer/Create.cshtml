@@ -8,7 +8,7 @@
 <h2>Add New Customer</h2>
 
 <!-- Form to create a new customer -->
-<form asp-action="Create" asp-controller="CustomerLiaison" method="post">
+<form asp-action="Create" asp-controller="ManageCustomer" method="post">
     @Html.AntiForgeryToken()
 
     <!-- Validation summary -->
@@ -54,6 +54,6 @@
     <!-- Buttons -->
     <button type="submit" class="btn btn-success">Save</button>
     <!-- Updated Cancel button to point to correct controller -->
-    <a asp-action="Index" asp-controller="CustomerLiaison" class="btn btn-secondary">Cancel</a>
+    <a asp-action="Index" asp-controller="ManageCustomer" class="btn btn-secondary">Cancel</a>
 </form>
 
