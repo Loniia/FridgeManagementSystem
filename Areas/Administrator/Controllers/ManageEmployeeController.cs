@@ -23,6 +23,11 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             _userManager = userManager;
             _logger = logger;
         }
+        // ✅ Dashboard Page
+        public IActionResult Dashboard()
+        {
+            return View();
+        }
 
         // ✅ Index Page (Manage Employees)
         public IActionResult Index()
