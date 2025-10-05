@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerManagementSubSystem.Controllers
+namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 {
     [Area("CustomerManagementSubSystem")]
     public class InventoryLiaisonController : Controller
@@ -30,8 +30,12 @@ namespace CustomerManagementSubSystem.Controllers
                 .Select(f => new FridgeViewModel
                 {
                     FridgeId = f.FridgeId,
+                    FridgeName = f.FridgeName,                    // Add this
+                    FridgeType = f.FridgeType,                    // Add this
                     Brand = f.Brand,
                     Model = f.Model,
+                    SerialNumber = f.SerialNumber,                // Add this
+                    Condition = f.Condition,                      // Add this
                     Status = f.Status,
                     Quantity = f.Quantity,
                     CustomerName = f.FridgeAllocation
@@ -71,8 +75,10 @@ namespace CustomerManagementSubSystem.Controllers
                 return View(fridge);
             }
 
+            // Set automatic values
             fridge.Status = "Received";
             fridge.DateAdded = DateOnly.FromDateTime(DateTime.Now);
+            fridge.UpdatedDate = DateTime.Now;
             fridge.IsActive = true;
 
             _context.Fridge.Add(fridge);
