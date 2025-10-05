@@ -42,7 +42,7 @@ namespace FridgeManagementSystem.Models
         public int LocationId { get; set; }
         public virtual Location Location { get; set; }
         [ForeignKey("ApplicationUserId")]
-        [Required]
+        
         public int ApplicationUserId { get; set; }
         public ApplicationUser UserAccount { get; set; }
 

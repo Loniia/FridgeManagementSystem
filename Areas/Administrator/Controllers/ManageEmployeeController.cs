@@ -1,54 +1,47 @@
-﻿using FridgeManagementSystem.Data; // Your DbContext
-using FridgeManagementSystem.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Models;
 
 namespace FridgeManagementSystem.Areas.Administrator.Controllers
 {
     [Area("Administrator")]
     public class ManageEmployeeController : Controller
     {
-        private readonly ILogger<ManageEmployeeController> _logger; 
         private readonly FridgeDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<ManageEmployeeController> _logger;
 
-        public ManageEmployeeController(FridgeDbContext context, UserManager<ApplicationUser> userManager, ILogger<ManageEmployeeController> logger )
+        public ManageEmployeeController(
+            FridgeDbContext context,
+            UserManager<ApplicationUser> userManager,
+            ILogger<ManageEmployeeController> logger)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
         }
-        public IActionResult Dashboard() 
-        {
-            return View();
-        }
 
-        // GET: ManageEmployees Page
+        // ✅ Index Page (Manage Employees)
         public IActionResult Index()
         {
-            var employees = _context.Employees.ToList();
-            ViewBag.Locations = _context.Locations
-                .Select(l => new SelectListItem
-                {
-                    Text = l.Address + ", " + l.City,
-                    Value = l.LocationId.ToString()
-                }).ToList();
-
+            var employees = _context.Employees
+                .Include(e => e.Location)
+                .ToList();
             return View(employees);
         }
-        // GET: Add New Employee
+
+        // ✅ GET: Create Employee Form
+        [HttpGet]
         public IActionResult Create()
         {
             PopulateDropdowns();
             return View(new Employee());
         }
 
-        // POST: Add New Employee
+        // ✅ POST: Create Employee
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Employee model)
@@ -59,7 +52,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 return View(model);
             }
 
-            // Create ApplicationUser
+            // 1️⃣ Create linked Identity user
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -70,7 +63,6 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
@@ -80,37 +72,39 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 return View(model);
             }
 
-            // Save Employee record
+            // 2️⃣ Create Employee record
             model.ApplicationUserId = user.Id;
             _context.Employees.Add(model);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Employee registered successfully!";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
-        // ---------------- Helper to populate dropdowns ----------------
+        // ✅ Helper — populate dropdown data
         private void PopulateDropdowns()
         {
-            // Roles linked to subsystem
-            ViewBag.Roles = new List<SelectListItem>
+            // Roles
+            var roles = new[]
             {
-                new SelectListItem { Text = "Customer Manager", Value = EmployeeRoles.CustomerManager },
-                new SelectListItem { Text = "Fault Technician", Value = EmployeeRoles.FaultTechnician },
-                new SelectListItem { Text = "Maintenance Technician", Value = EmployeeRoles.MaintenanceTechnician },
-                new SelectListItem { Text = "Purchasing Manager", Value = EmployeeRoles.PurchasingManager }
+                new { Value = EmployeeRoles.CustomerManager, Text = "Customer Manager" },
+                new { Value = EmployeeRoles.FaultTechnician, Text = "Fault Technician" },
+                new { Value = EmployeeRoles.MaintenanceTechnician, Text = "Maintenance Technician" },
+                new { Value = EmployeeRoles.PurchasingManager, Text = "Purchasing Manager" }
             };
+            ViewBag.Roles = new SelectList(roles, "Value", "Text");
 
-            // Locations dropdown
-            ViewBag.Locations = _context.Locations
+            // Locations
+            var locations = _context.Locations
                 .Where(l => l.IsActive)
-                .Select(l => new SelectListItem
+                .Select(l => new
                 {
-                    Text = l.Address + ", " + l.City,
-                    Value = l.LocationId.ToString()
+                    l.LocationId,
+                    FullAddress = l.Address + ", " + l.City
                 })
                 .ToList();
+
+            ViewBag.Locations = new SelectList(locations, "LocationId", "FullAddress");
         }
     }
 }
-
