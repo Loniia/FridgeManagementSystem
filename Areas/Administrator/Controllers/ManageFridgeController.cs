@@ -24,8 +24,46 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         // ===== View all fridges (Inventory + Status + Supplier + Location + Maintenance Info) =====
         public async Task<IActionResult> Index()
         {
-            var fridges = await _fridgeService.GetAllFridgesWithMaintenanceAsync();
-            return View(fridges);
+            // Get all fridges including related entities
+            var fridges = await _context.Fridge
+                .Include(f => f.Supplier)
+                .Include(f => f.Customer)
+                .Include(f => f.Location)
+                .Include(f => f.Faults)
+                .Include(f => f.MaintenanceRequest)
+                .ToListAsync();
+
+            // Map to a ViewModel for display
+            var fridgeVMs = fridges.Select(f => new FridgeViewModel
+            {
+                FridgeId = f.FridgeId,
+                FridgeName = f.FridgeName,
+                FridgeType = f.FridgeType,
+                Brand = f.Brand,
+                Model = f.Model,
+                SerialNumber = f.SerialNumber,
+                Condition = f.Condition,
+                PurchaseDate = f.PurchaseDate,
+                WarrantyExpiry = f.WarrantyExpiry,
+                Notes = f.Notes,
+                UpdatedDate = f.UpdatedDate,
+                DateAdded = f.DateAdded,
+                SupplierID = f.SupplierID,
+                CustomerId = f.CustomerId,
+                LocationId = f.LocationId,
+                Quantity = f.Quantity,
+                DeliveryDate = f.DeliveryDate,
+                Status = f.Status,
+                IsActive = f.IsActive,
+
+                // Related info
+                CustomerName = f.Customer?.FullName ?? "N/A",
+                AllocationDate = f.FridgeAllocation?.FirstOrDefault()?.AllocationDate,
+                ReturnDate = f.FridgeAllocation?.FirstOrDefault()?.ReturnDate,
+
+            }).ToList();
+
+            return View(fridgeVMs);
         }
 
         // ===== Create new fridge =====
