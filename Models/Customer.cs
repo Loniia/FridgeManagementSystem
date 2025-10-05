@@ -48,7 +48,7 @@ namespace FridgeManagementSystem.Models
         //Once you add ApplicationUserId in Customer, EF will correctly understand:
         // Customer depends on ApplicationUser.
         //When you delete a user, their Customer profile is also deleted.
-        public int ApplicationUserId { get; set; }
+        public int? ApplicationUserId { get; set; }
         public ICollection<FaultReport> FaultReports { get; set; }
        
         public ICollection<CustomerNote> CustomerNote { get; set; }

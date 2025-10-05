@@ -70,13 +70,13 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return View(model);
         }
-
+       
         // --------------------------
         // Create Customer
         // --------------------------
         public IActionResult Create()
         {
-            ViewBag.Locations = new SelectList(_context.Locations, "LocationId", "LocationName");
+            PopulateLocations();
             return View();
         }
 
@@ -86,7 +86,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Locations = new SelectList(_context.Locations, "LocationId", "LocationName");
+                PopulateLocations();
                 return View(customer);
             }
 
@@ -98,6 +98,25 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             TempData["SuccessMessage"] = "Customer created successfully!";
             return RedirectToAction(nameof(Index));
+        }
+
+        // --------------------------
+        // Private helper to populate locations dropdown
+        // --------------------------
+        private void PopulateLocations()
+        {
+            ViewBag.Locations = new SelectList(
+                _context.Locations
+                        .Where(l => l.IsActive)
+                        .Select(l => new
+                        {
+                            l.LocationId,
+                            FullAddress = l.Address + ", " + l.City + ", " + l.Province
+                        })
+                        .ToList(),
+                "LocationId",
+                "FullAddress"
+            );
         }
 
         // --------------------------

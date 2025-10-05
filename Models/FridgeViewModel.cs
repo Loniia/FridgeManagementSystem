@@ -6,15 +6,36 @@ namespace FridgeManagementSystem.Models
 {
     public class FridgeViewModel
     {
-        [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
-        public Fridge Fridge { get; set; }
+        public string FridgeName { get; set; }
+        public string FridgeType { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }
-        public string Status { get; set; }
+        public string SerialNumber { get; set; }
+        public string Condition { get; set; } = "Working";
+        public DateTime PurchaseDate { get; set; }
+        public DateTime? WarrantyExpiry { get; set; }
+        public string Notes { get; set; }
+        public DateTime UpdatedDate { get; set; } = DateTime.Now;
+        public DateOnly DateAdded { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public int SupplierID { get; set; }
+        public int? CustomerId { get; set; }
+        public int? LocationId { get; set; }
         public int Quantity { get; set; }
+        public DateTime DeliveryDate { get; set; }
+        public string Status { get; set; }
+        public bool IsActive { get; set; } = true;
+
+        // Customer allocation info
         public string CustomerName { get; set; }
         public DateOnly? AllocationDate { get; set; }
         public DateOnly? ReturnDate { get; set; }
+
+        // Computed properties
+        [NotMapped]
+        public bool IsUnderWarranty => WarrantyExpiry.HasValue && WarrantyExpiry.Value > DateTime.Today;
+
+        [NotMapped]
+        public bool IsLowStock => Quantity < 5;
     }
 }
