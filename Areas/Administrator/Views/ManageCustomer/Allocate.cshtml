@@ -12,7 +12,7 @@
     <div class="mb-3">
         <label asp-for="SelectedFridgeID" class="form-label">Select Fridge</label>
         <select asp-for="SelectedFridgeID" class="form-select"
-                asp-items="@(new SelectList(Model.AvailableFridges, "FridgeID", "Model"))">
+                asp-items="@(new SelectList(Model.AvailableFridges, "FridgeId", "Model"))">
             <option value="">-- Choose Fridge --</option>
         </select>
         <span asp-validation-for="SelectedFridgeID" class="text-danger"></span>

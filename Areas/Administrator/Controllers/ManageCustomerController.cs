@@ -211,23 +211,29 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Allocate(CustomerAllocationViewModel model)
         {
+            // ✅ Always populate AvailableFridges at the start
+            model.AvailableFridges = _context.Fridge
+                                             .Where(f => f.IsActive && f.Status != "Scrapped" && f.Quantity > 0)
+                                             .ToList();
+
+            // --------------------------
+            // Validation
+            // --------------------------
             if (model.SelectedFridgeID == 0)
-                ModelState.AddModelError("", "Please select a fridge to allocate.");
+                ModelState.AddModelError(nameof(model.SelectedFridgeID), "Please select a fridge to allocate.");
 
             if (model.QuantityAllocated <= 0)
-                ModelState.AddModelError("", "Quantity allocated must be greater than zero.");
+                ModelState.AddModelError(nameof(model.QuantityAllocated), "Quantity allocated must be greater than zero.");
 
             if (model.ReturnDate < DateOnly.FromDateTime(DateTime.Now))
-                ModelState.AddModelError("", "Return date cannot be in the past.");
+                ModelState.AddModelError(nameof(model.ReturnDate), "Return date cannot be in the past.");
 
             if (!ModelState.IsValid)
-            {
-                model.AvailableFridges = _context.Fridge
-                                                 .Where(f => f.IsActive && f.Status != "Scrapped" && f.Quantity > 0)
-                                                 .ToList();
                 return View(model);
-            }
 
+            // --------------------------
+            // Find customer
+            // --------------------------
             var customer = _context.Customers.Find(model.CustomerId);
             if (customer == null)
             {
@@ -235,6 +241,9 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 return RedirectToAction("Index");
             }
 
+            // --------------------------
+            // Find fridge
+            // --------------------------
             var fridge = _context.Fridge.Find(model.SelectedFridgeID);
             if (fridge == null || !fridge.IsActive || fridge.Status == "Scrapped")
             {
@@ -242,16 +251,18 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 return RedirectToAction("Index");
             }
 
+            // --------------------------
+            // Check stock
+            // --------------------------
             if (fridge.Quantity < model.QuantityAllocated)
             {
                 ModelState.AddModelError("", $"Not enough stock available. Only {fridge.Quantity} left.");
-                model.AvailableFridges = _context.Fridge
-                                                 .Where(f => f.IsActive && f.Status != "Scrapped" && f.Quantity > 0)
-                                                 .ToList();
-                return View(model);
+                return View(model); // AvailableFridges already populated
             }
 
+            // --------------------------
             // Create allocation
+            // --------------------------
             var allocation = new FridgeAllocation
             {
                 CustomerID = model.CustomerId,
@@ -271,6 +282,9 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             _context.SaveChanges();
 
+            // --------------------------
+            // Create initial maintenance request
+            // --------------------------
             try
             {
                 var created = _mrService.CreateInitialRequestForAllocationAsync(fridge.FridgeId)
@@ -289,6 +303,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             TempData["SuccessMessage"] = $"Allocated {model.QuantityAllocated} fridge(s) successfully!";
             return RedirectToAction("Details", new { id = model.CustomerId });
         }
+
 
         // --------------------------
         // Return Fridge
