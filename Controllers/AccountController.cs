@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using FridgeManagementSystem.Models;
 using FridgeManagementSystem.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace FridgeManagementSystem.Controllers
 {
@@ -35,13 +37,13 @@ namespace FridgeManagementSystem.Controllers
         {
             return View();
         }
-
-        // ✅ POST: Login
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
+            // 1️⃣ Find the user
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null)
             {
@@ -49,6 +51,20 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
+            // 2️⃣ Check if customer is verified
+            if (await _userManager.IsInRoleAsync(user, Roles.Customer))
+            {
+                var customer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+
+                if (customer != null && !customer.IsVerified)
+                {
+                    ModelState.AddModelError("", "Your account is awaiting admin approval.");
+                    return View(model);
+                }
+            }
+
+            // 3️⃣ Sign in
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
             if (!result.Succeeded)
             {
@@ -56,12 +72,10 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
-            // Get roles
+            // 4️⃣ Get roles
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Log roles for debugging
-            _logger.LogInformation($"User {user.UserName} roles: {string.Join(", ", roles)}");
-
+            // 5️⃣ Redirect based on role
             if (roles.Contains(Roles.Admin))
                 return RedirectToAction("Dashboard", "ManageEmployee", new { area = "Administrator" });
 
@@ -71,10 +85,7 @@ namespace FridgeManagementSystem.Controllers
             if (roles.Contains(Roles.Employee))
             {
                 if (string.IsNullOrEmpty(user.EmployeeRole))
-                {
-                    // Fallback if EmployeeRole not set
                     return RedirectToAction("Index", "Home");
-                }
 
                 return user.EmployeeRole switch
                 {
@@ -86,7 +97,7 @@ namespace FridgeManagementSystem.Controllers
                 };
             }
 
-            // Default fallback
+            // 6️⃣ Default fallback
             return RedirectToAction("Index", "Home");
         }
 
@@ -94,21 +105,35 @@ namespace FridgeManagementSystem.Controllers
         // ✅ GET: Register Customer
         public IActionResult RegisterCustomer()
         {
+            ViewBag.Locations = _context.Locations
+                .Where(l => l.IsActive)
+                .Select(l => new SelectListItem
+                {
+                    Value = l.LocationId.ToString(),
+                    Text = l.Address
+                 }).ToList();
             return View();
         }
 
-        // ✅ POST: Register Customer
+        // POST
         [HttpPost]
         public async Task<IActionResult> RegisterCustomer(RegisterCustomerViewModel model)
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.Locations = _context.Locations
+                    .Where(l => l.IsActive)
+                    .Select(l => new SelectListItem
+                    {
+                        Value = l.LocationId.ToString(),
+                        Text = l.Address
+                    }).ToList();
                 return View(model);
             }
 
             var user = new ApplicationUser
             {
-                UserName = model.UserName,
+                UserName = model.Email,
                 Email = model.Email,
                 FullName = model.FullName,
                 UserType = Roles.Customer
@@ -118,43 +143,42 @@ namespace FridgeManagementSystem.Controllers
 
             if (result.Succeeded)
             {
-                // ✅ Step 1: Ensure the Customer role exists
                 if (!await _roleManager.RoleExistsAsync(Roles.Customer))
-                {
                     await _roleManager.CreateAsync(new IdentityRole<int>(Roles.Customer));
-                }
 
-                // ✅ Step 2: Add user to Customer role
                 await _userManager.AddToRoleAsync(user, Roles.Customer);
 
-                // ✅ Step 3: Create matching Customer profile
                 var customer = new Customer
                 {
                     FullName = model.FullName,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
-                    LocationId = model.LocationId, // only if it's in your viewmodel
-                    ApplicationUserId = user.Id,   // link ApplicationUser ↔ Customer
+                    LocationId = model.LocationId,
+                    ApplicationUserId = user.Id,
                     RegistrationDate = DateOnly.FromDateTime(DateTime.Now),
-                    IsActive = true
+                    IsActive = true,
+                    IsVerified = false
                 };
 
                 _context.Customers.Add(customer);
+
+                // Optional: Admin notification
+                _context.AdminNotifications.Add(new AdminNotification
+                {
+                    Message = $"New customer {customer.FullName} registered. Awaiting verification."
+                });
+
                 await _context.SaveChangesAsync();
 
-                // ✅ Step 4: Redirect to login
-                return RedirectToAction("Login", "Account");
+                TempData["Message"] = "Registration successful. Wait for admin approval.";
+                return RedirectToAction("Login");
             }
 
-            // ❌ If registration failed, show errors
             foreach (var error in result.Errors)
-            {
                 ModelState.AddModelError("", error.Description);
-            }
 
             return View(model);
         }
-
         // ✅ Logout
         public async Task<IActionResult> Logout()
         {
