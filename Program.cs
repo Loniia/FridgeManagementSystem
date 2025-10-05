@@ -15,6 +15,8 @@ builder.Services.AddDbContext<FridgeDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<CustomerService>();
+builder.Services.AddScoped<FridgeService>();
+
 
 // ✅ 2. Add Identity with int as key and custom ApplicationUser
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
@@ -48,7 +50,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
 
     var context = services.GetRequiredService<FridgeDbContext>();
-    context.Database.Migrate();
+   // context.Database.Migrate();
 
     // Call SeedData to ensure roles + admin user exist
     await SeedData.InitializeAsync(services);
