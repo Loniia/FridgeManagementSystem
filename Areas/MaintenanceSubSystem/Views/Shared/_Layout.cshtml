@@ -241,23 +241,23 @@
 
         <ul class="menu">
             <li>
-                <a asp-area="MaintenanceSubsystem" asp-controller="MaintenanceHome" asp-action="Index" class="@(currentController == "MaintenanceHome" ? "active" : "")"><i class="fas fa-home"></i> Home</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="MaintenanceHome" asp-action="Index" class="@(currentController == "MaintenanceHome" ? "active" : "")"><i class="fas fa-home"></i> Home</a>
             </li>
             <li>
-                <a asp-area="MaintenanceSubsystem" asp-controller="Maintenance" asp-action="MaintenanceRequests" class="@(currentController == "Maintenance" && currentAction == "MaintenanceRequests" ? "active" : "")"><i class="fas fa-snowflake"></i> Maintenance Requests</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="MaintenanceRequests" class="@(currentController == "Maintenance" && currentAction == "MaintenanceRequests" ? "active" : "")"><i class="fas fa-snowflake"></i> Maintenance Requests</a>
             </li>
 
             <li class="menu-heading">MAINTENANCE</li>
             <li>
-                <a  asp-area="MaintenanceSubsystem" asp-controller="Maintenance" asp-action="ScheduleVisit" class="@(currentController == "Maintenance" && currentAction == "ScheduleVisit" ? "active" : "")"><i class="fas fa-calendar-plus"></i> Schedule Visit</a>
+                <a  asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="ScheduleVisit" class="@(currentController == "Maintenance" && currentAction == "ScheduleVisit" ? "active" : "")"><i class="fas fa-calendar-plus"></i> Schedule Visit</a>
             </li>
             <li>
-                <a asp-area="MaintenanceSubsystem"  asp-controller="Maintenance" asp-action="VisitList" class="@(currentController == "Maintenance" && currentAction == "VisitList" ? "active" : "")"><i class="fas fa-calendar-check"></i> View Scheduled Visits</a>
+                <a asp-area="MaintenanceSubSystem"  asp-controller="Maintenance" asp-action="VisitList" class="@(currentController == "Maintenance" && currentAction == "VisitList" ? "active" : "")"><i class="fas fa-calendar-check"></i> View Scheduled Visits</a>
             </li>
 
             <li class="menu-heading">REPORTS</li>
             <li>
-                <a asp-area="MaintenanceSubsystem" asp-controller="Maintenance" asp-action="ReportedFaults" class="@(currentController == "Maintenance" && currentAction == "ReportedFaults" ? "active" : "")"><i class="fas fa-exclamation-triangle"></i> View Reported Faults</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="ReportedFaults" class="@(currentController == "Maintenance" && currentAction == "ReportedFaults" ? "active" : "")"><i class="fas fa-exclamation-triangle"></i> View Reported Faults</a>
             </li>
         </ul>
 
