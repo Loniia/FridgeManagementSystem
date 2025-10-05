@@ -88,64 +88,46 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 
     <script>
-        document.getElementById('locationForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-            
+        document.getElementById('locationForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            console.log('Form submit event fired!');
+
+            // Get the form data
             const formData = new FormData(this);
-            
-            // FIXED: Using the correct controller name
+            console.log('FormData:', Object.fromEntries(formData));
+
+            // Simple test - does the fetch work at all?
             fetch('@Url.Action("Create", "ManageLocation")', {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value,
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data); // Debug log
-                if (data.success) {
-                    // Success - close modal and refresh page
-                    $('#addLocationModal').modal('hide');
-                    location.reload(); // Refresh to show new location
-                } else {
-                    // Show validation errors
-                    displayValidationErrors(data.errors);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while saving the location. Please try again.');
-            });
-        });
-
-        function displayValidationErrors(errors) {
-            // Clear previous errors
-            document.querySelectorAll('.text-danger').forEach(span => span.textContent = '');
-            
-            // Display new errors
-            if (errors && errors.Address) document.getElementById('addressValidation').textContent = errors.Address[0];
-            if (errors && errors.City) document.getElementById('cityValidation').textContent = errors.City[0];
-            if (errors && errors.Province) document.getElementById('provinceValidation').textContent = errors.Province[0];
-            if (errors && errors.PostalCode) document.getElementById('postalCodeValidation').textContent = errors.PostalCode[0];
-        }
-
-        // Clear validation errors when modal is closed
-        $('#addLocationModal').on('hidden.bs.modal', function () {
-            document.querySelectorAll('.text-danger').forEach(span => span.textContent = '');
-            document.getElementById('locationForm').reset();
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success! Response data:', data);
+                    if (data.success) {
+                        alert('Location saved successfully! Closing modal...');
+                        $('#addLocationModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Validation errors: ' + JSON.stringify(data.errors));
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert('Error occurred: ' + error.message);
+                });
         });
     </script>
-}
 }
