@@ -15,89 +15,90 @@
         padding-top: 0 !important;
     }
 
+    .main-content {
+        margin-top: 0 !important;
+    }
+
     body {
         margin: 0;
         font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
     }
 
-    /* 🔹 Layout container holding sidebar + main content */
-    .dashboard-container {
-        display: flex;
-        align-items: flex-start;
-        min-height: 100vh;
-        background-color: #f9f9f9;
-    }
-
-    /* 🔹 Sidebar */
     .sidebar {
-        position: relative;
-        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
         width: 220px;
         background-color: #3a3a3a;
         color: #fff;
         padding-top: 20px;
         transition: all 0.3s ease;
         overflow-x: hidden;
-        flex-shrink: 0;
+        z-index: 1000;
     }
 
-        .sidebar.collapsed {
-            width: 0;
-            padding: 0;
-            overflow: hidden;
-        }
+    .sidebar.collapsed {
+        width: 0;
+        padding: 0;
+    }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 1.5rem;
-            white-space: nowrap;
-        }
+    .sidebar h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 1.5rem;
+        white-space: nowrap;
+    }
 
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-            .sidebar ul li {
-                padding: 15px 20px;
-                margin-bottom: 5px;
-                border-radius: 4px;
-                background-color: #3a3a3a;
-                transition: all 0.3s;
-                white-space: nowrap;
-            }
+    .sidebar ul li {
+        padding: 15px 20px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        background-color: #3a3a3a;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
 
-                .sidebar ul li:hover,
-                .sidebar ul li.active {
-                    background-color: #d3d3d3;
-                    color: #000;
-                }
+    .sidebar ul li:hover,
+    .sidebar ul li.active {
+        background-color: #d3d3d3;
+        color: #000;
+    }
 
-                .sidebar ul li a {
-                    text-decoration: none;
-                    color: inherit;
-                    display: block;
-                }
+    .sidebar ul li a {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
 
-        .sidebar.collapsed h2,
-        .sidebar.collapsed ul li {
-            display: none;
-        }
+    .sidebar.collapsed h2,
+    .sidebar.collapsed ul li {
+        display: none;
+    }
 
-    /* 🔹 Main Content */
     .main-content {
-        flex: 1;
-        padding: 30px;
-        transition: all 0.3s ease;
+        margin-left: 220px;
+        padding: 10px 30px 30px 30px;
+        transition: margin-left 0.3s ease;
+        min-height: 100vh;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        margin-top: 0;
     }
 
-        .main-content.collapsed {
-            margin-left: 0;
-        }
+    .main-content.collapsed {
+        margin-left: 0;
+    }
 
-    /* 🔹 Toggle Button */
     .toggle-btn {
         position: fixed;
         top: 20px;
@@ -117,15 +118,14 @@
         transition: all 0.3s ease;
     }
 
-        .toggle-btn:hover {
-            background: #555;
-        }
+    .toggle-btn:hover {
+        background: #555;
+    }
 
-        .toggle-btn.collapsed {
-            left: 15px;
-        }
+    .toggle-btn.collapsed {
+        left: 15px;
+    }
 
-    /* 🔹 Welcome Section */
     .dashboard-welcome {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -133,21 +133,21 @@
         border-radius: 10px;
         margin-bottom: 30px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 0 !important;
     }
 
-        .dashboard-welcome h2 {
-            margin: 0 0 10px 0;
-            font-size: 2rem;
-            font-weight: bold;
-        }
+    .dashboard-welcome h2 {
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+        font-weight: bold;
+    }
 
-        .dashboard-welcome p {
-            margin: 0;
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
+    .dashboard-welcome p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
 
-    /* 🔹 Product Cards */
     .product-card {
         transition: transform 0.2s, box-shadow 0.2s;
         cursor: pointer;
@@ -155,10 +155,10 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
 
     .card-img-top {
         object-fit: cover;
@@ -191,66 +191,63 @@
 <!-- Toggle button -->
 <button class="toggle-btn" id="toggleBtn">&#9776;</button>
 
-<!-- 🔹 Sidebar + Content aligned in one flex container -->
-<div class="dashboard-container">
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <h2>Customer Dashboard</h2>
-        <ul id="sidebar-menu">
-            <li class="active"><a asp-action="Dashboard" asp-controller="Customer">Home</a></li>
-            <li><a asp-action="ViewCart" asp-controller="Customer">My Cart</a></li>
-            <li><a asp-action="Checkout" asp-controller="Customer">Checkout</a></li>
-            <li><a asp-action="MyAccount" asp-controller="Customer">My Orders</a></li>
-            <li><a asp-action="TrackOrder" asp-controller="Customer">Track Order</a></li>
-            <li><a asp-action="UpcomingVisits" asp-controller="Customer">Upcoming Maintenance Visit</a></li>
-            <li><a asp-action="FridgeServiceHistory" asp-controller="Customer">Service History</a></li>
-            <li><a asp-controller="Account" asp-action="Logout">Sign Out</a></li>
-        </ul>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h2>Customer Dashboard</h2>
+    <ul id="sidebar-menu">
+        <li class="active"><a asp-action="Dashboard" asp-controller="Customer">Home</a></li>
+        <li><a asp-action="ViewCart" asp-controller="Customer">My Cart</a></li>
+        <li><a asp-action="Checkout" asp-controller="Customer">Checkout</a></li>
+        <li><a asp-action="MyAccount" asp-controller="Customer">My Orders</a></li>
+        <li><a asp-action="TrackOrder" asp-controller="Customer">Track Order</a></li>
+        <li><a asp-action="UpcomingVisits" asp-controller="Customer">Upcoming Maintenance Visit</a></li>
+        <li><a asp-action="FridgeServiceHistory" asp-controller="Customer">Service History</a></li>
+        <li><a asp-controller="Account" asp-action="Logout">Sign Out</a></li>
+    </ul>
+</div>
+
+<!-- Main content -->
+<div class="main-content" id="mainContent">
+    <div class="dashboard-welcome">
+        <h2>Welcome, @(User.Identity?.Name ?? "Guest")!</h2>
+        <p>This is your customer dashboard. Browse our products and manage your orders.</p>
     </div>
 
-    <!-- Main content -->
-    <div class="main-content" id="mainContent">
-        <div class="dashboard-welcome">
-            <h2>Welcome, @(User.Identity?.Name ?? "Guest")!</h2>
-            <p>This is your customer dashboard. Browse our products and manage your orders.</p>
-        </div>
+    @foreach (var categoryVm in Model.Categories)
+    {
+        <h4 class="mt-4">@categoryVm.Category.CategoryName</h4>
+        <div class="row">
+            @foreach (var productVm in categoryVm.Products)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="card product-card position-relative">
+                        @if (productVm.AvailableStock <= 0)
+                        {
+                            <span class="badge bg-danger badge-stock">Out of Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success badge-stock">In Stock</span>
+                        }
 
-        @foreach (var categoryVm in Model.Categories)
-        {
-            <h4 class="mt-4">@categoryVm.Category.CategoryName</h4>
-            <div class="row">
-                @foreach (var productVm in categoryVm.Products)
-                {
-                    <div class="col-md-3 mb-4">
-                        <div class="card product-card position-relative">
-                            @if (productVm.AvailableStock <= 0)
-                            {
-                                <span class="badge bg-danger badge-stock">Out of Stock</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success badge-stock">In Stock</span>
-                            }
+                        <img src="/images/fridges/@productVm.Product.ImageUrl" class="card-img-top" alt="@productVm.Product.Name" />
 
-                            <img src="/images/fridges/@productVm.Product.ImageUrl" class="card-img-top" alt="@productVm.Product.Name" />
+                        <div class="card-body text-center">
+                            <h5 class="card-title">@productVm.Product.Name</h5>
+                            <p class="text-success fw-bold">R@(productVm.Product.Price.ToString("0.00"))</p>
+                            <p class="text-muted">Available: @productVm.AvailableStock</p>
 
-                            <div class="card-body text-center">
-                                <h5 class="card-title">@productVm.Product.Name</h5>
-                                <p class="text-success fw-bold">R@(productVm.Product.Price.ToString("0.00"))</p>
-                                <p class="text-muted">Available: @productVm.AvailableStock</p>
-
-                                <form asp-action="AddToCart" asp-controller="Customer" method="post">
-                                    <input type="hidden" name="productId" value="@productVm.Product.ProductId" />
-                                    <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
-                                </form>
-                            </div>
+                            <form asp-action="AddToCart" asp-controller="Customer" method="post">
+                                <input type="hidden" name="productId" value="@productVm.Product.ProductId" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+                            </form>
                         </div>
                     </div>
-                }
-            </div>
-        }
-    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
 
 @section Scripts {
@@ -271,7 +268,48 @@
                 toggleBtn.style.left = "235px";
             }
         });
+
+        const sidebarItems = document.querySelectorAll("#sidebar-menu li");
+        const currentUrl = window.location.href;
+
+        sidebarItems.forEach(item => {
+            const link = item.querySelector('a');
+            if (link && currentUrl.includes(link.getAttribute('href'))) {
+                sidebarItems.forEach(i => i.classList.remove("active"));
+                item.classList.add("active");
+            }
+
+            item.addEventListener("click", () => {
+                sidebarItems.forEach(i => i.classList.remove("active"));
+                item.classList.add("active");
+            });
+        });
+
+        document.addEventListener('click', (event) => {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickOnToggleBtn = toggleBtn.contains(event.target);
+
+            if (window.innerWidth <= 768 && !isClickInsideSidebar && !isClickOnToggleBtn && !sidebar.classList.contains('collapsed')) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('collapsed');
+                toggleBtn.innerHTML = "&#9776;";
+                toggleBtn.style.left = "15px";
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('collapsed');
+                toggleBtn.innerHTML = "&times;";
+                toggleBtn.style.left = "235px";
+            } else {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('collapsed');
+                toggleBtn.innerHTML = "&#9776;";
+                toggleBtn.style.left = "15px";
+            }
+        });
     </script>
 }
-
 
