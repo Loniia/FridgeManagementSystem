@@ -312,7 +312,9 @@ namespace FridgeManagementSystem.Migrations
                     IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     ShopType = table.Column<int>(type: "int", nullable: false),
-                    ApplicationUserId = table.Column<int>(type: "int", nullable: true)
+                    ApplicationUserId = table.Column<int>(type: "int", nullable: true),
+                    SecurityQuestion = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    SecurityAnswerHash = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -407,15 +409,13 @@ namespace FridgeManagementSystem.Migrations
                 {
                     FridgeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FridgeName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    FridgeType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FridgeType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Brand = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Model = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     SerialNumber = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Condition = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     WarrantyExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateAdded = table.Column<DateOnly>(type: "date", nullable: false),
                     SupplierID = table.Column<int>(type: "int", nullable: false),
@@ -505,7 +505,8 @@ namespace FridgeManagementSystem.Migrations
                 {
                     CartItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CartId = table.Column<int>(type: "int", nullable: false),
+                    CartId = table.Column<int>(type: "int", nullable: true),
+                    CartId1 = table.Column<int>(type: "int", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false)
                 },
@@ -515,6 +516,11 @@ namespace FridgeManagementSystem.Migrations
                     table.ForeignKey(
                         name: "FK_CartItems_Carts_CartId",
                         column: x => x.CartId,
+                        principalTable: "Carts",
+                        principalColumn: "CartId");
+                    table.ForeignKey(
+                        name: "FK_CartItems_Carts_CartId1",
+                        column: x => x.CartId1,
                         principalTable: "Carts",
                         principalColumn: "CartId");
                     table.ForeignKey(
@@ -543,7 +549,6 @@ namespace FridgeManagementSystem.Migrations
                     IsUrgent = table.Column<bool>(type: "bit", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TechnicianID = table.Column<int>(type: "int", nullable: true),
                     Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     FridgeId = table.Column<int>(type: "int", nullable: false),
                     EmployeeID = table.Column<int>(type: "int", nullable: true)
@@ -572,7 +577,7 @@ namespace FridgeManagementSystem.Migrations
                     CustomerID = table.Column<int>(type: "int", nullable: false),
                     FridgeId = table.Column<int>(type: "int", nullable: false),
                     AllocationDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    ReturnDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    ReturnDate = table.Column<DateOnly>(type: "date", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     QuantityAllocated = table.Column<int>(type: "int", nullable: false)
                 },
@@ -691,6 +696,8 @@ namespace FridgeManagementSystem.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Method = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    BankReference = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CardNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
@@ -1039,36 +1046,36 @@ namespace FridgeManagementSystem.Migrations
                 columns: new[] { "ProductId", "CategoryId", "Description", "ImageUrl", "Name", "Price" },
                 values: new object[,]
                 {
-                    { 1, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge1.jpg", "Bosch Fridge 1", 9586m },
-                    { 2, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge2.jpg", "Bosch Fridge 2", 3807m },
-                    { 3, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge3.jpg", "Whirlpool Fridge 3", 5394m },
-                    { 4, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge4.jpg", "Bosch Fridge 4", 7106m },
-                    { 5, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge5.jpg", "Defy Fridge 5", 6581m },
-                    { 6, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge6.jpg", "Bosch Fridge 6", 9097m },
-                    { 7, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge7.jpg", "Bosch Fridge 7", 8978m },
-                    { 8, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge8.jpg", "LG Fridge 8", 11223m },
-                    { 9, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge9.jpg", "Defy Fridge 9", 7911m },
-                    { 10, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge10.jpg", "Whirlpool Fridge 10", 7690m },
-                    { 11, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge11.jpg", "Bosch Fridge 11", 4320m },
-                    { 12, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge12.jpg", "Samsung Fridge 12", 3564m },
-                    { 13, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge13.jpg", "Hisense Fridge 13", 7988m },
-                    { 14, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge14.jpg", "Defy Fridge 14", 10109m },
-                    { 15, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge15.jpg", "LG Fridge 15", 6075m },
-                    { 16, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge16.jpg", "Defy Fridge 16", 7436m },
-                    { 17, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge17.jpg", "Whirlpool Fridge 17", 10751m },
-                    { 18, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge18.jpg", "Samsung Fridge 18", 9659m },
-                    { 19, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge19.jpg", "Samsung Fridge 19", 7089m },
-                    { 20, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge20.jpg", "Samsung Fridge 20", 10770m },
-                    { 21, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge21.jpg", "Hisense Fridge 21", 9375m },
-                    { 22, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge22.jpg", "Whirlpool Fridge 22", 5580m },
-                    { 23, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge23.jpg", "Hisense Fridge 23", 7893m },
-                    { 24, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge24.jpg", "Bosch Fridge 24", 7028m },
-                    { 25, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge25.jpg", "LG Fridge 25", 9117m },
-                    { 26, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge26.jpg", "LG Fridge 26", 10871m },
-                    { 27, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge27.jpg", "LG Fridge 27", 6112m },
-                    { 28, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge28.jpg", "Defy Fridge 28", 11749m },
-                    { 29, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge29.jpg", "Samsung Fridge 29", 9473m },
-                    { 30, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge30.jpg", "Defy Fridge 30", 10000m }
+                    { 1, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge1.jpg", "LG Fridge 1", 9316m },
+                    { 2, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge2.jpg", "Hisense Fridge 2", 7761m },
+                    { 3, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge3.jpg", "Whirlpool Fridge 3", 8221m },
+                    { 4, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge4.jpg", "Whirlpool Fridge 4", 8170m },
+                    { 5, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge5.jpg", "Whirlpool Fridge 5", 11481m },
+                    { 6, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge6.jpg", "LG Fridge 6", 6837m },
+                    { 7, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge7.jpg", "Bosch Fridge 7", 8143m },
+                    { 8, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge8.jpg", "Samsung Fridge 8", 4336m },
+                    { 9, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge9.jpg", "Samsung Fridge 9", 8593m },
+                    { 10, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge10.jpg", "LG Fridge 10", 6147m },
+                    { 11, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge11.jpg", "Bosch Fridge 11", 7179m },
+                    { 12, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge12.jpg", "Defy Fridge 12", 10024m },
+                    { 13, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge13.jpg", "Bosch Fridge 13", 7792m },
+                    { 14, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge14.jpg", "Defy Fridge 14", 5510m },
+                    { 15, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge15.jpg", "Samsung Fridge 15", 6520m },
+                    { 16, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge16.jpg", "LG Fridge 16", 7712m },
+                    { 17, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge17.jpg", "Hisense Fridge 17", 11702m },
+                    { 18, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge18.jpg", "Defy Fridge 18", 9410m },
+                    { 19, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge19.jpg", "Defy Fridge 19", 5027m },
+                    { 20, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge20.jpg", "Samsung Fridge 20", 8499m },
+                    { 21, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge21.jpg", "Defy Fridge 21", 7801m },
+                    { 22, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge22.jpg", "Hisense Fridge 22", 5099m },
+                    { 23, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge23.jpg", "Bosch Fridge 23", 10094m },
+                    { 24, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge24.jpg", "Whirlpool Fridge 24", 4957m },
+                    { 25, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge25.jpg", "Samsung Fridge 25", 7405m },
+                    { 26, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge26.jpg", "Hisense Fridge 26", 8879m },
+                    { 27, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge27.jpg", "Whirlpool Fridge 27", 4514m },
+                    { 28, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge28.jpg", "Samsung Fridge 28", 9443m },
+                    { 29, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge29.jpg", "Samsung Fridge 29", 9303m },
+                    { 30, 1, "High quality and energy-efficient fridge suitable for all households.", "fridge30.jpg", "Whirlpool Fridge 30", 9016m }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1114,6 +1121,11 @@ namespace FridgeManagementSystem.Migrations
                 name: "IX_CartItems_CartId",
                 table: "CartItems",
                 column: "CartId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CartItems_CartId1",
+                table: "CartItems",
+                column: "CartId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_ProductId",

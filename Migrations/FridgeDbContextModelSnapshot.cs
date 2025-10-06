@@ -594,9 +594,6 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("TechnicianID")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -687,13 +684,10 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int>("FaultID")
                         .HasColumnType("int");
 
-                    b.Property<string>("FridgeName")
+                    b.Property<string>("FridgeType")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("FridgeType")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -708,10 +702,6 @@ namespace FridgeManagementSystem.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -773,7 +763,6 @@ namespace FridgeManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateOnly?>("ReturnDate")
-                        .IsRequired()
                         .HasColumnType("date");
 
                     b.Property<string>("Status")
@@ -1147,7 +1136,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge1.jpg",
                             Name = "LG Fridge 1",
-                            Price = 8722m
+                            Price = 9316m
                         },
                         new
                         {
@@ -1155,8 +1144,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge2.jpg",
-                            Name = "LG Fridge 2",
-                            Price = 5526m
+                            Name = "Hisense Fridge 2",
+                            Price = 7761m
                         },
                         new
                         {
@@ -1164,8 +1153,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge3.jpg",
-                            Name = "Bosch Fridge 3",
-                            Price = 9002m
+                            Name = "Whirlpool Fridge 3",
+                            Price = 8221m
                         },
                         new
                         {
@@ -1173,8 +1162,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge4.jpg",
-                            Name = "Hisense Fridge 4",
-                            Price = 6759m
+                            Name = "Whirlpool Fridge 4",
+                            Price = 8170m
                         },
                         new
                         {
@@ -1182,8 +1171,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge5.jpg",
-                            Name = "LG Fridge 5",
-                            Price = 8828m
+                            Name = "Whirlpool Fridge 5",
+                            Price = 11481m
                         },
                         new
                         {
@@ -1191,8 +1180,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge6.jpg",
-                            Name = "Hisense Fridge 6",
-                            Price = 6860m
+                            Name = "LG Fridge 6",
+                            Price = 6837m
                         },
                         new
                         {
@@ -1200,8 +1189,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge7.jpg",
-                            Name = "LG Fridge 7",
-                            Price = 3689m
+                            Name = "Bosch Fridge 7",
+                            Price = 8143m
                         },
                         new
                         {
@@ -1209,8 +1198,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge8.jpg",
-                            Name = "LG Fridge 8",
-                            Price = 10625m
+                            Name = "Samsung Fridge 8",
+                            Price = 4336m
                         },
                         new
                         {
@@ -1218,8 +1207,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge9.jpg",
-                            Name = "Bosch Fridge 9",
-                            Price = 5044m
+                            Name = "Samsung Fridge 9",
+                            Price = 8593m
                         },
                         new
                         {
@@ -1227,8 +1216,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge10.jpg",
-                            Name = "Hisense Fridge 10",
-                            Price = 5232m
+                            Name = "LG Fridge 10",
+                            Price = 6147m
                         },
                         new
                         {
@@ -1237,7 +1226,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge11.jpg",
                             Name = "Bosch Fridge 11",
-                            Price = 3727m
+                            Price = 7179m
                         },
                         new
                         {
@@ -1245,8 +1234,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge12.jpg",
-                            Name = "Whirlpool Fridge 12",
-                            Price = 11649m
+                            Name = "Defy Fridge 12",
+                            Price = 10024m
                         },
                         new
                         {
@@ -1255,7 +1244,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge13.jpg",
                             Name = "Bosch Fridge 13",
-                            Price = 10682m
+                            Price = 7792m
                         },
                         new
                         {
@@ -1263,8 +1252,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge14.jpg",
-                            Name = "Bosch Fridge 14",
-                            Price = 8297m
+                            Name = "Defy Fridge 14",
+                            Price = 5510m
                         },
                         new
                         {
@@ -1273,7 +1262,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge15.jpg",
                             Name = "Samsung Fridge 15",
-                            Price = 7443m
+                            Price = 6520m
                         },
                         new
                         {
@@ -1282,7 +1271,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge16.jpg",
                             Name = "LG Fridge 16",
-                            Price = 8201m
+                            Price = 7712m
                         },
                         new
                         {
@@ -1291,7 +1280,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge17.jpg",
                             Name = "Hisense Fridge 17",
-                            Price = 4847m
+                            Price = 11702m
                         },
                         new
                         {
@@ -1299,8 +1288,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge18.jpg",
-                            Name = "Bosch Fridge 18",
-                            Price = 9826m
+                            Name = "Defy Fridge 18",
+                            Price = 9410m
                         },
                         new
                         {
@@ -1309,7 +1298,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge19.jpg",
                             Name = "Defy Fridge 19",
-                            Price = 10305m
+                            Price = 5027m
                         },
                         new
                         {
@@ -1317,8 +1306,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge20.jpg",
-                            Name = "Hisense Fridge 20",
-                            Price = 11709m
+                            Name = "Samsung Fridge 20",
+                            Price = 8499m
                         },
                         new
                         {
@@ -1326,8 +1315,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge21.jpg",
-                            Name = "Hisense Fridge 21",
-                            Price = 6604m
+                            Name = "Defy Fridge 21",
+                            Price = 7801m
                         },
                         new
                         {
@@ -1336,7 +1325,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge22.jpg",
                             Name = "Hisense Fridge 22",
-                            Price = 9921m
+                            Price = 5099m
                         },
                         new
                         {
@@ -1344,8 +1333,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge23.jpg",
-                            Name = "Whirlpool Fridge 23",
-                            Price = 4452m
+                            Name = "Bosch Fridge 23",
+                            Price = 10094m
                         },
                         new
                         {
@@ -1353,8 +1342,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge24.jpg",
-                            Name = "Defy Fridge 24",
-                            Price = 4147m
+                            Name = "Whirlpool Fridge 24",
+                            Price = 4957m
                         },
                         new
                         {
@@ -1362,8 +1351,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge25.jpg",
-                            Name = "Bosch Fridge 25",
-                            Price = 4694m
+                            Name = "Samsung Fridge 25",
+                            Price = 7405m
                         },
                         new
                         {
@@ -1371,8 +1360,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge26.jpg",
-                            Name = "Defy Fridge 26",
-                            Price = 5573m
+                            Name = "Hisense Fridge 26",
+                            Price = 8879m
                         },
                         new
                         {
@@ -1380,8 +1369,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge27.jpg",
-                            Name = "Samsung Fridge 27",
-                            Price = 5167m
+                            Name = "Whirlpool Fridge 27",
+                            Price = 4514m
                         },
                         new
                         {
@@ -1390,7 +1379,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge28.jpg",
                             Name = "Samsung Fridge 28",
-                            Price = 5646m
+                            Price = 9443m
                         },
                         new
                         {
@@ -1399,7 +1388,7 @@ namespace FridgeManagementSystem.Migrations
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge29.jpg",
                             Name = "Samsung Fridge 29",
-                            Price = 9218m
+                            Price = 9303m
                         },
                         new
                         {
@@ -1407,8 +1396,8 @@ namespace FridgeManagementSystem.Migrations
                             CategoryId = 1,
                             Description = "High quality and energy-efficient fridge suitable for all households.",
                             ImageUrl = "fridge30.jpg",
-                            Name = "Samsung Fridge 30",
-                            Price = 11935m
+                            Name = "Whirlpool Fridge 30",
+                            Price = 9016m
                         });
                 });
 
