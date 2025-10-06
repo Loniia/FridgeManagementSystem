@@ -7,7 +7,6 @@ namespace FridgeManagementSystem.Models
     public class FridgeViewModel
     {
         public int FridgeId { get; set; }
-        public string FridgeName { get; set; }
         public string FridgeType { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }
@@ -15,7 +14,6 @@ namespace FridgeManagementSystem.Models
         public string Condition { get; set; } = "Working";
         public DateTime PurchaseDate { get; set; }
         public DateTime? WarrantyExpiry { get; set; }
-        public string Notes { get; set; }
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
         public DateOnly DateAdded { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public int SupplierID { get; set; }

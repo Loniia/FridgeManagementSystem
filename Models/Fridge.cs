@@ -10,10 +10,8 @@ namespace FridgeManagementSystem.Models
     {
         public int FridgeId { get; set; }
 
-        [Required(ErrorMessage = "Fridge name is required")]
-        [StringLength(100, ErrorMessage = "Fridge name cannot exceed 100 characters")]
-
-        public string FridgeName { get; set; }
+        [Required(ErrorMessage = "Fridge Type is required")]
+        [StringLength(100, ErrorMessage = "Fridge Type cannot exceed 100 characters")]
         public string FridgeType { get; set; }
         public string Brand { get; set; }
         [Required(ErrorMessage = "Model is required")]
@@ -31,15 +29,6 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Warranty Expiry")]
         [DataType(DataType.Date)]
         public DateTime? WarrantyExpiry { get; set; }
-
-        
-       
-
-        [Display(Name = "Notes")]
-        [StringLength(1000)]
-        public string Notes { get; set; }
-        // Audit fields
-      
 
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;

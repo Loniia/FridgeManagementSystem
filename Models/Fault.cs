@@ -56,10 +56,6 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
-        // Technician who is processing the fault
-        [Display(Name = "Technician")]
-        public int? TechnicianID { get; set; }
-
         [Required(ErrorMessage = "Category is required")]
         [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]
         public string Category { get; set; } = string.Empty;
