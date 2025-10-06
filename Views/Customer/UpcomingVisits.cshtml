@@ -18,7 +18,7 @@ else
         @foreach (var visit in Model)
         {
             <div class="list-group-item mb-2">
-                <h5>@visit.MaintenanceRequest.Fridge.FridgeName - @visit.MaintenanceRequest.Fridge.Model</h5>
+                <h5>@visit.MaintenanceRequest.Fridge.Brand - @visit.MaintenanceRequest.Fridge.Model</h5>
                 <p>
                     <strong>Date:</strong> @visit.ScheduledDate.ToShortDateString() <br />
                     <strong>Time:</strong> @visit.ScheduledTime.ToString(@"hh\:mm") <br />

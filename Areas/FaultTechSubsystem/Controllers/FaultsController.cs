@@ -374,7 +374,7 @@ namespace FridgeManagementSystem.Controllers
                     if (existingFridge != null)
                     {
                         existingFridge.Condition = fridge.Condition;
-                        existingFridge.Notes = fridge.Notes;
+                        
                         existingFridge.UpdatedDate = DateTime.Now;
                         _context.Update(existingFridge);
 

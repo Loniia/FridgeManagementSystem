@@ -9,12 +9,7 @@
 <form asp-area="CustomerManagementSubSystem" asp-controller="InventoryLiaison" asp-action="Receive" method="post">
     @Html.AntiForgeryToken()
 
-    <!-- Fridge Name (Required) -->
-    <div class="mb-3">
-        <label asp-for="FridgeName" class="form-label">Fridge Name</label>
-        <input asp-for="FridgeName" class="form-control" placeholder="e.g., Kitchen Fridge, Display Unit A" />
-        <span asp-validation-for="FridgeName" class="text-danger"></span>
-    </div>
+    
 
     <!-- Fridge Type -->
     <div class="mb-3">
@@ -93,12 +88,7 @@
         <span asp-validation-for="SupplierID" class="text-danger"></span>
     </div>
 
-    <!-- Notes -->
-    <div class="mb-3">
-        <label asp-for="Notes" class="form-label">Notes</label>
-        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any additional notes..."></textarea>
-        <span asp-validation-for="Notes" class="text-danger"></span>
-    </div>
+  
 
     <!-- Hidden fields for automatic values -->
     <input type="hidden" asp-for="Status" value="Received" />

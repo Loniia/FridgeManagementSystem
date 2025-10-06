@@ -30,7 +30,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 .Select(f => new FridgeViewModel
                 {
                     FridgeId = f.FridgeId,
-                    FridgeName = f.FridgeName,
+                   
                     FridgeType = f.FridgeType,
                     Brand = f.Brand,
                     Model = f.Model,

@@ -375,7 +375,7 @@ public class CustomerController : Controller
 
         var generator = new ServiceHistoryPdfGenerator(visits, fridge);
         var pdfBytes = generator.GeneratePdf();
-        var fileName = $"ServiceHistory_{fridge.FridgeName}_{DateTime.Now:yyyyMMdd}.pdf";
+        var fileName = $"ServiceHistory_{fridge.Brand}_{DateTime.Now:yyyyMMdd}.pdf";
 
         return File(pdfBytes, "application/pdf", fileName);
     }

@@ -37,7 +37,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             var fridgeVMs = fridges.Select(f => new FridgeViewModel
             {
                 FridgeId = f.FridgeId,
-                FridgeName = f.FridgeName,
+               
                 FridgeType = f.FridgeType,
                 Brand = f.Brand,
                 Model = f.Model,
@@ -45,7 +45,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 Condition = f.Condition,
                 PurchaseDate = f.PurchaseDate,
                 WarrantyExpiry = f.WarrantyExpiry,
-                Notes = f.Notes,
+                
                 UpdatedDate = f.UpdatedDate,
                 DateAdded = f.DateAdded,
                 SupplierID = f.SupplierID,
