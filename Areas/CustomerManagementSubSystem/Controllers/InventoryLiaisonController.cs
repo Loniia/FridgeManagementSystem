@@ -30,26 +30,34 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 .Select(f => new FridgeViewModel
                 {
                     FridgeId = f.FridgeId,
-                    FridgeName = f.FridgeName,                    // Add this
-                    FridgeType = f.FridgeType,                    // Add this
+                    FridgeName = f.FridgeName,
+                    FridgeType = f.FridgeType,
                     Brand = f.Brand,
                     Model = f.Model,
-                    SerialNumber = f.SerialNumber,                // Add this
-                    Condition = f.Condition,                      // Add this
+                    SerialNumber = f.SerialNumber,
+                    Condition = f.Condition,
                     Status = f.Status,
                     Quantity = f.Quantity,
+
+                    // Stock availability calculation
+                    AvailableStock = f.Quantity - f.FridgeAllocation
+                        .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
+                        .Sum(a => 1),
+
                     CustomerName = f.FridgeAllocation
-                                    .OrderByDescending(a => a.AllocationDate)
-                                    .Select(a => a.Customer.FullName)
-                                    .FirstOrDefault(),
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => a.Customer.FullName)
+                        .FirstOrDefault(),
+
                     AllocationDate = f.FridgeAllocation
-                                    .OrderByDescending(a => a.AllocationDate)
-                                    .Select(a => (DateOnly?)a.AllocationDate)
-                                    .FirstOrDefault(),
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => (DateOnly?)a.AllocationDate)
+                        .FirstOrDefault(),
+
                     ReturnDate = f.FridgeAllocation
-                                    .OrderByDescending(a => a.AllocationDate)
-                                    .Select(a => (DateOnly?)a.ReturnDate)
-                                    .FirstOrDefault()
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => (DateOnly?)a.ReturnDate)
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
