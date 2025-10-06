@@ -9,6 +9,9 @@
     body {
         margin: 0;
         font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        
     }
 
     .sidebar {
@@ -71,9 +74,12 @@
 
     .main-content {
         margin-left: 220px;
-        padding: 20px 30px;
+        padding: 30px;
         transition: margin-left 0.3s ease;
         min-height: 100vh;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
     }
 
         .main-content.collapsed {
@@ -163,10 +169,7 @@
         border-bottom: 2px solid #667eea;
     }
 
-    .main-content.container {
-        padding-top: 20px;
-    }
-
+    
     * {
         transition: all 0.3s ease;
     }
@@ -191,7 +194,7 @@
 </div>
 
 <!-- Main content -->
-<div class="main-content container" id="mainContent">
+<div class="main-content " id="mainContent">
     <div class="dashboard-welcome">
         <h2>Welcome, @(User.Identity?.Name ?? "Guest")!</h2>
         <p>This is your customer dashboard. Browse our products and manage your orders.</p>
