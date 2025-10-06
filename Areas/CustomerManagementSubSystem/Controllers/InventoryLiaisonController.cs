@@ -231,23 +231,34 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         // --------------------------
         // Create Purchase Request Manually
         // --------------------------
+        [HttpGet]
         public IActionResult CreatePurchaseRequest() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePurchaseRequest(PurchaseRequest newRequest)
+        public async Task<IActionResult> CreatePurchaseRequest(CreatePurchaseRequestViewModel model)
         {
-            if (!ModelState.IsValid) return View(newRequest);
+            if (!ModelState.IsValid)
+                return View(model);
 
-            newRequest.RequestDate = DateOnly.FromDateTime(DateTime.Now);
-            newRequest.Status = "Pending";
-            newRequest.IsActive = true;
-            newRequest.AssignedToRole = "PurchasingManager";
-            newRequest.RequestBy = "InventoryLiaison";
-            newRequest.RequestType = "Fridge Purchase";
+            var newRequest = new PurchaseRequest
+            {
+                ItemFullNames = model.ItemFullNames,
+                Quantity = model.Quantity,
+                CustomerID = model.CustomerID,
+                RequestBy = "InventoryLiaison",
+                RequestType = "Fridge Purchase",
+                AssignedToRole = "PurchasingManager",
+                RequestDate = DateOnly.FromDateTime(DateTime.Now),
+                Status = "Pending",
+                IsActive = true
+            };
 
+            // Generate unique Request Number
             var year = DateTime.Now.Year;
-            int countForYear = await _context.PurchaseRequests.CountAsync(r => r.RequestDate.Year == year) + 1;
+            int countForYear = await _context.PurchaseRequests
+                .CountAsync(r => r.RequestDate.Year == year) + 1;
+
             newRequest.RequestNumber = $"PR-{year}-{countForYear:D3}";
 
             _context.PurchaseRequests.Add(newRequest);

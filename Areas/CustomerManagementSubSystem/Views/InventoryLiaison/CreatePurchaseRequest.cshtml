@@ -12,6 +12,10 @@
 }
 
 <form asp-action="CreatePurchaseRequest" method="post">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
     <div class="mb-3">
         <label asp-for="RequestBy" class="form-label"></label>
         <input asp-for="RequestBy" class="form-control" placeholder="Your Name" />
@@ -46,7 +50,6 @@
         <button type="submit" class="btn btn-primary">Submit Request</button>
         <a asp-action="ProcessPurchaseRequests" class="btn btn-secondary">Cancel</a>
     </div>
-    
 </form>
 
 @section Scripts {
