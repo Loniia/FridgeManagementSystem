@@ -8,11 +8,17 @@ namespace FridgeManagementSystem.ViewModels
     public class PaymentViewModel
     {
         public int OrderId { get; set; }
-
         public decimal Amount { get; set; }
 
         public Method Method { get; set; }
-        public string CardNumber { get; set; } // Optional if paying by card
-        public string BankReference { get; set; } // Optional if paying by EFT
+
+        // For Card payments
+        public string CardholderName { get; set; }
+        public string CardNumber { get; set; }
+        public string ExpiryDate { get; set; }
+        public string CVV { get; set; }
+
+        // For EFT payments
+        public string BankReference { get; set; }
     }
 }

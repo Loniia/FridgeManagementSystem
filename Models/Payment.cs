@@ -20,6 +20,9 @@ namespace FridgeManagementSystem.Models
         [StringLength(50)]
         [EnumDataType(typeof(Method))]
         public Method Method { get; set; }  // enum, not string
+        //public string CardholderName { get; set; } // For Card payments
+        public string BankReference { get; set; } // For EFT payments
+        public string CardNumber { get; set; } // For Card payments
 
         [Required]
         public DateTime PaymentDate { get; set; } = DateTime.Now;
