@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Rendering
+
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -13,196 +14,388 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
         }
 
+        /* Sidebar */
         .sidebar {
-        width: 210px;
-        min-height: auto;
-        background-color: #1a237e;
-        color: white;
-        padding: 1rem;
-        box-shadow: 3px 0 10px rgba(0, 0, 0, 0.2);
-        position: fixed;
-        left: 0;
-        top: 0;
-        z-index: 100;
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            padding-bottom: 50px;
+            transition: transform 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 1040;
+            transform: translateX(0);
+        }
+
+        .sidebar-collapsed {
+            transform: translateX(-100%);
         }
 
         .sidebar-header {
-        text-align: center;
-        padding-bottom: 1.5rem;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            background-color: #23272b;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
         }
 
-        .sidebar-header img {
-        width: 60px;
-        height: 60px;
-        object-fit: contain;
-        background-color: white;
-        padding: 5px;
-        border-radius: 8px;
+            .sidebar-header h3 {
+                margin: 0;
+                font-size: 1.2rem;
+                white-space: nowrap;
+                color: white;
+            }
+
+        .toggle-sidebar-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
         }
 
-        .sidebar-header h6 {
-        color: white;
-        margin-top: 0.5rem;
-        font-weight: 500;
+        /* User panel */
+        .user-panel {
+            padding: 1rem;
         }
 
-        .sidebar .nav-link {
-        color: rgba(255, 255, 255, 0.85) !important;
-        padding: 0.75rem 1rem;
-        margin: 0.25rem 0;
-        border-radius: 5px;
-        transition: all 0.3s;
+        .user-card {
+            background-color: #495057;
+            border-radius: 8px;
+            padding: 0.5rem;
+            text-align: center;
         }
 
-        .sidebar .nav-link:hover {
-        color: white !important;
-        background-color: #283593;
+            .user-card img {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-bottom: 0.5rem;
+            }
+
+            .user-card h4 {
+                margin: 0;
+                font-size: 0.9rem;
+                color: white;
+            }
+
+            .user-card p {
+                margin: 0;
+                font-size: 0.75rem;
+                color: #adb5bd;
+            }
+
+        /* Sidebar menu */
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .sidebar .nav-link.active {
-        color: white !important;
-        background-color: #3949ab;
-        font-weight: 500;
-        }
+            .sidebar-menu li {
+                width: 100%;
+            }
 
-        .sidebar .nav-link i {
-        margin-right: 0.75rem;
-        width: 20px;
-        text-align: center;
-        }
+                .sidebar-menu li a {
+                    display: block;
+                    color: white;
+                    padding: 0.75rem 1rem;
+                    text-decoration: none;
+                    transition: all 0.3s;
+                }
 
-        .sidebar .btn-signout {
-        background-color: #d32f2f;
-        border: none;
-        color: white;
-        margin-top: 1.5rem;
-        padding: 0.75rem;
-        }
+                    .sidebar-menu li a:hover,
+                    .sidebar-menu li a.active {
+                        background-color: #495057;
+                        color: white;
+                    }
 
-        .sidebar .btn-signout:hover {
-        background-color: #b71c1c;
-        }
+            .sidebar-menu .menu-header {
+                display: block;
+                padding: 0.75rem 1rem;
+                font-weight: bold;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                color: #adb5bd;
+                cursor: pointer;
+                border-bottom: 1px solid #495057;
+            }
 
+                .sidebar-menu .menu-header i {
+                    margin-right: 0.5rem;
+                }
+
+            /* Submenu styles */
+            .sidebar-menu .collapse {
+                background-color: #2c3034;
+            }
+
+                .sidebar-menu .collapse a {
+                    padding-left: 2rem;
+                    font-size: 0.9rem;
+                }
+
+                    .sidebar-menu .collapse a i {
+                        margin-right: 0.5rem;
+                        width: 16px;
+                        text-align: center;
+                    }
+
+        /* Main content */
         .main-content {
-        margin-left: 220px;
-        padding: 1.5rem;
-        width: calc(100% - 220px);
-        min-height: 100vh;
+            flex: 1;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
         }
 
-        /* Dropdown styles for sidebar */
-        .sidebar .dropdown-menu {
-        background-color: #283593;
-        border: none;
-        border-radius: 5px;
-        margin: 0;
-        padding: 0;
+        .sidebar-collapsed ~ .main-content {
+            margin-left: 0;
         }
 
-        .sidebar .dropdown-item {
-        color: rgba(255, 255, 255, 0.85);
-        padding: 0.6rem 1rem 0.6rem 2.5rem;
-        margin: 0;
+        main {
+            flex: 1;
+            padding: 1rem;
         }
 
-        .sidebar .dropdown-item:hover {
-        background-color: #3949ab;
-        color: white;
+        /* Fixed toggle button */
+        #sidebarFixedToggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1050;
+            display: none;
+            background-color: #343a40;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
-        .sidebar .dropdown-item.active {
-        background-color: #3949ab;
-        color: white;
+        /* Top navbar */
+        .navbar-brand {
+            font-weight: 600;
+            color: #1a237e !important;
         }
 
-        .sidebar .dropdown-toggle::after {
-        float: right;
-        margin-top: 0.5rem;
+        .nav-link.active {
+            font-weight: 500;
+            color: #1a237e !important;
         }
 
-        .sidebar .nav-item.dropdown.show .dropdown-toggle {
-        background-color: #3949ab;
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+                .sidebar:not(.sidebar-collapsed) {
+                    transform: translateX(0);
+                }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+
+            #sidebarFixedToggle {
+                display: block;
+            }
         }
     </style>
 </head>
 <body>
-
-    <div class="d-flex">
-        <!-- Sidebar -->
-        @if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            <div class="sidebar">
-                <div class="sidebar-header">
-                        <img src="~/images/Cozy.jpg" alt="Logo" />
-                        <h6>Onke Boyce</h6>
-                    </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a asp-controller="Faults" asp-action="Dashboard"
-                               class="nav-link @(currentController=="Faults" && currentAction=="Dashboard" ? "active" : "")">
-                                <i class="fas fa-home"></i> <span>Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-controller="Faults" asp-action="Index"
-                               class="nav-link @(currentController=="Faults" && currentAction=="Index" ? "active" : "")">
-                                <i class="fas fa-exclamation-triangle"></i> <span>View Faults</span>
-                            </a>
-                        </li>
-                    <li class="nav-item">
-                        <a asp-controller="Faults" asp-action="Process"
-                           class="nav-link @(currentController=="Faults" && currentAction=="Process" ? "active" : "")">
-                            <i class="fas fa-cogs"></i> <span>Process Fault</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a asp-controller="Faults" asp-action="Repair"
-                           class="nav-link @(currentController=="Faults" && currentAction=="Repair" ? "active" : "")">
-                            <i class="fas fa-tools"></i> <span>Repair Fridge</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a asp-controller="Faults" asp-action="UpdateCondition"
-                           class="nav-link @(currentController=="Faults" && currentAction=="UpdateCondition" ? "active" : "")">
-                            <i class="fas fa-thermometer-half"></i> <span>Update Condition</span>
-                        </a>
-                    </li>
-                    </ul>
-                    <div class="mt-auto">
-                        <a asp-controller="UserAcc" asp-action="Login" class="btn btn-signout w-100">
-                            <i class="fas fa-sign-out-alt"></i> <span>Sign Out</span>
-                        </a>
-                    </div> 
-            </div>
-            }
-        <!-- Main Content -->
-        <div class="main-content">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="toggle-sidebar-btn" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h3>Fridge Management<br>System</h3>
         </div>
+
+        <!-- User panel -->
+        <div class="user-panel">
+            <div class="user-card">
+                <img src="~/images/Cozy.jpg" alt="User Profile" />
+                <h4>Onke Boyce</h4>
+                <p>System Administrator</p>
+            </div>
+        </div>
+
+        <!-- Fault Management Menu -->
+        <ul class="sidebar-menu">
+            <li>
+                <span class="menu-header" id="faultHeader">
+                    <i class="fas fa-exclamation-triangle"></i> Fault Management
+                    <i class="fas fa-chevron-down float-end" data-bs-toggle="collapse" data-bs-target="#faultManagementSubmenu"></i>
+                </span>
+                <ul class="collapse list-unstyled" id="faultManagementSubmenu">
+                    <li>
+                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard"
+                           class="@(currentController=="Faults" && currentAction=="Dashboard" ? "active" : "")">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area ="FaultTechSubsystem" asp-controller="Faults" asp-action="Index"
+                           class="@(currentController=="Faults" && currentAction=="Index" ? "active" : "")">
+                            <i class="fas fa-list"></i> View Faults
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Process"
+                           class="@(currentController=="Faults" && currentAction=="Process" ? "active" : "")">
+                            <i class="fas fa-cogs"></i> Process Fault
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Repair"
+                           class="@(currentController=="Faults" && currentAction=="Repair" ? "active" : "")">
+                            <i class="fas fa-tools"></i> Repair Fridge
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="UpdateCondition"
+                           class="@(currentController=="Faults" && currentAction=="UpdateCondition" ? "active" : "")">
+                            <i class="fas fa-thermometer-half"></i> Update Condition
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <!-- Account Menu -->
+        <ul class="sidebar-menu">
+            <li class="menu-header">Account</li>
+            <li>
+                <a asp-controller="UserAcc" asp-action="Login">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Fixed toggle button for collapsed sidebar -->
+    <button id="sidebarFixedToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Main content -->
+    <div class="main-content" id="mainContent">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+            <div class="container-fluid">
+                <a asp-controller="Home" asp-action="Index" class="navbar-brand">FMS</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar" aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="topNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a asp-controller="Home" asp-action="Index"
+                               class="nav-link @(currentController=="Home" && currentAction=="Index" ? "active" : "")">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Initialize dropdowns
-        document.addEventListener('DOMContentLoaded', function() {
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
-            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl)
+        $(function () {
+            var path = window.location.pathname.toLowerCase();
+
+            // Auto-expand active menu
+            function expandActiveMenu() {
+                $('.sidebar-menu a').each(function () {
+                    var href = $(this).attr('href') || '';
+                    if (href !== '#' && path.startsWith(href.toLowerCase())) {
+                        $(this).addClass('active');
+                        // Expand parent collapse
+                        $(this).closest('.collapse').collapse('show');
+                    }
+                });
+            }
+
+            // Initialize active menu
+            expandActiveMenu();
+
+            // Menu header click handlers
+            $('#faultHeader').on('click', function () {
+                $('#faultManagementSubmenu').collapse('toggle');
             });
+
+            // Sidebar toggle functionality
+            $('#sidebarToggle').on('click', function () {
+                $('#sidebar').toggleClass('sidebar-collapsed');
+                updateFixedToggle();
+            });
+
+            // Fixed toggle button
+            $('#sidebarFixedToggle').on('click', function () {
+                $('#sidebar').removeClass('sidebar-collapsed');
+                updateFixedToggle();
+            });
+
+            function updateFixedToggle() {
+                if ($('#sidebar').hasClass('sidebar-collapsed')) {
+                    $('#sidebarFixedToggle').show();
+                } else {
+                    $('#sidebarFixedToggle').hide();
+                }
+            }
+
+            // Initialize fixed toggle visibility
+            updateFixedToggle();
+
+            // Auto-collapse sidebar on mobile
+            function handleResize() {
+                if ($(window).width() <= 768) {
+                    $('#sidebar').addClass('sidebar-collapsed');
+                    updateFixedToggle();
+                } else {
+                    $('#sidebar').removeClass('sidebar-collapsed');
+                    updateFixedToggle();
+                }
+            }
+
+            // Handle window resize
+            $(window).on('resize', handleResize);
+            handleResize(); // Initial call
         });
     </script>
 
     @RenderSection("Scripts", required: false)
 </body>
 </html>
-

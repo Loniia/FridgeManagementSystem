@@ -127,5 +127,117 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             ViewBag.Locations = new SelectList(locations, "LocationId", "FullAddress");
         
         }
+
+         [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var employee = await _context.Employees.FindAsync(id);
+        if (employee == null) return NotFound();
+
+        PopulateDropdowns();
+        return View(employee);
+    }
+
+    // ✅ POST: Edit Employee
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Employee model)
+    {
+        if (!ModelState.IsValid)
+        {
+            PopulateDropdowns();
+            return View(model);
+        }
+
+        var employee = await _context.Employees.FindAsync(model.EmployeeID);
+        if (employee == null) return NotFound();
+
+        // Update employee fields
+        employee.FullName = model.FullName;
+        employee.Email = model.Email;
+        employee.PhoneNumber = model.PhoneNumber;
+        employee.Address = model.Address;
+        employee.City = model.City;
+        employee.PostalCode = model.PostalCode;
+        employee.Role = model.Role;
+        employee.HireDate = model.HireDate;
+        employee.PayRate = model.PayRate;
+        employee.LocationId = model.LocationId;
+        employee.Status = model.Status;
+
+        _context.Update(employee);
+        await _context.SaveChangesAsync();
+
+        // Update linked Identity user (email & fullname)
+        var user = await _userManager.FindByIdAsync(employee.ApplicationUserId.ToString());
+        if (user != null)
+        {
+            user.Email = model.Email;
+            user.UserName = model.Email;
+            user.FullName = model.FullName;
+            await _userManager.UpdateAsync(user);
+        }
+
+        TempData["SuccessMessage"] = "Employee updated successfully!";
+        return RedirectToAction(nameof(Index));
+    }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.Location)
+                .Include(e => e.UserAccount)
+                .Include(e => e.Faults)
+                .FirstOrDefaultAsync(e => e.EmployeeID == id && e.Status != "Deleted");
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            return View(employee);
+        }
+        // ✅ Soft Delete Employee (set Status = "Inactive")
+        [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var employee = await _context.Employees.FindAsync(id);
+        if (employee == null) return NotFound();
+
+        employee.Status = "Inactive";
+        _context.Update(employee);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Employee deactivated (soft deleted) successfully!";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // ✅ Helper — populate dropdown data
+    //private void PopulateDropdowns()
+    //{
+    //    // Roles
+    //    var roles = new[]
+    //    {
+    //        new { Value = EmployeeRoles.CustomerManager, Text = "Customer Manager" },
+    //        new { Value = EmployeeRoles.FaultTechnician, Text = "Fault Technician" },
+    //        new { Value = EmployeeRoles.MaintenanceTechnician, Text = "Maintenance Technician" },
+    //        new { Value = EmployeeRoles.PurchasingManager, Text = "Purchasing Manager" }
+    //    };
+    //    ViewBag.Roles = new SelectList(roles, "Value", "Text");
+
+    //    // Locations
+    //    var locations = _context.Locations
+    //        .Where(l => l.IsActive)
+    //        .Select(l => new
+    //        {
+    //            l.LocationId,
+    //            FullAddress = l.Address + ", " + l.City
+    //        })
+    //        .ToList();
+
+    //    ViewBag.Locations = new SelectList(locations, "LocationId", "FullAddress");
+    //}
     }
 }
