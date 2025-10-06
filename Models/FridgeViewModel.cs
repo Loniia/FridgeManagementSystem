@@ -34,6 +34,7 @@ namespace FridgeManagementSystem.Models
         // Allocation info
         public DateOnly? AllocationDate { get; set; }
         public DateOnly? ReturnDate { get; set; }
+        public int AvailableStock { get; set; }
 
         // Computed properties
         [NotMapped]

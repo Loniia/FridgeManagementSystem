@@ -46,6 +46,22 @@ namespace FridgeManagementSystem.Data
         public DbSet<AdminNotification> AdminNotifications { get; set; }
         public DbSet<BusinessInfo> BusinessInfos { get; set; }
 
+
+        // --------------------------
+        // Calculate Available Stock
+        // --------------------------
+        public int CalculateAvailableStock(Fridge fridge)
+        {
+            if (fridge.FridgeAllocation == null || !fridge.FridgeAllocation.Any())
+                return fridge.Quantity;
+
+            var allocatedCount = fridge.FridgeAllocation
+                .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
+                .Count();
+
+            return fridge.Quantity - allocatedCount;
+        }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
