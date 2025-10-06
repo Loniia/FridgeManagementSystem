@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 #nullable disable
-namespace FridgeManagementSystem.Models
-{
+namespace FridgeManagementSystem.Models;
+
     public class RegisterCustomerViewModel
     {
         [Key]
@@ -24,5 +24,7 @@ namespace FridgeManagementSystem.Models
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
         [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; }
+        public string SecurityQuestion { get; set; }
+        public string SecurityAnswer { get; set; }
     }
-}
+

@@ -179,7 +179,7 @@ public class CustomerController : Controller
         };
 
         _context.Orders.Add(order);
-
+        await _context.SaveChangesAsync();
         // Optionally: clear cart
         var cart = await _context.Carts
             .Include(c => c.Items)
@@ -202,6 +202,46 @@ public class CustomerController : Controller
             .FirstOrDefaultAsync(o => o.OrderId == id);
 
         return View(order);
+    }
+
+    // GET: /Customer/AddCard
+    [HttpGet]
+    public IActionResult AddCard(int orderId, decimal amount)
+    {
+        var model = new PaymentViewModel
+        {
+            OrderId = orderId,
+            Amount = amount,
+            Method = Method.Card // Default to card method
+        };
+
+        return View(model);
+    }
+
+    // POST: /Customer/AddCard
+    [HttpPost]
+    public async Task<IActionResult> AddCard(PaymentViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var payment = new Payment
+        {
+            OrderId = model.OrderId,
+            Amount = model.Amount,
+            Method = model.Method,
+            CardNumber = model.CardNumber,
+            BankReference = model.BankReference,
+            PaymentDate = DateTime.Now,
+            Status = "Card Added" // Change depending on your logic
+        };
+
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("OrderConfirmation", new { id = model.OrderId });
     }
 
     // --------------------------

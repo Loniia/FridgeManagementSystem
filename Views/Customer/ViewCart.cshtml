@@ -36,7 +36,7 @@ else
                         </td>
                         <td>@item.Product.Price.ToString("C")</td>
                         <td>@item.Quantity</td>
-                        <td>@(item.Product.Price * item.Quantity).ToString("C")</td>
+                       <td>@((item.Product.Price * item.Quantity).ToString("C"))</td>
                     </tr>
                 }
             </tbody>

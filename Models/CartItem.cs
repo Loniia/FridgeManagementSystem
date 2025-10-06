@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 #nullable disable
 namespace FridgeManagementSystem.Models
 {
@@ -8,10 +9,9 @@ namespace FridgeManagementSystem.Models
     {
         [Key]
         public int CartItemId { get; set; }
-
-        [Required]
-        public int CartId { get; set; }
-
+        public int? CartId { get; set; }
+        [ForeignKey("CartId")]
+        public virtual Cart Cart { get; set; }
         public int ProductId { get; set; }
         public Product Product { get; set; }
 

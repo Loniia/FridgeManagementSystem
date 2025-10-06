@@ -1,11 +1,15 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using FridgeManagementSystem.Models;
-using FridgeManagementSystem.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FridgeManagementSystem.Controllers
 {
@@ -31,19 +35,17 @@ namespace FridgeManagementSystem.Controllers
             _logger = logger;
         }
 
+        // --------------------
+        // Login (GET + POST) — unchanged except we check customer verification
+        // --------------------
+        public IActionResult Login() => View();
 
-        // ✅ GET: Login
-        public IActionResult Login()
-        {
-            return View();
-        }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
-            // 1️⃣ Find the user
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null)
             {
@@ -51,7 +53,7 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
-            // 2️⃣ Check if customer is verified
+            // If user is a customer, ensure admin verified them
             if (await _userManager.IsInRoleAsync(user, Roles.Customer))
             {
                 var customer = await _context.Customers
@@ -64,7 +66,6 @@ namespace FridgeManagementSystem.Controllers
                 }
             }
 
-            // 3️⃣ Sign in
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
             if (!result.Succeeded)
             {
@@ -72,10 +73,9 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
-            // 4️⃣ Get roles
             var roles = await _userManager.GetRolesAsync(user);
+            _logger.LogInformation($"User {user.UserName} roles: {string.Join(",", roles)}");
 
-            // 5️⃣ Redirect based on role
             if (roles.Contains(Roles.Admin))
                 return RedirectToAction("Dashboard", "ManageEmployee", new { area = "Administrator" });
 
@@ -84,8 +84,7 @@ namespace FridgeManagementSystem.Controllers
 
             if (roles.Contains(Roles.Employee))
             {
-                if (string.IsNullOrEmpty(user.EmployeeRole))
-                    return RedirectToAction("Index", "Home");
+                if (string.IsNullOrEmpty(user.EmployeeRole)) return RedirectToAction("Index", "Home");
 
                 return user.EmployeeRole switch
                 {
@@ -97,37 +96,34 @@ namespace FridgeManagementSystem.Controllers
                 };
             }
 
-            // 6️⃣ Default fallback
             return RedirectToAction("Index", "Home");
         }
 
-
-        // ✅ GET: Register Customer
+        // --------------------
+        // Register Customer (GET + POST)
+        // --------------------
+        [HttpGet]
         public IActionResult RegisterCustomer()
         {
             ViewBag.Locations = _context.Locations
                 .Where(l => l.IsActive)
-                .Select(l => new SelectListItem
-                {
-                    Value = l.LocationId.ToString(),
-                    Text = l.Address
-                 }).ToList();
+                .Select(l => new SelectListItem { Value = l.LocationId.ToString(), Text = l.Address })
+                .ToList();
+
             return View();
         }
 
-        // POST
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterCustomer(RegisterCustomerViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 ViewBag.Locations = _context.Locations
                     .Where(l => l.IsActive)
-                    .Select(l => new SelectListItem
-                    {
-                        Value = l.LocationId.ToString(),
-                        Text = l.Address
-                    }).ToList();
+                    .Select(l => new SelectListItem { Value = l.LocationId.ToString(), Text = l.Address })
+                    .ToList();
+
                 return View(model);
             }
 
@@ -141,55 +137,180 @@ namespace FridgeManagementSystem.Controllers
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                if (!await _roleManager.RoleExistsAsync(Roles.Customer))
-                    await _roleManager.CreateAsync(new IdentityRole<int>(Roles.Customer));
+                foreach (var err in result.Errors) ModelState.AddModelError("", err.Description);
 
-                await _userManager.AddToRoleAsync(user, Roles.Customer);
+                ViewBag.Locations = _context.Locations
+                    .Where(l => l.IsActive)
+                    .Select(l => new SelectListItem { Value = l.LocationId.ToString(), Text = l.Address })
+                    .ToList();
 
-                var customer = new Customer
-                {
-                    FullName = model.FullName,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                    LocationId = model.LocationId,
-                    ApplicationUserId = user.Id,
-                    RegistrationDate = DateOnly.FromDateTime(DateTime.Now),
-                    IsActive = true,
-                    IsVerified = false
-                };
-
-                _context.Customers.Add(customer);
-
-                // Optional: Admin notification
-                _context.AdminNotifications.Add(new AdminNotification
-                {
-                    Message = $"New customer {customer.FullName} registered. Awaiting verification."
-                });
-
-                await _context.SaveChangesAsync();
-
-                TempData["Message"] = "Registration successful. Wait for admin approval.";
-                return RedirectToAction("Login");
+                return View(model);
             }
 
-            foreach (var error in result.Errors)
-                ModelState.AddModelError("", error.Description);
+            if (!await _roleManager.RoleExistsAsync(Roles.Customer))
+                await _roleManager.CreateAsync(new IdentityRole<int>(Roles.Customer));
+            await _userManager.AddToRoleAsync(user, Roles.Customer);
 
-            return View(model);
+            // Hash the security answer before saving
+            using var sha256 = SHA256.Create();
+            var securityHash = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(model.SecurityAnswer.ToLower().Trim())));
+
+            var customer = new Customer
+            {
+                FullName = model.FullName,
+                Email = model.Email,
+                PhoneNumber = model.PhoneNumber,
+                LocationId = model.LocationId,
+                ApplicationUserId = user.Id,
+                RegistrationDate = DateOnly.FromDateTime(DateTime.Now),
+                IsActive = true,
+                IsVerified = false, // admin must verify
+                SecurityQuestion = model.SecurityQuestion,
+                SecurityAnswerHash = securityHash
+            };
+
+            _context.Customers.Add(customer);
+
+            // Optional: keep AdminNotifications only if you added that DbSet
+            if (_context.Database.CanConnect())
+            {
+                try
+                {
+                    if (_context.Model.FindEntityType(typeof(AdminNotification)) != null)
+                    {
+                        _context.AdminNotifications.Add(new AdminNotification
+                        {
+                            Message = $"New customer {customer.FullName} registered — awaiting verification."
+                        });
+                    }
+                }
+                catch { /* ignore if AdminNotifications not present */ }
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Message"] = "Registration successful. Wait for admin approval.";
+            return RedirectToAction("Login");
         }
-        // ✅ Logout
+
+        // --------------------
+        // Logout + AccessDenied
+        // --------------------
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction("Login");
         }
 
-        // ✅ Access Denied
-        public IActionResult AccessDenied()
+        public IActionResult AccessDenied() => View();
+
+        // ---------------------------
+        // ForgetPassword (enter email) - GET + POST
+        // ---------------------------
+        [HttpGet]
+        public IActionResult ForgetPassword() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel model)
         {
-            return View();
+            if (string.IsNullOrEmpty(model?.Email))
+            {
+                ModelState.AddModelError("", "Email is required.");
+                return View(model);
+            }
+
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == model.Email);
+            if (customer == null)
+            {
+                ModelState.AddModelError("", "No account found with that email.");
+                return View(model);
+            }
+
+            // Redirect to SecurityQuestion with email in query string
+            return RedirectToAction("SecurityQuestion", new { email = customer.Email });
+        }
+
+        // ---------------------------
+        // SecurityQuestion (show question) GET and VerifyAnswer POST
+        // ---------------------------
+        [HttpGet]
+        public async Task<IActionResult> SecurityQuestion(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return RedirectToAction("ForgetPassword");
+
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
+            if (customer == null) return RedirectToAction("ForgetPassword");
+
+            var vm = new SecurityQuestionViewModel
+            {
+                Email = customer.Email,
+                SecurityQuestion = customer.SecurityQuestion
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyAnswer(SecurityQuestionViewModel model)
+        {
+            if (!ModelState.IsValid) return View("SecurityQuestion", model);
+
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == model.Email);
+            if (customer == null) return RedirectToAction("ForgetPassword");
+
+            using var sha256 = SHA256.Create();
+            var providedHash = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(model.SecurityAnswer.ToLower().Trim())));
+
+            if (providedHash != customer.SecurityAnswerHash)
+            {
+                ModelState.AddModelError("", "Incorrect answer.");
+                model.SecurityQuestion = customer.SecurityQuestion;
+                return View("SecurityQuestion", model);
+            }
+
+            // Answer ok -> go to reset password page (email in query string)
+            return RedirectToAction("ResetPassword", new { email = customer.Email });
+        }
+
+        // ---------------------------
+        // Reset Password (GET + POST)
+        // ---------------------------
+        [HttpGet]
+        public IActionResult ResetPassword(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return RedirectToAction("ForgetPassword");
+
+            var model = new ResetPasswordViewModel { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Account not found.");
+                return View(model);
+            }
+
+            // generate token then immediately apply it (no email needed)
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
+            if (result.Succeeded)
+            {
+                TempData["Message"] = "Password updated. Please log in.";
+                return RedirectToAction("Login");
+            }
+
+            foreach (var err in result.Errors) ModelState.AddModelError("", err.Description);
+            return View(model);
         }
     }
 }
