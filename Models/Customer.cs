@@ -49,6 +49,12 @@ namespace FridgeManagementSystem.Models
         // Customer depends on ApplicationUser.
         //When you delete a user, their Customer profile is also deleted.
         public int? ApplicationUserId { get; set; }
+        [Required]
+        [StringLength(200)]
+        public string SecurityQuestion { get; set; }
+
+        [Required]
+        public string SecurityAnswerHash { get; set; }
         public ICollection<FaultReport> FaultReports { get; set; }
        
         public ICollection<CustomerNote> CustomerNote { get; set; }

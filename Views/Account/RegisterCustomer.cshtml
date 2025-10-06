@@ -45,6 +45,18 @@
         </select>
         <span asp-validation-for="LocationId" class="text-danger"></span>
     </div>
+    <div class="mb-3">
+        <label asp-for="SecurityQuestion" class="form-label">Security Question</label>
+        <input asp-for="SecurityQuestion" class="form-control" placeholder="e.g. What is your pet's name?" />
+        <span asp-validation-for="SecurityQuestion" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="SecurityAnswer" class="form-label">Security Answer</label>
+        <input asp-for="SecurityAnswer" class="form-control" placeholder="Your answer" />
+        <span asp-validation-for="SecurityAnswer" class="text-danger"></span>
+    </div>
+
 
     <div class="form-group">
         <label asp-for="Password"></label>
