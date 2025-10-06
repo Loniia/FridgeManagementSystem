@@ -103,7 +103,7 @@
     <!-- Product display -->
     @foreach (var categoryVm in Model.Categories)
     {
-        <h4 class="mt-4">@categoryVm.Category.Name</h4>
+        <h4 class="mt-4">@categoryVm.Category.CategoryName</h4>
         <div class="row">
             @foreach (var productVm in categoryVm.Products)
             {
