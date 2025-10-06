@@ -9,9 +9,7 @@ namespace FridgeManagementSystem.Models
     {
         [Key]
         public int CartItemId { get; set; }
-
-        [Required]
-        public int CartId { get; set; }
+        public int? CartId { get; set; }
         [ForeignKey("CartId")]
         public virtual Cart Cart { get; set; }
         public int ProductId { get; set; }
