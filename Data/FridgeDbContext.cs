@@ -203,6 +203,32 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey<Payment>(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // --- 🌟 Seed Data for Fridge Products 🌟 ---
+            builder.Entity<Category>().HasData(
+                new Category { CategoryId = 1, CategoryName = "Fridges" }
+            );
+
+            // Fridge brands
+            string[] brands = { "Samsung", "LG", "Hisense", "Defy", "Whirlpool", "Bosch" };
+
+            var fridgeProducts = new List<Product>();
+            int id = 1;
+            var random = new Random();
+
+            for (int i = 1; i <= 30; i++)
+            {
+                fridgeProducts.Add(new Product
+                {
+                    ProductId = id++,
+                    Name = $"{brands[random.Next(brands.Length)]} Fridge {i}",
+                    Price = random.Next(3500, 12000), // random price between R3500 and R12000
+                    Description = "High quality and energy-efficient fridge suitable for all households.",
+                    ImageUrl = $"fridge{i}.jpg",
+                    CategoryId = 1
+                });
+            }
+
+            builder.Entity<Product>().HasData(fridgeProducts);
 
             // --- Soft Delete / Query Filters ---
             builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);

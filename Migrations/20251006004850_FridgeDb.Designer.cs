@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    [Migration("20251005215826_CreateFridgeDb")]
-    partial class CreateFridgeDb
+    [Migration("20251006004850_FridgeDb")]
+    partial class FridgeDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,6 +125,101 @@ namespace FridgeManagementSystem.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("FridgeManagementSystem.Models.BusinessInfo", b =>
+                {
+                    b.Property<int>("BusinessInfoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BusinessInfoId"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("BannerImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("BusinessType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CompanyDescription")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("CoreValues")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("FacebookUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Industry")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LinkedInUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("MissionStatement")
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RegistrationNumber")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ServicesDescription")
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
+
+                    b.Property<string>("TaxNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TwitterUrl")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("YearFounded")
+                        .HasColumnType("int");
+
+                    b.HasKey("BusinessInfoId");
+
+                    b.ToTable("BusinessInfos");
+                });
+
             modelBuilder.Entity("FridgeManagementSystem.Models.Cart", b =>
                 {
                     b.Property<int>("CartId")
@@ -186,6 +281,13 @@ namespace FridgeManagementSystem.Migrations
                     b.HasKey("CategoryId");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            CategoryName = "Fridges"
+                        });
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.ComponentUsed", b =>
@@ -582,6 +684,9 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<string>("FridgeType")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -596,6 +701,9 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime2");
@@ -628,8 +736,7 @@ namespace FridgeManagementSystem.Migrations
                         .IsUnique()
                         .HasFilter("[SerialNumber] IS NOT NULL");
 
-                    b.HasIndex("SupplierID")
-                        .IsUnique();
+                    b.HasIndex("SupplierID");
 
                     b.ToTable("Fridge");
                 });
@@ -1014,6 +1121,278 @@ namespace FridgeManagementSystem.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+
+                    b.HasData(
+                        new
+                        {
+                            ProductId = 1,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge1.jpg",
+                            Name = "Bosch Fridge 1",
+                            Price = 9586m
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge2.jpg",
+                            Name = "Bosch Fridge 2",
+                            Price = 3807m
+                        },
+                        new
+                        {
+                            ProductId = 3,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge3.jpg",
+                            Name = "Whirlpool Fridge 3",
+                            Price = 5394m
+                        },
+                        new
+                        {
+                            ProductId = 4,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge4.jpg",
+                            Name = "Bosch Fridge 4",
+                            Price = 7106m
+                        },
+                        new
+                        {
+                            ProductId = 5,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge5.jpg",
+                            Name = "Defy Fridge 5",
+                            Price = 6581m
+                        },
+                        new
+                        {
+                            ProductId = 6,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge6.jpg",
+                            Name = "Bosch Fridge 6",
+                            Price = 9097m
+                        },
+                        new
+                        {
+                            ProductId = 7,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge7.jpg",
+                            Name = "Bosch Fridge 7",
+                            Price = 8978m
+                        },
+                        new
+                        {
+                            ProductId = 8,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge8.jpg",
+                            Name = "LG Fridge 8",
+                            Price = 11223m
+                        },
+                        new
+                        {
+                            ProductId = 9,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge9.jpg",
+                            Name = "Defy Fridge 9",
+                            Price = 7911m
+                        },
+                        new
+                        {
+                            ProductId = 10,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge10.jpg",
+                            Name = "Whirlpool Fridge 10",
+                            Price = 7690m
+                        },
+                        new
+                        {
+                            ProductId = 11,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge11.jpg",
+                            Name = "Bosch Fridge 11",
+                            Price = 4320m
+                        },
+                        new
+                        {
+                            ProductId = 12,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge12.jpg",
+                            Name = "Samsung Fridge 12",
+                            Price = 3564m
+                        },
+                        new
+                        {
+                            ProductId = 13,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge13.jpg",
+                            Name = "Hisense Fridge 13",
+                            Price = 7988m
+                        },
+                        new
+                        {
+                            ProductId = 14,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge14.jpg",
+                            Name = "Defy Fridge 14",
+                            Price = 10109m
+                        },
+                        new
+                        {
+                            ProductId = 15,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge15.jpg",
+                            Name = "LG Fridge 15",
+                            Price = 6075m
+                        },
+                        new
+                        {
+                            ProductId = 16,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge16.jpg",
+                            Name = "Defy Fridge 16",
+                            Price = 7436m
+                        },
+                        new
+                        {
+                            ProductId = 17,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge17.jpg",
+                            Name = "Whirlpool Fridge 17",
+                            Price = 10751m
+                        },
+                        new
+                        {
+                            ProductId = 18,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge18.jpg",
+                            Name = "Samsung Fridge 18",
+                            Price = 9659m
+                        },
+                        new
+                        {
+                            ProductId = 19,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge19.jpg",
+                            Name = "Samsung Fridge 19",
+                            Price = 7089m
+                        },
+                        new
+                        {
+                            ProductId = 20,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge20.jpg",
+                            Name = "Samsung Fridge 20",
+                            Price = 10770m
+                        },
+                        new
+                        {
+                            ProductId = 21,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge21.jpg",
+                            Name = "Hisense Fridge 21",
+                            Price = 9375m
+                        },
+                        new
+                        {
+                            ProductId = 22,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge22.jpg",
+                            Name = "Whirlpool Fridge 22",
+                            Price = 5580m
+                        },
+                        new
+                        {
+                            ProductId = 23,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge23.jpg",
+                            Name = "Hisense Fridge 23",
+                            Price = 7893m
+                        },
+                        new
+                        {
+                            ProductId = 24,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge24.jpg",
+                            Name = "Bosch Fridge 24",
+                            Price = 7028m
+                        },
+                        new
+                        {
+                            ProductId = 25,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge25.jpg",
+                            Name = "LG Fridge 25",
+                            Price = 9117m
+                        },
+                        new
+                        {
+                            ProductId = 26,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge26.jpg",
+                            Name = "LG Fridge 26",
+                            Price = 10871m
+                        },
+                        new
+                        {
+                            ProductId = 27,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge27.jpg",
+                            Name = "LG Fridge 27",
+                            Price = 6112m
+                        },
+                        new
+                        {
+                            ProductId = 28,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge28.jpg",
+                            Name = "Defy Fridge 28",
+                            Price = 11749m
+                        },
+                        new
+                        {
+                            ProductId = 29,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge29.jpg",
+                            Name = "Samsung Fridge 29",
+                            Price = 9473m
+                        },
+                        new
+                        {
+                            ProductId = 30,
+                            CategoryId = 1,
+                            Description = "High quality and energy-efficient fridge suitable for all households.",
+                            ImageUrl = "fridge30.jpg",
+                            Name = "Defy Fridge 30",
+                            Price = 10000m
+                        });
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.PurchaseOrder", b =>
@@ -1368,6 +1747,9 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("FridgeId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -1688,9 +2070,9 @@ namespace FridgeManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("FridgeManagementSystem.Models.Supplier", "Supplier")
-                        .WithMany()
+                        .WithMany("Fridges")
                         .HasForeignKey("SupplierID")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -2120,6 +2502,8 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Supplier", b =>
                 {
+                    b.Navigation("Fridges");
+
                     b.Navigation("PurchaseOrders");
 
                     b.Navigation("Quotations");

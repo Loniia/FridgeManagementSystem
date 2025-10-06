@@ -52,6 +52,10 @@
         padding: 30px;
     }
 
+    .dashboard-welcome {
+        margin-bottom: 30px;
+    }
+
     .product-card {
         transition: transform 0.2s;
         cursor: pointer;
@@ -89,12 +93,14 @@
     </ul>
 </div>
 
-<div class="main-content">
-    <div class="dashboard-welcome mb-4">
+<div class="main-content container">
+    <!-- Welcome section -->
+    <div class="dashboard-welcome">
         <h2>Welcome, @(User.Identity?.Name ?? "Guest")</h2>
         <p>This is your customer dashboard.</p>
     </div>
 
+    <!-- Product display -->
     @foreach (var categoryVm in Model.Categories)
     {
         <h4 class="mt-4">@categoryVm.Category.Name</h4>
@@ -111,7 +117,10 @@
                         {
                             <span class="badge bg-success badge-stock">In Stock</span>
                         }
-                        <img src="@productVm.Product.ImageUrl" class="card-img-top" alt="@productVm.Product.Name" />
+
+                        <!-- Image path fixed -->
+                        <img src="/images/fridges/@productVm.Product.ImageUrl" class="card-img-top" alt="@productVm.Product.Name" />
+
                         <div class="card-body text-center">
                             <h5 class="card-title">@productVm.Product.Name</h5>
                             <p class="text-success fw-bold">R@productVm.Product.Price.ToString("0.00")</p>
