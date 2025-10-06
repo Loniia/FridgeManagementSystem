@@ -204,6 +204,19 @@ public class CustomerController : Controller
         return View(order);
     }
 
+    // GET: /Customer/Payment
+    [HttpGet]
+    public IActionResult Payment(int orderId, decimal amount)
+    {
+        var model = new FridgeManagementSystem.ViewModels.PaymentViewModel
+        {
+            OrderId = orderId,
+            Amount = amount
+        };
+
+        return View(model);
+    }
+
     // --------------------------
     // 8. My Account / Orders
     // --------------------------
