@@ -1,39 +1,33 @@
-﻿@using Microsoft.AspNetCore.Mvc.Rendering
-
-@{
-    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
-    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-}
+﻿@* Layout for Fault Technician *@
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FMS</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - Dynamic Ice Inc</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <style>
         body {
             display: flex;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 250px;
             background-color: #343a40;
             color: white;
             flex-shrink: 0;
             padding-bottom: 50px;
-            transition: transform 0.3s ease;
             position: fixed;
             top: 0;
             left: 0;
             height: 100%;
             z-index: 1040;
-            transform: translateX(0);
+            transition: transform 0.3s ease;
         }
 
         .sidebar-collapsed {
@@ -45,16 +39,8 @@
             background-color: #23272b;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
             gap: 10px;
         }
-
-            .sidebar-header h3 {
-                margin: 0;
-                font-size: 1.2rem;
-                white-space: nowrap;
-                color: white;
-            }
 
         .toggle-sidebar-btn {
             background: none;
@@ -64,7 +50,6 @@
             cursor: pointer;
         }
 
-        /* User panel */
         .user-panel {
             padding: 1rem;
         }
@@ -87,7 +72,6 @@
             .user-card h4 {
                 margin: 0;
                 font-size: 0.9rem;
-                color: white;
             }
 
             .user-card p {
@@ -96,30 +80,21 @@
                 color: #adb5bd;
             }
 
-        /* Sidebar menu */
         .sidebar-menu {
             list-style: none;
             padding: 0;
-            margin: 0;
         }
 
-            .sidebar-menu li {
-                width: 100%;
+            .sidebar-menu li a {
+                display: block;
+                color: white;
+                padding: 0.75rem 1rem;
+                text-decoration: none;
             }
 
-                .sidebar-menu li a {
-                    display: block;
-                    color: white;
-                    padding: 0.75rem 1rem;
-                    text-decoration: none;
-                    transition: all 0.3s;
+                .sidebar-menu li a:hover, .sidebar-menu li a.active {
+                    background-color: #495057;
                 }
-
-                    .sidebar-menu li a:hover,
-                    .sidebar-menu li a.active {
-                        background-color: #495057;
-                        color: white;
-                    }
 
             .sidebar-menu .menu-header {
                 display: block;
@@ -129,30 +104,8 @@
                 text-transform: uppercase;
                 color: #adb5bd;
                 cursor: pointer;
-                border-bottom: 1px solid #495057;
             }
 
-                .sidebar-menu .menu-header i {
-                    margin-right: 0.5rem;
-                }
-
-            /* Submenu styles */
-            .sidebar-menu .collapse {
-                background-color: #2c3034;
-            }
-
-                .sidebar-menu .collapse a {
-                    padding-left: 2rem;
-                    font-size: 0.9rem;
-                }
-
-                    .sidebar-menu .collapse a i {
-                        margin-right: 0.5rem;
-                        width: 16px;
-                        text-align: center;
-                    }
-
-        /* Main content */
         .main-content {
             flex: 1;
             background-color: #f8f9fa;
@@ -160,11 +113,6 @@
             flex-direction: column;
             margin-left: 250px;
             transition: margin-left 0.3s ease;
-            min-height: 100vh;
-        }
-
-        .sidebar-collapsed ~ .main-content {
-            margin-left: 0;
         }
 
         main {
@@ -172,7 +120,6 @@
             padding: 1rem;
         }
 
-        /* Fixed toggle button */
         #sidebarFixedToggle {
             position: fixed;
             top: 10px;
@@ -186,36 +133,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
-        /* Top navbar */
-        .navbar-brand {
-            font-weight: 600;
-            color: #1a237e !important;
-        }
-
-        .nav-link.active {
-            font-weight: 500;
-            color: #1a237e !important;
-        }
-
-        /* Responsive */
-        @@media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-                .sidebar:not(.sidebar-collapsed) {
-                    transform: translateX(0);
-                }
-
-            .main-content {
-                margin-left: 0 !important;
-            }
-
-            #sidebarFixedToggle {
-                display: block;
-            }
-        }
     </style>
 </head>
 <body>
@@ -225,144 +142,110 @@
             <button class="toggle-sidebar-btn" id="sidebarToggle">
                 <i class="fas fa-bars"></i>
             </button>
-            <h3>Fridge Management<br>System</h3>
+            <h3>Fault Technician <br /> Management<br> SubSystem</h3>
         </div>
 
         <!-- User panel -->
         <div class="user-panel">
             <div class="user-card">
-                <img src="~/images/Cozy.jpg" alt="User Profile" />
-                <h4>Onke Boyce</h4>
-                <p>System Administrator</p>
+                <img src="~/images/technician.jpg" alt="Fault Technician" />
+                <h4>@User.Identity.Name</h4>
+                <p>Fault Technician</p>
             </div>
         </div>
 
-        <!-- Fault Management Menu -->
+        <!-- Fault Technician Menu -->
         <ul class="sidebar-menu">
             <li>
                 <span class="menu-header" id="faultHeader">
-                    <i class="fas fa-exclamation-triangle"></i> Fault Management
-                    <i class="fas fa-chevron-down float-end" data-bs-toggle="collapse" data-bs-target="#faultManagementSubmenu"></i>
+                    <i class="fas fa-tools"></i> Fault Management
+                    <i class="fas fa-chevron-down float-end"></i>
                 </span>
-                <ul class="collapse list-unstyled" id="faultManagementSubmenu">
-                    <li>
-                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard"
-                           class="@(currentController=="Faults" && currentAction=="Dashboard" ? "active" : "")">
-                            <i class="fas fa-home"></i> Dashboard
-                        </a>
-                    </li>
-                    <li>
-                        <a asp-area ="FaultTechSubsystem" asp-controller="Faults" asp-action="Index"
-                           class="@(currentController=="Faults" && currentAction=="Index" ? "active" : "")">
-                            <i class="fas fa-list"></i> View Faults
-                        </a>
-                    </li>
-                    <li>
-                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Process"
-                           class="@(currentController=="Faults" && currentAction=="Process" ? "active" : "")">
-                            <i class="fas fa-cogs"></i> Process Fault
-                        </a>
-                    </li>
-                    <li>
-                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Repair"
-                           class="@(currentController=="Faults" && currentAction=="Repair" ? "active" : "")">
-                            <i class="fas fa-tools"></i> Repair Fridge
-                        </a>
-                    </li>
-                    <li>
-                        <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="UpdateCondition"
-                           class="@(currentController=="Faults" && currentAction=="UpdateCondition" ? "active" : "")">
-                            <i class="fas fa-thermometer-half"></i> Update Condition
-                        </a>
-                    </li>
+                <ul class="collapse list-unstyled" id="faultTechnicianSubmenu">
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Index"><i class="fas fa-list"></i> View Faults</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Process"><i class="fas fa-wrench"></i> Process Fault</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Repair"><i class="fas fa-tools"></i> Repair Fault</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Complete"><i class="fas fa-check"></i> Complete Repair</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="UpdateCondition"><i class="fas fa-exclamation-triangle"></i> Update Condition</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Details"><i class="fas fa-info-circle"></i> Fault Details</a></li>
                 </ul>
             </li>
         </ul>
 
-        <!-- Account Menu -->
+        <!-- General Pages -->
         <ul class="sidebar-menu">
-            <li class="menu-header">Account</li>
-            <li>
-                <a asp-controller="UserAcc" asp-action="Login">
-                    <i class="fas fa-sign-out-alt"></i> Sign Out
-                </a>
-            </li>
+            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="About"><i class="fas fa-info"></i> About Us</a></li>
+            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Services"><i class="fas fa-concierge-bell"></i> Services</a></li>
+            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Contact"><i class="fas fa-envelope"></i> Contact Us</a></li>
         </ul>
+
+        <!-- Account -->
+        <div class="sign-out">
+            <a asp-area="" asp-controller="Account" asp-action="Logout">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </a>
+        </div>
     </div>
 
-    <!-- Fixed toggle button for collapsed sidebar -->
+    <!-- Fixed toggle button -->
     <button id="sidebarFixedToggle">
         <i class="fas fa-bars"></i>
     </button>
 
     <!-- Main content -->
     <div class="main-content" id="mainContent">
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
             <div class="container-fluid">
-                <a asp-controller="Home" asp-action="Index" class="navbar-brand">FMS</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar" aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Dashboard" class="navbar-brand">Dynamic Ice Inc</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-
                 <div class="collapse navbar-collapse" id="topNavbar">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a asp-controller="Home" asp-action="Index"
-                               class="nav-link @(currentController=="Home" && currentAction=="Index" ? "active" : "")">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">About Us</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">Services</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">Contact Us</a>
-                        </li>
+                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Dashboard" class="nav-link">Home</a></li>
+                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="About" class="nav-link">About</a></li>
+                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Services" class="nav-link">Services</a></li>
+                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Contact" class="nav-link">Contact</a></li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <form asp-area="" asp-page="/Account/Logout" method="post">
+                            <button type="submit" class="btn btn-link">Logout</button>
+                        </form>
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <main role="main" class="pb-3">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
         $(function () {
-            var path = window.location.pathname.toLowerCase();
-
-            // Auto-expand active menu
-            function expandActiveMenu() {
-                $('.sidebar-menu a').each(function () {
-                    var href = $(this).attr('href') || '';
-                    if (href !== '#' && path.startsWith(href.toLowerCase())) {
-                        $(this).addClass('active');
-                        // Expand parent collapse
-                        $(this).closest('.collapse').collapse('show');
-                    }
-                });
-            }
-
-            // Initialize active menu
-            expandActiveMenu();
-
-            // Menu header click handlers
-            $('#faultHeader').on('click', function () {
-                $('#faultManagementSubmenu').collapse('toggle');
+            $('.navbar .nav-link').each(function () {
+                if ((this.href) === window.location.href) $(this).addClass('active');
             });
 
-            // Sidebar toggle functionality
+            $('.sidebar-menu a').on('click', function () {
+                $('.sidebar-menu a').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            $('#faultHeader').on('click', function () {
+                $('#faultTechnicianSubmenu').collapse('toggle');
+            });
+
             $('#sidebarToggle').on('click', function () {
                 $('#sidebar').toggleClass('sidebar-collapsed');
                 updateFixedToggle();
             });
 
-            // Fixed toggle button
             $('#sidebarFixedToggle').on('click', function () {
                 $('#sidebar').removeClass('sidebar-collapsed');
                 updateFixedToggle();
@@ -375,27 +258,10 @@
                     $('#sidebarFixedToggle').hide();
                 }
             }
-
-            // Initialize fixed toggle visibility
             updateFixedToggle();
-
-            // Auto-collapse sidebar on mobile
-            function handleResize() {
-                if ($(window).width() <= 768) {
-                    $('#sidebar').addClass('sidebar-collapsed');
-                    updateFixedToggle();
-                } else {
-                    $('#sidebar').removeClass('sidebar-collapsed');
-                    updateFixedToggle();
-                }
-            }
-
-            // Handle window resize
-            $(window).on('resize', handleResize);
-            handleResize(); // Initial call
         });
     </script>
 
-    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
