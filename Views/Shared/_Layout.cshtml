@@ -48,7 +48,7 @@
             <!-- Sidebar (renders only if a partial exists) -->
             @if (ViewData["Sidebar"]?.ToString() == "CustomerManagementSubSystem" ||
             ViewData["Sidebar"]?.ToString() == "PurchasingSubSystem" ||
-            ViewData["Sidebar"]?.ToString() == "FaultTechSubSystem" ||
+            ViewData["Sidebar"]?.ToString() == "FaultTechSubsystem" ||
             ViewData["Sidebar"]?.ToString() == "MaintenanceSubSystem")
             {
                 <div class="col-3">
@@ -61,9 +61,9 @@
                         {
                             <partial name="_PurchasingSidebar" />
                         }
-                        else if (ViewData["Sidebar"]?.ToString() == "FaultTechSubSystem")
+                        else if (ViewData["Sidebar"]?.ToString() == "FaultTechSubsystem")
                         {
-                            <partial name="_PurchasingSidebar" />
+                            <partial name="_FaultTechSidebar" />
                         }
                         else if (ViewData["Sidebar"]?.ToString() == "MaintenanceSubSystem")
                         {
