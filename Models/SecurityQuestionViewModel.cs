@@ -1,4 +1,5 @@
-﻿namespace FridgeManagementSystem.Models
+﻿#nullable disable
+namespace FridgeManagementSystem.Models
 {
     public class SecurityQuestionViewModel
     {

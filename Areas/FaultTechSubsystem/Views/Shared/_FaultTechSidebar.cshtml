@@ -1,0 +1,110 @@
+﻿<!-- Simplified Fault Tech Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h5>Fault Technician</h5>
+        <small>Management SubSystem</small>
+    </div>
+
+    <!-- User panel -->
+    <div class="user-panel mb-3">
+        <div class="user-card text-center">
+            <img src="~/images/technician.jpg" alt="Fault Technician" class="rounded-circle" width="60" height="60" />
+            <h6 class="mt-2">@User.Identity.Name</h6>
+            <small class="text-muted">Fault Technician</small>
+        </div>
+    </div>
+
+    <!-- Fault Technician Menu -->
+    <div class="sidebar-menu">
+        <h6 class="menu-header" data-bs-toggle="collapse" data-bs-target="#faultTechnicianSubmenu">
+            <i class="fas fa-tools"></i> Fault Management
+            <i class="fas fa-chevron-down float-end"></i>
+        </h6>
+        <div class="collapse show" id="faultTechnicianSubmenu">
+            <ul class="list-unstyled">
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Index" class="nav-link"><i class="fas fa-list"></i> View Faults</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Process" class="nav-link"><i class="fas fa-wrench"></i> Process Fault</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Repair" class="nav-link"><i class="fas fa-tools"></i> Repair Fault</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Complete" class="nav-link"><i class="fas fa-check"></i> Complete Repair</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="UpdateCondition" class="nav-link"><i class="fas fa-exclamation-triangle"></i> Update Condition</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Details" class="nav-link"><i class="fas fa-info-circle"></i> Fault Details</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- General Pages -->
+    <div class="sidebar-menu mt-3">
+        <ul class="list-unstyled">
+            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="About" class="nav-link"><i class="fas fa-info"></i> About Us</a></li>
+            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Services" class="nav-link"><i class="fas fa-concierge-bell"></i> Services</a></li>
+            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Contact" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a></li>
+        </ul>
+    </div>
+
+    <!-- Account -->
+    <div class="mt-3 pt-3 border-top">
+        <a asp-area="" asp-controller="Account" asp-action="Logout" class="nav-link text-danger">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+        </a>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        background-color: #f8f9fa;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        overflow-y: auto;
+    }
+
+    .sidebar-header {
+        background-color: #343a40;
+        color: white;
+        padding: 1rem;
+        margin: -1rem -1rem 1rem -1rem;
+    }
+
+    .user-card {
+        padding: 1rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .menu-header {
+        cursor: pointer;
+        padding: 0.5rem 0;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .sidebar-menu .nav-link {
+        color: #495057;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.25rem;
+    }
+
+        .sidebar-menu .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+
+        .sidebar-menu .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+</style>
+
+<script>
+    $(function () {
+        // Set active link
+        $('.sidebar-menu .nav-link').each(function () {
+            if (this.href === window.location.href) {
+                $(this).addClass('active');
+            }
+        });
+    });
+</script>

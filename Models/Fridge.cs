@@ -2,9 +2,8 @@
 using Microsoft.Identity.Client;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-namespace FridgeManagementSystem.Models
 #nullable disable
+namespace FridgeManagementSystem.Models
 {
     public class Fridge
     {
@@ -23,8 +22,6 @@ namespace FridgeManagementSystem.Models
         public string Condition { get; set; } = "Working"; // Working, Under Repair, Faulty, Scrapped
 
         public DateTime PurchaseDate { get; set; }
-
-       
 
         [Display(Name = "Warranty Expiry")]
         [DataType(DataType.Date)]

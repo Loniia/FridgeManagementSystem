@@ -1,0 +1,279 @@
+﻿@model Fault
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Fault Details";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Fault Details</h1>
+        <div>
+            <a asp-action="MyFaults" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to My Faults
+            </a>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Fault Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Fault Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Fault Code</label>
+                                <p class="form-control-plaintext">@Model.FaultCode</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Reported Date</label>
+                                <p class="form-control-plaintext">@Model.ReportDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fault Description</label>
+                        <div class="border rounded p-3 bg-light">
+                            @Model.FaultDescription
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Status</label>
+                                <p>
+                                    @if (Model.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning fs-6">@Model.Status</span>
+                                    }
+                                    else if (Model.Status == "In Progress")
+                                    {
+                                        <span class="badge bg-info fs-6">@Model.Status</span>
+                                    }
+                                    else if (Model.Status == "Resolved")
+                                    {
+                                        <span class="badge bg-success fs-6">@Model.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary fs-6">@Model.Status</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Priority</label>
+                                <p>
+                                    @if (Model.Priority == "High")
+                                    {
+                                        <span class="badge bg-danger fs-6">@Model.Priority</span>
+                                    }
+                                    else if (Model.Priority == "Medium")
+                                    {
+                                        <span class="badge bg-warning fs-6">@Model.Priority</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info fs-6">@Model.Priority</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Assigned Technician</label>
+                                <p class="form-control-plaintext">
+                                    @if (Model.AssignedTechnician != null)
+                                    {
+                                        @Model.AssignedTechnician.FullName
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not assigned yet</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fridge Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-refrigerator"></i> Fridge Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Fridge != null)
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Model</label>
+                                    <p class="form-control-plaintext">@Model.Fridge.Model</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Serial Number</label>
+                                    <p class="form-control-plaintext">@Model.Fridge.SerialNumber</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Brand</label>
+                                    <p class="form-control-plaintext">@Model.Fridge.Brand</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Condition</label>
+                                    <p class="form-control-plaintext">@Model.Fridge.Condition</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Fridge information not available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status Timeline -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Status Timeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item @(Model.Status != "Pending" ? "completed" : "active")">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6>Reported</h6>
+                                <small class="text-muted">@Model.ReportDate.ToString("MMM dd, yyyy")</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item @(Model.Status == "In Progress" || Model.Status == "Resolved" ? "completed" : (Model.Status == "Pending" ? "" : "active"))">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6>In Progress</h6>
+                                <small class="text-muted">
+                                    @(Model.Status == "In Progress" || Model.Status == "Resolved" ? "Assigned to technician" : "Waiting assignment")
+                                </small>
+                            </div>
+                        </div>
+                        <div class="timeline-item @(Model.Status == "Resolved" ? "completed" : "")">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6>Resolved</h6>
+                                <small class="text-muted">
+                                    @(Model.Status == "Resolved" ? "Fault resolved" : "In progress")
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Information -->
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-headset"></i> Need Help?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>If you have questions about this fault, contact our support team:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-phone text-primary me-2"></i> 1-800-FRIDGES</li>
+                        <li><i class="fas fa-envelope text-primary me-2"></i> support@fms.com</li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            Expected resolution time:
+                            @(Model.Priority == "High" ? "2-4 hours" : Model.Priority == "Medium" ? "24 hours" : "48 hours")
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 3px solid white;
+    }
+
+    .timeline-item.completed .timeline-marker {
+        background-color: #28a745 !important;
+    }
+
+    .timeline-item.active .timeline-marker {
+        background-color: #007bff !important;
+        animation: pulse 2s infinite;
+    }
+
+    .timeline-content h6 {
+        margin-bottom: 5px;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>

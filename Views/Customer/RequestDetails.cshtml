@@ -1,0 +1,257 @@
+﻿@model FridgeRequest
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Request Details";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Request Details</h1>
+        <div>
+            <a asp-action="MyRequests" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to My Requests
+            </a>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Request Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Request Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Request Code</label>
+                                <p class="form-control-plaintext">@Model.RequestCode</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Request Date</label>
+                                <p class="form-control-plaintext">@Model.RequestDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Required Model</label>
+                                <p class="form-control-plaintext">@Model.RequiredModel</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Quantity</label>
+                                <p class="form-control-plaintext">@Model.Quantity</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Required By Date</label>
+                                <p class="form-control-plaintext">@Model.RequiredDate.ToString("MMM dd, yyyy")</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Status</label>
+                                <p>
+                                    @if (Model.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning fs-6">@Model.Status</span>
+                                    }
+                                    else if (Model.Status == "Approved")
+                                    {
+                                        <span class="badge bg-success fs-6">@Model.Status</span>
+                                    }
+                                    else if (Model.Status == "Rejected")
+                                    {
+                                        <span class="badge bg-danger fs-6">@Model.Status</span>
+                                    }
+                                    else if (Model.Status == "Fulfilled")
+                                    {
+                                        <span class="badge bg-info fs-6">@Model.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary fs-6">@Model.Status</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.SpecialRequirements))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Special Requirements</label>
+                            <div class="border rounded p-3 bg-light">
+                                @Model.SpecialRequirements
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.AdminNotes))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Admin Notes</label>
+                            <div class="border rounded p-3 bg-info text-white">
+                                @Model.AdminNotes
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Request Timeline -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Request Timeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item @(Model.Status != "Pending" ? "completed" : "active")">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6>Submitted</h6>
+                                <small class="text-muted">@Model.RequestDate.ToString("MMM dd, yyyy")</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item @(Model.Status == "Approved" || Model.Status == "Rejected" || Model.Status == "Fulfilled" ? "completed" : (Model.Status == "Pending" ? "" : "active"))">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6>Under Review</h6>
+                                <small class="text-muted">
+                                    @(Model.Status == "Approved" || Model.Status == "Rejected" || Model.Status == "Fulfilled" ? "Reviewed by admin" : "Waiting review")
+                                </small>
+                            </div>
+                        </div>
+                        <div class="timeline-item @(Model.Status == "Approved" || Model.Status == "Fulfilled" ? "completed" : (Model.Status == "Rejected" ? "rejected" : ""))">
+                            <div class="timeline-marker @(Model.Status == "Rejected" ? "bg-danger" : "bg-primary")"></div>
+                            <div class="timeline-content">
+                                <h6>@(Model.Status == "Rejected" ? "Rejected" : "Approved")</h6>
+                                <small class="text-muted">
+                                    @if (Model.ResponseDate.HasValue)
+                                    {
+                                        @Model.ResponseDate.Value.ToString("MMM dd, yyyy")
+                                    }
+                                    else
+                                    {
+                                        <text>Pending</text>
+                                    }
+                                </small>
+                            </div>
+                        </div>
+                        @if (Model.Status == "Fulfilled")
+                        {
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6>Fulfilled</h6>
+                                    <small class="text-muted">Request completed</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-question-circle"></i> Questions?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Contact our procurement team for request-related questions:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-phone text-success me-2"></i> 1-800-PROCURE</li>
+                        <li><i class="fas fa-envelope text-success me-2"></i> procurement@fms.com</li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            Standard processing time: 3-5 business days
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 3px solid white;
+    }
+
+    .timeline-item.completed .timeline-marker {
+        background-color: #28a745 !important;
+    }
+
+    .timeline-item.active .timeline-marker {
+        background-color: #007bff !important;
+        animation: pulse 2s infinite;
+    }
+
+    .timeline-item.rejected .timeline-marker {
+        background-color: #dc3545 !important;
+    }
+
+    .timeline-content h6 {
+        margin-bottom: 5px;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
