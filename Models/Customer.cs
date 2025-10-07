@@ -63,6 +63,7 @@ namespace FridgeManagementSystem.Models
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
         public virtual ICollection<PurchaseRequest> PurchaseRequest { get; set; }
         public virtual Location Location { get; set; }
+        public virtual ICollection<Fault> Faults { get; set; } = new List<Fault>();
         public virtual ICollection<Fridge> Fridge { get; set; }
         //public virtual ICollection<BussinessInfo> BussinessInfo { get; set; }
 
