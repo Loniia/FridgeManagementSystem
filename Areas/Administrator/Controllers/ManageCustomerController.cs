@@ -80,7 +80,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             customer.IsVerified = true;
             await _context.SaveChangesAsync();
 
-            // Optionally, send notification email to customer
+            
 
             return RedirectToAction(nameof(Index));
         }
@@ -89,13 +89,29 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         public async Task<IActionResult> RejectCustomer(int customerId)
         {
             var customer = await _context.Customers.FindAsync(customerId);
-            if (customer == null) return NotFound();
+            if (customer == null)
+                return NotFound();
 
+            // Update rejection info
             customer.IsVerified = false;
+            customer.IsActive = false;
+            customer.UpdatedAt = DateTime.Now; // optional if you added it
+
+            // Create a notification for the customer
+            var notification = new CustomerNotification
+            {
+                CustomerId = customer.CustomerID,
+                Message = $"Dear {customer.FullName}, your registration has been rejected. Please contact support for more details."
+            };
+
+            _context.CustomerNotifications.Add(notification);
             await _context.SaveChangesAsync();
 
+            TempData["Message"] = $"Customer {customer.FullName} has been rejected, and notified.";
             return RedirectToAction(nameof(Index));
         }
+
+
 
         // --------------------------
         // Create Customer

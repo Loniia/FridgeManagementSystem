@@ -17,7 +17,7 @@ public class CustomerController : Controller
         _context = context;
     }
 
-    //DASHBOARD
+    // DASHBOARD
     public async Task<IActionResult> Dashboard()
     {
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
@@ -25,6 +25,47 @@ public class CustomerController : Controller
         {
             return RedirectToAction("Login", "Account");
         }
+
+        // ✅ Convert claim value to int
+        if (!int.TryParse(userIdClaim.Value, out int userId))
+        {
+            return RedirectToAction("Login", "Account"); // Invalid user ID
+        }
+
+        // Get the logged-in customer
+        var customer = await _context.Customers
+            .IgnoreQueryFilters() // Include rejected customers too
+            .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
+
+        if (customer == null)
+        {
+            return NotFound();
+        }
+
+        // 🔍 Check for rejection notifications
+        var rejectionNotification = await _context.CustomerNotifications
+            .Where(n => n.CustomerId == customer.CustomerID &&
+                        n.Message.ToLower().Contains("rejected"))
+            .OrderByDescending(n => n.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (rejectionNotification != null)
+        {
+            ViewBag.RejectionMessage = rejectionNotification.Message;
+            ViewBag.RejectionDate = rejectionNotification.CreatedAt;
+
+            return View("RejectedDashboard"); // Show rejection-only page
+        }
+
+        // — Normal dashboard flow —
+
+        // Load customer notifications
+        var notifications = await _context.CustomerNotifications
+            .Where(n => n.CustomerId == customer.CustomerID)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+
+        ViewBag.Notifications = notifications;
 
         // Get all categories and their products
         var categories = await _context.Categories
@@ -45,7 +86,6 @@ public class CustomerController : Controller
                 Product = p,
                 AvailableStock = availableFridges
                     .Where(f =>
-                        // Match product name with fridge model/brand
                         !string.IsNullOrEmpty(f.Model) &&
                         !string.IsNullOrEmpty(p.Name) &&
                         (f.Model.ToLower().Contains(p.Name.ToLower()) ||
@@ -55,7 +95,6 @@ public class CustomerController : Controller
                     )
                     .Sum(f =>
                     {
-                        // Use the SAME calculation as InventoryLiaison
                         var allocatedCount = f.FridgeAllocation
                             .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
                             .Sum(a => 1);
@@ -72,6 +111,52 @@ public class CustomerController : Controller
 
         return View(vm);
     }
+
+    private async Task<IActionResult> NormalDashboard(Customer customer)
+    {
+        var categories = await _context.Categories
+            .Include(c => c.Products)
+            .ToListAsync();
+
+        var availableFridges = await _context.Fridge
+            .Include(f => f.FridgeAllocation)
+            .Where(f => f.Status == "Available" || f.Status == "Received")
+            .ToListAsync();
+
+        var categoriesVm = categories.Select(c => new CategoryViewModel
+        {
+            Category = c,
+            Products = c.Products.Select(p => new ProductViewModel
+            {
+                Product = p,
+                AvailableStock = availableFridges
+                    .Where(f =>
+                        !string.IsNullOrEmpty(f.Model) &&
+                        !string.IsNullOrEmpty(p.Name) &&
+                        (f.Model.ToLower().Contains(p.Name.ToLower()) ||
+                         p.Name.ToLower().Contains(f.Model.ToLower()) ||
+                         f.Brand.ToLower().Contains(p.Name.ToLower()) ||
+                         p.Name.ToLower().Contains(f.Brand.ToLower()))
+                    )
+                    .Sum(f =>
+                    {
+                        var allocatedCount = f.FridgeAllocation
+                            .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
+                            .Sum(a => 1);
+
+                        return f.Quantity - allocatedCount;
+                    })
+            }).ToList()
+        }).ToList();
+
+        var vm = new DashboardViewModel
+        {
+            Categories = categoriesVm
+        };
+
+        return View(vm);
+    }
+
 
     // --------------------------
     // 2. Browse Category
