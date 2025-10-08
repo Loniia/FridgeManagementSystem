@@ -49,7 +49,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 UpdatedDate = f.UpdatedDate,
                 DateAdded = f.DateAdded,
                 SupplierID = f.SupplierID,
-                CustomerId = f.CustomerId,
+                CustomerID = f.CustomerID,
                 LocationId = f.LocationId,
                 Quantity = f.Quantity,
                 DeliveryDate = f.DeliveryDate,

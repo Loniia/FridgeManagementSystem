@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 #nullable disable
 namespace FridgeManagementSystem.Models
 {
@@ -9,8 +10,9 @@ namespace FridgeManagementSystem.Models
         [Key]
         public int PaymentId { get; set; }
 
-        [Required]
+        [ForeignKey("Order")]
         public int OrderId { get; set; }
+        public virtual Order Orders { get; set; }
 
         [Required(ErrorMessage = "Payment amount is required")]
         [Range(0.01, 1000000)]

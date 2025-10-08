@@ -207,45 +207,39 @@
 </div>
 
 <!-- Main content -->
-<div class="main-content" id="mainContent">
-    <div class="dashboard-welcome">
-        <h2>Welcome, @(User.Identity?.Name ?? "Guest")!</h2>
-        <p>This is your customer dashboard. Browse our products and manage your orders.</p>
-    </div>
+<div class="dashboard-welcome">
+    <h2>Welcome, @(Model.FullNames)!</h2>
+    <p>This is your customer dashboard. Browse our fridges and manage your orders.</p>
+</div>
 
-    @foreach (var categoryVm in Model.Categories)
+<div class="row">
+    @foreach (var fridgeVm in Model.AvailableFridges)
     {
-        <h4 class="mt-4">@categoryVm.Category.CategoryName</h4>
-        <div class="row">
-            @foreach (var productVm in categoryVm.Products)
-            {
-                <div class="col-md-3 mb-4">
-                    <div class="card product-card position-relative">
-                        @if (productVm.AvailableStock <= 0)
-                        {
-                            <span class="badge bg-danger badge-stock">Out of Stock</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-success badge-stock">In Stock</span>
-                        }
+        <div class="col-md-3 mb-4">
+            <div class="card product-card position-relative">
+                @if (fridgeVm.AvailableStock <= 0)
+                {
+                    <span class="badge bg-danger badge-stock">Out of Stock</span>
+                }
+                else
+                {
+                    <span class="badge bg-success badge-stock">In Stock</span>
+                }
 
-                        <img src="/images/fridges/@productVm.Product.ImageUrl" class="card-img-top" alt="@productVm.Product.Name" />
+                <img src="/images/fridges/@fridgeVm.ImageUrl" class="card-img-top" alt="@fridgeVm.Brand @fridgeVm.Model" />
 
-                        <div class="card-body text-center">
-                            <h5 class="card-title">@productVm.Product.Name</h5>
-                            <p class="text-success fw-bold">R@(productVm.Product.Price.ToString("0.00"))</p>
-                            <p class="text-muted">Available: @productVm.AvailableStock</p>
+                <div class="card-body text-center">
+                    <h5 class="card-title">@fridgeVm.Brand @fridgeVm.Model</h5>
+                    <p class="text-success fw-bold">R@(fridgeVm.Price.ToString("0.00"))</p>
+                    <p class="text-muted">Available: @fridgeVm.AvailableStock</p>
 
-                            <form asp-action="AddToCart" asp-controller="Customer" method="post">
-                                <input type="hidden" name="productId" value="@productVm.Product.ProductId" />
-                                <input type="hidden" name="quantity" value="1" />
-                                <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
-                            </form>
-                        </div>
-                    </div>
+                    <form asp-action="AddToCart" asp-controller="Customer" method="post">
+                        <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
+                        <input type="hidden" name="quantity" value="1" />
+                        <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+                    </form>
                 </div>
-            }
+            </div>
         </div>
     }
 </div>

@@ -60,6 +60,8 @@ namespace FridgeManagementSystem.Models
         public ICollection<CustomerNote> CustomerNote { get; set; }
 
         //Navigation Property
+        public virtual Cart Cart { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
         public virtual ICollection<PurchaseRequest> PurchaseRequest { get; set; }
         public virtual Location Location { get; set; }

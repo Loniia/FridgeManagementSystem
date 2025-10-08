@@ -33,7 +33,7 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("Supplier")]
         public int SupplierID { get; set; }
         [ForeignKey("Customer")]
-        public int? CustomerId {  get; set; }
+        public int? CustomerID {  get; set; }
         [ForeignKey("Location")]
         public int? LocationId { get; set; }
         public Location Location { get; set; }  
@@ -46,6 +46,8 @@ namespace FridgeManagementSystem.Models
         public decimal Price { get; set; }
 
         //Navigation Property
+       
+        public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
         public virtual Inventory Inventories { get; set; }
         public virtual ScrappedFridge ScrappedFridges { get; set; }

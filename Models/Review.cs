@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 #nullable disable
 namespace FridgeManagementSystem.Models
 {
@@ -12,9 +13,9 @@ namespace FridgeManagementSystem.Models
         [Required]
         public int CustomerId { get; set; }
 
-        [Required]
-        public int ProductId { get; set; }
-
+        [ForeignKey("Fridge")]
+        public int FridgeId { get; set; }
+        public virtual Fridge Fridge { get; set; }
         [Required(ErrorMessage = "Review comment is required")]
         [StringLength(500, ErrorMessage = "Comment cannot exceed 500 characters")]
         public string Comment { get; set; }
@@ -24,8 +25,8 @@ namespace FridgeManagementSystem.Models
         public int Rating { get; set; }
 
         // Navigation properties
-        public virtual Product Product { get; set; }
-        public virtual Customer Customer { get; set; }
+        
+        public virtual Customer Customers { get; set; }
     }
 
 }

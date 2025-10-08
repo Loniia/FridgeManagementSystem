@@ -17,7 +17,7 @@ namespace FridgeManagementSystem.Models
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
         public DateOnly DateAdded { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public int SupplierID { get; set; }
-        public int? CustomerId { get; set; }
+        public int? CustomerID { get; set; }
         public int? LocationId { get; set; }
         public int Quantity { get; set; }
         public DateTime DeliveryDate { get; set; }

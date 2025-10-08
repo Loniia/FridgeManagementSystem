@@ -35,8 +35,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<DeliveryNote> DeliveryNotes { get; set; }
         // Customer E-Commerce Tables by Idah
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<Product> Products { get; set; }
+        
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
@@ -125,7 +124,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<Customer>()
                 .HasMany(c => c.Fridge)
                 .WithOne(f => f.Customer)
-                .HasForeignKey(f => f.CustomerId)
+                .HasForeignKey(f => f.CustomerID)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // Location -> Fridge (FIXED - NoAction to prevent cascade cycles)
@@ -167,35 +166,26 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(f => f.SupplierID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // --- Category -> Product (1-to-many) ---
-            builder.Entity<Category>()
-                .HasMany(c => c.Products)
-                .WithOne(p => p.Category)
-                .HasForeignKey(p => p.CategoryId)
+           
+
+            // --- Fridge -> Review (1-to-many) ---
+            builder.Entity<Fridge>()
+                .HasMany(f => f.Reviews)
+                .WithOne(r => r.Fridge)
+                .HasForeignKey(r => r.FridgeId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Product>()
-                .HasMany(p => p.Inventory) 
-                .WithOne(i => i.Product)
-                .HasForeignKey(i => i.ProductId);
-
-            // --- Product -> Review (1-to-many) ---
-            builder.Entity<Product>()
-                .HasMany(p => p.Reviews)
-                .WithOne(r => r.Product)
-                .HasForeignKey(r => r.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // --- Customer -> Cart (1-to-1) ---
+            // One-to-one relationship between Customer and Cart
             builder.Entity<Customer>()
-                .HasOne<Cart>()
-                .WithOne()
-                .HasForeignKey<Cart>(c => c.CustomerId)
+                .HasOne(c => c.Cart)
+                .WithOne(ca => ca.Customer)
+                .HasForeignKey<Cart>(ca => ca.CustomerID)
+
                 .OnDelete(DeleteBehavior.Cascade);
 
             // --- Cart -> CartItem (1-to-many) ---
             builder.Entity<Cart>()
-                .HasMany(c => c.Items)
+                .HasMany(c => c.CartItems)
                 .WithOne()
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -204,12 +194,12 @@ namespace FridgeManagementSystem.Data
             builder.Entity<Customer>()
                 .HasMany<Order>()
                 .WithOne()
-                .HasForeignKey(o => o.CustomerId)
+                .HasForeignKey(o => o.CustomerID)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // --- Order -> OrderItem (1-to-many) ---
             builder.Entity<Order>()
-                .HasMany(o => o.Items)
+                .HasMany(o => o.OrderItems)
                 .WithOne()
                 .HasForeignKey(oi => oi.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -221,35 +211,49 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey<Payment>(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // --- 🌟 Seed Data for Fridge Products 🌟 ---
-            builder.Entity<Category>().HasData(
-                new Category { CategoryId = 1, CategoryName = "Fridges" }
-            );
+           
 
-            // Fridge brands
-            string[] brands = { "Samsung", "LG", "Hisense", "Defy", "Whirlpool", "Bosch" };
-
-            var fridgeProducts = new List<Product>();
-            int id = 1;
-            var random = new Random();
-
-            for (int i = 1; i <= 30; i++)
-            {
-                fridgeProducts.Add(new Product
+            // --- 🌟 Seed Supplier 🌟 ---
+            builder.Entity<Supplier>().HasData(
+                new Supplier
                 {
-                    ProductId = id++,
-                    Name = $"{brands[random.Next(brands.Length)]} Fridge {i}",
-                    Price = random.Next(3500, 12000), // random price between R3500 and R12000
-                    Description = "High quality and energy-efficient fridge suitable for all households.",
-                    ImageUrl = $"fridge{i}.jpg",
-                    CategoryId = 1
+                    SupplierID = 1,
+                    Name = "Default Supplier",
+                    Email = "supplier@example.com",
+                    Phone = "0123456789",
+                    Address = "123 Main Street"
+                }
+                
+            );
+            // Seed fridges
+            var fridges = new List<Fridge>();
+            int id = 1;
+            var rnd = new Random();
+            string[] brands = { "Samsung", "LG", "Hisense", "Defy", "Bosch" };
+            string[] types = { "Single Door", "Double Door", "Mini Fridge" };
+            for (int i = 1; i <= 12; i++)
+            {
+                fridges.Add(new Fridge
+                {
+                    FridgeId = id++,
+                    FridgeType = types[rnd.Next(types.Length)],
+                    Brand = brands[rnd.Next(brands.Length)],
+                    Model = $"Model-{i}",
+                    Condition = "Working",
+                    SupplierID = 1,
+                    Price = rnd.Next(3500, 12000),
+                    ImageUrl = $"/images/fridges/fridge{i}.jpg",
+                    IsActive = true,
+                    Quantity = rnd.Next(1, 10),
+                    Status = "Available",
+                    DeliveryDate = DateTime.Now
                 });
             }
 
-            builder.Entity<Product>().HasData(fridgeProducts);
-
-            // --- Soft Delete / Query Filters ---
-            builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
+            builder.Entity<Fridge>().HasData(fridges);
+        
+        // --- Soft Delete / Query Filters ---
+        builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
             builder.Entity<Customer>().HasQueryFilter(c => c.IsActive);
             builder.Entity<Fridge>().HasQueryFilter(f => f.IsActive);
             builder.Entity<FridgeAllocation>().HasQueryFilter(a => a.Fridge.IsActive);
@@ -307,7 +311,7 @@ namespace FridgeManagementSystem.Data
             builder.Entity<Fridge>()
                 .HasOne(f => f.Customer)
                 .WithMany(c => c.Fridge)
-                .HasForeignKey(f => f.CustomerId)
+                .HasForeignKey(f => f.CustomerID)
                 .IsRequired(false);
 
             builder.Entity<Fridge>()

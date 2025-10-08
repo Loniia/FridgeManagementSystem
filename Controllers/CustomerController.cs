@@ -22,116 +22,85 @@ public class CustomerController : Controller
     {
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
-        {
             return RedirectToAction("Login", "Account");
-        }
 
-        // Get all categories and their products
-        var categories = await _context.Categories
-            .Include(c => c.Products)
-            .ToListAsync();
-
-        // Get all available fridges with their allocations
-        var availableFridges = await _context.Fridge
+        // Get all available fridges
+        var fridges = await _context.Fridge
             .Include(f => f.FridgeAllocation)
             .Where(f => f.Status == "Available" || f.Status == "Received")
             .ToListAsync();
 
-        var categoriesVm = categories.Select(c => new CategoryViewModel
+        // Map to FridgeViewModel
+        var fridgeViewModels = fridges.Select(f => new FridgeViewModel
         {
-            Category = c,
-            Products = c.Products.Select(p => new ProductViewModel
-            {
-                Product = p,
-                AvailableStock = availableFridges
-                    .Where(f =>
-                        // Match product name with fridge model/brand
-                        !string.IsNullOrEmpty(f.Model) &&
-                        !string.IsNullOrEmpty(p.Name) &&
-                        (f.Model.ToLower().Contains(p.Name.ToLower()) ||
-                         p.Name.ToLower().Contains(f.Model.ToLower()) ||
-                         f.Brand.ToLower().Contains(p.Name.ToLower()) ||
-                         p.Name.ToLower().Contains(f.Brand.ToLower()))
-                    )
-                    .Sum(f =>
-                    {
-                        // Use the SAME calculation as InventoryLiaison
-                        var allocatedCount = f.FridgeAllocation
-                            .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
-                            .Sum(a => 1);
-
-                        return f.Quantity - allocatedCount;
-                    })
-            }).ToList()
+            FridgeId = f.FridgeId,
+            FridgeType = f.FridgeType,
+            Brand = f.Brand,
+            Model = f.Model,
+            SerialNumber = f.SerialNumber,
+            Condition = f.Condition,
+            PurchaseDate = f.PurchaseDate,
+            WarrantyExpiry = f.WarrantyExpiry,
+            Status = f.Status,
+            Price = f.Price,
+            ImageUrl = f.ImageUrl,
+            AvailableStock = f.Quantity - (f.FridgeAllocation?.Sum(a => a.QuantityAllocated) ?? 0)
         }).ToList();
 
-        var vm = new DashboardViewModel
+        // Create the ViewModel for the dashboard
+        var model = new CustomerViewModel
         {
-            Categories = categoriesVm
+            FullNames = User.Identity?.Name ?? "Guest",
+            AvailableFridges = fridgeViewModels
         };
 
-        return View(vm);
+        return View(model);
     }
+
 
     // --------------------------
     // 2. Browse Category
     // --------------------------
-    public async Task<IActionResult> Category(int id)
-    {
-        var category = await _context.Categories
-            .Include(c => c.Products)
-                .ThenInclude(p => p.Reviews)
-            .FirstOrDefaultAsync(c => c.CategoryId == id);
-
-        if (category == null)
-            return NotFound();
-
-        return View(category);
-    }
 
     // --------------------------
     // 3. Product Details / Compare
     // --------------------------
-    public async Task<IActionResult> ProductDetails(int id)
-    {
-        var product = await _context.Products
-            .Include(p => p.Reviews)
-            .FirstOrDefaultAsync(p => p.ProductId == id);
 
-        if (product == null)
-            return NotFound();
 
-        return View(product);
-    }
-
-    // --------------------------
-    // 4. Add to Cart
-    // --------------------------
+    // POST: Add to Cart
     [HttpPost]
-    public async Task<IActionResult> AddToCart(int productId, int quantity)
+    public async Task<IActionResult> AddToCart(int fridgeId, int quantity = 1)
     {
         var customerId = GetLoggedInCustomerId();
-        var cart = await _context.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+        if (customerId == 0) return RedirectToAction("Login", "Account");
+
+        var cart = await _context.Carts.Include(c => c.CartItems)
+                    .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
         if (cart == null)
         {
-            cart = new Cart { CustomerId = customerId, Items = new List<CartItem>() };
+            cart = new Cart { CustomerID = customerId };
             _context.Carts.Add(cart);
+            await _context.SaveChangesAsync();
         }
 
-        var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == productId);
-        if (cartItem != null)
-            cartItem.Quantity += quantity;
+        var fridge = await _context.Fridge.FindAsync(fridgeId);
+        if (fridge == null) return NotFound();
+
+        var existing = cart.CartItems.FirstOrDefault(i => i.FridgeId == fridgeId);
+        if (existing != null)
+        {
+            existing.Quantity += quantity;
+            existing.Price = fridge.Price;
+        }
         else
-            cart.Items.Add(new CartItem { ProductId = productId, Quantity = quantity });
+        {
+            cart.CartItems.Add(new CartItem { FridgeId = fridgeId, Quantity = quantity, Price = fridge.Price });
+        }
 
         await _context.SaveChangesAsync();
-
         return RedirectToAction("ViewCart");
     }
-
     // --------------------------
     // 5. View Cart
     // --------------------------
@@ -139,9 +108,9 @@ public class CustomerController : Controller
     {
         var customerId = GetLoggedInCustomerId();
         var cart = await _context.Carts
-            .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            .Include(c => c.CartItems)
+                .ThenInclude(i => i.Fridge)
+            .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
         return View(cart);
     }
@@ -153,54 +122,62 @@ public class CustomerController : Controller
     {
         var customerId = GetLoggedInCustomerId();
         var cart = await _context.Carts
-            .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            .Include(c => c.CartItems)
+                .ThenInclude(i => i.Fridge)
+            .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
         return View(cart);
     }
-
     [HttpPost]
-    public async Task<IActionResult> ConfirmCheckout(CheckoutViewModel model)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmCheckout()
     {
         var customerId = GetLoggedInCustomerId();
+        if (customerId == 0) return RedirectToAction("Login", "Account");
+
+        var cart = await _context.Carts
+            .Include(c => c.CartItems)
+                .ThenInclude(i => i.Fridge)
+            .FirstOrDefaultAsync(c => c.CustomerID == customerId);
+
+        if (cart == null || !cart.CartItems.Any())
+        {
+            TempData["Error"] = "Your cart is empty.";
+            return RedirectToAction("ViewCart");
+        }
 
         var order = new Order
         {
-            CustomerId = customerId,
+            CustomerID = customerId,
             OrderDate = DateTime.Now,
-            Status = "Processing",
-            DeliveryAddress = model.DeliveryAddress,
-            TotalAmount = model.TotalAmount,
-            Items = model.CartItems.Select(ci => new OrderItem
-            {
-                ProductId = ci.ProductId,
-                Quantity = ci.Quantity,
-                Price = ci.Product.Price
-            }).ToList()
+            Status = "Pending",
+            TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
         };
 
+        foreach (var ci in cart.CartItems)
+        {
+            order.OrderItems.Add(new OrderItem
+            {
+                FridgeId = ci.FridgeId,
+                Quantity = ci.Quantity,
+                Price = ci.Price
+            });
+        }
+
         _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
-        // Optionally: clear cart
-        var cart = await _context.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
-        if (cart != null) _context.Carts.Remove(cart);
+        _context.Carts.Remove(cart); // clear cart
+        await _context.SaveChangesAsync(); // order.OrderId is now generated
 
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("OrderConfirmation", new { id = order.OrderId });
+        return RedirectToAction("AddCard", new { orderId = order.OrderId, amount = order.TotalAmount });
     }
-
     // --------------------------
     // 7. Order Confirmation
     // --------------------------
     public async Task<IActionResult> OrderConfirmation(int id)
     {
         var order = await _context.Orders
-            .Include(o => o.Items)
-                .ThenInclude(i => i.Product)
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Fridge)
             .FirstOrDefaultAsync(o => o.OrderId == id);
 
         return View(order);
@@ -208,43 +185,74 @@ public class CustomerController : Controller
 
     // GET: /Customer/AddCard
     [HttpGet]
-    public IActionResult AddCard(int orderId, decimal amount)
+    public async Task<IActionResult> AddCard(int orderId, decimal? amount)
     {
-        var model = new PaymentViewModel
+        var customerId = GetLoggedInCustomerId();
+        if (customerId == 0) return RedirectToAction("Login", "Account");
+
+        var order = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
+
+        if (order == null) return NotFound();
+
+        var vm = new PaymentViewModel
         {
-            OrderId = orderId,
-            Amount = amount,
-            Method = Method.Card // Default to card method
+            OrderId = order.OrderId,
+            Amount = amount ?? order.TotalAmount,
+            Method = Method.Card
         };
 
-        return View(model);
+        return View(vm);
     }
 
     // POST: /Customer/AddCard
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddCard(PaymentViewModel model)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid) return View(model);
+
+        var customerId = GetLoggedInCustomerId();
+        var order = await _context.Orders.FindAsync(model.OrderId);
+
+        if (order == null || order.CustomerID != customerId)
         {
-            return View(model);
+            return Forbid();
         }
+
+        // Recalculate total server-side
+        var recalculated = await _context.OrderItems
+            .Where(oi => oi.OrderId == model.OrderId)
+            .SumAsync(oi => oi.Price * oi.Quantity);
+
+        model.Amount = recalculated;
 
         var payment = new Payment
         {
             OrderId = model.OrderId,
             Amount = model.Amount,
             Method = model.Method,
-            CardNumber = model.CardNumber,
+            CardNumber = MaskCardNumber(model.CardNumber),
             BankReference = model.BankReference,
             PaymentDate = DateTime.Now,
-            Status = "Card Added" // Change depending on your logic
+            Status = "Paid"
         };
 
         _context.Payments.Add(payment);
+        order.Status = "Paid";
         await _context.SaveChangesAsync();
 
-        return RedirectToAction("OrderConfirmation", new { id = model.OrderId });
+        return RedirectToAction("PaymentConfirmation", new { id = payment.PaymentId });
     }
+    private string MaskCardNumber(string cardNumber)
+    {
+        if (string.IsNullOrEmpty(cardNumber)) return null;
+        var s = cardNumber.Replace(" ", "");
+        var last4 = s.Length >= 4 ? s[^4..] : s;
+        return new string('*', Math.Max(0, s.Length - 4)) + last4;
+    }
+
 
     // --------------------------
     // 8. My Account / Orders
@@ -253,9 +261,9 @@ public class CustomerController : Controller
     {
         var customerId = GetLoggedInCustomerId();
         var orders = await _context.Orders
-            .Where(o => o.CustomerId == customerId)
-            .Include(o => o.Items)
-                .ThenInclude(i => i.Product)
+            .Where(o => o.CustomerID == customerId)
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Fridge)
             .ToListAsync();
 
         return View(orders);
@@ -321,7 +329,7 @@ public class CustomerController : Controller
             .Include(v => v.MaintenanceRequest)
                 .ThenInclude(r => r.Fridge)
             .Include(v => v.Employee)
-            .Where(v => v.MaintenanceRequest.Fridge.CustomerId == customerId &&
+            .Where(v => v.MaintenanceRequest.Fridge.CustomerID == customerId &&
                         (v.Status == FridgeManagementSystem.Models.TaskStatus.Scheduled || v.Status == FridgeManagementSystem.Models.TaskStatus.Rescheduled))
             .OrderBy(v => v.ScheduledDate)
             .ThenBy(v => v.ScheduledTime)
@@ -346,7 +354,7 @@ public class CustomerController : Controller
             .Include(v => v.ComponentUsed)
             .Include(v => v.FaultReport)
             .Where(v => v.MaintenanceRequest.FridgeId == fridgeId &&
-                        v.MaintenanceRequest.Fridge.CustomerId == customerId)
+                        v.MaintenanceRequest.Fridge.CustomerID == customerId)
             .OrderByDescending(v => v.ScheduledDate)
             .ToListAsync();
 
@@ -359,7 +367,7 @@ public class CustomerController : Controller
 
         var fridge = _context.Fridge
             .Include(f => f.Customer)
-            .FirstOrDefault(f => f.FridgeId == fridgeId && f.CustomerId == customerId);
+            .FirstOrDefault(f => f.FridgeId == fridgeId && f.CustomerID == customerId);
 
         if (fridge == null) return NotFound("Fridge not found.");
 
@@ -443,7 +451,7 @@ public class CustomerController : Controller
 
             // Get customer's fridges for dropdown
             var customerFridges = await _context.Fridge
-                .Where(f => f.CustomerId == customerId && f.IsActive)
+                .Where(f => f.CustomerID == customerId && f.IsActive)
                 .Select(f => new { f.FridgeId, DisplayName = $"{f.Model} - {f.SerialNumber}" })
                 .ToListAsync();
 
@@ -496,7 +504,7 @@ public class CustomerController : Controller
             // Repopulate dropdowns if validation fails
             var customerId = GetCurrentCustomerId();
             var customerFridges = await _context.Fridge
-                .Where(f => f.CustomerId == customerId && f.IsActive)
+                .Where(f => f.CustomerID == customerId && f.IsActive)
                 .Select(f => new { f.FridgeId, DisplayName = $"{f.Model} - {f.SerialNumber}" })
                 .ToListAsync();
 

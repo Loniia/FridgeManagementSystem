@@ -13,26 +13,26 @@
             <div class="card shadow-sm border-0 p-4">
                 <form asp-action="AddCard" method="post">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cardholder Name</label>
-                        <input asp-for="CardholderName" class="form-control" placeholder="Full name on card" required />
+                        <label asp-for="CardholderName" class="form-label fw-bold"></label>
+                        <input asp-for="CardholderName" class="form-control" placeholder="Full name on card" />
                         <span asp-validation-for="CardholderName" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Card Number</label>
-                        <input asp-for="CardNumber" class="form-control" placeholder="**** **** **** ****" maxlength="16" required />
+                        <label asp-for="CardNumber" class="form-label fw-bold"></label>
+                        <input asp-for="CardNumber" class="form-control" placeholder="**** **** **** ****" maxlength="16" />
                         <span asp-validation-for="CardNumber" class="text-danger"></span>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Expiry Date</label>
-                            <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" required />
+                            <label asp-for="ExpiryDate" class="form-label fw-bold"></label>
+                            <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" />
                             <span asp-validation-for="ExpiryDate" class="text-danger"></span>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">CVV</label>
-                            <input asp-for="CVV" class="form-control" placeholder="***" maxlength="3" required />
+                            <label asp-for="CVV" class="form-label fw-bold"></label>
+                            <input asp-for="CVV" class="form-control" placeholder="***" maxlength="3" />
                             <span asp-validation-for="CVV" class="text-danger"></span>
                         </div>
                     </div>
@@ -55,3 +55,5 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+
