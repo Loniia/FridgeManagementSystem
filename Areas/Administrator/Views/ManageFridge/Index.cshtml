@@ -4,17 +4,89 @@
     Layout = "_Layout";
 }
 
+<style>
+    body {
+        background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h1 {
+        font-weight: bold;
+        color: #1a1a1a;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .btn-back {
+        background: linear-gradient(90deg, #005bea, #00c6fb);
+        color: #fff !important;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease-in-out;
+        text-decoration: none;
+    }
+
+        .btn-back:hover {
+            background: linear-gradient(90deg, #00c6fb, #005bea);
+            transform: scale(1.05);
+        }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        background: linear-gradient(90deg, #00c6fb, #005bea);
+        color: #fff;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+
+    table {
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    }
+
+    thead th {
+        background: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    tbody tr:hover {
+        background: rgba(0, 123, 255, 0.05);
+        transition: 0.3s;
+    }
+
+    .btn-primary, .btn-info, .btn-success {
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+</style>
+
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a asp-controller="ManageEmployee" asp-action="Dashboard" class="btn btn-back">
+                ← Go Back to Dashboard
+            </a>
+        </div>
         <h1 class="h3 mb-0 text-gray-800">Fridge Inventory</h1>
-        <a href="@Url.Action("Create", "ManageFridge", new { area = "Administrator" })" class="btn btn-light">
-            <i class="fas fa-plus me-2"></i>Add New Fridge
-        </a>
+        <div>
+            <a href="@Url.Action("Create", "ManageFridge", new { area = "Administrator" })" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Fridge
+            </a>
+        </div>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">All Fridges</h6>
+            <h6 class="m-0 font-weight-bold">All Fridges</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -22,7 +94,6 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            
                             <th>Type</th>
                             <th>Brand</th>
                             <th>Model</th>
@@ -35,7 +106,6 @@
                             <th>Purchase Date</th>
                             <th>Warranty Expiry</th>
                             <th>Delivery Date</th>
-                            <th>Notes</th>
                             <th>Supplier</th>
                             <th>Customer</th>
                             <th>Location</th>
@@ -51,7 +121,6 @@
                         {
                             <tr>
                                 <td>@fridge.FridgeId</td>
-                                
                                 <td>@fridge.FridgeType</td>
                                 <td>@fridge.Brand</td>
                                 <td>@fridge.Model</td>
@@ -64,7 +133,6 @@
                                 <td>@fridge.PurchaseDate.ToString("MM/dd/yyyy")</td>
                                 <td>@fridge.WarrantyExpiry?.ToString("MM/dd/yyyy")</td>
                                 <td>@fridge.DeliveryDate.ToString("MM/dd/yyyy")</td>
-                                
                                 <td>@fridge.SupplierID</td>
                                 <td>@fridge.CustomerName</td>
                                 <td>@(fridge.LocationId ?? 0)</td>
@@ -91,7 +159,6 @@
             </div>
         </div>
     </div>
-</div>
 
     <div class="row">
         <div class="col-lg-6">
@@ -102,7 +169,7 @@
                 <span class="text">View Inventory Report</span>
             </a>
         </div>
-        <div class="col-lg-6 text-right">
+        <div class="col-lg-6 text-end">
             <a asp-action="SupplierReport" class="btn btn-success btn-icon-split">
                 <span class="icon text-white-50">
                     <i class="fas fa-truck"></i>
@@ -112,4 +179,3 @@
         </div>
     </div>
 </div>
-
