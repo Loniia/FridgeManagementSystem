@@ -17,15 +17,21 @@ public class CustomerController : Controller
         _context = context;
     }
 
-    //DASHBOARD
+    // DASHBOARD
     public async Task<IActionResult> Dashboard()
     {
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
             return RedirectToAction("Login", "Account");
+        }
 
-        // Get all available fridges
-        var fridges = await _context.Fridge
+        // Get all categories and their products
+        var categories = await _context.Categories
+            .Include(c => c.Products)
+            .ToListAsync();
+
+        // Get all available fridges with their allocations
+        var availableFridges = await _context.Fridge
             .Include(f => f.FridgeAllocation)
             .Where(f => f.Status == "Available" || f.Status == "Received")
             .ToListAsync();
@@ -33,18 +39,30 @@ public class CustomerController : Controller
         // Map to FridgeViewModel
         var fridgeViewModels = fridges.Select(f => new FridgeViewModel
         {
-            FridgeId = f.FridgeId,
-            FridgeType = f.FridgeType,
-            Brand = f.Brand,
-            Model = f.Model,
-            SerialNumber = f.SerialNumber,
-            Condition = f.Condition,
-            PurchaseDate = f.PurchaseDate,
-            WarrantyExpiry = f.WarrantyExpiry,
-            Status = f.Status,
-            Price = f.Price,
-            ImageUrl = f.ImageUrl,
-            AvailableStock = f.Quantity - (f.FridgeAllocation?.Sum(a => a.QuantityAllocated) ?? 0)
+            Category = c,
+            Products = c.Products.Select(p => new ProductViewModel
+            {
+                Product = p,
+                AvailableStock = availableFridges
+                    .Where(f =>
+                        // Match product name with fridge model/brand
+                        !string.IsNullOrEmpty(f.Model) &&
+                        !string.IsNullOrEmpty(p.Name) &&
+                        (f.Model.ToLower().Contains(p.Name.ToLower()) ||
+                         p.Name.ToLower().Contains(f.Model.ToLower()) ||
+                         f.Brand.ToLower().Contains(p.Name.ToLower()) ||
+                         p.Name.ToLower().Contains(f.Brand.ToLower()))
+                    )
+                    .Sum(f =>
+                    {
+                        // Use the SAME calculation as InventoryLiaison
+                        var allocatedCount = f.FridgeAllocation
+                            .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
+                            .Sum(a => 1);
+
+                        return f.Quantity - allocatedCount;
+                    })
+            }).ToList()
         }).ToList();
 
         // Create the ViewModel for the dashboard

@@ -73,6 +73,27 @@
             margin: 0 2px;
         }
 
+    .btn-go-back {
+        background: linear-gradient(145deg, #4a90e2, #357ABD);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(0, 123, 255, 0.4);
+        transition: all 0.3s ease;
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+        .btn-go-back:hover {
+            background: linear-gradient(145deg, #357ABD, #4a90e2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 123, 255, 0.5);
+            color: white;
+        }
+
+
         .search-box {
             position: relative;
         }
@@ -157,6 +178,7 @@
             .filter-dropdown .dropdown-item:hover {
                 background-color: #f1f5f9;
             }
+
     </style>
 
     <div class="container-fluid py-4">
@@ -170,6 +192,9 @@
                 <a href="@Url.Action("Create", "ManageSupplier", new { area = "Administrator" })" class="btn btn-light">
                     <i class="fas fa-plus me-2"></i>Add New Supplier
                 </a>
+            <a asp-controller="ManageEmployee" asp-action="Dashboard" class="btn btn-go-back">
+                ← Go Back to Dashboard
+            </a>
             </div>
         </div>
 

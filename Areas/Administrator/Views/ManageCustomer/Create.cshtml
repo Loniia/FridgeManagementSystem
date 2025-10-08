@@ -5,55 +5,141 @@
     ViewData["Title"] = "Add Customer";
 }
 
+<style>
+    body {
+        background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    form {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+        input:focus, select:focus {
+            border-color: #ffb703;
+            box-shadow: 0 0 8px rgba(255, 183, 3, 0.4);
+            outline: none;
+        }
+
+    .btn-save {
+        background: linear-gradient(90deg, #ffb703, #fb8500);
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+    .btn-cancel {
+        background: #adb5bd;
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+        .btn-cancel:hover {
+            background: #868e96;
+        }
+
+    .btn-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    .text-danger {
+        font-size: 0.9em;
+    }
+</style>
+
 <h2>Add New Customer</h2>
 
-<!-- Form to create a new customer -->
 <form asp-action="Create" asp-controller="ManageCustomer" method="post">
     @Html.AntiForgeryToken()
 
-    <!-- Validation summary -->
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <!-- Full Names -->
-    <div class="form-group mb-2">
-        <label asp-for="FullName" class="form-label"></label>
+    <div class="form-group">
+        <label asp-for="FullName"></label>
         <input asp-for="FullName" class="form-control" />
         <span asp-validation-for="FullName" class="text-danger"></span>
     </div>
 
-    <!-- Address/Location -->
-    <div class="form-group mb-2">
-        <label asp-for="LocationId" class="form-label"></label>
+    <div class="form-group">
+        <label asp-for="LocationId"></label>
         <select asp-for="LocationId" class="form-control" asp-items="ViewBag.Locations">
             <option value="">-- Select Location --</option>
         </select>
         <span asp-validation-for="LocationId" class="text-danger"></span>
     </div>
 
-    <!-- Phone Number -->
-    <div class="form-group mb-2">
-        <label asp-for="PhoneNumber" class="form-label"></label>
+    <div class="form-group">
+        <label asp-for="PhoneNumber"></label>
         <input asp-for="PhoneNumber" class="form-control" />
         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
     </div>
 
-    <!-- Email -->
-    <div class="form-group mb-2">
-        <label asp-for="Email" class="form-label"></label>
+    <div class="form-group">
+        <label asp-for="Email"></label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
-    <!-- Registration Date -->
-    <div class="form-group mb-2">
-        <label asp-for="RegistrationDate" class="form-label"></label>
+    <div class="form-group">
+        <label asp-for="RegistrationDate"></label>
         <input asp-for="RegistrationDate" type="date" class="form-control" />
         <span asp-validation-for="RegistrationDate" class="text-danger"></span>
     </div>
 
-    <!-- Buttons -->
-    <button type="submit" class="btn btn-success">Save</button>
-    <!-- Updated Cancel button to point to correct controller -->
-    <a asp-action="Index" asp-controller="ManageCustomer" class="btn btn-secondary">Cancel</a>
+    <div class="btn-container">
+        <button type="submit" class="btn-save">Save</button>
+        <a asp-controller="ManageCustomer" asp-action="Index" asp-area="Administrator" class="btn-cancel">Cancel</a>
+    </div>
 </form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+
 

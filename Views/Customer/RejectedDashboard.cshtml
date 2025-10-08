@@ -1,0 +1,93 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Registration Rejected";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        font-family: 'Segoe UI', sans-serif;
+        color: #fff;
+    }
+
+    .rejection-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+    }
+
+    .rejection-box {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 600px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+                    0 0 20px rgba(0, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: fadeInUp 1s ease forwards;
+    }
+
+    .rejection-box h1 {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ff4c4c;
+        text-shadow: 0px 0px 10px rgba(255, 76, 76, 0.8);
+    }
+
+    .rejection-box p {
+        font-size: 1.2rem;
+        margin-top: 15px;
+        color: #f0f0f0;
+    }
+
+    .rejection-date {
+        margin-top: 20px;
+        font-size: 0.9rem;
+        color: #bbb;
+    }
+
+    .btn-go-back {
+        display: inline-block;
+        margin-top: 30px;
+        background: #ff4c4c;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-go-back:hover {
+        background: #ff1f1f;
+        text-decoration: none;
+        color: white;
+    }
+
+    @@keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="rejection-container">
+    <div class="rejection-box">
+        <h1>@ViewBag.RejectionMessage</h1>
+        <p class="rejection-date">@ViewBag.RejectionDate?.ToString("f")</p>
+
+        <!-- Go Back Button -->
+        <a asp-controller="Account" asp-action="Login" class="btn-go-back">
+            ← Go Back to Login
+        </a>
+    </div>
+</div>

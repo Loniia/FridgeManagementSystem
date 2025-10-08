@@ -40,49 +40,49 @@
         z-index: 1000;
     }
 
-    .sidebar.collapsed {
-        width: 0;
-        padding: 0;
-    }
+        .sidebar.collapsed {
+            width: 0;
+            padding: 0;
+        }
 
-    .sidebar h2 {
-        text-align: center;
-        margin-bottom: 30px;
-        font-size: 1.5rem;
-        white-space: nowrap;
-    }
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            white-space: nowrap;
+        }
 
-    .sidebar ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-    .sidebar ul li {
-        padding: 15px 20px;
-        margin-bottom: 5px;
-        border-radius: 4px;
-        background-color: #3a3a3a;
-        transition: all 0.3s;
-        white-space: nowrap;
-    }
+            .sidebar ul li {
+                padding: 15px 20px;
+                margin-bottom: 5px;
+                border-radius: 4px;
+                background-color: #3a3a3a;
+                transition: all 0.3s;
+                white-space: nowrap;
+            }
 
-    .sidebar ul li:hover,
-    .sidebar ul li.active {
-        background-color: #d3d3d3;
-        color: #000;
-    }
+                .sidebar ul li:hover,
+                .sidebar ul li.active {
+                    background-color: #d3d3d3;
+                    color: #000;
+                }
 
-    .sidebar ul li a {
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
+                .sidebar ul li a {
+                    text-decoration: none;
+                    color: inherit;
+                    display: block;
+                }
 
-    .sidebar.collapsed h2,
-    .sidebar.collapsed ul li {
-        display: none;
-    }
+        .sidebar.collapsed h2,
+        .sidebar.collapsed ul li {
+            display: none;
+        }
 
     .main-content {
         margin-left: 220px;
@@ -95,9 +95,9 @@
         margin-top: 0;
     }
 
-    .main-content.collapsed {
-        margin-left: 0;
-    }
+        .main-content.collapsed {
+            margin-left: 0;
+        }
 
     .toggle-btn {
         position: fixed;
@@ -118,13 +118,13 @@
         transition: all 0.3s ease;
     }
 
-    .toggle-btn:hover {
-        background: #555;
-    }
+        .toggle-btn:hover {
+            background: #555;
+        }
 
-    .toggle-btn.collapsed {
-        left: 15px;
-    }
+        .toggle-btn.collapsed {
+            left: 15px;
+        }
 
     .dashboard-welcome {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -136,17 +136,17 @@
         margin-top: 0 !important;
     }
 
-    .dashboard-welcome h2 {
-        margin: 0 0 10px 0;
-        font-size: 2rem;
-        font-weight: bold;
-    }
+        .dashboard-welcome h2 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            font-weight: bold;
+        }
 
-    .dashboard-welcome p {
-        margin: 0;
-        font-size: 1.1rem;
-        opacity: 0.9;
-    }
+        .dashboard-welcome p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
 
     .product-card {
         transition: transform 0.2s, box-shadow 0.2s;
@@ -155,10 +155,10 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
 
     .card-img-top {
         object-fit: cover;
@@ -212,19 +212,22 @@
     <p>This is your customer dashboard. Browse our fridges and manage your orders.</p>
 </div>
 
-<div class="row">
-    @foreach (var fridgeVm in Model.AvailableFridges)
+    @foreach (var categoryVm in Model.Categories)
     {
-        <div class="col-md-3 mb-4">
-            <div class="card product-card position-relative">
-                @if (fridgeVm.AvailableStock <= 0)
-                {
-                    <span class="badge bg-danger badge-stock">Out of Stock</span>
-                }
-                else
-                {
-                    <span class="badge bg-success badge-stock">In Stock</span>
-                }
+        <h4 class="mt-4">@categoryVm.Category.CategoryName</h4>
+        <div class="row">
+            @foreach (var productVm in categoryVm.Products)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="card product-card position-relative">
+                        @if (productVm.AvailableStock <= 0)
+                        {
+                            <span class="badge bg-danger badge-stock">Out of Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success badge-stock">In Stock</span>
+                        }
 
                 <img src="/images/fridges/@fridgeVm.ImageUrl" class="card-img-top" alt="@fridgeVm.Brand @fridgeVm.Model" />
 
@@ -246,6 +249,13 @@
 
 @section Scripts {
     <script>
+        function dismissNotification(button) {
+            const alertDiv = button.closest(".alert");
+            if (alertDiv) {
+                alertDiv.remove();
+            }
+        }
+
         const toggleBtn = document.getElementById("toggleBtn");
         const sidebar = document.getElementById("sidebar");
         const mainContent = document.getElementById("mainContent");
@@ -306,4 +316,3 @@
         });
     </script>
 }
-

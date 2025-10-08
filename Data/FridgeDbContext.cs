@@ -44,7 +44,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<AdminNotification> AdminNotifications { get; set; }
         public DbSet<BusinessInfo> BusinessInfos { get; set; }
-
+        public DbSet<CustomerNotification> CustomerNotifications { get; set; }
         public DbSet<FridgeRequest> FridgeRequests { get; set; }
 
 
@@ -127,13 +127,20 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(f => f.CustomerID)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            builder.Entity<CustomerNotification>()
+                .HasOne(n => n.Customer)           // Each notification belongs to one customer
+                .WithMany(c => c.CustomerNotifications) // Each customer can have many notifications
+                .HasForeignKey(n => n.CustomerId) // Foreign key in CustomerNotification
+                .OnDelete(DeleteBehavior.Cascade); // Deletes notifications if customer is deleted
+
+
             // Location -> Fridge (FIXED - NoAction to prevent cascade cycles)
             builder.Entity<Fridge>()
-         .HasOne(f => f.Location)
-         .WithMany(l => l.Fridge)
-         .HasForeignKey(f => f.LocationId)
-         .OnDelete(DeleteBehavior.NoAction)
-         .IsRequired(false);
+                 .HasOne(f => f.Location)
+                 .WithMany(l => l.Fridge)
+                 .HasForeignKey(f => f.LocationId)
+                 .OnDelete(DeleteBehavior.NoAction)
+                 .IsRequired(false);
 
             // RepairSchedule relationships
             builder.Entity<RepairSchedule>()
