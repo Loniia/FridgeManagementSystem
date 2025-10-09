@@ -18,7 +18,6 @@ namespace FridgeManagementSystem.Models
         public int TotalScrappedFridges { get; set; }
         public int TotalSuppliers { get; set; }
         
-        public List<CategoryViewModel> Categories { get; set; }
-        public List<Product> RecommendedProducts { get; set; } = new List<Product>();
+      // need to add recommended fridges
     }
 }

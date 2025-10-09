@@ -29,6 +29,7 @@ namespace FridgeManagementSystem.Models
         public string PhoneNumber { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; } //for the notification
 
         [Required]
         [DataType(DataType.Date)]
@@ -60,11 +61,15 @@ namespace FridgeManagementSystem.Models
         public ICollection<CustomerNote> CustomerNote { get; set; }
 
         //Navigation Property
+        public virtual Cart Cart { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
         public virtual ICollection<PurchaseRequest> PurchaseRequest { get; set; }
         public virtual Location Location { get; set; }
         public virtual ICollection<Fault> Faults { get; set; } = new List<Fault>();
         public virtual ICollection<Fridge> Fridge { get; set; }
+        //For being rejected 
+        public ICollection<CustomerNotification> CustomerNotifications { get; set; }
         //public virtual ICollection<BussinessInfo> BussinessInfo { get; set; }
 
         // Add computed property for display

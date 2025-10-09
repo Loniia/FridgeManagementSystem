@@ -21,6 +21,7 @@ namespace FridgeManagementSystem.Models
 
         //Navigation Property
         public List<FridgeViewModel> AvailableFridges { get; set; }
+        public List<FridgeViewModel> Fridges { get; set; } = new List<FridgeViewModel>();
         public List<FridgeAllocationViewModel> FridgeAllocations { get; set; } = new List<FridgeAllocationViewModel>();
         public int TotalFridgesAllocated => FridgeAllocations?.Sum(a => a.QuantityAllocated) ?? 0;
     }

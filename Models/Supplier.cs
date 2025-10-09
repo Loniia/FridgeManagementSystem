@@ -15,7 +15,7 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Supplier Name")]
         public string Name { get; set; } 
 
-        [Required]
+       
         [StringLength(50, ErrorMessage = "Contact Person cannot be longer than 50 characters.")]
         [Display(Name = "Contact Person")]
         public string ContactPerson { get; set; }

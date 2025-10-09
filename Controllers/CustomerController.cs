@@ -1,410 +1,407 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
 using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
 using FridgeManagementSystem.ViewModels;
-using System.Security.Claims;
+using TaskStatus = FridgeManagementSystem.Models.TaskStatus;
 using QuestPDF.Fluent;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
-public class CustomerController : Controller
+namespace FridgeManagementSystem.Controllers
 {
-    private readonly FridgeDbContext _context;
-
-
-    public CustomerController(FridgeDbContext context)
+    public class CustomerController : Controller
     {
-        _context = context;
-    }
+        private readonly FridgeDbContext _context;
 
-    //DASHBOARD
-    public async Task<IActionResult> Dashboard()
-    {
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
+        public CustomerController(FridgeDbContext context)
         {
-            return RedirectToAction("Login", "Account");
+            _context = context;
         }
 
-        // Get all categories and their products
-        var categories = await _context.Categories
-            .Include(c => c.Products)
-            .ToListAsync();
-
-        // Get all available fridges with their allocations
-        var availableFridges = await _context.Fridge
-            .Include(f => f.FridgeAllocation)
-            .Where(f => f.Status == "Available" || f.Status == "Received")
-            .ToListAsync();
-
-        var categoriesVm = categories.Select(c => new CategoryViewModel
+        // ==========================
+        // 1. DASHBOARD
+        // ==========================
+        public async Task<IActionResult> Dashboard()
         {
-            Category = c,
-            Products = c.Products.Select(p => new ProductViewModel
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return RedirectToAction("Login", "Account");
+
+            // Get available fridges
+            var availableFridges = await _context.Fridge
+                .Include(f => f.FridgeAllocation)
+                .Where(f => f.Status == "Available" || f.Status == "Received")
+                .ToListAsync();
+
+            var fridgeViewModels = availableFridges.Select(f => new FridgeViewModel
             {
-                Product = p,
-                AvailableStock = availableFridges
-                    .Where(f =>
-                        // Match product name with fridge model/brand
-                        !string.IsNullOrEmpty(f.Model) &&
-                        !string.IsNullOrEmpty(p.Name) &&
-                        (f.Model.ToLower().Contains(p.Name.ToLower()) ||
-                         p.Name.ToLower().Contains(f.Model.ToLower()) ||
-                         f.Brand.ToLower().Contains(p.Name.ToLower()) ||
-                         p.Name.ToLower().Contains(f.Brand.ToLower()))
-                    )
-                    .Sum(f =>
-                    {
-                        // Use the SAME calculation as InventoryLiaison
-                        var allocatedCount = f.FridgeAllocation
-                            .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
-                            .Sum(a => 1);
+                FridgeId = f.FridgeId,
+                FridgeType = f.FridgeType,
+                Brand = f.Brand,
+                Model = f.Model,
+                Price = f.Price,
+                Quantity = f.Quantity,
+                ImageUrl = string.IsNullOrEmpty(f.ImageUrl) ? "/images/fridges/default.jpg" : f.ImageUrl,
+                AvailableStock = f.Quantity - (f.FridgeAllocation?.Count(a =>
+                    a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today)) ?? 0)
+            }).ToList();
 
-                        return f.Quantity - allocatedCount;
-                    })
-            }).ToList()
-        }).ToList();
-
-        var vm = new DashboardViewModel
-        {
-            Categories = categoriesVm
-        };
-
-        return View(vm);
-    }
-
-    // --------------------------
-    // 2. Browse Category
-    // --------------------------
-    public async Task<IActionResult> Category(int id)
-    {
-        var category = await _context.Categories
-            .Include(c => c.Products)
-                .ThenInclude(p => p.Reviews)
-            .FirstOrDefaultAsync(c => c.CategoryId == id);
-
-        if (category == null)
-            return NotFound();
-
-        return View(category);
-    }
-
-    // --------------------------
-    // 3. Product Details / Compare
-    // --------------------------
-    public async Task<IActionResult> ProductDetails(int id)
-    {
-        var product = await _context.Products
-            .Include(p => p.Reviews)
-            .FirstOrDefaultAsync(p => p.ProductId == id);
-
-        if (product == null)
-            return NotFound();
-
-        return View(product);
-    }
-
-    // --------------------------
-    // 4. Add to Cart
-    // --------------------------
-    [HttpPost]
-    public async Task<IActionResult> AddToCart(int productId, int quantity)
-    {
-        var customerId = GetLoggedInCustomerId();
-        var cart = await _context.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
-
-        if (cart == null)
-        {
-            cart = new Cart { CustomerId = customerId, Items = new List<CartItem>() };
-            _context.Carts.Add(cart);
-        }
-
-        var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == productId);
-        if (cartItem != null)
-            cartItem.Quantity += quantity;
-        else
-            cart.Items.Add(new CartItem { ProductId = productId, Quantity = quantity });
-
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("ViewCart");
-    }
-
-    // --------------------------
-    // 5. View Cart
-    // --------------------------
-    public async Task<IActionResult> ViewCart()
-    {
-        var customerId = GetLoggedInCustomerId();
-        var cart = await _context.Carts
-            .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
-
-        return View(cart);
-    }
-
-    // --------------------------
-    // 6. Checkout Process
-    // --------------------------
-    public async Task<IActionResult> Checkout()
-    {
-        var customerId = GetLoggedInCustomerId();
-        var cart = await _context.Carts
-            .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
-
-        return View(cart);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> ConfirmCheckout(CheckoutViewModel model)
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var order = new Order
-        {
-            CustomerId = customerId,
-            OrderDate = DateTime.Now,
-            Status = "Processing",
-            DeliveryAddress = model.DeliveryAddress,
-            TotalAmount = model.TotalAmount,
-            Items = model.CartItems.Select(ci => new OrderItem
+            var model = new CustomerViewModel
             {
-                ProductId = ci.ProductId,
-                Quantity = ci.Quantity,
-                Price = ci.Product.Price
-            }).ToList()
-        };
+                FullNames = User.Identity?.Name ?? "Guest",
+                Fridges = fridgeViewModels
+            };
 
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
-        // Optionally: clear cart
-        var cart = await _context.Carts
-            .Include(c => c.Items)
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
-        if (cart != null) _context.Carts.Remove(cart);
-
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("OrderConfirmation", new { id = order.OrderId });
-    }
-
-    // --------------------------
-    // 7. Order Confirmation
-    // --------------------------
-    public async Task<IActionResult> OrderConfirmation(int id)
-    {
-        var order = await _context.Orders
-            .Include(o => o.Items)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(o => o.OrderId == id);
-
-        return View(order);
-    }
-
-    // GET: /Customer/AddCard
-    [HttpGet]
-    public IActionResult AddCard(int orderId, decimal amount)
-    {
-        var model = new PaymentViewModel
-        {
-            OrderId = orderId,
-            Amount = amount,
-            Method = Method.Card // Default to card method
-        };
-
-        return View(model);
-    }
-
-    // POST: /Customer/AddCard
-    [HttpPost]
-    public async Task<IActionResult> AddCard(PaymentViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
             return View(model);
         }
 
-        var payment = new Payment
+
+        // ==========================
+        // 2. ADD TO CART
+        // ==========================
+        [HttpPost]
+        public async Task<IActionResult> AddToCart(int fridgeId, int quantity = 1)
         {
-            OrderId = model.OrderId,
-            Amount = model.Amount,
-            Method = model.Method,
-            CardNumber = model.CardNumber,
-            BankReference = model.BankReference,
-            PaymentDate = DateTime.Now,
-            Status = "Card Added" // Change depending on your logic
-        };
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
 
-        _context.Payments.Add(payment);
-        await _context.SaveChangesAsync();
+            var cart = await _context.Carts.Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
-        return RedirectToAction("OrderConfirmation", new { id = model.OrderId });
-    }
+            if (cart == null)
+            {
+                cart = new Cart { CustomerID = customerId };
+                _context.Carts.Add(cart);
+                await _context.SaveChangesAsync();
+            }
 
-    // --------------------------
-    // 8. My Account / Orders
-    // --------------------------
-    public async Task<IActionResult> MyAccount()
-    {
-        var customerId = GetLoggedInCustomerId();
-        var orders = await _context.Orders
-            .Where(o => o.CustomerId == customerId)
-            .Include(o => o.Items)
-                .ThenInclude(i => i.Product)
-            .ToListAsync();
+            var fridge = await _context.Fridge.FindAsync(fridgeId);
+            if (fridge == null) return NotFound();
 
-        return View(orders);
-    }
+            var existingItem = cart.CartItems.FirstOrDefault(i => i.FridgeId == fridgeId);
+            if (existingItem != null)
+            {
+                existingItem.Quantity += quantity;
+                existingItem.Price = fridge.Price;
+            }
+            else
+            {
+                cart.CartItems.Add(new CartItem { FridgeId = fridgeId, Quantity = quantity, Price = fridge.Price });
+            }
 
-    // --------------------------
-    // 9. Track Order
-    // --------------------------
-    public async Task<IActionResult> TrackOrder(int orderId)
-    {
-        var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
-        return View(order);
-    }
+            await _context.SaveChangesAsync();
+            return RedirectToAction("ViewCart");
+        }
 
-    // --------------------------
-    // 10. Payment
-    // --------------------------
-    [HttpPost]
-    public async Task<IActionResult> ProcessPayment(PaymentViewModel model)
-    {
-        var payment = new Payment
+        // ==========================
+        // 3. VIEW CART
+        // ==========================
+        public async Task<IActionResult> ViewCart()
         {
-            OrderId = model.OrderId,
-            Amount = model.Amount,
-            Method = model.Method,
-            PaymentDate = DateTime.Now,
-            Status = "Paid" // For demo, integrate real gateway later
-        };
+            var customerId = GetLoggedInCustomerId();
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .ThenInclude(i => i.Fridge)
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
-        _context.Payments.Add(payment);
-        await _context.SaveChangesAsync();
+            return View(cart);
+        }
 
-        return RedirectToAction("PaymentConfirmation");
-    }
+        // ==========================
+        // 4. CHECKOUT
+        // ==========================
+        public async Task<IActionResult> Checkout()
+        {
+            var customerId = GetLoggedInCustomerId();
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .ThenInclude(i => i.Fridge)
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
-    public IActionResult PaymentConfirmation()
+            return View(cart);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmCheckout()
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .ThenInclude(i => i.Fridge)
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
+
+            if (cart == null || !cart.CartItems.Any())
+            {
+                TempData["Error"] = "Your cart is empty.";
+                return RedirectToAction("ViewCart");
+            }
+
+            var order = new Order
+            {
+                CustomerID = customerId,
+                OrderDate = DateTime.Now,
+                Status = "Pending",
+                TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
+            };
+
+            foreach (var ci in cart.CartItems)
+            {
+                order.OrderItems.Add(new OrderItem
+                {
+                    FridgeId = ci.FridgeId,
+                    Quantity = ci.Quantity,
+                    Price = ci.Price
+                });
+            }
+
+            _context.Orders.Add(order);
+            _context.Carts.Remove(cart);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("AddCard", new { orderId = order.OrderId, amount = order.TotalAmount });
+        }
+
+        // ==========================
+        // 5. ORDER CONFIRMATION
+        // ==========================
+        public async Task<IActionResult> OrderConfirmation(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Fridge)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            return View(order);
+        }
+
+        // ==========================
+        // 6. PAYMENT METHODS
+        // ==========================
+        [HttpGet]
+        public async Task<IActionResult> AddCard(int orderId, decimal? amount)
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
+
+            if (order == null) return NotFound();
+
+            var vm = new PaymentViewModel
+            {
+                OrderId = order.OrderId,
+                Amount = amount ?? order.TotalAmount,
+                Method = Method.Card
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCard(PaymentViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var customerId = GetLoggedInCustomerId();
+            var order = await _context.Orders.FindAsync(model.OrderId);
+
+            if (order == null || order.CustomerID != customerId) return Forbid();
+
+            model.Amount = await _context.OrderItems
+                .Where(oi => oi.OrderId == model.OrderId)
+                .SumAsync(oi => oi.Price * oi.Quantity);
+
+            var payment = new Payment
+            {
+                OrderId = model.OrderId,
+                Amount = model.Amount,
+                Method = model.Method,
+                CardNumber = MaskCardNumber(model.CardNumber),
+                BankReference = model.BankReference,
+                PaymentDate = DateTime.Now,
+                Status = "Paid"
+            };
+
+            _context.Payments.Add(payment);
+            order.Status = "Paid";
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("PaymentConfirmation", new { id = payment.PaymentId });
+        }
+
+        public IActionResult PaymentConfirmation() => View();
+
+        // ==========================
+        // 7. MY ACCOUNT & ORDERS
+        // ==========================
+        public async Task<IActionResult> MyAccount()
+        {
+            var customerId = GetLoggedInCustomerId();
+            var orders = await _context.Orders
+                .Where(o => o.CustomerID == customerId)
+                .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Fridge)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
+        public async Task<IActionResult> TrackOrder(int orderId)
+        {
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            return View(order);
+        }
+
+        // ==========================
+        // 8. FAULT MANAGEMENT
+        // ==========================
+        public async Task<IActionResult> MyFaults()
+        {
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+                var faults = await _context.Faults
+                    .Include(f => f.Fridge)
+                    .Include(f => f.AssignedTechnician)
+                    .Where(f => f.CustomerId == customerId)
+                    .OrderByDescending(f => f.FaultID)
+                    .ToListAsync();
+
+                return View(faults);
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Error loading faults.";
+                return View(new List<Fault>());
+            }
+        }
+
+        public async Task<IActionResult> FaultDetails(int? id)
+        {
+            if (id == null) return NotFound();
+
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+                var fault = await _context.Faults
+                    .Include(f => f.Fridge)
+                    .Include(f => f.AssignedTechnician)
+                    .Include(f => f.RepairSchedules)
+                    .FirstOrDefaultAsync(f => f.FaultID == id && f.CustomerId == customerId);
+
+                return fault == null ? NotFound() : View(fault);
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Error loading fault details.";
+                return RedirectToAction(nameof(MyFaults));
+            }
+        }
+
+        public IActionResult CreateFault() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
+        {
+            if (!ModelState.IsValid) return View(viewModel);
+
+            try
+            {
+                var fault = new Fault
+                {
+                    FridgeId = viewModel.FridgeId,
+                    Priority = viewModel.Priority,
+                    FaultDescription = viewModel.FaultDescription,
+                    CustomerId = GetLoggedInCustomerId(),
+                    Status = "Pending",
+                    ReportDate = DateTime.Now,
+                    FaultCode = GenerateFaultCode()
+                };
+
+                _context.Add(fault);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Fault reported successfully.";
+                return RedirectToAction(nameof(FaultDetails), new { id = fault.FaultID });
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Error reporting fault.";
+                return View(viewModel);
+            }
+        }
+
+    // GET: CustomerFault/CreateRequest - Request a new fridge
+    public IActionResult CreateRequest()
     {
         return View();
     }
 
-    // --------------------------
-    // Helper: Get Logged-in Customer Id
-    // --------------------------
-    private int GetLoggedInCustomerId()
+    // POST: CustomerFault/CreateRequest
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateRequest([Bind("RequiredModel,Quantity,RequiredDate,SpecialRequirements")] FridgeRequest request)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null) return 0;
+        try
+        {
+            if (ModelState.IsValid)
+            {
+                // Set additional properties
+                request.CustomerId = GetCurrentCustomerId();
+                request.Status = "Pending";
+                request.RequestDate = DateTime.Now;
+                request.RequestCode = GenerateRequestCode();
 
-        int appUserId = int.Parse(userIdClaim.Value);
+                _context.FridgeRequests.Add(request);
+                await _context.SaveChangesAsync();
 
-        var customer = _context.Customers.FirstOrDefault(c => c.ApplicationUserId == appUserId);
-        return customer?.CustomerID ?? 0;
+                TempData["SuccessMessage"] = "Fridge request submitted successfully! We'll contact you soon.";
+                return RedirectToAction(nameof(RequestDetails), new { id = request.RequestId });
+            }
+
+            return View(request);
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "An error occurred while submitting the request. Please try again.";
+            return View(request);
+        }
     }
 
-    // --------------------------
-    // Upcoming Maintenance Visits
-    // --------------------------
-    public async Task<IActionResult> UpcomingVisits()
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var visits = await _context.MaintenanceVisit
-            .Include(v => v.MaintenanceRequest)
-                .ThenInclude(r => r.Fridge)
-            .Include(v => v.Employee)
-            .Where(v => v.MaintenanceRequest.Fridge.CustomerId == customerId &&
-                        (v.Status == FridgeManagementSystem.Models.TaskStatus.Scheduled || v.Status == FridgeManagementSystem.Models.TaskStatus.Rescheduled))
-            .OrderBy(v => v.ScheduledDate)
-            .ThenBy(v => v.ScheduledTime)
-            .ToListAsync();
-
-        return View(visits);
-    }
-    // --------------------------
-    // View Service History for a specific fridge
-    // --------------------------
-    public async Task<IActionResult> FridgeServiceHistory(int fridgeId)
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var visits = await _context.MaintenanceVisit
-            .Include(v => v.MaintenanceRequest)
-                .ThenInclude(r => r.Fridge)
-                    .ThenInclude(f => f.Customer)
-                        .ThenInclude(c => c.Location)
-            .Include(v => v.Employee)
-            .Include(v => v.MaintenanceChecklist)
-            .Include(v => v.ComponentUsed)
-            .Include(v => v.FaultReport)
-            .Where(v => v.MaintenanceRequest.FridgeId == fridgeId &&
-                        v.MaintenanceRequest.Fridge.CustomerId == customerId)
-            .OrderByDescending(v => v.ScheduledDate)
-            .ToListAsync();
-
-        return View(visits);
-    }
-    [HttpGet]
-    public IActionResult DownloadFridgeServiceHistory(int fridgeId)
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var fridge = _context.Fridge
-            .Include(f => f.Customer)
-            .FirstOrDefault(f => f.FridgeId == fridgeId && f.CustomerId == customerId);
-
-        if (fridge == null) return NotFound("Fridge not found.");
-
-        var visits = _context.MaintenanceVisit
-            .Include(v => v.MaintenanceRequest)
-            .Include(v => v.Employee)
-            .Include(v => v.MaintenanceChecklist)
-            .Include(v => v.ComponentUsed)
-            .Include(v => v.FaultReport)
-            .Where(v => v.MaintenanceRequest.FridgeId == fridgeId)
-            .OrderByDescending(v => v.ScheduledDate)
-            .ToList();
-
-        if (!visits.Any()) return NotFound("No service history for this fridge.");
-
-        var generator = new ServiceHistoryPdfGenerator(visits, fridge);
-        var pdfBytes = generator.GeneratePdf();
-        var fileName = $"ServiceHistory_{fridge.Brand}_{DateTime.Now:yyyyMMdd}.pdf";
-
-        return File(pdfBytes, "application/pdf", fileName);
-    }
-    // GET: CustomerFault/MyFaults - View customer's faults
-    public async Task<IActionResult> MyFaults()
+    // GET: CustomerFault/MyRequests - View customer's fridge requests
+    public async Task<IActionResult> MyRequests()
     {
         try
         {
             var customerId = GetCurrentCustomerId();
-            var faults = await _context.Faults
-                .Include(f => f.Fridge)
-                .Include(f => f.AssignedTechnician)
-                .Where(f => f.CustomerId == customerId)
-                .OrderByDescending(f => f.FaultID)
+            var requests = await _context.FridgeRequests
+                .Where(r => r.CustomerId == customerId)
+                .OrderByDescending(r => r.RequestId)
                 .ToListAsync();
 
-            return View(faults);
+            return View(requests);
         }
         catch (Exception)
         {
-            TempData["ErrorMessage"] = "An error occurred while loading your faults.";
-            return View(new List<Fault>());
+            TempData["ErrorMessage"] = "An error occurred while loading your requests.";
+            return View(new List<FridgeRequest>());
         }
     }
 
-    // GET: CustomerFault/FaultDetails/5 - View specific fault details
-    public async Task<IActionResult> FaultDetails(int? id)
+    // GET: CustomerFault/RequestDetails/5 - View specific request details
+    public async Task<IActionResult> RequestDetails(int? id)
     {
         if (id == null)
         {
@@ -414,243 +411,84 @@ public class CustomerController : Controller
         try
         {
             var customerId = GetCurrentCustomerId();
-            var fault = await _context.Faults
-                .Include(f => f.Fridge)
-                .Include(f => f.AssignedTechnician)
-                .Include(f => f.RepairSchedules)
-                .FirstOrDefaultAsync(f => f.FaultID == id && f.CustomerId == customerId);
+            var request = await _context.FridgeRequests
+                .FirstOrDefaultAsync(r => r.RequestId == id && r.CustomerId == customerId);
 
-            if (fault == null)
+            if (request == null)
             {
                 return NotFound();
             }
 
-            return View(fault);
+            return View(request);
         }
         catch (Exception)
         {
-            TempData["ErrorMessage"] = "An error occurred while loading fault details.";
-            return RedirectToAction(nameof(MyFaults));
+            TempData["ErrorMessage"] = "An error occurred while loading request details.";
+            return RedirectToAction(nameof(MyRequests));
         }
     }
 
-    // GET: CustomerFault/CreateFault - Report a new fault
-    public async Task<IActionResult> CreateFault()
-    {
-        try
+        [HttpGet]
+        public IActionResult DownloadFridgeServiceHistory(int fridgeId)
         {
-            var customerId = GetCurrentCustomerId();
+            var customerId = GetLoggedInCustomerId();
+            var fridge = _context.Fridge
+                .Include(f => f.Customer)
+                .FirstOrDefault(f => f.FridgeId == fridgeId && f.CustomerID == customerId);
 
-            // Get customer's fridges for dropdown
-            var customerFridges = await _context.Fridge
-                .Where(f => f.CustomerId == customerId && f.IsActive)
-                .Select(f => new { f.FridgeId, DisplayName = $"{f.Model} - {f.SerialNumber}" })
-                .ToListAsync();
+            if (fridge == null) return NotFound("Fridge not found.");
 
-            var viewModel = new CreateFaultViewModel
-            {
-                FridgeOptions = new SelectList(customerFridges, "FridgeId", "DisplayName"),
-                PriorityOptions = new SelectList(new[]
-                {
-                new { Value = "Low", Text = "Low" },
-                new { Value = "Medium", Text = "Medium" },
-                new { Value = "High", Text = "High" }
-            }, "Value", "Text", "Medium")
-            };
+            var visits = _context.MaintenanceVisit
+                .Include(v => v.MaintenanceRequest)
+                .Include(v => v.Employee)
+                .Include(v => v.MaintenanceChecklist)
+                .Include(v => v.ComponentUsed)
+                .Include(v => v.FaultReport)
+                .Where(v => v.MaintenanceRequest.FridgeId == fridgeId)
+                .OrderByDescending(v => v.ScheduledDate)
+                .ToList();
 
-            return View(viewModel);
+            if (!visits.Any()) return NotFound("No service history.");
+
+            var generator = new ServiceHistoryPdfGenerator(visits, fridge);
+            var pdfBytes = generator.GeneratePdf();
+            var fileName = $"ServiceHistory_{fridge.Brand}_{DateTime.Now:yyyyMMdd}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
         }
-        catch (Exception)
+
+        // ==========================
+        // HELPER METHODS
+        // ==========================
+        private int GetLoggedInCustomerId()
         {
-            TempData["ErrorMessage"] = "An error occurred while loading the form.";
-            return RedirectToAction(nameof(MyFaults));
-        }
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
-    {
-        try
-        {
-            if (ModelState.IsValid)
-            {
-                var fault = new Fault
-                {
-                    FridgeId = viewModel.FridgeId,
-                    Priority = viewModel.Priority,
-                    FaultDescription = viewModel.FaultDescription,
-                    CustomerId = GetCurrentCustomerId(),
-                    Status = "Pending",
-                    ReportDate = DateTime.Now,
-                    FaultCode = GenerateFaultCode()
-                };
-
-                _context.Add(fault);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Fault reported successfully! Our team will review it shortly.";
-                return RedirectToAction(nameof(FaultDetails), new { id = fault.FaultID });
-            }
-
-            // Repopulate dropdowns if validation fails
-            var customerId = GetCurrentCustomerId();
-            var customerFridges = await _context.Fridge
-                .Where(f => f.CustomerId == customerId && f.IsActive)
-                .Select(f => new { f.FridgeId, DisplayName = $"{f.Model} - {f.SerialNumber}" })
-                .ToListAsync();
-
-            viewModel.FridgeOptions = new SelectList(customerFridges, "FridgeId", "DisplayName", viewModel.FridgeId);
-            viewModel.PriorityOptions = new SelectList(new[]
-            {
-            new { Value = "Low", Text = "Low" },
-            new { Value = "Medium", Text = "Medium" },
-            new { Value = "High", Text = "High" }
-        }, "Value", "Text", viewModel.Priority);
-
-            return View(viewModel);
-        }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while reporting the fault. Please try again.";
-            return View(viewModel);
-        }
-    }
-
-    // GET: CustomerFault/CreateRequest - Request a new fridge
-    //public IActionResult CreateRequest()
-    //{
-    //    return View();
-    //}
-
-    //// POST: CustomerFault/CreateRequest
-    //[HttpPost]
-    //[ValidateAntiForgeryToken]
-    //public async Task<IActionResult> CreateRequest([Bind("RequiredModel,Quantity,RequiredDate,SpecialRequirements")] FridgeRequest request)
-    //{
-    //    try
-    //    {
-    //        if (ModelState.IsValid)
-    //        {
-    //            // Set additional properties
-    //            request.CustomerId = GetCurrentCustomerId();
-    //            request.Status = "Pending";
-    //            request.RequestDate = DateTime.Now;
-    //            request.RequestCode = GenerateRequestCode();
-
-    //            _context.FridgeRequests.Add(request);
-    //            await _context.SaveChangesAsync();
-
-    //            TempData["SuccessMessage"] = "Fridge request submitted successfully! We'll contact you soon.";
-    //            return RedirectToAction(nameof(RequestDetails), new { id = request.RequestId });
-    //        }
-
-    //        return View(request);
-    //    }
-    //    catch (Exception)
-    //    {
-    //        TempData["ErrorMessage"] = "An error occurred while submitting the request. Please try again.";
-    //        return View(request);
-    //    }
-    //}
-
-    //// GET: CustomerFault/MyRequests - View customer's fridge requests
-    //public async Task<IActionResult> MyRequests()
-    //{
-    //    try
-    //    {
-    //        var customerId = GetCurrentCustomerId();
-    //        var requests = await _context.FridgeRequests
-    //            .Where(r => r.CustomerId == customerId)
-    //            .OrderByDescending(r => r.RequestId)
-    //            .ToListAsync();
-
-    //        return View(requests);
-    //    }
-    //    catch (Exception)
-    //    {
-    //        TempData["ErrorMessage"] = "An error occurred while loading your requests.";
-    //        return View(new List<FridgeRequest>());
-    //    }
-    //}
-
-    //// GET: CustomerFault/RequestDetails/5 - View specific request details
-    //public async Task<IActionResult> RequestDetails(int? id)
-    //{
-    //    if (id == null)
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    try
-    //    {
-    //        var customerId = GetCurrentCustomerId();
-    //        var request = await _context.FridgeRequests
-    //            .FirstOrDefaultAsync(r => r.RequestId == id && r.CustomerId == customerId);
-
-    //        if (request == null)
-    //        {
-    //            return NotFound();
-    //        }
-
-    //        return View(request);
-    //    }
-    //    catch (Exception)
-    //    {
-    //        TempData["ErrorMessage"] = "An error occurred while loading request details.";
-    //        return RedirectToAction(nameof(MyRequests));
-    //    }
-    //}
-
-    // GET: CustomerFault/GetFaultStatus - AJAX endpoint for fault status
-    [HttpGet]
-    public async Task<JsonResult> GetFaultStatus(int faultId)
-    {
-        try
-        {
-            var customerId = GetCurrentCustomerId();
-            var fault = await _context.Faults
-                .Where(f => f.FaultID == faultId && f.CustomerId == customerId)
-                .Select(f => new { f.Status, f.Priority, f.FaultDescription })
-                .FirstOrDefaultAsync();
-
-            if (fault == null)
-            {
-                return Json(new { success = false, message = "Fault not found" });
-            }
-
-            return Json(new { success = true, status = fault.Status, priority = fault.Priority, description = fault.FaultDescription });
-        }
-        catch (Exception)
-        {
-            return Json(new { success = false, message = "Error retrieving fault status" });
-        }
-    }
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return 0;
 
     // GET: CustomerFault/GetRequestStatus - AJAX endpoint for request status
-    //[HttpGet]
-    //public async Task<JsonResult> GetRequestStatus(int requestId)
-    //{
-    //    try
-    //    {
-    //        var customerId = GetCurrentCustomerId();
-    //        var request = await _context.FridgeRequests
-    //            .Where(r => r.RequestId == requestId && r.CustomerId == customerId)
-    //            .Select(r => new { r.Status, r.RequiredModel, r.Quantity })
-    //            .FirstOrDefaultAsync();
+    [HttpGet]
+    public async Task<JsonResult> GetRequestStatus(int requestId)
+    {
+        try
+        {
+            var customerId = GetCurrentCustomerId();
+            var request = await _context.FridgeRequests
+                .Where(r => r.RequestId == requestId && r.CustomerId == customerId)
+                .Select(r => new { r.Status, r.RequiredModel, r.Quantity })
+                .FirstOrDefaultAsync();
 
-    //        if (request == null)
-    //        {
-    //            return Json(new { success = false, message = "Request not found" });
-    //        }
+            if (request == null)
+            {
+                return Json(new { success = false, message = "Request not found" });
+            }
 
-    //        return Json(new { success = true, status = request.Status, model = request.RequiredModel, quantity = request.Quantity });
-    //    }
-    //    catch (Exception)
-    //    {
-    //        return Json(new { success = false, message = "Error retrieving request status" });
-    //    }
-    //}
+            return Json(new { success = true, status = request.Status, model = request.RequiredModel, quantity = request.Quantity });
+        }
+        catch (Exception)
+        {
+            return Json(new { success = false, message = "Error retrieving request status" });
+        }
+    }
     // Helper Methods
     private int GetCurrentCustomerId()
     {
@@ -659,33 +497,22 @@ public class CustomerController : Controller
         // For now, returning 1 as example
         return 1;
 
-        // Example implementation if using ASP.NET Core Identity:
-        // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId);
-        // return customer?.CustomerId ?? 0;
-    }
+            return new string('*', Math.Max(0, cleaned.Length - 4)) + last4;
+        }
 
-    private string GenerateFaultCode()
-    {
-        return "FLT-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
-    }
+        private string GenerateFaultCode()
+        {
+            return "FLT-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        }
 
-    private string GenerateRequestCode()
-    {
-        return "REQ-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        private string GenerateRequestCode()
+        {
+            return "REQ-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        }
     }
 }
 
-// Customer Dashboard ViewModel
-public class CustomerDashboardViewModel
-{
-    public int TotalFaults { get; set; }
-    public int PendingFaults { get; set; }
-    public int InProgressFaults { get; set; }
-    public int ResolvedFaults { get; set; }
-    public int PendingRequests { get; set; }
-    public List<Fault> RecentFaults { get; set; } = new List<Fault>();
-}
+
 
 
 

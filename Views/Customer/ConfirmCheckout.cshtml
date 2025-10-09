@@ -13,7 +13,7 @@
             <table class="table table-bordered">
                 <thead class="table-light">
                     <tr>
-                        <th>Product</th>
+                        <th>Fridge</th>
                         <th>Quantity</th>
                         <th>Price</th>
                         <th>Subtotal</th>
@@ -23,10 +23,10 @@
                     @foreach (var item in Model.CartItems)
                     {
                         <tr>
-                            <td>@item.Product.Name</td>
+                            <td>@item.Fridge.Brand</td>
                             <td>@item.Quantity</td>
-                            <td>@item.Product.Price.ToString("C")</td>
-                            <td>@(item.Product.Price * item.Quantity).ToString("C")</td>
+                            <td>@item.Fridge.Price.ToString("C")</td>
+                            <td>@(item.Fridge.Price * item.Quantity).ToString("C")</td>
                         </tr>
                     }
                 </tbody>
