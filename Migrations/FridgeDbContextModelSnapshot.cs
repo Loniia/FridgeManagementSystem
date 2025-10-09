@@ -247,7 +247,10 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int>("CartId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CartsCartId")
+                    b.Property<int?>("CartId1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CartId2")
                         .HasColumnType("int");
 
                     b.Property<int>("FridgeId")
@@ -263,7 +266,7 @@ namespace FridgeManagementSystem.Migrations
 
                     b.HasIndex("CartId");
 
-                    b.HasIndex("CartsCartId");
+                    b.HasIndex("CartId1");
 
                     b.HasIndex("FridgeId");
 
@@ -760,230 +763,230 @@ namespace FridgeManagementSystem.Migrations
                         new
                         {
                             FridgeId = 1,
-                            Brand = "LG",
+                            Brand = "Hisense",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9212),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6413),
                             FaultID = 0,
                             FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge1.jpg",
                             IsActive = true,
                             Model = "Model-1",
-                            Price = 5651m,
+                            Price = 7581m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 1,
+                            Quantity = 2,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(8989)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6170)
                         },
                         new
                         {
                             FridgeId = 2,
-                            Brand = "LG",
+                            Brand = "Hisense",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9276),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6449),
                             FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge2.jpg",
                             IsActive = true,
                             Model = "Model-2",
-                            Price = 11035m,
+                            Price = 8291m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 7,
+                            Quantity = 8,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9233)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6420)
                         },
                         new
                         {
                             FridgeId = 3,
                             Brand = "LG",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9310),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6477),
                             FaultID = 0,
-                            FridgeType = "Double Door",
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge3.jpg",
                             IsActive = true,
                             Model = "Model-3",
-                            Price = 8917m,
+                            Price = 8802m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 8,
+                            Quantity = 4,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9278)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6451)
                         },
                         new
                         {
                             FridgeId = 4,
-                            Brand = "Hisense",
+                            Brand = "LG",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9333),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6503),
                             FaultID = 0,
-                            FridgeType = "Single Door",
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge4.jpg",
                             IsActive = true,
                             Model = "Model-4",
-                            Price = 4326m,
+                            Price = 4735m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 5,
+                            Quantity = 1,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9312)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6478)
                         },
                         new
                         {
                             FridgeId = 5,
-                            Brand = "Samsung",
+                            Brand = "Defy",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9356),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6529),
                             FaultID = 0,
-                            FridgeType = "Single Door",
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge5.jpg",
                             IsActive = true,
                             Model = "Model-5",
-                            Price = 11373m,
+                            Price = 8558m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 3,
+                            Quantity = 2,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9335)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6505)
                         },
                         new
                         {
                             FridgeId = 6,
-                            Brand = "Defy",
+                            Brand = "LG",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9383),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6561),
                             FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge6.jpg",
                             IsActive = true,
                             Model = "Model-6",
-                            Price = 9887m,
+                            Price = 8967m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 7,
+                            Quantity = 3,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9362)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6535)
                         },
                         new
                         {
                             FridgeId = 7,
-                            Brand = "LG",
+                            Brand = "Hisense",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9404),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6587),
                             FaultID = 0,
                             FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge7.jpg",
                             IsActive = true,
                             Model = "Model-7",
-                            Price = 8280m,
+                            Price = 8348m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 1,
+                            Quantity = 5,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9384)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6563)
                         },
                         new
                         {
                             FridgeId = 8,
                             Brand = "LG",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9425),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6632),
                             FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge8.jpg",
                             IsActive = true,
                             Model = "Model-8",
-                            Price = 8658m,
+                            Price = 6361m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 3,
+                            Quantity = 2,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9405)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6588)
                         },
                         new
                         {
                             FridgeId = 9,
-                            Brand = "Bosch",
+                            Brand = "LG",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9444),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6681),
                             FaultID = 0,
                             FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge9.jpg",
                             IsActive = true,
                             Model = "Model-9",
-                            Price = 5933m,
+                            Price = 4140m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 8,
+                            Quantity = 4,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9426)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6655)
                         },
                         new
                         {
                             FridgeId = 10,
                             Brand = "Bosch",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9477),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6732),
                             FaultID = 0,
-                            FridgeType = "Double Door",
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge10.jpg",
                             IsActive = true,
                             Model = "Model-10",
-                            Price = 9426m,
+                            Price = 3817m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 6,
+                            Quantity = 1,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9448)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6686)
                         },
                         new
                         {
                             FridgeId = 11,
-                            Brand = "Bosch",
+                            Brand = "Defy",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9522),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6785),
                             FaultID = 0,
-                            FridgeType = "Double Door",
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge11.jpg",
                             IsActive = true,
                             Model = "Model-11",
-                            Price = 6550m,
+                            Price = 10684m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 9,
+                            Quantity = 1,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9500)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6758)
                         },
                         new
                         {
                             FridgeId = 12,
-                            Brand = "Samsung",
+                            Brand = "Hisense",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 8),
-                            DeliveryDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9542),
+                            DateAdded = new DateOnly(2025, 10, 9),
+                            DeliveryDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6810),
                             FaultID = 0,
-                            FridgeType = "Single Door",
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge12.jpg",
                             IsActive = true,
                             Model = "Model-12",
-                            Price = 3819m,
+                            Price = 7149m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 2,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 8, 22, 43, 52, 996, DateTimeKind.Local).AddTicks(9523)
+                            UpdatedDate = new DateTime(2025, 10, 9, 2, 4, 23, 174, DateTimeKind.Local).AddTicks(6787)
                         });
                 });
 
@@ -1339,7 +1342,10 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrdersOrderId")
+                    b.Property<int?>("OrderId1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId2")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
@@ -1354,7 +1360,7 @@ namespace FridgeManagementSystem.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("OrdersOrderId");
+                    b.HasIndex("OrderId1");
 
                     b.ToTable("OrderItems");
                 });
@@ -1403,313 +1409,6 @@ namespace FridgeManagementSystem.Migrations
                     b.HasIndex("OrdersOrderId");
 
                     b.ToTable("Payments");
-                });
-
-            modelBuilder.Entity("FridgeManagementSystem.Models.Product", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("ProductId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("Products");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductId = 1,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge1.jpg",
-                            Name = "Hisense Fridge 1",
-                            Price = 11218m
-                        },
-                        new
-                        {
-                            ProductId = 2,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge2.jpg",
-                            Name = "Samsung Fridge 2",
-                            Price = 11877m
-                        },
-                        new
-                        {
-                            ProductId = 3,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge3.jpg",
-                            Name = "Bosch Fridge 3",
-                            Price = 10295m
-                        },
-                        new
-                        {
-                            ProductId = 4,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge4.jpg",
-                            Name = "Defy Fridge 4",
-                            Price = 6957m
-                        },
-                        new
-                        {
-                            ProductId = 5,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge5.jpg",
-                            Name = "Whirlpool Fridge 5",
-                            Price = 8217m
-                        },
-                        new
-                        {
-                            ProductId = 6,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge6.jpg",
-                            Name = "Bosch Fridge 6",
-                            Price = 9638m
-                        },
-                        new
-                        {
-                            ProductId = 7,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge7.jpg",
-                            Name = "Hisense Fridge 7",
-                            Price = 8844m
-                        },
-                        new
-                        {
-                            ProductId = 8,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge8.jpg",
-                            Name = "LG Fridge 8",
-                            Price = 9261m
-                        },
-                        new
-                        {
-                            ProductId = 9,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge9.jpg",
-                            Name = "Whirlpool Fridge 9",
-                            Price = 6535m
-                        },
-                        new
-                        {
-                            ProductId = 10,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge10.jpg",
-                            Name = "Hisense Fridge 10",
-                            Price = 4336m
-                        },
-                        new
-                        {
-                            ProductId = 11,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge11.jpg",
-                            Name = "LG Fridge 11",
-                            Price = 4110m
-                        },
-                        new
-                        {
-                            ProductId = 12,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge12.jpg",
-                            Name = "Defy Fridge 12",
-                            Price = 10611m
-                        },
-                        new
-                        {
-                            ProductId = 13,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge13.jpg",
-                            Name = "LG Fridge 13",
-                            Price = 4876m
-                        },
-                        new
-                        {
-                            ProductId = 14,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge14.jpg",
-                            Name = "Whirlpool Fridge 14",
-                            Price = 8282m
-                        },
-                        new
-                        {
-                            ProductId = 15,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge15.jpg",
-                            Name = "Hisense Fridge 15",
-                            Price = 7194m
-                        },
-                        new
-                        {
-                            ProductId = 16,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge16.jpg",
-                            Name = "Defy Fridge 16",
-                            Price = 8473m
-                        },
-                        new
-                        {
-                            ProductId = 17,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge17.jpg",
-                            Name = "Hisense Fridge 17",
-                            Price = 11805m
-                        },
-                        new
-                        {
-                            ProductId = 18,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge18.jpg",
-                            Name = "Defy Fridge 18",
-                            Price = 7756m
-                        },
-                        new
-                        {
-                            ProductId = 19,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge19.jpg",
-                            Name = "LG Fridge 19",
-                            Price = 9605m
-                        },
-                        new
-                        {
-                            ProductId = 20,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge20.jpg",
-                            Name = "Defy Fridge 20",
-                            Price = 8323m
-                        },
-                        new
-                        {
-                            ProductId = 21,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge21.jpg",
-                            Name = "Hisense Fridge 21",
-                            Price = 3559m
-                        },
-                        new
-                        {
-                            ProductId = 22,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge22.jpg",
-                            Name = "LG Fridge 22",
-                            Price = 7151m
-                        },
-                        new
-                        {
-                            ProductId = 23,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge23.jpg",
-                            Name = "Bosch Fridge 23",
-                            Price = 5902m
-                        },
-                        new
-                        {
-                            ProductId = 24,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge24.jpg",
-                            Name = "Samsung Fridge 24",
-                            Price = 3929m
-                        },
-                        new
-                        {
-                            ProductId = 25,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge25.jpg",
-                            Name = "Bosch Fridge 25",
-                            Price = 7476m
-                        },
-                        new
-                        {
-                            ProductId = 26,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge26.jpg",
-                            Name = "Defy Fridge 26",
-                            Price = 11999m
-                        },
-                        new
-                        {
-                            ProductId = 27,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge27.jpg",
-                            Name = "Bosch Fridge 27",
-                            Price = 9285m
-                        },
-                        new
-                        {
-                            ProductId = 28,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge28.jpg",
-                            Name = "Samsung Fridge 28",
-                            Price = 6078m
-                        },
-                        new
-                        {
-                            ProductId = 29,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge29.jpg",
-                            Name = "Hisense Fridge 29",
-                            Price = 6773m
-                        },
-                        new
-                        {
-                            ProductId = 30,
-                            CategoryId = 1,
-                            Description = "High quality and energy-efficient fridge suitable for all households.",
-                            ImageUrl = "fridge30.jpg",
-                            Name = "Whirlpool Fridge 30",
-                            Price = 5779m
-                        });
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.PurchaseOrder", b =>
@@ -2239,13 +1938,13 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Cart", b =>
                 {
-                    b.HasOne("FridgeManagementSystem.Models.Customer", "Customers")
-                        .WithOne("Carts")
+                    b.HasOne("FridgeManagementSystem.Models.Customer", "Customer")
+                        .WithOne("Cart")
                         .HasForeignKey("FridgeManagementSystem.Models.Cart", "CustomerID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Customers");
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.CartItem", b =>
@@ -2256,9 +1955,9 @@ namespace FridgeManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("FridgeManagementSystem.Models.Cart", "Carts")
+                    b.HasOne("FridgeManagementSystem.Models.Cart", "Cart")
                         .WithMany()
-                        .HasForeignKey("CartsCartId");
+                        .HasForeignKey("CartId1");
 
                     b.HasOne("FridgeManagementSystem.Models.Fridge", "Fridge")
                         .WithMany()
@@ -2266,7 +1965,7 @@ namespace FridgeManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Carts");
+                    b.Navigation("Cart");
 
                     b.Navigation("Fridge");
                 });
@@ -2560,13 +2259,13 @@ namespace FridgeManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("FridgeManagementSystem.Models.Order", "Orders")
+                    b.HasOne("FridgeManagementSystem.Models.Order", "Order")
                         .WithMany()
-                        .HasForeignKey("OrdersOrderId");
+                        .HasForeignKey("OrderId1");
 
                     b.Navigation("Fridge");
 
-                    b.Navigation("Orders");
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Payment", b =>
@@ -2780,7 +2479,7 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Customer", b =>
                 {
-                    b.Navigation("Carts");
+                    b.Navigation("Cart");
 
                     b.Navigation("CustomerNote");
 

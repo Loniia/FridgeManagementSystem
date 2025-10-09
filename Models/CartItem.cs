@@ -12,7 +12,7 @@ namespace FridgeManagementSystem.Models
        
         [ForeignKey("Cart")]
         public int CartId { get; set; }
-        public virtual Cart Carts { get; set; }
+        public virtual Cart Cart { get; set; }
         [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
         public Fridge Fridge { get; set; }

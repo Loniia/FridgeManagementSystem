@@ -130,9 +130,9 @@
                                 <td>@fridge.Status</td>
                                 <td>@(fridge.IsUnderWarranty ? "Yes" : "No")</td>
                                 <td>@(fridge.IsLowStock ? "Yes" : "No")</td>
-                                <td>@fridge.PurchaseDate.ToString("MM/dd/yyyy")</td>
+                                <td>@fridge.PurchaseDate?.ToString("MM/dd/yyyy")</td>
                                 <td>@fridge.WarrantyExpiry?.ToString("MM/dd/yyyy")</td>
-                                <td>@fridge.DeliveryDate.ToString("MM/dd/yyyy")</td>
+                                <td>@fridge.DeliveryDate?.ToString("MM/dd/yyyy")</td>
                                 <td>@fridge.SupplierID</td>
                                 <td>@fridge.CustomerName</td>
                                 <td>@(fridge.LocationId ?? 0)</td>
