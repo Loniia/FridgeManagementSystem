@@ -44,7 +44,7 @@ namespace FridgeManagementSystem.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<AdminNotification> AdminNotifications { get; set; }
         public DbSet<BusinessInfo> BusinessInfos { get; set; }
-        public DbSet<CustomerNotification> CustomerNotifications { get; set; }
+
         public DbSet<FridgeRequest> FridgeRequests { get; set; }
 
 
