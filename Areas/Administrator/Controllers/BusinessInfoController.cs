@@ -424,6 +424,61 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         {
             return _context.BusinessInfos.Any(e => e.BusinessInfoId == id);
         }
+
+        // Add these methods to your BusinessInfoController
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("/api/businessinfo")]
+        public async Task<IActionResult> GetBusinessInfoApi()
+        {
+            try
+            {
+                var businessInfo = await _context.BusinessInfos
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+
+                if (businessInfo == null)
+                {
+                    return NotFound(new { message = "Business information not found" });
+                }
+
+                // Return as JSON
+                return Ok(new
+                {
+                    companyName = businessInfo.CompanyName,
+                    missionStatement = businessInfo.MissionStatement,
+                    companyDescription = businessInfo.CompanyDescription,
+                    phone = businessInfo.Phone,
+                    email = businessInfo.Email,
+                    address = businessInfo.Address,
+                    // Add other properties as needed
+                    home = new
+                    {
+                        title = "Welcome to " + businessInfo.CompanyName,
+                        content = businessInfo.CompanyDescription,
+                        contactInfo = new
+                        {
+                            email = businessInfo.Email,
+                            phone = businessInfo.Phone
+                        }
+                    },
+                    about = new
+                    {
+                        title = "About " + businessInfo.CompanyName,
+                        content = businessInfo.CompanyDescription,
+                        additionalInfo = businessInfo.MissionStatement
+                    },
+                    // ... similar for other sections
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in business info API");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
     }
 }
 

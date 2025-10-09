@@ -518,89 +518,89 @@ public class CustomerController : Controller
     }
 
     // GET: CustomerFault/CreateRequest - Request a new fridge
-    public IActionResult CreateRequest()
-    {
-        return View();
-    }
+    //public IActionResult CreateRequest()
+    //{
+    //    return View();
+    //}
 
-    // POST: CustomerFault/CreateRequest
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateRequest([Bind("RequiredModel,Quantity,RequiredDate,SpecialRequirements")] FridgeRequest request)
-    {
-        try
-        {
-            if (ModelState.IsValid)
-            {
-                // Set additional properties
-                request.CustomerId = GetCurrentCustomerId();
-                request.Status = "Pending";
-                request.RequestDate = DateTime.Now;
-                request.RequestCode = GenerateRequestCode();
+    //// POST: CustomerFault/CreateRequest
+    //[HttpPost]
+    //[ValidateAntiForgeryToken]
+    //public async Task<IActionResult> CreateRequest([Bind("RequiredModel,Quantity,RequiredDate,SpecialRequirements")] FridgeRequest request)
+    //{
+    //    try
+    //    {
+    //        if (ModelState.IsValid)
+    //        {
+    //            // Set additional properties
+    //            request.CustomerId = GetCurrentCustomerId();
+    //            request.Status = "Pending";
+    //            request.RequestDate = DateTime.Now;
+    //            request.RequestCode = GenerateRequestCode();
 
-                _context.FridgeRequests.Add(request);
-                await _context.SaveChangesAsync();
+    //            _context.FridgeRequests.Add(request);
+    //            await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Fridge request submitted successfully! We'll contact you soon.";
-                return RedirectToAction(nameof(RequestDetails), new { id = request.RequestId });
-            }
+    //            TempData["SuccessMessage"] = "Fridge request submitted successfully! We'll contact you soon.";
+    //            return RedirectToAction(nameof(RequestDetails), new { id = request.RequestId });
+    //        }
 
-            return View(request);
-        }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while submitting the request. Please try again.";
-            return View(request);
-        }
-    }
+    //        return View(request);
+    //    }
+    //    catch (Exception)
+    //    {
+    //        TempData["ErrorMessage"] = "An error occurred while submitting the request. Please try again.";
+    //        return View(request);
+    //    }
+    //}
 
-    // GET: CustomerFault/MyRequests - View customer's fridge requests
-    public async Task<IActionResult> MyRequests()
-    {
-        try
-        {
-            var customerId = GetCurrentCustomerId();
-            var requests = await _context.FridgeRequests
-                .Where(r => r.CustomerId == customerId)
-                .OrderByDescending(r => r.RequestId)
-                .ToListAsync();
+    //// GET: CustomerFault/MyRequests - View customer's fridge requests
+    //public async Task<IActionResult> MyRequests()
+    //{
+    //    try
+    //    {
+    //        var customerId = GetCurrentCustomerId();
+    //        var requests = await _context.FridgeRequests
+    //            .Where(r => r.CustomerId == customerId)
+    //            .OrderByDescending(r => r.RequestId)
+    //            .ToListAsync();
 
-            return View(requests);
-        }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while loading your requests.";
-            return View(new List<FridgeRequest>());
-        }
-    }
+    //        return View(requests);
+    //    }
+    //    catch (Exception)
+    //    {
+    //        TempData["ErrorMessage"] = "An error occurred while loading your requests.";
+    //        return View(new List<FridgeRequest>());
+    //    }
+    //}
 
-    // GET: CustomerFault/RequestDetails/5 - View specific request details
-    public async Task<IActionResult> RequestDetails(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
+    //// GET: CustomerFault/RequestDetails/5 - View specific request details
+    //public async Task<IActionResult> RequestDetails(int? id)
+    //{
+    //    if (id == null)
+    //    {
+    //        return NotFound();
+    //    }
 
-        try
-        {
-            var customerId = GetCurrentCustomerId();
-            var request = await _context.FridgeRequests
-                .FirstOrDefaultAsync(r => r.RequestId == id && r.CustomerId == customerId);
+    //    try
+    //    {
+    //        var customerId = GetCurrentCustomerId();
+    //        var request = await _context.FridgeRequests
+    //            .FirstOrDefaultAsync(r => r.RequestId == id && r.CustomerId == customerId);
 
-            if (request == null)
-            {
-                return NotFound();
-            }
+    //        if (request == null)
+    //        {
+    //            return NotFound();
+    //        }
 
-            return View(request);
-        }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while loading request details.";
-            return RedirectToAction(nameof(MyRequests));
-        }
-    }
+    //        return View(request);
+    //    }
+    //    catch (Exception)
+    //    {
+    //        TempData["ErrorMessage"] = "An error occurred while loading request details.";
+    //        return RedirectToAction(nameof(MyRequests));
+    //    }
+    //}
 
     // GET: CustomerFault/GetFaultStatus - AJAX endpoint for fault status
     [HttpGet]
@@ -628,29 +628,29 @@ public class CustomerController : Controller
     }
 
     // GET: CustomerFault/GetRequestStatus - AJAX endpoint for request status
-    [HttpGet]
-    public async Task<JsonResult> GetRequestStatus(int requestId)
-    {
-        try
-        {
-            var customerId = GetCurrentCustomerId();
-            var request = await _context.FridgeRequests
-                .Where(r => r.RequestId == requestId && r.CustomerId == customerId)
-                .Select(r => new { r.Status, r.RequiredModel, r.Quantity })
-                .FirstOrDefaultAsync();
+    //[HttpGet]
+    //public async Task<JsonResult> GetRequestStatus(int requestId)
+    //{
+    //    try
+    //    {
+    //        var customerId = GetCurrentCustomerId();
+    //        var request = await _context.FridgeRequests
+    //            .Where(r => r.RequestId == requestId && r.CustomerId == customerId)
+    //            .Select(r => new { r.Status, r.RequiredModel, r.Quantity })
+    //            .FirstOrDefaultAsync();
 
-            if (request == null)
-            {
-                return Json(new { success = false, message = "Request not found" });
-            }
+    //        if (request == null)
+    //        {
+    //            return Json(new { success = false, message = "Request not found" });
+    //        }
 
-            return Json(new { success = true, status = request.Status, model = request.RequiredModel, quantity = request.Quantity });
-        }
-        catch (Exception)
-        {
-            return Json(new { success = false, message = "Error retrieving request status" });
-        }
-    }
+    //        return Json(new { success = true, status = request.Status, model = request.RequiredModel, quantity = request.Quantity });
+    //    }
+    //    catch (Exception)
+    //    {
+    //        return Json(new { success = false, message = "Error retrieving request status" });
+    //    }
+    //}
     // Helper Methods
     private int GetCurrentCustomerId()
     {

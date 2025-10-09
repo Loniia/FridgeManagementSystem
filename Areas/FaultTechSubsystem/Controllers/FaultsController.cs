@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace FridgeManagementSystem.Controllers
 {
     [Area("FaultTechSubsystem")]
+
     public class FaultsController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -62,6 +63,8 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // GET: Faults/Process/5 - Process Fault
+        [HttpGet]
+        [Route("Faults/Process")]
         public async Task<IActionResult> Process(int? id)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem"; // Add this line
@@ -215,6 +218,8 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // GET: Faults/Repair/5 - Repair Fridge
+        [HttpGet]
+        [Route("Faults/Repair/{id?}")]
         public async Task<IActionResult> Repair(int? id)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem"; // Add this line
@@ -339,6 +344,8 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // GET: Faults/UpdateCondition/5 - Update Fridge Condition
+        [HttpGet]
+        [Route("Faults/UpdateCondition/{id?}")]
         public async Task<IActionResult> UpdateCondition(int? id)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem"; // Add this line
@@ -444,6 +451,8 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // GET: Faults/Complete/5 - Complete Repair Process
+        [HttpGet]
+        [Route("Faults/Complete/{id?}")]
         public async Task<IActionResult> Complete(int? id)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem"; // Add this line
@@ -510,6 +519,8 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // GET: Faults/Details/5
+        [HttpGet]
+        [Route("Faults/Details/{id?}")]
         public async Task<IActionResult> Details(int? id)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem"; // Add this line
