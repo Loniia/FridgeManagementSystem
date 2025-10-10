@@ -343,90 +343,87 @@ namespace FridgeManagementSystem.Controllers
             }
         }
 
-    // GET: CustomerFault/CreateRequest - Request a new fridge
-    public IActionResult CreateRequest()
-    {
-        return View();
-    }
+        // ==========================
+        // 9. REQUEST MANAGEMENT
+        // ==========================
+        //public IActionResult CreateRequest() => View();
 
-    // POST: CustomerFault/CreateRequest
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateRequest([Bind("RequiredModel,Quantity,RequiredDate,SpecialRequirements")] FridgeRequest request)
-    {
-        try
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> CreateRequest([Bind("RequiredModel,Quantity,RequiredDate,SpecialRequirements")] FridgeRequest request)
+        //{
+        //    if (!ModelState.IsValid) return View(request);
+
+        //    request.CustomerId = GetLoggedInCustomerId();
+        //    request.Status = "Pending";
+        //    request.RequestDate = DateTime.Now;
+        //    request.RequestCode = GenerateRequestCode();
+
+        //    _context.FridgeRequests.Add(request);
+        //    await _context.SaveChangesAsync();
+
+        //    TempData["SuccessMessage"] = "Fridge request submitted.";
+        //    return RedirectToAction(nameof(RequestDetails), new { id = request.RequestId });
+        //}
+
+        //public async Task<IActionResult> MyRequests()
+        //{
+        //    var customerId = GetLoggedInCustomerId();
+        //    //var requests = await _context.FridgeRequests
+        //        .Where(r => r.CustomerId == customerId)
+        //        .OrderByDescending(r => r.RequestId)
+        //        .ToListAsync();
+
+        //    return View(requests);
+        //}
+
+        //public async Task<IActionResult> RequestDetails(int? id)
+        //{
+        //    if (id == null) return NotFound();
+
+        //    var customerId = GetLoggedInCustomerId();
+        //    //var request = await _context.FridgeRequests
+        //        .FirstOrDefaultAsync(r => r.RequestId == id && r.CustomerId == customerId);
+
+        //    return request == null ? NotFound() : View(request);
+        //}
+
+        // ==========================
+        // 10. SERVICE HISTORY
+        // ==========================
+        public async Task<IActionResult> UpcomingVisits()
         {
-            if (ModelState.IsValid)
-            {
-                // Set additional properties
-                request.CustomerId = GetCurrentCustomerId();
-                request.Status = "Pending";
-                request.RequestDate = DateTime.Now;
-                request.RequestCode = GenerateRequestCode();
-
-                _context.FridgeRequests.Add(request);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Fridge request submitted successfully! We'll contact you soon.";
-                return RedirectToAction(nameof(RequestDetails), new { id = request.RequestId });
-            }
-
-            return View(request);
-        }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while submitting the request. Please try again.";
-            return View(request);
-        }
-    }
-
-    // GET: CustomerFault/MyRequests - View customer's fridge requests
-    public async Task<IActionResult> MyRequests()
-    {
-        try
-        {
-            var customerId = GetCurrentCustomerId();
-            var requests = await _context.FridgeRequests
-                .Where(r => r.CustomerId == customerId)
-                .OrderByDescending(r => r.RequestId)
+            var customerId = GetLoggedInCustomerId();
+            var visits = await _context.MaintenanceVisit
+                .Include(v => v.MaintenanceRequest)
+                .ThenInclude(r => r.Fridge)
+                .Include(v => v.Employee)
+                .Where(v => v.MaintenanceRequest.Fridge.CustomerID == customerId &&
+                            (v.Status == TaskStatus.Scheduled || v.Status == TaskStatus.Rescheduled))
+                .OrderBy(v => v.ScheduledDate)
+                .ThenBy(v => v.ScheduledTime)
                 .ToListAsync();
 
-            return View(requests);
-        }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while loading your requests.";
-            return View(new List<FridgeRequest>());
-        }
-    }
-
-    // GET: CustomerFault/RequestDetails/5 - View specific request details
-    public async Task<IActionResult> RequestDetails(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
+            return View(visits);
         }
 
-        try
+        public async Task<IActionResult> FridgeServiceHistory(int fridgeId)
         {
-            var customerId = GetCurrentCustomerId();
-            var request = await _context.FridgeRequests
-                .FirstOrDefaultAsync(r => r.RequestId == id && r.CustomerId == customerId);
+            var customerId = GetLoggedInCustomerId();
+            var visits = await _context.MaintenanceVisit
+                .Include(v => v.MaintenanceRequest)
+                .ThenInclude(r => r.Fridge)
+                .Include(v => v.Employee)
+                .Include(v => v.MaintenanceChecklist)
+                .Include(v => v.ComponentUsed)
+                .Include(v => v.FaultReport)
+                .Where(v => v.MaintenanceRequest.FridgeId == fridgeId &&
+                            v.MaintenanceRequest.Fridge.CustomerID == customerId)
+                .OrderByDescending(v => v.ScheduledDate)
+                .ToListAsync();
 
-            if (request == null)
-            {
-                return NotFound();
-            }
-
-            return View(request);
+            return View(visits);
         }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while loading request details.";
-            return RedirectToAction(nameof(MyRequests));
-        }
-    }
 
         [HttpGet]
         public IActionResult DownloadFridgeServiceHistory(int fridgeId)
@@ -465,37 +462,18 @@ namespace FridgeManagementSystem.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null) return 0;
 
-    // GET: CustomerFault/GetRequestStatus - AJAX endpoint for request status
-    [HttpGet]
-    public async Task<JsonResult> GetRequestStatus(int requestId)
-    {
-        try
-        {
-            var customerId = GetCurrentCustomerId();
-            var request = await _context.FridgeRequests
-                .Where(r => r.RequestId == requestId && r.CustomerId == customerId)
-                .Select(r => new { r.Status, r.RequiredModel, r.Quantity })
-                .FirstOrDefaultAsync();
+            var appUserId = int.Parse(userIdClaim.Value);
+            var customer = _context.Customers.FirstOrDefault(c => c.ApplicationUserId == appUserId);
 
-            if (request == null)
-            {
-                return Json(new { success = false, message = "Request not found" });
-            }
+            return customer?.CustomerID ?? 0;
+        }
 
-            return Json(new { success = true, status = request.Status, model = request.RequiredModel, quantity = request.Quantity });
-        }
-        catch (Exception)
+        private string MaskCardNumber(string cardNumber)
         {
-            return Json(new { success = false, message = "Error retrieving request status" });
-        }
-    }
-    // Helper Methods
-    private int GetCurrentCustomerId()
-    {
-        // Implement this based on your authentication system
-        // This is a placeholder - you'll need to get the actual customer ID from your auth system
-        // For now, returning 1 as example
-        return 1;
+            if (string.IsNullOrEmpty(cardNumber)) return null;
+
+            var cleaned = cardNumber.Replace(" ", "");
+            var last4 = cleaned.Length >= 4 ? cleaned[^4..] : cleaned;
 
             return new string('*', Math.Max(0, cleaned.Length - 4)) + last4;
         }
@@ -511,234 +489,3 @@ namespace FridgeManagementSystem.Controllers
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//using FridgeManagementSystem.Data;
-//using FridgeManagementSystem.Models;
-//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//#nullable disable
-
-//namespace FridgeManagementSystem.Controllers
-//{
-//    [Authorize(Roles = "Customer")]
-//        public class CustomerController : Controller
-//        {
-//            private readonly FridgeDbContext _context;
-
-//            public CustomerController(FridgeDbContext context)
-//            {
-//                _context = context;
-//            }
-
-//        //Dashboard
-//        public IActionResult Dashboard()
-//        {
-//            return View();
-//        }
-
-//        // GET: Customer
-//        public async Task<IActionResult> Index()
-//            {
-//                var customers = await _context.Customers
-//                    .Include(c => c.UserAccount)
-//                    .ToListAsync();
-//                return View(customers);
-//            }
-
-//            // GET: Customer/Details/5
-//            public async Task<IActionResult> Details(int? id)
-//            {
-//                if (id == null) return NotFound();
-
-//                var customer = await _context.Customers
-//                    .Include(c => c.UserAccount)
-//                    .FirstOrDefaultAsync(m => m.CustomerID == id);
-
-//                if (customer == null) return NotFound();
-
-//                return View(customer);
-//            }
-
-//            // GET: Customer/Create
-//            public IActionResult Create()
-//            {
-//                return View();
-//            }
-
-//            // POST: Customer/Create
-//            [HttpPost]
-//            [ValidateAntiForgeryToken]
-//            public async Task<IActionResult> Create(Customer customer)
-//            {
-//                if (ModelState.IsValid)
-//                {
-//                    _context.Add(customer);
-//                    await _context.SaveChangesAsync();
-//                    return RedirectToAction(nameof(Index));
-//                }
-//                return View(customer);
-//            }
-
-//            // GET: Customer/Edit/5
-//            public async Task<IActionResult> Edit(int? id)
-//            {
-//                if (id == null) return NotFound();
-
-//                var customer = await _context.Customers.FindAsync(id);
-//                if (customer == null) return NotFound();
-
-//                return View(customer);
-//            }
-
-//            // POST: Customer/Edit/5
-//            [HttpPost]
-//            [ValidateAntiForgeryToken]
-//            public async Task<IActionResult> Edit(int id, Customer customer)
-//            {
-//                if (id != customer.CustomerID) return NotFound();
-
-//                if (ModelState.IsValid)
-//                {
-//                    try
-//                    {
-//                        _context.Update(customer);
-//                        await _context.SaveChangesAsync();
-//                    }
-//                    catch (DbUpdateConcurrencyException)
-//                    {
-//                        if (!_context.Customers.Any(e => e.CustomerID == id))
-//                            return NotFound();
-//                        else
-//                            throw;
-//                    }
-//                    return RedirectToAction(nameof(Index));
-//                }
-//                return View(customer);
-//            }
-
-//            // GET: Customer/Delete/5
-//            public async Task<IActionResult> Delete(int? id)
-//            {
-//                if (id == null) return NotFound();
-
-//                var customer = await _context.Customers
-//                    .FirstOrDefaultAsync(m => m.CustomerID == id);
-
-//                if (customer == null) return NotFound();
-
-//                return View(customer);
-//            }
-
-//            // POST: Customer/Delete/5
-//            [HttpPost, ActionName("Delete")]
-//            [ValidateAntiForgeryToken]
-//            public async Task<IActionResult> DeleteConfirmed(int id)
-//            {
-//                var customer = await _context.Customers.FindAsync(id);
-//                if (customer != null)
-//                {
-//                    _context.Customers.Remove(customer);
-//                    await _context.SaveChangesAsync();
-//                }
-//                return RedirectToAction(nameof(Index));
-//            }
-
-//        // Receive & Track Fridges
-//        public IActionResult ReceiveTrack()
-//        {
-//            var fridges = _context.Fridge
-//                .ToList(); 
-//            return View(fridges);
-//        }
-//        // customer views service history 
-//        public IActionResult MyServiceHistory(int customerId)
-//        {
-//            var visits = _context.MaintenanceVisit
-//                .Include(v => v.Fridge)
-//                .Include(v => v.MaintenanceChecklist)
-//                .Include(v => v.ComponentUsed)
-//                .Include(v => v.FaultReport)
-//                .Where(v => v.Fridge.CustomerId == customerId)
-//                .OrderByDescending(v => v.ScheduledDate)
-//                .ToList();
-
-//            return View(visits);
-//        }
-//        // customer views upcoming maintenance visits
-//        public IActionResult MyUpcomingVisits(int customerId)
-//        {
-//            var visits = _context.MaintenanceVisit
-//                .Include(v => v.Fridge)
-//                .Where(v => v.Fridge.CustomerId == customerId &&
-//                            (v.Status == Models.TaskStatus.Scheduled || v.Status == Models.TaskStatus.Rescheduled))
-//                .OrderBy(v => v.ScheduledDate)
-//                .ToList();
-
-//            return View(visits);
-//        }
-
-//// Create Faults
-//public IActionResult CreateFault()
-//{
-//    return View();
-//}
-
-//[HttpPost]
-//[ValidateAntiForgeryToken]
-//public IActionResult CreateFault(Fault model)
-//{
-//    if (ModelState.IsValid)
-//    {
-//        _context.Faults.Add(model);
-//        _context.SaveChanges();
-//        return RedirectToAction("Dashboard");
-//    }
-//    return View(model);
-//}
-
-//// Maintenance Visit
-//public IActionResult MaintenanceVisit()
-//{
-//    var visits = _context.MaintenanceVisits.ToList(); // example
-//    return View(visits);
-//}
-
-//// View Fridge History
-//public IActionResult FridgeHistory()
-//{
-//    var history = _context.FridgeHistories.ToList(); // example
-//    return View(history);
-//}
-
-//// Create Fridge Request
-//public IActionResult CreateFridgeRequest()
-//{
-//    return View();
-//}
-
-//[HttpPost]
-//[ValidateAntiForgeryToken]
-//public IActionResult CreateFridgeRequest(FridgeRequest model)
-//{
-//    if (ModelState.IsValid)
-//    {
-//        _context.FridgeRequests.Add(model);
-//        _context.SaveChanges();
-//        return RedirectToAction("Dashboard");
-//    }
-//    return View(model);
-//}
