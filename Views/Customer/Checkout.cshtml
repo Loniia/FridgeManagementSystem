@@ -10,74 +10,78 @@
 
     @if (Model == null || Model.CartItems == null || !Model.CartItems.Any())
     {
-        <div class="alert alert-info text-center">
-            Your cart is empty.
-        </div>
-        <div class="text-center mt-3">
-            <a asp-action="Dashboard" class="btn btn-primary">Back to Home</a>
-        </div>
+            <div class="alert alert-info text-center">
+                Your cart is empty.
+            </div>
+            <div class="text-center mt-3">
+                <a asp-action="Dashboard" class="btn btn-primary">Back to Home</a>
+            </div>
     }
     else
     {
-        <div class="row">
-            <!-- Delivery Form -->
-            <div class="col-md-6">
-                <div class="card shadow-sm p-4 mb-4">
-                    <h5 class="fw-bold mb-3">Delivery Information</h5>
-                    <form asp-action="ConfirmCheckout" method="post">
+            <div class="row">
+                <!-- Delivery Form -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold mb-3">Delivery Information</h5>
+                        <form asp-action="ConfirmCheckout" method="post">
                         @Html.AntiForgeryToken()
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Full Name</label>
-                            <input type="text" name="FullName" class="form-control" placeholder="Enter your full name" required />
-                        </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Full Name</label>
+                                <!-- Name matches controller parameter "contactName" -->
+                                <input type="text" name="contactName" class="form-control" placeholder="Enter your full name" required />
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Phone Number</label>
-                            <input type="text" name="PhoneNumber" class="form-control" placeholder="Enter your phone number" required />
-                        </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <!-- Name matches controller parameter "phoneNumber" -->
+                                <input type="text" name="phoneNumber" class="form-control" placeholder="Enter your phone number" required />
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Delivery Address</label>
-                            <textarea name="DeliveryAddress" class="form-control" placeholder="Enter full delivery address" required></textarea>
-                        </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Delivery Address</label>
+                                <!-- Name matches controller parameter "deliveryAddress" -->
+                                <textarea name="deliveryAddress" class="form-control" placeholder="Enter full delivery address" required></textarea>
+                            </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                Save & Continue to Payment
-                            </button>
-                        </div>
-                    </form>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    Save & Continue to Payment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Order Summary -->
-            <div class="col-md-6">
-                <div class="card shadow-sm p-4">
-                    <h5 class="fw-bold mb-3">Order Summary</h5>
-                    <ul class="list-group mb-3">
+                <!-- Order Summary -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm p-4">
+                        <h5 class="fw-bold mb-3">Order Summary</h5>
+                        <ul class="list-group mb-3">
                         @foreach (var item in Model.CartItems)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>@item.Fridge?.Brand @item.Fridge?.Model</strong><br />
-                                    <small>@item.Quantity × R @item.Price.ToString("N2")</small>
-                                </div>
-                                <div>R @((item.Price * item.Quantity).ToString("N2"))</div>
-                            </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>@item.Fridge?.Brand @item.Fridge?.Model</strong><br />
+                                            <small>@item.Quantity × R @item.Price.ToString("N2")</small>
+                                        </div>
+                                        <div>R @((item.Price * item.Quantity).ToString("N2"))</div>
+                                    </li>
                         }
-                    </ul>
+                        </ul>
 
-                    <div class="border-top pt-2">
-                        <h5 class="text-end">
-                            Total:
-                            <span class="fw-bold text-success">
-                                R @Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("N2")
-                            </span>
-                        </h5>
+                        <div class="border-top pt-2">
+                            <h5 class="text-end">
+                                Total:
+                                <span class="fw-bold text-success">
+                                    R @Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("N2")
+                                </span>
+                            </h5>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
     }
 </div>
+
