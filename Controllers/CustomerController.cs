@@ -17,10 +17,12 @@ namespace FridgeManagementSystem.Controllers
     public class CustomerController : Controller
     {
         private readonly FridgeDbContext _context;
+        private readonly FridgeService _fridgeService;
 
-        public CustomerController(FridgeDbContext context)
+        public CustomerController(FridgeDbContext context, FridgeService fridgeService)
         {
             _context = context;
+            _fridgeService = fridgeService;
         }
 
         // ==========================
@@ -32,13 +34,11 @@ namespace FridgeManagementSystem.Controllers
             if (userIdClaim == null)
                 return RedirectToAction("Login", "Account");
 
-            // Get available fridges
-            var availableFridges = await _context.Fridge
+            var fridges = await _context.Fridge
                 .Include(f => f.FridgeAllocation)
-                .Where(f => f.Status == "Available" || f.Status == "Received")
                 .ToListAsync();
 
-            var fridgeViewModels = availableFridges.Select(f => new FridgeViewModel
+            var fridgeViewModels = fridges.Select(f => new FridgeViewModel
             {
                 FridgeId = f.FridgeId,
                 FridgeType = f.FridgeType,
@@ -47,8 +47,10 @@ namespace FridgeManagementSystem.Controllers
                 Price = f.Price,
                 Quantity = f.Quantity,
                 ImageUrl = string.IsNullOrEmpty(f.ImageUrl) ? "/images/fridges/default.jpg" : f.ImageUrl,
-                AvailableStock = f.Quantity - (f.FridgeAllocation?.Count(a =>
-                    a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today)) ?? 0)
+                AvailableStock = f.Quantity - f.FridgeAllocation
+                    .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
+                    .Count(),
+                Status = (!f.IsActive || f.Quantity <= 0) ? "Out of Stock" : "In Stock"
             }).ToList();
 
             var model = new CustomerViewModel
@@ -59,7 +61,6 @@ namespace FridgeManagementSystem.Controllers
 
             return View(model);
         }
-
 
         // ==========================
         // 2. ADD TO CART
@@ -104,9 +105,10 @@ namespace FridgeManagementSystem.Controllers
         public async Task<IActionResult> ViewCart()
         {
             var customerId = GetLoggedInCustomerId();
+
             var cart = await _context.Carts
-                .Include(c => c.CartItems)
-                .ThenInclude(i => i.Fridge)
+                .Include(c => c.CartItems.Where(ci => !ci.IsDeleted)) // only active items
+                .ThenInclude(ci => ci.Fridge)
                 .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
             return View(cart);
@@ -128,7 +130,7 @@ namespace FridgeManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmCheckout()
+        public async Task<IActionResult> ConfirmCheckout(string deliveryAddress)
         {
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0) return RedirectToAction("Login", "Account");
@@ -136,7 +138,7 @@ namespace FridgeManagementSystem.Controllers
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
                 .ThenInclude(i => i.Fridge)
-                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
 
             if (cart == null || !cart.CartItems.Any())
             {
@@ -149,6 +151,7 @@ namespace FridgeManagementSystem.Controllers
                 CustomerID = customerId,
                 OrderDate = DateTime.Now,
                 Status = "Pending",
+                DeliveryAddress = deliveryAddress,
                 TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
             };
 
@@ -163,7 +166,11 @@ namespace FridgeManagementSystem.Controllers
             }
 
             _context.Orders.Add(order);
-            _context.Carts.Remove(cart);
+
+            // Soft delete instead of removing
+            cart.IsActive = false;
+            _context.Carts.Update(cart);
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction("AddCard", new { orderId = order.OrderId, amount = order.TotalAmount });

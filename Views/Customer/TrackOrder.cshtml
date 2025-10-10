@@ -1,43 +1,23 @@
 ﻿@model FridgeManagementSystem.Models.Order
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Track Order #" + Model.OrderId;
+    ViewData["Title"] = "Track Order";
 }
 
-<h2 class="mb-4">Track Order #@Model.OrderId</h2>
+<div class="container mt-4">
+    <h2 class="mb-3">Track Order #@Model.OrderId</h2>
 
-<div class="card shadow-sm p-4 mb-4">
-    <h4>Status</h4>
-    <div class="progress" style="height: 30px;">
-        @{
-            var steps = new List<string> { "Processing", "Packed", "Dispatched", "Out for Delivery", "Delivered" };
-            var currentStep = steps.IndexOf(Model.Status);
-        }
-        @for (int i = 0; i < steps.Count; i++)
-        {
-            var width = 20; // each step = 20% (5 steps)
-            var bg = i <= currentStep ? "bg-success" : "bg-light";
-            <div class="progress-bar @bg" role="progressbar" style="width:@width%;">@steps[i]</div>
-        }
+    <div class="card p-4">
+        <p><strong>Status:</strong> @Model.Status</p>
+        <p><strong>Ordered On:</strong> @Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</p>
+        <p><strong>Total:</strong> R@Model.TotalAmount.ToString("0.00")</p>
+
+        <hr />
+        <p><strong>Delivery Address</strong><br />@Model.DeliveryAddress</p>
+
+        <div class="mt-4">
+            <a asp-action="MyAccount" class="btn btn-secondary">Back to Orders</a>
+        </div>
     </div>
-</div>
-
-<div class="card shadow-sm p-4">
-    <h4>Order Summary</h4>
-    <ul class="list-group mb-3">
-        @foreach (var item in Model.OrderItems)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                @item.Fridge.Brand x @item.Quantity
-                <span>@(item.Price * item.Quantity).ToString("C")</span>
-            </li>
-        }
-    </ul>
-    <h5>Total: @Model.TotalAmount.ToString("C")</h5>
-    <p>Delivery Address: @Model.DeliveryAddress</p>
-</div>
-
-<div class="text-center mt-3">
-    <a asp-action="MyAccount" class="btn btn-primary">Back to My Account</a>
 </div>
 

@@ -1,17 +1,31 @@
 ﻿@model FridgeManagementSystem.ViewModels.PaymentViewModel
-
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Add Card";
+    ViewData["Title"] = "Payment - Add Card";
 }
 
 <div class="container mt-5">
-    <h2 class="fw-bold mb-4 text-center">Add Card Details</h2>
+    <h2 class="fw-bold mb-4 text-center">Payment</h2>
 
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 p-4">
+        <div class="col-md-7">
+            <div class="card p-4">
                 <form asp-action="AddCard" method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="OrderId" type="hidden" />
+                    <input asp-for="Amount" type="hidden" />
+
+                    <div class="mb-3">
+                        <label asp-for="Method" class="form-label fw-bold">Payment Method</label>
+                        <select asp-for="Method" class="form-select">
+                            @foreach (var m in Enum.GetValues(typeof(FridgeManagementSystem.Models.Method)))
+                            {
+                                <option value="@m" selected="@(m.ToString() == Model.Method.ToString() ? "selected" : null)">@m</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Method" class="text-danger"></span>
+                    </div>
+
                     <div class="mb-3">
                         <label asp-for="CardholderName" class="form-label fw-bold"></label>
                         <input asp-for="CardholderName" class="form-control" placeholder="Full name on card" />
@@ -20,7 +34,7 @@
 
                     <div class="mb-3">
                         <label asp-for="CardNumber" class="form-label fw-bold"></label>
-                        <input asp-for="CardNumber" class="form-control" placeholder="**** **** **** ****" maxlength="16" />
+                        <input asp-for="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" />
                         <span asp-validation-for="CardNumber" class="text-danger"></span>
                     </div>
 
@@ -32,17 +46,13 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="CVV" class="form-label fw-bold"></label>
-                            <input asp-for="CVV" class="form-control" placeholder="***" maxlength="3" />
+                            <input asp-for="CVV" class="form-control" maxlength="4" placeholder="CVV" />
                             <span asp-validation-for="CVV" class="text-danger"></span>
                         </div>
                     </div>
 
-                    <input asp-for="OrderId" type="hidden" />
-                    <input asp-for="Amount" type="hidden" />
-                    <input asp-for="Method" type="hidden" value="Card" />
-
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Add Card</button>
+                        <button type="submit" class="btn btn-primary btn-lg">Pay R@Model.Amount.ToString("0.00")</button>
                     </div>
                 </form>
             </div>
@@ -51,9 +61,8 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
+
 
 

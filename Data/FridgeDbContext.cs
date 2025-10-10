@@ -194,7 +194,7 @@ namespace FridgeManagementSystem.Data
             // --- Cart -> CartItem (1-to-many) ---
             builder.Entity<Cart>()
                 .HasMany(c => c.CartItems)
-                .WithOne()
+                .WithOne(ci => ci.Cart)
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 

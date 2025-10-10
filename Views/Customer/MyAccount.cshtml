@@ -1,44 +1,44 @@
 ﻿@model IEnumerable<FridgeManagementSystem.Models.Order>
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "My Account";
+    ViewData["Title"] = "My Orders";
 }
 
-<h2 class="mb-4">My Account - Orders</h2>
+<div class="container mt-4">
+    <h2 class="mb-3">My Orders</h2>
 
-@if (!Model.Any())
-{
-    <p class="text-muted">You have no orders yet.</p>
-}
-else
-{
-    <div class="accordion" id="ordersAccordion">
-        @foreach (var order in Model)
-        {
-            <div class="accordion-item mb-3 shadow-sm">
-                <h2 class="accordion-header" id="heading@order.OrderId">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse@order.OrderId" aria-expanded="false" aria-controls="collapse@order.OrderId">
-                        Order #@order.OrderId - <span class="text-success">@order.Status</span> - @order.OrderDate.ToShortDateString()
-                    </button>
-                </h2>
-                <div id="collapse@order.OrderId" class="accordion-collapse collapse" aria-labelledby="heading@order.OrderId" data-bs-parent="#ordersAccordion">
-                    <div class="accordion-body">
-                        <ul class="list-group mb-3">
-                            @foreach (var item in order.OrderItems)
-                            {
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    @item.Fridge.Brand x @item.Quantity
-                                    <span>@(item.Price * item.Quantity).ToString("C")</span>
-                                </li>
-                            }
-                        </ul>
-                        <h5>Total: @order.TotalAmount.ToString("C")</h5>
-                        <p>Delivery Address: @order.DeliveryAddress</p>
-                        <a asp-action="TrackOrder" asp-route-orderId="@order.OrderId" class="btn btn-outline-primary">Track Order</a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-}
-
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">You have no orders yet.</div>
+        <a asp-action="Dashboard" class="btn btn-primary">Shop Now</a>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    <tr>
+                        <td>@o.OrderId</td>
+                        <td>@o.OrderDate.ToString("yyyy-MM-dd")</td>
+                        <td>R@o.TotalAmount.ToString("0.00")</td>
+                        <td>@o.Status</td>
+                        <td>
+                            <a asp-action="OrderConfirmation" asp-route-id="@o.OrderId" class="btn btn-sm btn-info">View</a>
+                            <a asp-action="TrackOrder" asp-route-orderId="@o.OrderId" class="btn btn-sm btn-outline-secondary ms-1">Track</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

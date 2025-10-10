@@ -12,7 +12,8 @@ namespace FridgeManagementSystem.Models
 
         [ForeignKey("Customer")]
         public int CustomerID { get; set; }
+        public bool IsActive { get; set; } = true;
         public virtual Customer Customer { get; set; }
-        public virtual ICollection<CartItem> CartItems { get; set; }
+        public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
 }

@@ -70,18 +70,32 @@
 
                 <!-- Actions -->
                 <td>
-                    <a asp-action="UpdateStatus" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-warning">
-                        <!-- Fixed: FridgeId not FridgeID -->
-                        <i class="fas fa-sync"></i> Update Status
-                    </a>
-                    <a asp-action="Details" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-info">
-                        <!-- Fixed: FridgeId not FridgeID -->
-                        <i class="fas fa-eye"></i> Details
-                    </a>
-                    <a asp-action="Edit" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-primary">
-                        <!-- Fixed: FridgeId not FridgeID -->
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
+                    <div class="btn-group">
+                        <!-- Update Status Button -->
+                        <a asp-action="UpdateStatus" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-warning">
+                            <i class="fas fa-sync"></i> Update Status
+                        </a>
+
+                        <!-- Dropdown for Remove Fridge -->
+                        <button type="button" class="btn btn-sm btn-warning dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form asp-area="CustomerManagementSubSystem"
+                                      asp-controller="InventoryLiaison"
+                                      asp-action="DeleteConfirmed"
+                                      asp-route-id="@fridge.FridgeId"
+                                      method="post"
+                                      style="margin:0;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-trash-alt"></i> Remove Fridge
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 </td>
             </tr>
         }

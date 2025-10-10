@@ -357,6 +357,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 return View(model);
             }
 
+
             // --------------------------
             // AJAX Endpoint for Year Selection
             // --------------------------
@@ -394,7 +395,21 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                     totalReturned = returnedCounts.Sum(),
                     lowStockMonths = receivedCounts.Count(c => c < LowStockThreshold)
                 });
+
             }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var fridge = _context.Fridge.FirstOrDefault(f => f.FridgeId == id);
+            if (fridge != null)
+            {
+                fridge.IsActive = false; // Soft delete instead of removing
+                _context.SaveChanges();
+                TempData["SuccessMessage"] = "Fridge removed successfully.";
+            }
+            return RedirectToAction(nameof(Index)); // Go back to inventory list
         }
     }
+}
 

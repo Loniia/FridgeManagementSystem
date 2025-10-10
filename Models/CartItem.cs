@@ -21,5 +21,6 @@ namespace FridgeManagementSystem.Models
         [Range(1, 100, ErrorMessage = "Quantity must be between 1 and 100")]
         public int Quantity { get; set; }
         public decimal Price { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }

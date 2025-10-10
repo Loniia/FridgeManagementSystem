@@ -16,8 +16,7 @@ namespace FridgeManagementSystem.Models
         public async Task<List<Fridge>> GetAllFridgesAsync()
         {
             return await _context.Fridge
-                .Include(f => f.Supplier)
-                .Include(f => f.Location)
+                .Include(f => f.FridgeAllocation)
                 .ToListAsync();
         }
 
