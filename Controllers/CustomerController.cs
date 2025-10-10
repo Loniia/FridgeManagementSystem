@@ -324,8 +324,10 @@ namespace FridgeManagementSystem.Controllers
             order.Status = "Paid";
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("PaymentConfirmation", new { id = payment.PaymentId });
+            // Redirect to PaymentConfirmation with orderId and amount
+            return RedirectToAction("PaymentConfirmation", "Customer", new { orderId = order.OrderId });
         }
+
 
         public IActionResult PaymentConfirmation() => View();
 
