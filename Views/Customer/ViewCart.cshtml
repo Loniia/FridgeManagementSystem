@@ -11,11 +11,13 @@
 
     @if (Model == null || !Model.CartItems.Any())
     {
-        <div class="alert alert-warning text-center">Your cart is empty.</div>
+        <div class="alert alert-warning text-center">
+            Your cart is empty.
+        </div>
     }
     else
     {
-        <table class="table table-striped text-center align-middle">
+        <table class="table table-striped text-center align-middle shadow-sm">
             <thead class="table-dark">
                 <tr>
                     <th>Fridge</th>
@@ -33,11 +35,12 @@
                             <strong>@item.Fridge.Brand</strong><br />
                             @item.Fridge.Model
                         </td>
-                        <td>R @item.Price.ToString("0.00")</td>
+                        <td>R @(item.Price.ToString("N2"))</td>
                         <td>@item.Quantity</td>
-                        <td>R @(item.Price * item.Quantity).ToString("0.00")</td>
+                        <td>R @((item.Price * item.Quantity).ToString("N2"))</td>
                         <td>
                             <form asp-action="RemoveFromCart" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" name="cartItemId" value="@item.CartItemId" />
                                 <button type="submit" class="btn btn-sm btn-danger">
                                     <i class="fas fa-trash"></i> Remove
@@ -49,13 +52,25 @@
             </tbody>
         </table>
 
-        <div class="text-end mt-3">
+        <div class="text-end mt-4">
             <h4>
-                Total: R @Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("0.00")
+                <strong>Total:</strong>
+                <span class="text-success">
+                    R @((Model.CartItems.Sum(i => i.Price * i.Quantity)).ToString("N2"))
+                </span>
             </h4>
-            <a asp-action="Checkout" class="btn btn-success mt-2">
+
+            <a asp-action="Checkout" class="btn btn-success mt-3 px-4 py-2">
                 Proceed to Checkout
             </a>
+            <div class="mb-3">
+                <a asp-action="Dashboard" asp-controller="Customer" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
         </div>
     }
 </div>
+
+<!-- Optional icons support -->
+<script src="https://kit.fontawesome.com/a2d9d5c56f.js" crossorigin="anonymous"></script>
