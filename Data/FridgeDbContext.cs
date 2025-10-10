@@ -35,6 +35,8 @@ namespace FridgeManagementSystem.Data
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<DeliveryNote> DeliveryNotes { get; set; }
         // Customer E-Commerce Tables by Idah
+        public DbSet<FinancialAccount> FinancialAccounts { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
         public DbSet<CustomerNotification> CustomerNotifications { get; set; }
         
         public DbSet<Review> Reviews { get; set; }

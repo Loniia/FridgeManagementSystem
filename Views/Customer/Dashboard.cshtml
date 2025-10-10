@@ -510,10 +510,16 @@
     <!-- Main Content -->
     <div class="main-content">
         <!-- Welcome Section -->
-        <div class="dashboard-welcome">
-            <h2>Welcome, @Model.FullNames! 👋</h2>
-            <p>Discover our premium fridge collection and manage your orders with ease</p>
-        </div>
+        <div class="container mt-3">
+    <h2>Welcome, @User.Identity.Name!</h2>
+
+            <form asp-action="Dashboard" method="get" class="my-3">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search by brand or model..." value="@ViewData["Search"]" />
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+      </div>
 
         <!-- Products Section -->
         <div class="products-section">

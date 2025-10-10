@@ -53,24 +53,37 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
-            // If user is a customer, ensure admin verified them
-            if (await _userManager.IsInRoleAsync(user, Roles.Customer))
-            {
-                var customer = await _context.Customers
-                    .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
-
-                if (customer != null && !customer.IsVerified)
-                {
-                    ModelState.AddModelError("", "Your account is awaiting admin approval.");
-                    return View(model);
-                }
-            }
-
+            // First verify the password and sign in
             var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Invalid login attempt.");
                 return View(model);
+            }
+
+            // Check for rejected customers after successful login
+            if (await _userManager.IsInRoleAsync(user, Roles.Customer))
+            {
+                var customer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+
+                if (customer != null)
+                {
+                    if (!customer.IsVerified)
+                    {
+                        // Sign out rejected/unverified users
+                        await _signInManager.SignOutAsync();
+                        ModelState.AddModelError("", "Your registration has been rejected. Please contact support.");
+                        return View(model);
+                    }
+
+                    if (!customer.IsActive)
+                    {
+                        await _signInManager.SignOutAsync();
+                        ModelState.AddModelError("", "Your account is inactive. Contact support.");
+                        return View(model);
+                    }
+                }
             }
 
             var roles = await _userManager.GetRolesAsync(user);

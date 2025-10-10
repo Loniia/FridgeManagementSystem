@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -16,27 +18,57 @@ namespace FridgeManagementSystem.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly FridgeDbContext _context;
-        private readonly FridgeService _fridgeService;
+        private readonly FridgeDbContext _context;       
+        private readonly FridgeService _fridgeService;   
+        private readonly UserManager<ApplicationUser> _userManager; 
 
-        public CustomerController(FridgeDbContext context, FridgeService fridgeService)
+        // Constructor
+        public CustomerController(
+            FridgeDbContext context,
+            FridgeService fridgeService,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _fridgeService = fridgeService;
+            _userManager = userManager;  
         }
 
         // ==========================
         // 1. DASHBOARD
         // ==========================
-        public async Task<IActionResult> Dashboard()
+        public async Task<IActionResult> Dashboard(string search)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
                 return RedirectToAction("Login", "Account");
 
-            var fridges = await _context.Fridge
+            // Convert to int
+            if (!int.TryParse(userIdClaim.Value, out int userId))
+                return RedirectToAction("Login", "Account");
+
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
+            if (customer != null && !customer.IsVerified && customer.IsActive)
+            {
+                // Redirect rejected customers to rejected dashboard
+                return RedirectToAction("RejectedCustomer", "Customer");
+            }
+
+            // Start query for fridges
+            var fridgesQuery = _context.Fridge
                 .Include(f => f.FridgeAllocation)
-                .ToListAsync();
+                .AsQueryable();
+
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                fridgesQuery = fridgesQuery.Where(f =>
+                    f.Brand.Contains(search) || f.Model.Contains(search));
+            }
+
+            ViewData["Search"] = search;
+
+            var fridges = await fridgesQuery.ToListAsync();
 
             var fridgeViewModels = fridges.Select(f => new FridgeViewModel
             {
@@ -350,50 +382,6 @@ namespace FridgeManagementSystem.Controllers
             }
         }
 
-        // ==========================
-        // 9. REQUEST MANAGEMENT
-        // ==========================
-        //public IActionResult CreateRequest() => View();
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> CreateRequest([Bind("RequiredModel,Quantity,RequiredDate,SpecialRequirements")] FridgeRequest request)
-        //{
-        //    if (!ModelState.IsValid) return View(request);
-
-        //    request.CustomerId = GetLoggedInCustomerId();
-        //    request.Status = "Pending";
-        //    request.RequestDate = DateTime.Now;
-        //    request.RequestCode = GenerateRequestCode();
-
-        //    _context.FridgeRequests.Add(request);
-        //    await _context.SaveChangesAsync();
-
-        //    TempData["SuccessMessage"] = "Fridge request submitted.";
-        //    return RedirectToAction(nameof(RequestDetails), new { id = request.RequestId });
-        //}
-
-        //public async Task<IActionResult> MyRequests()
-        //{
-        //    var customerId = GetLoggedInCustomerId();
-        //    //var requests = await _context.FridgeRequests
-        //        .Where(r => r.CustomerId == customerId)
-        //        .OrderByDescending(r => r.RequestId)
-        //        .ToListAsync();
-
-        //    return View(requests);
-        //}
-
-        //public async Task<IActionResult> RequestDetails(int? id)
-        //{
-        //    if (id == null) return NotFound();
-
-        //    var customerId = GetLoggedInCustomerId();
-        //    //var request = await _context.FridgeRequests
-        //        .FirstOrDefaultAsync(r => r.RequestId == id && r.CustomerId == customerId);
-
-        //    return request == null ? NotFound() : View(request);
-        //}
 
         // ==========================
         // 10. SERVICE HISTORY
