@@ -35,6 +35,13 @@ namespace FridgeManagementSystem.Models
         [StringLength(500)]
         public string DeliveryAddress { get; set; }
 
+        [Required(ErrorMessage = "Contact Name is required")]
+        [StringLength(50)]
+        public string ContactName { get; set; }
+
+        [Required(ErrorMessage = "Contact Phone is required")]
+        [StringLength(50)]
+        public string ContactPhone { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; }
         public virtual ICollection<Payment> Payments { get; set; }
     }

@@ -130,6 +130,41 @@ namespace FridgeManagementSystem.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("ViewCart");
         }
+        // Remove from cart 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveFromCart(int cartItemId)
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
+
+            if (cart == null)
+            {
+                TempData["Error"] = "Cart not found.";
+                return RedirectToAction("ViewCart");
+            }
+
+            var item = cart.CartItems.FirstOrDefault(i => i.CartItemId == cartItemId);
+            if (item == null)
+            {
+                TempData["Error"] = "Item not found in cart.";
+                return RedirectToAction("ViewCart");
+            }
+
+            // Soft delete instead of removing
+            item.IsDeleted = true;
+            _context.CartItems.Update(item);
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Item removed from cart.";
+
+            return RedirectToAction("ViewCart");
+        }
+
 
         // ==========================
         // 3. VIEW CART
@@ -157,18 +192,25 @@ namespace FridgeManagementSystem.Controllers
                 .ThenInclude(i => i.Fridge)
                 .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
+            if (cart == null || !cart.CartItems.Any())
+            {
+                TempData["Error"] = "Your cart is empty.";
+                return RedirectToAction("ViewCart");
+            }
+
             return View(cart);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmCheckout(string deliveryAddress)
+        public async Task<IActionResult> ConfirmCheckout(string deliveryAddress, string contactName,string phoneNumber)
         {
+            
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0) return RedirectToAction("Login", "Account");
 
             var cart = await _context.Carts
-                .Include(c => c.CartItems)
+                .Include(c => c.CartItems.Where(ci => !ci.IsDeleted))
                 .ThenInclude(i => i.Fridge)
                 .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
 
@@ -184,6 +226,8 @@ namespace FridgeManagementSystem.Controllers
                 OrderDate = DateTime.Now,
                 Status = "Pending",
                 DeliveryAddress = deliveryAddress,
+                ContactName = contactName,
+                ContactPhone = phoneNumber,
                 TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
             };
 
@@ -232,6 +276,7 @@ namespace FridgeManagementSystem.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Fridge)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
 
             if (order == null) return NotFound();
@@ -240,7 +285,8 @@ namespace FridgeManagementSystem.Controllers
             {
                 OrderId = order.OrderId,
                 Amount = amount ?? order.TotalAmount,
-                Method = Method.Card
+                Method = Method.Card,
+                Orders = order
             };
 
             return View(vm);
@@ -253,7 +299,9 @@ namespace FridgeManagementSystem.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var customerId = GetLoggedInCustomerId();
-            var order = await _context.Orders.FindAsync(model.OrderId);
+            var order = await _context.Orders
+        .Include(o => o.OrderItems)
+        .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
 
             if (order == null || order.CustomerID != customerId) return Forbid();
 

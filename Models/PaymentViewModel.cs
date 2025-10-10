@@ -21,7 +21,7 @@ namespace FridgeManagementSystem.ViewModels
         public string CardNumber { get; set; }
         public string ExpiryDate { get; set; }
         public string CVV { get; set; }
-
+        public Order Orders { get; set; }
         // For EFT payments
         public string BankReference { get; set; }
     }
