@@ -461,45 +461,59 @@
             <h2>Customer Dashboard</h2>
             <div class="subtitle">Manage Your Fridge Experience</div>
         </div>
-        
         <ul class="sidebar-menu" id="sidebar-menu">
-            <li class="active">
-                <a asp-action="Dashboard" asp-controller="Customer">
-                    <i class="fas fa-home"></i> Home
-                </a>
-            </li>
-            <li>
-                <a asp-action="ViewCart" asp-controller="Customer">
-                    <i class="fas fa-shopping-cart"></i> My Cart
-                </a>
-            </li>
-            <li>
-                <a asp-action="Checkout" asp-controller="Customer">
-                    <i class="fas fa-credit-card"></i> Checkout
-                </a>
-            </li>
-            <li>
-                <a asp-action="MyAccount" asp-controller="Customer">
-                    <i class="fas fa-box"></i> My Orders
-                </a>
-            </li>
-            <li>
-                <a asp-action="TrackOrder" asp-controller="Customer">
-                    <i class="fas fa-map-marker-alt"></i> Track Order
-                </a>
-            </li>
-            <li>
-                <a asp-action="UpcomingVisits" asp-controller="Customer">
-                    <i class="fas fa-tools"></i> Maintenance
-                </a>
-            </li>
-            <li>
-                <a asp-action="FridgeServiceHistory" asp-controller="Customer">
-                    <i class="fas fa-history"></i> Service History
-                </a>
-            </li>
-        </ul>
-        
+    <li class="active">
+        <a asp-action="Dashboard" asp-controller="Customer">
+            <i class="fas fa-home"></i> Home
+        </a>
+    </li>
+    <li>
+        <a asp-action="ViewCart" asp-controller="Customer">
+            <i class="fas fa-shopping-cart"></i> My Cart
+        </a>
+    </li>
+    <li>
+        <a asp-action="Checkout" asp-controller="Customer">
+            <i class="fas fa-credit-card"></i> Checkout
+        </a>
+    </li>
+    <li>
+        <a asp-action="MyAccount" asp-controller="Customer">
+            <i class="fas fa-box"></i> My Orders
+        </a>
+    </li>
+    <li>
+        <a asp-action="OrderHistory" asp-controller="Customer">
+            <i class="fas fa-history"></i> Order History
+        </a>
+    </li>
+    <li>
+        <a asp-action="TrackOrder" asp-controller="Customer">
+            <i class="fas fa-map-marker-alt"></i> Track Order
+        </a>
+    </li>
+    <li>
+        <a asp-action="UpcomingVisits" asp-controller="Customer">
+            <i class="fas fa-tools"></i> Maintenance Visits
+        </a>
+    </li>
+    <li>
+        <a asp-action="FridgeServiceHistory" asp-controller="Customer">
+            <i class="fas fa-history"></i> Service History
+        </a>
+    </li>
+    <li>
+        <a asp-action="MyFaults" asp-controller="Customer">
+            <i class="fas fa-exclamation-triangle"></i> My Faults
+        </a>
+    </li>
+    <li>
+        <a asp-action="CreateFault" asp-controller="Customer">
+            <i class="fas fa-plus-circle"></i> Report Fault
+        </a>
+    </li>
+</ul>
+
         <div class="sidebar-footer">
             <a asp-controller="Account" asp-action="Logout" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Sign Out
