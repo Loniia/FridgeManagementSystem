@@ -11,6 +11,7 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Fault Description is required")]
         [StringLength(500, ErrorMessage = "Fault Description cannot exceed 500 characters")]
         public string FaultDescription { get; set; }
+        public string FaultCode { get; set; }
 
         [StringLength(50, ErrorMessage = "Status cannot exceed 50 characters")]
         [Required]
@@ -56,15 +57,19 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
-        // Technician who is processing the fault
-        [Display(Name = "Technician")]
-        public int? TechnicianID { get; set; }
-
         [Required(ErrorMessage = "Category is required")]
         [StringLength(100, ErrorMessage = "Category cannot exceed 100 characters")]
         public string Category { get; set; } = string.Empty;
         public int FridgeId { get; set; }
         public virtual Fridge Fridge { get; set; }
+
+        [ForeignKey("Employee")]
+        public int? AssignedTechnicianId { get; set; }
+        public virtual Employee AssignedTechnician { get; set; }
+
+        [ForeignKey("Customer")]
+        public int CustomerId { get; set; }
+        public virtual Customer Customer { get; set; }
 
         // Navigation property for related repair schedules
         public virtual ICollection<RepairSchedule> RepairSchedules { get; set; }

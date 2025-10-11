@@ -1,5 +1,7 @@
 ﻿@model FridgeManagementSystem.Models.RepairSchedule
+
 @{
+    Layout = "~/Views/Shared/_FaultTechSidebar.cshtml";
     ViewData["Title"] = "Process Fault";
     var faultInfo = ViewBag.FaultInfo as FridgeManagementSystem.Models.Fault;
 }

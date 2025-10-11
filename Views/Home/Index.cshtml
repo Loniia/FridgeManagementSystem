@@ -1,1 +1,27 @@
-﻿<h2>Welcome to Dynamic Ice Inc</h2>
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="home-container position-relative">
+    <!-- Full background image -->
+    <img src="~/images/HopePage.jpg" alt="Fridge background" class="img-fluid home-image" />
+</div>
+
+@section Styles {
+    <style>
+        .home-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .home-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+        }
+    </style>
+}
+

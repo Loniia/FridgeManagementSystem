@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FridgeManagementSystem.Data;   // <-- replace with your namespace
-using FridgeManagementSystem.Models; // <-- replace with your namespace
+using FridgeManagementSystem.Data;  
+using FridgeManagementSystem.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,10 +13,12 @@ namespace FridgeManagementSystem.Areas.Administration.Controllers
     public class ManageLocationController : Controller
     {
         private readonly FridgeDbContext _context;
+        private readonly ILogger<ManageLocationController> _logger;
 
-        public ManageLocationController(FridgeDbContext context)
+        public ManageLocationController(FridgeDbContext context, ILogger<ManageLocationController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // 1️⃣ LIST all active locations
@@ -46,35 +48,49 @@ namespace FridgeManagementSystem.Areas.Administration.Controllers
             return View(location);
         }
 
-        // 3️⃣ CREATE a new location
-        public IActionResult Create() => View();
+        // GET: Create Location
+        public IActionResult Create()
+        {
+            return View();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Location location)
+        public async Task<IActionResult> Create(Location model)
         {
-            if (ModelState.IsValid)
+            try
             {
-                // Optional: ensure unique Address + City combo
-                bool exists = _context.Locations.Any(l =>
-                    l.Address == location.Address &&
-                    l.City == location.City &&
-                    l.IsActive);
+                // Debug: Check if we're reaching the controller
+                System.Diagnostics.Debug.WriteLine("Create action reached with model: " + model?.Address);
 
-                if (exists)
+                if (!ModelState.IsValid)
                 {
-                    ModelState.AddModelError("", "A location with this address already exists.");
-                    return View(location);
+                    var errors = ModelState.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+                    return Json(new { success = false, errors });
                 }
 
-                location.IsActive = true; // ensure new locations are active
-                _context.Add(location);
+                model.IsActive = true;
+                _context.Locations.Add(model);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(location);
-        }
 
+                return Json(new { success = true, message = "Location created successfully!" });
+            }
+            catch (Exception ex)
+            {
+                // Return proper JSON even on exceptions
+                return Json(new
+                {
+                    success = false,
+                    errors = new
+                    {
+                        General = new[] { $"Error saving location: {ex.Message}" }
+                    }
+                });
+            }
+        }
         // 4️⃣ EDIT an existing location
         public async Task<IActionResult> Edit(int id)
         {

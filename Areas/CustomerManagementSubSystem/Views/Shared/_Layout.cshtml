@@ -229,14 +229,12 @@
         </ul>
 
         <!-- Account -->
-        <ul class="sidebar-menu">
-            <li class="menu-header">Account</li>
-            <li>
-                <a asp-controller="Account" asp-action="Logout">
-                    <i class="fas fa-sign-out-alt"></i> <span>Sign Out</span>
-                </a>
-            </li>
-        </ul>
+        <div class="sign-out">
+            <a asp-area="" asp-controller="Account" asp-action="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </a>
+        </div>
     </div>
 
     <!-- Fixed toggle button for collapsed sidebar -->
@@ -261,7 +259,7 @@
                         <li class="nav-item"><a asp-controller="CustomerManagementHome" asp-action="Contact" class="nav-link">Contact Us</a></li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
-                        <form asp-area="Identity" asp-page="/Account/Logout" method="post" id="logoutForm">
+                        <form asp-area="" asp-page="/Account/Logout" method="post" id="logoutForm">
                             <button type="submit" class="btn btn-link">Logout</button>
                         </form>
 

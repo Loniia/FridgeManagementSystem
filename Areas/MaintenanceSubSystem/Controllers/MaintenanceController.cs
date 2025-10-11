@@ -70,7 +70,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
             if (!string.IsNullOrEmpty(query))
             {
                 filterRequests = filterRequests.Where(r =>
-                    r.Fridge.FridgeName.Contains(query) ||
+                    r.Fridge.Brand.Contains(query) ||
                     r.Fridge.Customer.FullName.Contains(query) ||
                     r.Fridge.Customer.Location.Address.Contains(query) ||
                     r.Fridge.Model.Contains(query));
@@ -506,7 +506,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
             var generator = new ServiceHistoryPdfGenerator(visits, fridge);
 
             var pdfBytes = generator.GeneratePdf();
-            var fileName = $"ServiceHistory_{fridge.FridgeName}_{DateTime.Now:yyyyMMdd}.pdf";
+            var fileName = $"ServiceHistory_{fridge.Brand}_{DateTime.Now:yyyyMMdd}.pdf";
 
             return File(pdfBytes, "application/pdf", fileName);
         }

@@ -1,0 +1,98 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewData["Title"] = "Admin Dashboard";
+
+    var customersUrl = Url.Action("Index", "ManageCustomer", new { area = "Administrator" });
+    var employeesUrl = Url.Action("Index", "ManageEmployee", new { area = "Administrator" });
+    var fridgesUrl = Url.Action("Index", "ManageFridge", new { area = "Administrator" });
+    var locationsUrl = Url.Action("Index", "ManageLocation", new { area = "Administrator" });
+    var suppliersUrl = Url.Action("Index", "ManageSupplier", new { area = "Administrator" });
+    var businessInfoUrl = Url.Action("Index", "BusinessInfo", new { area = "Administrator" });
+}
+
+<h2 class="mb-4">
+    Welcome, @(User.Identity?.Name ?? "Guest")
+</h2>
+
+<div class="row">
+
+    <!-- Employees Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@employeesUrl" style="text-decoration: none;">
+            <div class="card text-white bg-success h-100">
+                <div class="card-header">Employees</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Employees</h5>
+                    <p class="card-text">Create and assign employees to roles.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Locations Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@locationsUrl" style="text-decoration: none;">
+            <div class="card text-white bg-info h-100">
+                <div class="card-header">Locations</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Locations</h5>
+                    <p class="card-text">Add, edit, or remove fridge locations.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Suppliers Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@suppliersUrl" style="text-decoration: none;">
+            <div class="card text-white bg-secondary h-100">
+                <div class="card-header">Suppliers</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Suppliers</h5>
+                    <p class="card-text">Add, edit, or remove refrigerator suppliers.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Customers Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@customersUrl" style="text-decoration: none;">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-header">Customers</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Customers</h5>
+                    <p class="card-text">View, edit, or remove customer accounts.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Fridges Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@fridgesUrl" style="text-decoration: none;">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-header">Fridges</div>
+                <div class="card-body">
+                    <h5 class="card-title">Manage Fridges</h5>
+                    <p class="card-text">Manage fridges, inventory, and allocations.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Business Info Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@businessInfoUrl" style="text-decoration: none;">
+            <div class="card text-white bg-dark h-100">
+                <div class="card-header">Business Info</div>
+                <div class="card-body">
+                    <h5 class="card-title">Business Settings</h5>
+                    <p class="card-text">Manage company information and system settings.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+</div>

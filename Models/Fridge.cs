@@ -2,18 +2,15 @@
 using Microsoft.Identity.Client;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-namespace FridgeManagementSystem.Models
 #nullable disable
+namespace FridgeManagementSystem.Models
 {
     public class Fridge
     {
         public int FridgeId { get; set; }
 
-        [Required(ErrorMessage = "Fridge name is required")]
-        [StringLength(100, ErrorMessage = "Fridge name cannot exceed 100 characters")]
-
-        public string FridgeName { get; set; }
+        [Required(ErrorMessage = "Fridge Type is required")]
+        [StringLength(100, ErrorMessage = "Fridge Type cannot exceed 100 characters")]
         public string FridgeType { get; set; }
         public string Brand { get; set; }
         [Required(ErrorMessage = "Model is required")]
@@ -26,20 +23,9 @@ namespace FridgeManagementSystem.Models
 
         public DateTime PurchaseDate { get; set; }
 
-       
-
         [Display(Name = "Warranty Expiry")]
         [DataType(DataType.Date)]
         public DateTime? WarrantyExpiry { get; set; }
-
-        
-       
-
-        [Display(Name = "Notes")]
-        [StringLength(1000)]
-        public string Notes { get; set; }
-        // Audit fields
-      
 
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
@@ -47,7 +33,7 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("Supplier")]
         public int SupplierID { get; set; }
         [ForeignKey("Customer")]
-        public int? CustomerId {  get; set; }
+        public int? CustomerID {  get; set; }
         [ForeignKey("Location")]
         public int? LocationId { get; set; }
         public Location Location { get; set; }  
@@ -56,8 +42,12 @@ namespace FridgeManagementSystem.Models
         public DateTime DeliveryDate { get; set; }
         public string Status { get; set; } // e.g., Received, In Transit, Delivered
         public bool IsActive { get; set; } = true;
+        public string ImageUrl { get; set; } // for pictures
+        public decimal Price { get; set; }
 
         //Navigation Property
+       
+        public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
         public virtual Inventory Inventories { get; set; }
         public virtual ScrappedFridge ScrappedFridges { get; set; }

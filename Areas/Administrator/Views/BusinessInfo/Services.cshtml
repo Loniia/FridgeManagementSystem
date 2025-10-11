@@ -1,0 +1,94 @@
+﻿@model BusinessInfo
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    ViewData["Title"] = "Our Services";
+    Layout = "_PublicLayout"; // Use a public-facing layout
+}
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Our Services</h1>
+        <p class="lead">Comprehensive fridge management solutions for your business</p>
+    </div>
+
+    <!-- Services Description -->
+    @if (!string.IsNullOrEmpty(Model.ServicesDescription))
+    {
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 bg-light">
+                    <div class="card-body p-5 text-center">
+                        <h2 class="h3 mb-4">What We Offer</h2>
+                        <div class="fs-5">
+                            @Html.Raw(Model.ServicesDescription.Replace("\n", "<br>"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Service Features -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="text-primary mb-3">
+                        <i class="bi bi-tools" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="h5">Fridge Maintenance</h3>
+                    <p class="text-muted">Regular servicing and maintenance to keep your fridges running efficiently and extend their lifespan.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="text-primary mb-3">
+                        <i class="bi bi-clipboard-check" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="h5">Inventory Management</h3>
+                    <p class="text-muted">Comprehensive tracking and management of your fridge inventory across all locations.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="text-primary mb-3">
+                        <i class="bi bi-headset" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="h5">24/7 Support</h3>
+                    <p class="text-muted">Round-the-clock technical support and emergency services for all your fridge needs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center p-5">
+                    <h2 class="h3 mb-3">Ready to Get Started?</h2>
+                    <p class="mb-4">Contact us today to learn more about our comprehensive fridge management services.</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        @if (!string.IsNullOrEmpty(Model.Phone))
+                        {
+                            <a href="tel:@Model.Phone" class="btn btn-light btn-lg">Call Us: @Model.Phone</a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Email))
+                        {
+                            <a href="mailto:@Model.Email" class="btn btn-outline-light btn-lg">Email Us</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

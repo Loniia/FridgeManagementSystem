@@ -15,7 +15,7 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Supplier Name")]
         public string Name { get; set; } 
 
-        [Required]
+       
         [StringLength(50, ErrorMessage = "Contact Person cannot be longer than 50 characters.")]
         [Display(Name = "Contact Person")]
         public string ContactPerson { get; set; }
@@ -38,11 +38,13 @@ namespace FridgeManagementSystem.Models
         public string Address { get; set; }
         public int PurchaseOrderID { get; set; }
         public int QuotationID { get; set; }
+        public int FridgeId { get; set; }
        
         // Soft delete flag
         public bool IsActive { get; set; } = true;
 
-        // Navigation Properties 
+        // Navigation
+        public virtual ICollection<Fridge> Fridges { get; set; }
         public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
 
         public virtual ICollection<Quotation> Quotations { get; set; }

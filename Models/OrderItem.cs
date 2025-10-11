@@ -10,12 +10,13 @@ namespace FridgeManagementSystem.Models
         [Key]
         public int OrderItemId { get; set; }
 
-        [Required]
+        [ForeignKey("Order")]
         public int OrderId { get; set; }
+        public virtual Order Order { get; set; }
 
-        [Required]
-        public int ProductId { get; set; }
-
+        [ForeignKey("Fridge")]
+        public int FridgeId { get; set; }
+        public virtual Fridge Fridge { get; set; }
         [Required]
         [Range(1, 100)]
         public int Quantity { get; set; }
@@ -24,7 +25,6 @@ namespace FridgeManagementSystem.Models
         [Range(0.01, 100000)]
         public decimal Price { get; set; }
 
-        [ForeignKey("OrderId")]
-        public Product Product { get; set; }
+       
     }
 }

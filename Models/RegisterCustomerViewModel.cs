@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 #nullable disable
-namespace FridgeManagementSystem.Models
-{
+namespace FridgeManagementSystem.Models;
+
     public class RegisterCustomerViewModel
     {
         [Key]
@@ -12,6 +12,11 @@ namespace FridgeManagementSystem.Models
 
         [Required, EmailAddress]
         public string Email { get; set; }
+        [Required(ErrorMessage = "Phone number is required")]
+        [Phone]
+        [StringLength(10, ErrorMessage = "Phone number must be 10 digits")]
+        public string PhoneNumber { get; set; }
+        public int LocationId { get; set; }
 
         [Required, DataType(DataType.Password)]
         public string Password { get; set; }
@@ -19,5 +24,7 @@ namespace FridgeManagementSystem.Models
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
         [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; }
+        public string SecurityQuestion { get; set; }
+        public string SecurityAnswer { get; set; }
     }
-}
+

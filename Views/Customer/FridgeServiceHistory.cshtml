@@ -1,0 +1,92 @@
+﻿@model List<FridgeManagementSystem.Models.MaintenanceVisit>
+
+@{
+    ViewData["Title"] = "Fridge Service History";
+}
+
+<h2>Service History for @Model.FirstOrDefault()?.MaintenanceRequest.Fridge.Brand</h2>
+
+<div class="mb-3">
+    <a asp-action="DownloadFridgeServiceHistory"
+       asp-route-fridgeId="@Model.FirstOrDefault()?.MaintenanceRequest.FridgeId"
+       class="btn btn-secondary">
+        <i class="fas fa-file-pdf"></i> Download PDF
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No service history available.</div>
+}
+else
+{
+    @foreach (var visit in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                Visit on @visit.ScheduledDate.ToShortDateString() at @visit.ScheduledTime.ToString(@"hh\:mm")
+                <span class="badge @(visit.Status == FridgeManagementSystem.Models.TaskStatus.Complete ? "bg-success" : "bg-warning")">
+                    @visit.Status
+                </span>
+            </div>
+            <div class="card-body">
+                <h6>Checklist</h6>
+                @if (visit.MaintenanceChecklist != null)
+                {
+                    <ul>
+                        <li>Temperature Status: @visit.MaintenanceChecklist.TemperatureStatus</li>
+                        <li>Condenser Coils Cleaned: @(visit.MaintenanceChecklist.CondenserCoilsCleaned ? "Yes" : "No")</li>
+                        <li>Coolant Level: @visit.MaintenanceChecklist.CoolantLevel</li>
+                        <li>Door Seal Condition: @visit.MaintenanceChecklist.DoorSealCondition</li>
+                        <li>Lighting Status: @visit.MaintenanceChecklist.LightingStatus</li>
+                        <li>Power Cable Condition: @visit.MaintenanceChecklist.PowerCableCondition</li>
+                    </ul>
+                }
+                else
+                {
+                    <p>No checklist completed.</p>
+                }
+
+                <h6>Components Used</h6>
+                @if (visit.ComponentUsed != null && visit.ComponentUsed.Any())
+                {
+                    <ul>
+                        @foreach (var c in visit.ComponentUsed)
+                        {
+                            <li>@c.ComponentName - Quantity: @c.Quantity - Condition: @c.Condition</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No components recorded.</p>
+                }
+
+                <h6>Fault Reports</h6>
+                @if (visit.FaultReport != null && visit.FaultReport.Any())
+                {
+                    <ul>
+                        @foreach (var f in visit.FaultReport)
+                        {
+                            <li>@f.ReportDate.ToShortDateString() - @f.FaultType - @f.FaultDescription</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No faults reported.</p>
+                }
+
+                <h6>Visit Notes</h6>
+                @if (!string.IsNullOrEmpty(visit.VisitNotes))
+                {
+                    <p>@visit.VisitNotes</p>
+                }
+                else
+                {
+                    <p>No notes for this visit.</p>
+                }
+            </div>
+        </div>
+    }
+}

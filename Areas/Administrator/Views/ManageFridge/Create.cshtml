@@ -1,30 +1,95 @@
 ﻿@model FridgeManagementSystem.Models.Fridge
 
 @{
+    Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Create Fridge";
 }
 
-<h2>Add New Fridge</h2>
+<style>
+    body {
+        background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        font-weight: bold;
+        color: #1a1a1a;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    form {
+        max-width: 600px;
+        margin: auto;
+        padding: 30px;
+        background: linear-gradient(145deg, #ffffff, #e6f0ff);
+        border-radius: 15px;
+        box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .btn-success {
+        background: linear-gradient(90deg, #28a745, #218838);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: all 0.3s ease-in-out;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+    .btn-secondary {
+        border-radius: 8px;
+        padding: 10px 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease-in-out;
+    }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+</style>
+
+<h2 class="text-center mb-4">Add New Fridge</h2>
 
 <form asp-action="Create" method="post">
-    <div class="form-group">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="form-group mb-3">
         <label asp-for="SerialNumber" class="control-label"></label>
         <input asp-for="SerialNumber" class="form-control" />
         <span asp-validation-for="SerialNumber" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
+    <div class="form-group mb-3">
         <label>Supplier</label>
         <select asp-for="SupplierID" asp-items="ViewBag.Suppliers" class="form-control"></select>
     </div>
 
-    <div class="form-group">
+    <div class="form-group mb-4">
         <label>Location</label>
         <select asp-for="LocationId" asp-items="ViewBag.Locations" class="form-control"></select>
     </div>
 
-    <button type="submit" class="btn btn-success">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-success">Save</button>
+        <a asp-action="Index" asp-controller="ManageFridge" class="btn btn-secondary">Cancel</a>
+    </div>
 </form>
+
 
 

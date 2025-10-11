@@ -1,38 +1,110 @@
 ﻿@model IEnumerable<FridgeManagementSystem.Models.InventoryReportVM>
 
 @{
+    Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Inventory Report";
 }
 
-<div class="card shadow">
-    <div class="card-header bg-info text-white">
-        <h4>Inventory Report</h4>
-    </div>
-    <div class="card-body">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Location</th>
-                    <th>Total Fridges</th>
-                    <th>Active</th>
-                    <th>In Repair</th>
-                    <th>Retired</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>@item.Location</td>
-                        <td>@item.TotalFridges</td>
-                        <td>@item.Active</td>
-                        <td>@item.InRepair</td>
-                        <td>@item.Retired</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <a asp-action="Index" class="btn btn-secondary">Back</a>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h4 class="m-0">Inventory Report</h4>
+            <a asp-action="Index" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Serial Number</th>
+                            <th>Condition</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Under Warranty</th>
+                            <th>Low Stock</th>
+                            <th>Purchase Date</th>
+                            <th>Warranty Expiry</th>
+                            <th>Delivery Date</th>
+                            <th>Notes</th>
+                            <th>Supplier</th>
+                            <th>Customer</th>
+                            <th>Location</th>
+                            <th>Allocation Date</th>
+                            <th>Return Date</th>
+                            <th>Last Maintenance</th>
+                            <th>Next Maintenance</th>
+                            <th>Active?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var fridge in Model)
+                        {
+                            <tr>
+                                <td>@fridge.FridgeId</td>
+                                <td>@fridge.FridgeName</td>
+                                <td>@fridge.FridgeType</td>
+                                <td>@fridge.Brand</td>
+                                <td>@fridge.Model</td>
+                                <td>@fridge.SerialNumber</td>
+                                <td>@fridge.Condition</td>
+                                <td>@fridge.Quantity</td>
+                                <td>@fridge.Status</td>
+                                <td>@(fridge.IsUnderWarranty ? "Yes" : "No")</td>
+                                <td>@(fridge.IsLowStock ? "Yes" : "No")</td>
+                                <td>@fridge.PurchaseDate.ToString("MM/dd/yyyy")</td>
+                                <td>@(fridge.WarrantyExpiry?.ToString("MM/dd/yyyy") ?? "N/A")</td>
+                                <td>@fridge.DeliveryDate.ToString("MM/dd/yyyy")</td>
+                                <td>@fridge.Notes</td>
+                                <td>@fridge.SupplierName</td>
+                                <td>@fridge.CustomerName ?? "N/A"</td>
+                                <td>@(fridge.AllocationDate?.ToString("MM/dd/yyyy") ?? "N/A")</td>
+                                <td>@(fridge.ReturnDate?.ToString("MM/dd/yyyy") ?? "N/A")</td>
+                                <td>@(fridge.LastMaintenance?.ToString("MM/dd/yyyy") ?? "N/A")</td>
+                                <td>@(fridge.NextScheduledMaintenance?.ToString("MM/dd/yyyy") ?? "N/A")</td>
+                                <td>@(fridge.IsActive ? "Yes" : "No")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    /* Business style: striped, hover, and compact */
+    table.table th, table.table td {
+        font-size: 0.85rem;
+        vertical-align: middle;
+    }
+
+    table.table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .table-dark th {
+        background-color: #343a40 !important;
+        color: white;
+    }
+
+    .badge-status {
+        padding: 0.25em 0.5em;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        color: white;
+    }
+
+    .badge-active { background-color: #28a745; }
+    .badge-inrepair { background-color: #ffc107; }
+    .badge-retired { background-color: #6c757d; }
+</style>
+
 

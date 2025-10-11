@@ -22,9 +22,8 @@ namespace FridgeManagementSystem.Models
         [DataType(DataType.Date)]
         public DateOnly AllocationDate { get; set; }= DateOnly.FromDateTime(DateTime.Now);
 
-        [Required]
         [DataType(DataType.Date)]
-        public DateOnly? ReturnDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateOnly? ReturnDate { get; set; }
 
         [Required]
         [StringLength(50, ErrorMessage = "Status cannot be longer than 50 characters")]

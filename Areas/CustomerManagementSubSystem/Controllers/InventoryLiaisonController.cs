@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerManagementSubSystem.Controllers
+namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 {
     [Area("CustomerManagementSubSystem")]
     public class InventoryLiaisonController : Controller
@@ -30,22 +30,34 @@ namespace CustomerManagementSubSystem.Controllers
                 .Select(f => new FridgeViewModel
                 {
                     FridgeId = f.FridgeId,
+                   
+                    FridgeType = f.FridgeType,
                     Brand = f.Brand,
                     Model = f.Model,
+                    SerialNumber = f.SerialNumber,
+                    Condition = f.Condition,
                     Status = f.Status,
                     Quantity = f.Quantity,
+
+                    // Stock availability calculation
+                    AvailableStock = f.Quantity - f.FridgeAllocation
+                        .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
+                        .Sum(a => 1),
+
                     CustomerName = f.FridgeAllocation
-                                    .OrderByDescending(a => a.AllocationDate)
-                                    .Select(a => a.Customer.FullName)
-                                    .FirstOrDefault(),
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => a.Customer.FullName)
+                        .FirstOrDefault(),
+
                     AllocationDate = f.FridgeAllocation
-                                    .OrderByDescending(a => a.AllocationDate)
-                                    .Select(a => (DateOnly?)a.AllocationDate)
-                                    .FirstOrDefault(),
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => (DateOnly?)a.AllocationDate)
+                        .FirstOrDefault(),
+
                     ReturnDate = f.FridgeAllocation
-                                    .OrderByDescending(a => a.AllocationDate)
-                                    .Select(a => (DateOnly?)a.ReturnDate)
-                                    .FirstOrDefault()
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => (DateOnly?)a.ReturnDate)
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
@@ -71,8 +83,10 @@ namespace CustomerManagementSubSystem.Controllers
                 return View(fridge);
             }
 
+            // Set automatic values
             fridge.Status = "Received";
             fridge.DateAdded = DateOnly.FromDateTime(DateTime.Now);
+            fridge.UpdatedDate = DateTime.Now;
             fridge.IsActive = true;
 
             _context.Fridge.Add(fridge);
@@ -217,23 +231,34 @@ namespace CustomerManagementSubSystem.Controllers
         // --------------------------
         // Create Purchase Request Manually
         // --------------------------
+        [HttpGet]
         public IActionResult CreatePurchaseRequest() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePurchaseRequest(PurchaseRequest newRequest)
+        public async Task<IActionResult> CreatePurchaseRequest(CreatePurchaseRequestViewModel model)
         {
-            if (!ModelState.IsValid) return View(newRequest);
+            if (!ModelState.IsValid)
+                return View(model);
 
-            newRequest.RequestDate = DateOnly.FromDateTime(DateTime.Now);
-            newRequest.Status = "Pending";
-            newRequest.IsActive = true;
-            newRequest.AssignedToRole = "PurchasingManager";
-            newRequest.RequestBy = "InventoryLiaison";
-            newRequest.RequestType = "Fridge Purchase";
+            var newRequest = new PurchaseRequest
+            {
+                ItemFullNames = model.ItemFullNames,
+                Quantity = model.Quantity,
+                CustomerID = model.CustomerID,
+                RequestBy = "InventoryLiaison",
+                RequestType = "Fridge Purchase",
+                AssignedToRole = "PurchasingManager",
+                RequestDate = DateOnly.FromDateTime(DateTime.Now),
+                Status = "Pending",
+                IsActive = true
+            };
 
+            // Generate unique Request Number
             var year = DateTime.Now.Year;
-            int countForYear = await _context.PurchaseRequests.CountAsync(r => r.RequestDate.Year == year) + 1;
+            int countForYear = await _context.PurchaseRequests
+                .CountAsync(r => r.RequestDate.Year == year) + 1;
+
             newRequest.RequestNumber = $"PR-{year}-{countForYear:D3}";
 
             _context.PurchaseRequests.Add(newRequest);
@@ -332,6 +357,7 @@ namespace CustomerManagementSubSystem.Controllers
                 return View(model);
             }
 
+
             // --------------------------
             // AJAX Endpoint for Year Selection
             // --------------------------
@@ -369,7 +395,21 @@ namespace CustomerManagementSubSystem.Controllers
                     totalReturned = returnedCounts.Sum(),
                     lowStockMonths = receivedCounts.Count(c => c < LowStockThreshold)
                 });
+
             }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var fridge = _context.Fridge.FirstOrDefault(f => f.FridgeId == id);
+            if (fridge != null)
+            {
+                fridge.IsActive = false; // Soft delete instead of removing
+                _context.SaveChanges();
+                TempData["SuccessMessage"] = "Fridge removed successfully.";
+            }
+            return RedirectToAction(nameof(Index)); // Go back to inventory list
         }
     }
+}
 

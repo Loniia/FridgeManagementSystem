@@ -1,212 +1,229 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Dynamic Ice Inc</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Maintenance System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 280px;
+            background: #2c3e50;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
 
-        body {
-            background: #f1f5f9;
-            min-height: 100vh;
-            display: flex;
-        }
+            .sidebar.collapsed {
+                width: 70px;
+            }
+
+                /* Hide text when collapsed */
+                .sidebar.collapsed .logo h1,
+                .sidebar.collapsed .user-profile h2,
+                .sidebar.collapsed .user-profile p,
+                .sidebar.collapsed .menu li a span,
+                .sidebar.collapsed .menu-heading,
+                .sidebar.collapsed .sign-out a span {
+                    display: none;
+                }
+
+                .sidebar.collapsed .user-profile img {
+                    width: 40px;
+                    height: 40px;
+                }
+
+                .sidebar.collapsed .menu li a {
+                    justify-content: center;
+                    padding: 15px;
+                }
+
+                    .sidebar.collapsed .menu li a i {
+                        margin-right: 0;
+                        font-size: 1.2rem;
+                    }
 
         /* Toggle Button */
         .toggle-btn {
             position: fixed;
             top: 20px;
-            left: 20px;
-            background: #1e293b;
-            border: none;
+            left: 300px;
+            z-index: 1001;
+            background: #2c3e50;
             color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            font-size: 20px;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 5px;
             cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
             .toggle-btn:hover {
-                background: #3b82f6;
-                transform: scale(1.08);
+                background: #34495e;
+                transform: scale(1.05);
             }
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: linear-gradient(to bottom, #1e293b, #0f172a);
-            color: white;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding-top: 20px;
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-            z-index: 99;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+        .sidebar.collapsed + .toggle-btn {
+            left: 90px;
         }
 
-            .sidebar.collapsed {
-                transform: translateX(-280px);
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+            .main-content.sidebar-collapsed {
+                margin-left: 70px;
             }
 
+        /* Logo */
         .logo {
-            text-align: center;
             padding: 25px 20px;
-            border-bottom: 1px solid #334155;
-            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+            background: #34495e;
         }
 
             .logo h1 {
-                font-size: 22px;
-                background: linear-gradient(45deg, #3b82f6, #60a5fa);
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                font-weight: 700;
-                letter-spacing: 0.5px;
+                font-size: 1.4rem;
+                margin: 0;
+                color: white;
+                font-weight: 600;
             }
 
+        /* User Profile */
         .user-profile {
-            text-align: center;
             padding: 25px 20px;
-            border-bottom: 1px solid #334155;
-            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
         }
 
             .user-profile img {
-                width: 90px;
-                height: 90px;
+                width: 80px;
+                height: 80px;
                 border-radius: 50%;
+                margin-bottom: 12px;
+                border: 3px solid #3498db;
                 object-fit: cover;
-                border: 3px solid #3b82f6;
-                box-shadow: 0 0 20px rgba(59,130,246,0.4);
             }
 
             .user-profile h2 {
-                font-size: 18px;
-                margin: 18px 0 6px;
+                font-size: 1.1rem;
+                margin: 8px 0;
+                color: white;
                 font-weight: 600;
             }
 
             .user-profile p {
-                font-size: 14px;
-                color: #94a3b8;
+                font-size: 0.85rem;
+                color: #bdc3c7;
                 margin: 0;
-                background-color: #334155;
-                display: inline-block;
-                padding: 4px 12px;
-                border-radius: 15px;
             }
 
+        /* Menu */
         .menu {
+            flex: 1;
             list-style: none;
-            padding: 15px 0;
+            padding: 0;
             margin: 0;
+            overflow-y: auto;
         }
-
-            .menu li {
-                margin: 4px 0;
-            }
-
-            .menu a {
-                display: flex;
-                align-items: center;
-                color: #cbd5e1;
-                text-decoration: none;
-                padding: 14px 25px;
-                transition: all 0.2s;
-                border-left: 4px solid transparent;
-            }
-
-                .menu a:hover {
-                    background: #334155;
-                    color: white;
-                    border-left: 4px solid #3b82f6;
-                }
-
-                .menu a.active {
-                    background: linear-gradient(90deg,#3b82f6,#1e40af);
-                    color: white;
-                    border-left: 4px solid #93c5fd;
-                    box-shadow: inset 0 0 15px rgba(255,255,255,0.1);
-                }
-
-            .menu i {
-                margin-right: 15px;
-                width: 22px;
-                text-align: center;
-                font-size: 20px;
-            }
 
         .menu-heading {
-            padding: 18px 25px 12px;
-            font-size: 14px;
+            padding: 20px 20px 8px 20px;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: #94a3b8;
+            color: #95a5a6;
             font-weight: 600;
-            border-bottom: 1px solid #334155;
-            margin: 20px 0 12px;
+            margin-top: 10px;
+            letter-spacing: 1px;
         }
 
+        .menu li a {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-size: 0.95rem;
+        }
+
+            .menu li a i {
+                width: 20px;
+                text-align: center;
+                margin-right: 15px;
+                font-size: 1.1rem;
+            }
+
+            .menu li a:hover {
+                background: #34495e;
+                color: white;
+                border-left: 4px solid #3498db;
+                padding-left: 25px;
+            }
+
+            .menu li a.active {
+                background: #34495e;
+                color: white;
+                border-left: 4px solid #e74c3c;
+                font-weight: 600;
+            }
+
+        /* Sign Out */
         .sign-out {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            border-top: 1px solid #334155;
-            padding: 18px 0;
-            background-color: #1e293b;
+            margin-top: auto;
+            padding: 20px;
+            border-top: 1px solid #34495e;
+            background: #34495e;
         }
 
             .sign-out a {
                 display: flex;
                 align-items: center;
-                color: #cbd5e1;
+                color: #ecf0f1;
                 text-decoration: none;
-                padding: 12px 25px;
-                transition: all 0.2s;
+                padding: 12px 15px;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+                background: #2c3e50;
+                font-size: 0.95rem;
             }
 
                 .sign-out a:hover {
-                    background: #334155;
+                    background: #e74c3c;
                     color: white;
+                    transform: translateX(5px);
                 }
 
-        /* Main content */
-        .main-content {
-            margin-left: 280px;
-            padding: 30px;
-            width: calc(100% - 280px);
-            transition: margin-left 0.3s ease;
-            min-height: 100vh;
-        }
+                .sign-out a i {
+                    margin-right: 12px;
+                    font-size: 1.1rem;
+                }
 
-            .main-content.sidebar-collapsed {
-                margin-left: 0;
-                width: 100%;
-            }
-
-        @@media(max - width:768px) {
+        /* Responsive */
+        @@media (max-width: 768px) {
             .sidebar
 
         {
-            transform: translateX(-280px);
+            width: 280px;
+            transform: translateX(-100%);
         }
 
         .sidebar.expanded {
@@ -215,25 +232,58 @@
 
         .main-content {
             margin-left: 0;
-            width: 100%;
             padding: 20px 15px;
         }
 
+        .toggle-btn {
+            left: 20px;
         }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+            .sidebar.collapsed.expanded {
+                transform: translateX(0);
+            }
+
+        }
+
+        /* Scrollbar Styling */
+        .menu::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .menu::-webkit-scrollbar-track {
+            background: #34495e;
+        }
+
+        .menu::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 10px;
+        }
+
+            .menu::-webkit-scrollbar-thumb:hover {
+                background: #2980b9;
+            }
     </style>
 </head>
 <body>
-    <button class="toggle-btn" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+    <button class="toggle-btn" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
 
     <div class="sidebar" id="sidebar">
-        <div class="logo"><h1>Dynamic Ice Inc</h1></div>
+        <div class="logo">
+            <h1>Dynamic Ice Inc</h1>
+        </div>
+
         <div class="user-profile">
             <img src="~/images/Kayla.jpg" alt="Kayla Williams" />
             <h2>Kayla Williams</h2>
             <p>Maintenance Technician</p>
         </div>
 
-        @* Razor: get current controller/action for active menu *@
         @{
             var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
             var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -241,28 +291,63 @@
 
         <ul class="menu">
             <li>
-                <a asp-area="MaintenanceSubsystem" asp-controller="MaintenanceHome" asp-action="Index" class="@(currentController == "MaintenanceHome" ? "active" : "")"><i class="fas fa-home"></i> Home</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="MaintenanceHome" asp-action="Index"
+                   class="@(currentController == "MaintenanceHome" ? "active" : "")">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
             </li>
+
             <li>
-                <a asp-area="MaintenanceSubsystem" asp-controller="Maintenance" asp-action="MaintenanceRequests" class="@(currentController == "Maintenance" && currentAction == "MaintenanceRequests" ? "active" : "")"><i class="fas fa-snowflake"></i> Maintenance Requests</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="MaintenanceRequests"
+                   class="@(currentController == "Maintenance" && currentAction == "MaintenanceRequests" ? "active" : "")">
+                    <i class="fas fa-snowflake"></i>
+                    <span>Maintenance Requests</span>
+                </a>
             </li>
 
             <li class="menu-heading">MAINTENANCE</li>
+
             <li>
-                <a  asp-area="MaintenanceSubsystem" asp-controller="Maintenance" asp-action="ScheduleVisit" class="@(currentController == "Maintenance" && currentAction == "ScheduleVisit" ? "active" : "")"><i class="fas fa-calendar-plus"></i> Schedule Visit</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="ScheduleVisit"
+                   class="@(currentController == "Maintenance" && currentAction == "ScheduleVisit" ? "active" : "")">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>Schedule Visit</span>
+                </a>
             </li>
+
             <li>
-                <a asp-area="MaintenanceSubsystem"  asp-controller="Maintenance" asp-action="VisitList" class="@(currentController == "Maintenance" && currentAction == "VisitList" ? "active" : "")"><i class="fas fa-calendar-check"></i> View Scheduled Visits</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="PerformMaintenance"
+                   class="@(currentController == "Maintenance" && currentAction == "PerformMaintenance" ? "active" : "")">
+                    <i class="fas fa-tools"></i>
+                    <span>Perform Maintenance</span>
+                </a>
+            </li>
+
+            <li>
+                <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="VisitList"
+                   class="@(currentController == "Maintenance" && currentAction == "VisitList" ? "active" : "")">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>View Scheduled Visits</span>
+                </a>
             </li>
 
             <li class="menu-heading">REPORTS</li>
+
             <li>
-                <a asp-area="MaintenanceSubsystem" asp-controller="Maintenance" asp-action="ReportedFaults" class="@(currentController == "Maintenance" && currentAction == "ReportedFaults" ? "active" : "")"><i class="fas fa-exclamation-triangle"></i> View Reported Faults</a>
+                <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="ReportedFaults"
+                   class="@(currentController == "Maintenance" && currentAction == "ReportedFaults" ? "active" : "")">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>View Reported Faults</span>
+                </a>
             </li>
         </ul>
 
         <div class="sign-out">
-            <a asp-area="" asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            <a asp-area="" asp-controller="Account" asp-action="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </a>
         </div>
     </div>
 
@@ -274,25 +359,48 @@
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
         const toggleBtn = document.getElementById('sidebarToggle');
+
         let sidebarOpen = true;
 
         toggleBtn.addEventListener('click', () => {
-            sidebarOpen = !sidebarOpen;
-            if(window.innerWidth > 768){
+            if (window.innerWidth > 768) {
+                // Desktop: toggle collapsed state
                 sidebar.classList.toggle('collapsed');
                 mainContent.classList.toggle('sidebar-collapsed');
-                const icon = toggleBtn.querySelector('i');
-                icon.classList.toggle('fa-bars');
-                icon.classList.toggle('fa-chevron-right');
-                toggleBtn.style.left = sidebar.classList.contains('collapsed') ? '20px' : '300px';
+
+                // Update toggle button position and icon
+                if (sidebar.classList.contains('collapsed')) {
+                    toggleBtn.style.left = '90px';
+                    toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                } else {
+                    toggleBtn.style.left = '300px';
+                    toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                }
             } else {
+                // Mobile: toggle expanded state
                 sidebar.classList.toggle('expanded');
             }
         });
 
+        // Handle window resize
         window.addEventListener('resize', () => {
-            if(window.innerWidth > 768) sidebar.classList.remove('expanded');
-            else if(!sidebarOpen) sidebar.classList.remove('expanded');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('expanded');
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('sidebar-collapsed');
+                toggleBtn.style.left = '20px';
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+
+        // Close sidebar when clicking on a link (mobile)
+        document.querySelectorAll('.menu li a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('expanded');
+                }
+            });
         });
     </script>
 

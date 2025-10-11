@@ -16,8 +16,7 @@ namespace FridgeManagementSystem.Models
         public async Task<List<Fridge>> GetAllFridgesAsync()
         {
             return await _context.Fridge
-                .Include(f => f.Supplier)
-                .Include(f => f.Location)
+                .Include(f => f.FridgeAllocation)
                 .ToListAsync();
         }
 
@@ -143,6 +142,31 @@ namespace FridgeManagementSystem.Models
         public int Active { get; set; }
         public int InRepair { get; set; }
         public int Retired { get; set; }
+        // Detailed fridge info
+        public int FridgeId { get; set; }
+        public string? FridgeName { get; set; }
+        public string? FridgeType { get; set; }
+        public string? Brand { get; set; }
+        public string? Model { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? Condition { get; set; }
+        public int Quantity { get; set; }
+        public string? Status { get; set; }
+        public DateTime PurchaseDate { get; set; }
+        public DateTime? WarrantyExpiry { get; set; }
+        public DateTime DeliveryDate { get; set; }
+        public string? Notes { get; set; }
+        public string? SupplierName { get; set; }
+        public string? CustomerName { get; set; }
+        public DateOnly? AllocationDate { get; set; }
+        public DateOnly? ReturnDate { get; set; }
+        public DateTime? LastMaintenance { get; set; }
+        public DateTime? NextScheduledMaintenance { get; set; }
+
+        // Computed properties
+        public bool IsUnderWarranty => WarrantyExpiry.HasValue && WarrantyExpiry.Value > DateTime.Today;
+        public bool IsLowStock => Quantity < 5;
+        public bool IsActive { get; set; }
     }
 
     public class SupplierReportVM
