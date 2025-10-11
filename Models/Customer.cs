@@ -40,14 +40,11 @@ namespace FridgeManagementSystem.Models
         public bool IsActive { get; set; } = true;
 
         //Added by Idah
+        //shebeen,Spaza,Restaurant,Supermarket 
         [Required(ErrorMessage = "ShopType is required")]
         [EnumDataType(typeof(ShopType))]
         public ShopType ShopType { get; set; }
-        //shebeen,Spaza,Restaurant,Supermarket 
 
-        //Idah added this for customer in DbContext we need it 
-        //Once you add ApplicationUserId in Customer, EF will correctly understand:
-        // Customer depends on ApplicationUser.
         //When you delete a user, their Customer profile is also deleted.
         public int? ApplicationUserId { get; set; }
         [Required]

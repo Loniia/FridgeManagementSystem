@@ -69,19 +69,19 @@ namespace FridgeManagementSystem.Controllers
 
                 if (customer != null)
                 {
-                    if (!customer.IsVerified)
+                    // Block rejected or unverified customers
+                    if (!customer.IsVerified || !customer.IsActive)
                     {
-                        // Sign out rejected/unverified users
                         await _signInManager.SignOutAsync();
-                        ModelState.AddModelError("", "Your registration has been rejected. Please contact support.");
-                        return View(model);
-                    }
 
-                    if (!customer.IsActive)
-                    {
-                        await _signInManager.SignOutAsync();
-                        ModelState.AddModelError("", "Your account is inactive. Contact support.");
-                        return View(model);
+                        string message = !customer.IsVerified
+                            ? "Your registration has been rejected. Please contact support."
+                            : "Your account is inactive. Contact support.";
+
+                        // Store message temporarily
+                        TempData["LoginError"] = message;
+
+                        return RedirectToAction("Login", "Account");
                     }
                 }
             }

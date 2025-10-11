@@ -48,7 +48,7 @@ namespace CustomerManagementSubSystem.Controllers
             }
 
             // Populate dropdowns
-            PopulateDropdowns(model.CustomerID, model.FridgeId);
+            PopulateDropdowns(model.FridgeId);
 
             return View(model);
         }
@@ -73,7 +73,7 @@ namespace CustomerManagementSubSystem.Controllers
             }
 
             // Reload dropdowns if model state is invalid
-            PopulateDropdowns(request.CustomerID, request.FridgeId);
+            PopulateDropdowns(request.FridgeId);
 
             return View(request);
         }

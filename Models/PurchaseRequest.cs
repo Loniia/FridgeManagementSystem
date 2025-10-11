@@ -40,14 +40,12 @@ namespace FridgeManagementSystem.Models
         [Required]
         public int Quantity { get; set; }
         public bool IsActive { get; set; } = true;
-        public int CustomerID { get; set; }
 
         // fields for tracking the Purchase from Purchasing Manager
         public bool IsViewed { get; set; } // True if manager has opened it
         public DateTime? ViewedDate { get; set; } // When it was viewed
 
         //Navigation Properties
-        public virtual Customer Customer { get; set; }
         public virtual Fridge Fridge { get; set; }
 
         public virtual Inventory Inventory { get; set; }
