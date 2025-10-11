@@ -18,19 +18,22 @@ namespace FridgeManagementSystem.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly FridgeDbContext _context;       
-        private readonly FridgeService _fridgeService;   
-        private readonly UserManager<ApplicationUser> _userManager; 
+        private readonly FridgeDbContext _context;
+        private readonly FridgeService _fridgeService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<CustomerController> _logger;  // ✅ Add this line
 
         // Constructor
         public CustomerController(
             FridgeDbContext context,
             FridgeService fridgeService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            ILogger<CustomerController> logger) // ✅ Add logger to constructor
         {
             _context = context;
             _fridgeService = fridgeService;
-            _userManager = userManager;  
+            _userManager = userManager;
+            _logger = logger;  // ✅ Initialize it
         }
 
         // ==========================
@@ -48,11 +51,10 @@ namespace FridgeManagementSystem.Controllers
 
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
-            if (customer != null && !customer.IsVerified && customer.IsActive)
-            {
-                // Redirect rejected customers to rejected dashboard
-                return RedirectToAction("RejectedCustomer", "Customer");
-            }
+
+            // If customer record is missing, send back to login
+            if (customer == null)
+                return RedirectToAction("Login", "Account");
 
             // Start query for fridges
             var fridgesQuery = _context.Fridge
@@ -332,7 +334,13 @@ namespace FridgeManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCard(PaymentViewModel model)
         {
-            // Validate card fields only if payment method is Card
+            // Debug: Log incoming model
+            _logger.LogInformation($"AddCard POST - OrderId: {model.OrderId}, Amount: {model.Amount}, Method: {model.Method}");
+
+            // Clear previous model state to start fresh
+            ModelState.Clear();
+
+            // Validate based on payment method
             if (model.Method == Method.Card)
             {
                 if (string.IsNullOrWhiteSpace(model.CardholderName))
@@ -347,48 +355,109 @@ namespace FridgeManagementSystem.Controllers
                 if (string.IsNullOrWhiteSpace(model.CVV))
                     ModelState.AddModelError("CVV", "CVV is required.");
             }
+            else if (model.Method == Method.EFT)
+            {
+                if (string.IsNullOrWhiteSpace(model.BankReference))
+                    ModelState.AddModelError("BankReference", "Bank Reference is required.");
+            }
 
-            // If ModelState is invalid, reload the form with validation messages
+            // If ModelState is invalid, return to form with errors
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"AddCard validation failed - Errors: {string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))}");
+
+                // Reload the order to populate the view model
+                var customerId = GetLoggedInCustomerId();
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(i => i.Fridge)
+                    .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
+
+                model.Orders = order;
                 return View(model);
             }
 
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
+
+                if (order == null || order.CustomerID != customerId)
+                    return Forbid();
+
+                // Create payment record
+                var payment = new Payment
+                {
+                    OrderId = model.OrderId,
+                    Amount = model.Amount,
+                    Method = model.Method,
+                    CardNumber = model.Method == Method.Card ? MaskCardNumber(model.CardNumber) : null,
+                    BankReference = model.Method == Method.EFT ? model.BankReference : null,
+                    PaymentDate = DateTime.Now,
+                    Status = "Paid"
+                };
+
+                _context.Payments.Add(payment);
+
+                // Update order status
+                order.Status = "Paid";
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Payment successful for order {order.OrderId}");
+                return RedirectToAction("PaymentConfirmation", "Customer", new { orderId = order.OrderId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing payment for order {OrderId}", model.OrderId);
+                ModelState.AddModelError("", "An error occurred while processing your payment. Please try again.");
+
+                // Reload the order
+                var customerId = GetLoggedInCustomerId();
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(i => i.Fridge)
+                    .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
+
+                model.Orders = order;
+                return View(model);
+            }
+        }
+        // ==========================
+        // 7. PAYMENT CONFIRMATION
+        // ==========================
+        [HttpGet]
+        public async Task<IActionResult> PaymentConfirmation(int orderId)
+        {
             var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
+                .ThenInclude(oi => oi.Fridge)
+                .Include(o => o.Payments)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
 
-            if (order == null || order.CustomerID != customerId)
-                return Forbid();
-
-            // Calculate amount from order items to ensure it's correct
-            model.Amount = await _context.OrderItems
-                .Where(oi => oi.OrderId == model.OrderId)
-                .SumAsync(oi => oi.Price * oi.Quantity);
-
-            var payment = new Payment
+            if (order == null)
             {
-                OrderId = model.OrderId,
-                Amount = model.Amount,
-                Method = model.Method,
-                CardNumber = model.Method == Method.Card ? MaskCardNumber(model.CardNumber) : null,
-                BankReference = model.Method != Method.Card ? model.BankReference : null,
-                PaymentDate = DateTime.Now,
-                Status = "Paid"
+                return NotFound();
+            }
+
+            var payment = order.Payments?.FirstOrDefault();
+
+            var viewModel = new PaymentConfirmationViewModel
+            {
+                OrderId = order.OrderId,
+                Amount = payment?.Amount ?? order.TotalAmount,
+                PaymentDate = payment?.PaymentDate ?? DateTime.Now,
+                PaymentMethod = payment?.Method.ToString() ?? "Card",
+                Status = payment?.Status ?? "Paid",
+                OrderItems = order.OrderItems?.ToList() ?? new List<OrderItem>()
             };
 
-            _context.Payments.Add(payment);
-
-            // Update order status
-            order.Status = "Paid";
-            await _context.SaveChangesAsync();
-
-            // Redirect to confirmation page
-            return RedirectToAction("PaymentConfirmation", "Customer", new { orderId = order.OrderId });
+            return View(viewModel);
         }
-
-        public IActionResult PaymentConfirmation() => View();
 
         // ==========================
         // 7. MY ACCOUNT & ORDERS
