@@ -25,12 +25,15 @@ namespace FridgeManagementSystem.Models
         //public string CardholderName { get; set; } // For Card payments
         public string BankReference { get; set; } // For EFT payments
         public string CardNumber { get; set; } // For Card payments
+                                               // For EFT
+        public string PaymentReference { get; set; } // new unique reference for EFT
+        public string ProofFilePath { get; set; } // for EFT proof upload
+        public string Status { get; set; } // "Pending", "AwaitingAdminApproval", "Paid"
+        public DateTime PaymentDate { get; set; }
+        // For PayPal
+        public string PayPalTransactionId { get; set; }
 
-        [Required]
-        public DateTime PaymentDate { get; set; } = DateTime.Now;
+       
 
-        [Required]
-        [StringLength(50)]
-        public string Status { get; set; } // Paid, Failed, Pending
     }
 }

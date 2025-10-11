@@ -222,13 +222,12 @@ namespace FridgeManagementSystem.Controllers
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0) return RedirectToAction("Login", "Account");
 
-            // Only include non-deleted items and ensure cart is active
             var cart = await _context.Carts
                 .Include(c => c.CartItems.Where(ci => !ci.IsDeleted))
                 .ThenInclude(i => i.Fridge)
                 .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
 
-            if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
+            if (cart == null || !cart.CartItems.Any())
             {
                 TempData["Error"] = "Your cart is empty.";
                 return RedirectToAction("ViewCart");
@@ -239,7 +238,7 @@ namespace FridgeManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmCheckout(string deliveryAddress, string contactName, string phoneNumber)
+        public async Task<IActionResult> ConfirmCheckout(string fullName, string phoneNumber, string deliveryAddress)
         {
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0) return RedirectToAction("Login", "Account");
@@ -249,23 +248,25 @@ namespace FridgeManagementSystem.Controllers
                 .ThenInclude(i => i.Fridge)
                 .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
 
-            if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
+            if (cart == null || !cart.CartItems.Any())
             {
                 TempData["Error"] = "Your cart is empty.";
                 return RedirectToAction("ViewCart");
             }
 
+            // ✅ Create new order
             var order = new Order
             {
                 CustomerID = customerId,
                 OrderDate = DateTime.Now,
                 Status = "Pending",
                 DeliveryAddress = deliveryAddress,
-                ContactName = contactName,
+                ContactName = fullName,
                 ContactPhone = phoneNumber,
                 TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
             };
 
+            // ✅ Add each cart item to the order
             foreach (var ci in cart.CartItems)
             {
                 order.OrderItems.Add(new OrderItem
@@ -276,29 +277,14 @@ namespace FridgeManagementSystem.Controllers
                 });
             }
 
+            // ✅ Save order and deactivate cart
             _context.Orders.Add(order);
-
-            // Mark the cart as inactive (so new items require a new cart)
             cart.IsActive = false;
             _context.Carts.Update(cart);
-
             await _context.SaveChangesAsync();
 
-            // Explicitly redirect to AddCard action in Customer controller
-            return RedirectToAction("AddCard", "Customer", new { orderId = order.OrderId, amount = order.TotalAmount });
-        }
-
-        // ==========================
-        // 5. ORDER CONFIRMATION
-        // ==========================
-        public async Task<IActionResult> OrderConfirmation(int id)
-        {
-            var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .ThenInclude(i => i.Fridge)
-                .FirstOrDefaultAsync(o => o.OrderId == id);
-
-            return View(order);
+            // ✅ Redirect to payment (AddCard) page
+            return RedirectToAction("AddCard", new { orderId = order.OrderId });
         }
 
         // ==========================
@@ -325,6 +311,7 @@ namespace FridgeManagementSystem.Controllers
                 Orders = order
             };
 
+
             return View(vm);
         }
 
@@ -332,63 +319,91 @@ namespace FridgeManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCard(PaymentViewModel model)
         {
-            // Validate card fields only if payment method is Card
-            if (model.Method == Method.Card)
-            {
-                if (string.IsNullOrWhiteSpace(model.CardholderName))
-                    ModelState.AddModelError("CardholderName", "Cardholder Name is required.");
-
-                if (string.IsNullOrWhiteSpace(model.CardNumber))
-                    ModelState.AddModelError("CardNumber", "Card Number is required.");
-
-                if (string.IsNullOrWhiteSpace(model.ExpiryDate))
-                    ModelState.AddModelError("ExpiryDate", "Expiry Date is required.");
-
-                if (string.IsNullOrWhiteSpace(model.CVV))
-                    ModelState.AddModelError("CVV", "CVV is required.");
-            }
-
-            // If ModelState is invalid, reload the form with validation messages
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
             var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
                 .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
 
-            if (order == null || order.CustomerID != customerId)
-                return Forbid();
+            if (order == null) return Forbid();
 
-            // Calculate amount from order items to ensure it's correct
+            // Recompute amount server-side for safety
             model.Amount = await _context.OrderItems
                 .Where(oi => oi.OrderId == model.OrderId)
                 .SumAsync(oi => oi.Price * oi.Quantity);
 
-            var payment = new Payment
+            if (!ModelState.IsValid)
+            {
+                model.Orders = order;
+                return View(model);
+            }
+
+            Payment payment = new Payment
             {
                 OrderId = model.OrderId,
                 Amount = model.Amount,
                 Method = model.Method,
-                CardNumber = model.Method == Method.Card ? MaskCardNumber(model.CardNumber) : null,
-                BankReference = model.Method != Method.Card ? model.BankReference : null,
-                PaymentDate = DateTime.Now,
-                Status = "Paid"
+                PaymentDate = DateTime.Now
             };
 
-            _context.Payments.Add(payment);
+            if (model.Method == Method.Card)
+            {
+                payment.CardNumber = MaskCardNumber(model.CardNumber);
+                payment.Status = "Paid";
+                order.Status = "Paid";
+            }
+            else if (model.Method == Method.EFT)
+            {
+                payment.PaymentReference = GeneratePaymentReference();
+                payment.BankReference = model.BankReference;
+                payment.Status = "Pending"; // awaiting admin approval
 
-            // Update order status
-            order.Status = "Paid";
+                if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
+                {
+                    var fileName = $"{payment.PaymentReference}_{model.ProofOfPayment.FileName}";
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/payments", fileName);
+
+                    using var stream = new FileStream(path, FileMode.Create);
+                    await model.ProofOfPayment.CopyToAsync(stream);
+
+                    payment.ProofFilePath = "/uploads/payments/" + fileName;
+                    payment.Status = "AwaitingAdminApproval";
+                }
+
+                order.Status = "AwaitingPayment";
+            }
+            else if (model.Method == Method.PayPal)
+            {
+                payment.Status = "Pending"; // mark pending until confirmation
+                order.Status = "AwaitingPayment";
+            }
+
+            _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
-            // Redirect to confirmation page
-            return RedirectToAction("PaymentConfirmation", "Customer", new { orderId = order.OrderId });
+            return RedirectToAction("PaymentConfirmation", new { orderId = order.OrderId });
         }
 
-        public IActionResult PaymentConfirmation() => View();
+
+        public async Task<IActionResult> PaymentConfirmation(int orderId)
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Fridge)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
+
+            if (order == null) return NotFound();
+
+            // Optionally include latest payment
+            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
+
+            ViewBag.Payment = payment;
+            return View(order);
+        }
 
         // ==========================
         // 7. MY ACCOUNT & ORDERS
@@ -576,22 +591,24 @@ namespace FridgeManagementSystem.Controllers
         private string MaskCardNumber(string cardNumber)
         {
             if (string.IsNullOrEmpty(cardNumber)) return null;
-
             var cleaned = cardNumber.Replace(" ", "");
             var last4 = cleaned.Length >= 4 ? cleaned[^4..] : cleaned;
-
             return new string('*', Math.Max(0, cleaned.Length - 4)) + last4;
         }
+
 
         private string GenerateFaultCode()
         {
             return "FLT-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
         }
-
-        private string GenerateRequestCode()
+        private string GeneratePaymentReference()
         {
-            return "REQ-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            return "PAY-" + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
         }
+
+      
+
+
     }
 }
 
