@@ -1,0 +1,108 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.Order>
+
+@{
+    ViewData["Title"] = "Order History";
+}
+
+<!-- Dashboard / Navigation Buttons -->
+<div class="mb-4 d-flex align-items-center">
+    <a asp-action="Dashboard" class="btn btn-primary btn-3d me-3">
+        <i class="fas fa-home me-2"></i>Back to Dashboard
+    </a>
+    <a asp-controller="Customer" asp-action="OrderHistory" class="btn btn-primary btn-3d">
+        <i class="fas fa-history me-2"></i>View Order History
+    </a>
+</div>
+
+<h2 class="mb-4">Order History</h2>
+
+@if (!Model.Any())
+{
+        <div class="alert alert-info shadow-sm">
+            You haven't placed any orders yet.
+        </div>
+}
+else
+{
+        <table class="table table-hover shadow-sm rounded">
+            <thead class="table-header-gradient text-white">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var order in Model)
+            {
+                        <tr>
+                            <td>@order.OrderId</td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@($"R{order.TotalAmount:0.00}")</td>
+                            <td>
+                                <a asp-action="ViewOrder" asp-route-id="@order.OrderId" class="btn btn-sm btn-success btn-3d">
+                                    <i class="fas fa-eye me-1"></i>View / Print
+                                </a>
+                            </td>
+                        </tr>
+            }
+            </tbody>
+        </table>
+}
+
+<!-- CSS Styling for 3D buttons and table -->
+<style>
+    /* 3D Buttons */
+    .btn-3d {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        box-shadow: 0 5px 0 rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary.btn-3d {
+        background: linear-gradient(145deg, #4e73df, #224abe);
+        color: #fff;
+    }
+
+    .btn-success.btn-3d {
+        background: linear-gradient(145deg, #1cc88a, #17a673);
+        color: #fff;
+    }
+
+    .btn-3d:hover {
+        transform: translateY(2px);
+        box-shadow: 0 3px 0 rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.15);
+        text-decoration: none;
+    }
+
+    /* Table Styling */
+    .table-hover tbody tr:hover {
+        background-color: rgba(78, 115, 223, 0.08);
+        cursor: pointer;
+    }
+
+    .table-header-gradient {
+        background: linear-gradient(90deg, #4e73df, #224abe);
+    }
+
+    .table {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .alert-info {
+        background-color: #e3f2fd;
+        color: #055160;
+        border-radius: 8px;
+        padding: 15px;
+    }
+</style>
+

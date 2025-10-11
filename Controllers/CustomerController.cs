@@ -424,6 +424,7 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
         }
+
         // ==========================
         // 7. PAYMENT CONFIRMATION
         // ==========================
@@ -457,6 +458,45 @@ namespace FridgeManagementSystem.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> OrderHistory()
+        {
+            var appUser = await _userManager.GetUserAsync(User);
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.ApplicationUserId == appUser.Id);
+
+            if (customer == null)
+                return NotFound("Customer profile not found.");
+
+            var orders = await _context.Orders
+                .Where(o => o.CustomerID == customer.CustomerID) 
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Fridge)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> ViewOrder(int id)
+        {
+            var appUser = await _userManager.GetUserAsync(User);
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.ApplicationUserId == appUser.Id);
+
+            if (customer == null)
+                return NotFound("Customer profile not found.");
+
+            var order = await _context.Orders
+                .Where(o => o.OrderId == id && o.CustomerID == customer.CustomerID)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Fridge)
+                .FirstOrDefaultAsync();
+
+            return View(order);
         }
 
         // ==========================
