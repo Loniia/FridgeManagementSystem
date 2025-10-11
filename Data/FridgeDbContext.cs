@@ -101,12 +101,6 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey(a => a.FridgeId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<Customer>()
-                .HasMany(c => c.PurchaseRequest)
-                .WithOne(p => p.Customer)
-                .HasForeignKey(p => p.CustomerID)
-                .OnDelete(DeleteBehavior.NoAction);
-
             // Fridge Relationships (Consolidated)
             builder.Entity<Fridge>()
                 .HasMany(f => f.Faults)
@@ -266,7 +260,6 @@ namespace FridgeManagementSystem.Data
             builder.Entity<FridgeAllocation>().HasQueryFilter(a => a.Fridge.IsActive);
             builder.Entity<Inventory>().HasQueryFilter(i => i.Fridge.IsActive);
             builder.Entity<ScrappedFridge>().HasQueryFilter(s => s.Fridge.IsActive);
-            builder.Entity<PurchaseRequest>().HasQueryFilter(p => p.Customer.IsActive);
             builder.Entity<FaultReport>().HasQueryFilter(fr => fr.Fridge.IsActive);
 
             // Configure enum conversions
