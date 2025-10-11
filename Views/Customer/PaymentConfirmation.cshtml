@@ -22,7 +22,7 @@
                         </div>
                         <div class="col-md-6">
                             <h5>Payment Information</h5>
-                            <p><strong>Amount Paid:</strong> R@Model.Amount.ToString("0.00")</p>
+                            <p><strong>Amount Paid:</strong> @($"R{Model.Amount:0.00}")</p>
                             <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
                             <p><strong>Status:</strong> <span class="badge bg-success">@Model.Status</span></p>
                         </div>
@@ -48,8 +48,8 @@
                                                     <tr>
                                                         <td>@item.Fridge?.Brand @item.Fridge?.Model</td>
                                                         <td>@item.Quantity</td>
-                                                        <td>R@item.Price.ToString("0.00")</td>
-                                                        <td>R@((item.Quantity * item.Price).ToString("0.00"))</td>
+                                                        <td>@($"R{item.Price:0.00}")</td>
+                                                        <td>@($"R{item.Quantity * item.Price:0.00}")</td>
                                                     </tr>
                                         }
                                         </tbody>
