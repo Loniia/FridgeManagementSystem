@@ -13,11 +13,14 @@ using FridgeManagementSystem.Models;
 using FridgeManagementSystem.ViewModels;
 using TaskStatus = FridgeManagementSystem.Models.TaskStatus;
 using QuestPDF.Fluent;
+using FridgeManagementSystem.Services;
 
 namespace FridgeManagementSystem.Controllers
 {
     public class CustomerController : Controller
     {
+
+        private readonly INotificationService _notificationService;
         private readonly FridgeDbContext _context;
         private readonly FridgeService _fridgeService;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -28,12 +31,13 @@ namespace FridgeManagementSystem.Controllers
             FridgeDbContext context,
             FridgeService fridgeService,
             UserManager<ApplicationUser> userManager,
-            ILogger<CustomerController> logger)
+            ILogger<CustomerController> logger, INotificationService notificationService)
         {
             _context = context;
             _fridgeService = fridgeService;
             _userManager = userManager;
             _logger = logger;
+            _notificationService = notificationService;
         }
 
         // ==========================
@@ -273,7 +277,7 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // ==========================
-        // 5. PAYMENT METHODS
+        // PAYMENT METHODS (Card + EFT Only)
         // ==========================
         [HttpGet]
         public async Task<IActionResult> AddCard(int orderId, decimal? amount)
@@ -307,14 +311,11 @@ namespace FridgeManagementSystem.Controllers
             if (customerId == 0) return RedirectToAction("Login", "Account");
 
             var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
+         .Include(o => o.OrderItems)
+         .Include(o => o.Customers)
+         .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
 
             if (order == null) return Forbid();
-
-            model.Amount = await _context.OrderItems
-                .Where(oi => oi.OrderId == model.OrderId)
-                .SumAsync(oi => oi.Price * oi.Quantity);
 
             if (!ModelState.IsValid)
             {
@@ -322,55 +323,88 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
-            Payment payment = new Payment
+            var paymentReference = $"ORD{order.OrderId}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}";
+
+            var payment = new Payment
             {
                 OrderId = model.OrderId,
-                Amount = model.Amount,
+                Amount = order.TotalAmount,
                 Method = model.Method,
-                PaymentDate = DateTime.Now
+                PaymentDate = DateTime.Now,
+                PaymentReference = paymentReference,
+                BankReference = model.BankReference,
+                Status = "AwaitingAdminApproval"
             };
 
+            // ==========================
+            // CARD PAYMENT
+            // ==========================
             if (model.Method == Method.Card)
             {
-                payment.CardNumber = MaskCardNumber(model.CardNumber);
+                string cleanCard = new string(model.CardNumber.Where(char.IsDigit).ToArray());
+                if (cleanCard.Length != 16)
+                {
+                    ModelState.AddModelError("CardNumber", "Invalid card number (must be 16 digits).");
+                    model.Orders = order;
+                    return View(model);
+                }
+
+                payment.CardNumber = MaskCardNumber(cleanCard);
                 payment.Status = "Paid";
                 order.Status = "Paid";
             }
+
+            // ==========================
+            // EFT PAYMENT
+            // ==========================
             else if (model.Method == Method.EFT)
             {
-                payment.PaymentReference = GeneratePaymentReference();
-                payment.BankReference = model.BankReference;
-                payment.Status = "Pending";
-
                 if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
                 {
-                    var fileName = $"{payment.PaymentReference}_{model.ProofOfPayment.FileName}";
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/payments", fileName);
+                    var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "payments");
+                    if (!Directory.Exists(uploadsDir))
+                        Directory.CreateDirectory(uploadsDir);
+
+                    var fileName = $"{payment.PaymentReference}_{Path.GetFileName(model.ProofOfPayment.FileName)}";
+                    var path = Path.Combine(uploadsDir, fileName);
 
                     using var stream = new FileStream(path, FileMode.Create);
                     await model.ProofOfPayment.CopyToAsync(stream);
 
-                    payment.ProofFilePath = "/uploads/payments/" + fileName;
-                    payment.Status = "AwaitingAdminApproval";
+                    payment.ProofFilePath = $"/uploads/payments/{fileName}";
                 }
 
-                order.Status = "AwaitingPayment";
-            }
-            else if (model.Method == Method.PayPal)
-            {
-                payment.Status = "Pending";
                 order.Status = "AwaitingPayment";
             }
 
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
+            // ==========================
+            // NOTIFICATIONS
+            // ==========================
+            var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.UserType == Roles.Admin);
+            var adminCustomer = adminUser != null
+                ? await _context.Customers.FirstOrDefaultAsync(c => c.ApplicationUserId == adminUser.Id)
+                : null;
+
+            int adminCustomerId = adminCustomer?.CustomerID ?? 1;
+
+            await _notificationService.CreateAsync(
+                adminCustomerId,
+                $"New EFT proof uploaded for Order #{order.OrderId} by {order.Customers.FullName}. Reference: {payment.PaymentReference}",
+                Url.Action("PendingPayments", "Admin"));
+
+            await _notificationService.CreateAsync(
+                customerId,
+                $"We received your proof of payment for order #{order.OrderId}. Awaiting admin verification.",
+                Url.Action("MyAccount", "Customer"));
+
             return RedirectToAction("PaymentConfirmation", new { orderId = order.OrderId });
         }
 
-        // ==========================
-        // 6. PAYMENT CONFIRMATION
-        // ==========================
+
+        // ✅ PAYMENT CONFIRMATION
         [HttpGet]
         public async Task<IActionResult> PaymentConfirmation(int orderId)
         {
@@ -379,28 +413,24 @@ namespace FridgeManagementSystem.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Fridge)
                 .Include(o => o.Payments)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
 
-            if (order == null)
-            {
-                return NotFound();
-            }
+            if (order == null) return NotFound();
 
             var payment = order.Payments?.FirstOrDefault();
 
-            var viewModel = new PaymentConfirmationViewModel
+            var vm = new PaymentConfirmationViewModel
             {
                 OrderId = order.OrderId,
                 Amount = payment?.Amount ?? order.TotalAmount,
                 PaymentDate = payment?.PaymentDate ?? DateTime.Now,
                 PaymentMethod = payment?.Method.ToString() ?? "Card",
-                Status = payment?.Status ?? "Paid",
-                OrderItems = order.OrderItems?.ToList() ?? new List<OrderItem>()
+                Status = payment?.Status ?? "Pending",
+                OrderItems = order.OrderItems.ToList()
             };
 
-            return View(viewModel);
+            return View(vm);
         }
 
         [Authorize]
@@ -649,12 +679,11 @@ namespace FridgeManagementSystem.Controllers
 
         private string MaskCardNumber(string cardNumber)
         {
-            if (string.IsNullOrEmpty(cardNumber)) return null;
-            var cleaned = cardNumber.Replace(" ", "");
-            var last4 = cleaned.Length >= 4 ? cleaned[^4..] : cleaned;
-            return new string('*', Math.Max(0, cleaned.Length - 4)) + last4;
-        }
+            if (string.IsNullOrWhiteSpace(cardNumber) || cardNumber.Length < 4)
+                return "****";
 
+            return new string('*', cardNumber.Length - 4) + cardNumber[^4..];
+        }
         private string GenerateFaultCode()
         {
             return "FLT-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
@@ -662,7 +691,7 @@ namespace FridgeManagementSystem.Controllers
 
         private string GeneratePaymentReference()
         {
-            return "PAY-" + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+            return "REF-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
         }
     }
 }

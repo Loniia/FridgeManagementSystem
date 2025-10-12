@@ -47,7 +47,8 @@ namespace FridgeManagementSystem.Data
         public DbSet<AdminNotification> AdminNotifications { get; set; }
         public DbSet<BusinessInfo> BusinessInfos { get; set; }
 
-        //public DbSet<FridgeRequest> FridgeRequests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
 
 
         // --------------------------

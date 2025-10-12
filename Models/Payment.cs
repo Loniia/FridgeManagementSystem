@@ -30,8 +30,7 @@ namespace FridgeManagementSystem.Models
         public string ProofFilePath { get; set; } // for EFT proof upload
         public string Status { get; set; } // "Pending", "AwaitingAdminApproval", "Paid"
         public DateTime PaymentDate { get; set; }
-        // For PayPal
-        public string PayPalTransactionId { get; set; }
+        
 
        
 
