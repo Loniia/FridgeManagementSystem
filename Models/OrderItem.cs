@@ -20,6 +20,7 @@ namespace FridgeManagementSystem.Models
         [Required]
         [Range(1, 100)]
         public int Quantity { get; set; }
+        public string AllocationStatus { get; set; }
 
         [Required]
         [Range(0.01, 100000)]

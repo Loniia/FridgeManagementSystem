@@ -10,10 +10,15 @@ namespace FridgeManagementSystem.ViewModels
 {
     public class CheckoutViewModel
     {
-        public List<CartItem> CartItems { get; set; } = new List<CartItem>();
+        [Required]
+        public string ContactName { get; set; }
 
+        [Required]
+        public string ContactPhone { get; set; }
+
+        [Required]
         public string DeliveryAddress { get; set; }
-
+        public List<CartItem> CartItems { get; set; } = new List<CartItem>();
         public decimal TotalAmount { get; set; }
        
         public Method PaymentMethod { get; set; }

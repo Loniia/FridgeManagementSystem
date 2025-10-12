@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF;
 using QuestPDF.Infrastructure;
+using FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,10 @@ builder.Services.AddControllersWithViews();
 
 // ✅ 4. Add ServiceHistoryPdfGenerator to DI container
 builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
+
+builder.Services.AddScoped<ICustomerManagementSubSystem, CustomerManagementService>();
+builder.Services.AddScoped<InventoryLiaisonController>();
+
 
 // ✅ 5. Configure role-based authorization
 builder.Services.ConfigureApplicationCookie(options =>

@@ -1,4 +1,88 @@
-﻿@model IEnumerable<FridgeManagementSystem.Models.FridgeViewModel>
+﻿@model IEnumerable<FridgeManagementSystem.Models.Fridge>
+
+@{
+    ViewData["Title"] = "Manage Fridges";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary mb-0">🧊 Manage Fridges</h2>
+
+    <!-- ✅ Single Request button (outside the table) -->
+    <a asp-action="RequestFridge" class="btn btn-primary px-4 py-2 shadow rounded-pill">
+        ➕ Request New Fridge
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success text-center shadow-sm">
+        @TempData["Success"]
+    </div>
+}
+
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>Fridge</th>
+                        <th>Brand</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    @foreach (var fridge in Model)
+                    {
+                        <tr class="shadow-sm" style="transition: all 0.3s ease;">
+                            <td class="fw-semibold">@fridge.FridgeType</td>
+                            <td>@fridge.Brand</td>
+                            <td>
+                                <span class="badge @(fridge.Status == "Available" ? "bg-success" : fridge.Status == "Requested" ? "bg-warning text-dark" : "bg-secondary")">
+                                    @fridge.Status
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 💎 3D table & hover effects */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0 0.7rem;
+    }
+
+        .table tbody tr {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+            .table tbody tr:hover {
+                transform: scale(1.01);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+        .table th {
+            font-weight: 600;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+</style>
+
+
+
+
+
+@* @model IEnumerable<FridgeManagementSystem.Models.FridgeViewModel>
 @{
     ViewData["Title"] = "Fridge Inventory";
     Layout = "_Layout";
@@ -179,3 +263,4 @@
         </div>
     </div>
 </div>
+ *@

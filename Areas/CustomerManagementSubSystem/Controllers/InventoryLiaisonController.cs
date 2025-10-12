@@ -229,11 +229,17 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         }
 
         // --------------------------
-        // Create Purchase Request Manually
+        // Create Purchase Request (GET)
         // --------------------------
         [HttpGet]
-        public IActionResult CreatePurchaseRequest() => View();
+        public IActionResult CreatePurchaseRequest()
+        {
+            return View();
+        }
 
+        // --------------------------
+        // Create Purchase Request (POST)
+        // --------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePurchaseRequest(CreatePurchaseRequestViewModel model)
@@ -245,12 +251,14 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             {
                 ItemFullNames = model.ItemFullNames,
                 Quantity = model.Quantity,
-                RequestBy = "InventoryLiaison",
+                RequestBy = "Inventory Liaison",
                 RequestType = "Fridge Purchase",
-                AssignedToRole = "PurchasingManager",
+                AssignedToRole = "Purchasing Manager",
                 RequestDate = DateOnly.FromDateTime(DateTime.Now),
                 Status = "Pending",
-                IsActive = true
+                IsActive = true,
+                FridgeId = model.FridgeId, // optional link (nullable)
+                InventoryID = model.InventoryID ?? 0// if it comes from stock
             };
 
             // Generate unique Request Number
@@ -267,6 +275,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return RedirectToAction(nameof(ProcessPurchaseRequests));
         }
 
+        // --------------------------
+        // Process Purchase Requests (List)
+        // --------------------------
         public async Task<IActionResult> ProcessPurchaseRequests()
         {
             var requests = await _context.PurchaseRequests
@@ -279,34 +290,14 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 RequestDate = r.RequestDate,
                 Status = r.Status,
                 Quantity = r.Quantity,
-                ItemName = r.ItemFullNames
-            });
+                ItemFullNames = r.ItemFullNames,
+                RequestNumber = r.RequestNumber
+            }).ToList();
 
             return View(viewModel);
         }
 
-        public async Task<IActionResult> Approve(int id)
-        {
-            var request = await _context.PurchaseRequests.FindAsync(id);
-            if (request == null) return NotFound();
-
-            request.Status = "Approved";
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Purchase request approved!";
-            return RedirectToAction(nameof(ProcessPurchaseRequests));
-        }
-
-        public async Task<IActionResult> Reject(int id)
-        {
-            var request = await _context.PurchaseRequests.FindAsync(id);
-            if (request == null) return NotFound();
-
-            request.Status = "Rejected";
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Purchase request rejected!";
-            return RedirectToAction(nameof(ProcessPurchaseRequests));
-        }
-
+       
             // Monthly Dashboard View
             // --------------------------
             public async Task<IActionResult> MonthlyDashboard(int? year)

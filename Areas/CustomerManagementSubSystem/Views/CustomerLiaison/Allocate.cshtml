@@ -1,41 +1,132 @@
 ﻿@model FridgeManagementSystem.Models.CustomerAllocationViewModel
+
 @{
-    Layout = "_Layout";
     ViewData["Title"] = "Allocate Fridge";
 }
 
-<h2>Allocate Fridge for @Model.CustomerName</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<form asp-action="Allocate" method="post">
-    <input type="hidden" asp-for="CustomerId" />
+<style>
+    body {
+        background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+        font-family: 'Segoe UI', sans-serif;
+        color: #333;
+    }
 
-    <div class="mb-3">
-        <label asp-for="SelectedFridgeID" class="form-label">Select Fridge</label>
-        <select asp-for="SelectedFridgeID" class="form-select"
-                asp-items="@(new SelectList(Model.AvailableFridges, "FridgeID", "Model"))">
-            <option value="">-- Choose Fridge --</option>
-        </select>
-        <span asp-validation-for="SelectedFridgeID" class="text-danger"></span>
+    .allocation-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+
+        .allocation-card:hover {
+            transform: translateY(-10px) rotateX(3deg);
+            box-shadow: 0 25px 35px rgba(0, 0, 0, 0.25);
+        }
+
+    .fridge-card {
+        background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 15px;
+    }
+
+        .fridge-card:hover {
+            transform: translateY(-5px) rotateX(2deg);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+        }
+
+    .fridge-image {
+        max-width: 100px;
+        border-radius: 10px;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    }
+
+    .btn-allocate {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        color: white;
+        font-weight: 600;
+        transition: transform 0.2s ease;
+    }
+
+        .btn-allocate:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+    .alert {
+        border-radius: 12px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Allocate Fridge to @Model.CustomerName</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger text-center">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+    }
+
+    <div class="allocation-card mx-auto" style="max-width:800px;">
+        <form asp-action="Allocate" method="post">
+            <input type="hidden" asp-for="CustomerId" />
+
+            <div class="mb-3">
+                <label asp-for="SelectedFridgeID" class="form-label">Select Fridge</label>
+                <select asp-for="SelectedFridgeID" class="form-select">
+                    <option value="">-- Choose a fridge --</option>
+                    @foreach (var fridge in Model.AvailableFridges)
+                    {
+                        <option value="@fridge.FridgeId">@fridge.Brand @fridge.Model (Stock: @fridge.Quantity)</option>
+                    }
+                </select>
+                <span asp-validation-for="SelectedFridgeID" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="QuantityAllocated" class="form-label">Quantity to Allocate</label>
+                <input asp-for="QuantityAllocated" type="number" min="1" class="form-control" />
+                <span asp-validation-for="QuantityAllocated" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ReturnDate" class="form-label">Expected Return Date</label>
+                <input asp-for="ReturnDate" type="date" class="form-control" />
+                <span asp-validation-for="ReturnDate" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-allocate w-100 py-2">Allocate Fridge</button>
+        </form>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="QuantityAllocated" class="form-label">Quantity to Allocate</label>
-        <input asp-for="QuantityAllocated" type="number" min="1" class="form-control" />
-        <span asp-validation-for="QuantityAllocated" class="text-danger"></span>
+    <h4 class="mt-5 mb-3 text-center">Pending Orders</h4>
+    <div class="row">
+        @foreach (var item in Model.OrderedItems)
+        {
+            <div class="col-md-6">
+                <div class="fridge-card d-flex align-items-center">
+                    <img src="@item.Fridge.ImageUrl ?? " /images/fridges/default.jpg"" alt="Fridge Image" class="fridge-image me-3" />
+                    <div>
+                        <h5>@item.Fridge.Brand @item.Fridge.Model</h5>
+                        <p>Ordered: @item.Quantity</p>
+                        <p>Price: @item.Price.ToString("C")</p>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
-
-    <div class="mb-3">
-        <label asp-for="ReturnDate" class="form-label">Expected Return Date (optional)</label>
-        <input asp-for="ReturnDate" class="form-control" type="date" />
-        <span asp-validation-for="ReturnDate" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-success">Allocate Fridge</button>
-    <a asp-action="Details" asp-route-id="@Model.CustomerId" class="btn btn-secondary">Back</a>
-</form>
+</div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

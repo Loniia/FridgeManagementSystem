@@ -1,0 +1,49 @@
+﻿@model IEnumerable<FridgeManagementSystem.ViewModels.PendingAllocationViewModel>
+
+<h2>Pending Fridge Allocations</h2>
+
+<table class="table table-hover table-bordered mt-3 shadow-lg">
+    <thead class="table-dark text-center">
+        <tr>
+            <th>Customer</th>
+            <th>Fridge</th>
+            <th>Quantity Ordered</th>
+            <th>Quantity Allocated</th>
+            <th>Quantity Pending</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="text-center">
+                <td>@item.CustomerName</td>
+                <td>@item.FridgeBrand @item.FridgeModel</td>
+                <td>@item.QuantityOrdered</td>
+                <td>@item.QuantityAllocated</td>
+                <td>@item.QuantityPending</td>
+                <td>
+                    @if (item.Status == "Pending")
+                    {
+                        <span class="text-warning fw-bold">Pending</span>
+                    }
+                    else
+                    {
+                        <span class="text-success fw-bold">Allocated</span>
+                    }
+                </td>
+                <td>
+                    <form asp-action="AllocateFridge" method="post" class="d-flex justify-content-center gap-1">
+                        <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+                        <input type="number" name="quantityToAllocate"
+                               class="form-control form-control-sm"
+                               min="1" max="@item.QuantityPending"
+                               value="@item.QuantityPending" style="width: 70px;" />
+                        <button type="submit" class="btn btn-primary btn-sm shadow">Allocate</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

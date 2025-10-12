@@ -1,8 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+#nullable disable
 namespace FridgeManagementSystem.Models
 {
     public class CreatePurchaseRequestViewModel
     {
+
+            [HiddenInput(DisplayValue = false)]
+            public int? FridgeId { get; set; }
+
+            [HiddenInput(DisplayValue = false)]
+            public int? InventoryID { get; set; }
+
             [Required]
             [StringLength(100)]
             public string ItemFullNames { get; set; }

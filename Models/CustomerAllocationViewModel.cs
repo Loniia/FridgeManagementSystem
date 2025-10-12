@@ -17,15 +17,20 @@ namespace FridgeManagementSystem.Models
 
         public string Status { get; set; }
 
-        public List<Fridge> AvailableFridges { get; set; }
-
         // IDs of fridges selected for allocation (posted back)
         public List<int> SelectedFridgeIDs { get; set; } = new List<int>();
 
-        //how many fridges to allocate
+        // How many fridges to allocate
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Please enter a valid quantity")]
         public int QuantityAllocated { get; set; }
+
+        // Fridges available to allocate
+        public List<Fridge> AvailableFridges { get; set; } = new List<Fridge>();
+
+        // NEW: Track the customer's order items to respect purchased quantity
+        public List<OrderItem> OrderedItems { get; set; } = new List<OrderItem>();
+
     }
 
 }

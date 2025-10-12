@@ -10,7 +10,7 @@ namespace FridgeManagementSystem.Models
         public int PurchaseRequestID { get; set; }
 
         [ForeignKey("Fridge")]
-        public int FridgeId { get; set; }
+        public int? FridgeId { get; set; }
         [ForeignKey("Inventory")]
         public int InventoryID { get; set; }
 

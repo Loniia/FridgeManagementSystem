@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Request a Fridge";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+        <h3 class="text-center text-primary mb-4">Request a Fridge</h3>
+
+        <form asp-action="SubmitFridgeRequest" method="post">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Fridge Model</label>
+                <input type="text" name="Model" class="form-control" placeholder="Enter fridge model..." required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Reason for Request</label>
+                <textarea name="Reason" class="form-control" rows="4" placeholder="Why do you need this fridge?" required></textarea>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+

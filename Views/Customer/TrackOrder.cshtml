@@ -9,11 +9,13 @@
     <h2 class="mb-4 text-center">Track Order #@Model.OrderId</h2>
 
     <div class="card shadow-sm p-4">
+        <!-- Order Status Badge -->
         <div class="mb-3">
-            <strong>Status:</strong> 
-            <span class="badge 
-                @(Model.Status == "Pending" ? "bg-warning text-dark" : 
-                  Model.Status == "Shipped" ? "bg-primary" : 
+            <strong>Status:</strong>
+            <span class="badge
+                @(Model.Status == "Pending" ? "bg-warning text-dark" :
+                  Model.Status == "Allocated" ? "bg-info text-dark" :
+                  Model.Status == "Shipped" ? "bg-primary" :
                   Model.Status == "Delivered" ? "bg-success" : "bg-secondary")">
                 @Model.Status
             </span>
@@ -30,11 +32,58 @@
         <div class="mt-4">
             <h5>Order Progress</h5>
             <ul class="timeline">
-                <li class="@(Model.Status == "Pending" || Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Order Placed</li>
+                <li class="@(Model.Status == "Pending" || Model.Status == "Allocated" || Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Order Placed</li>
+                <li class="@(Model.Status == "Allocated" || Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Fridge Allocated</li>
                 <li class="@(Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Shipped</li>
                 <li class="@(Model.Status == "Delivered" ? "completed" : "")">Delivered</li>
             </ul>
         </div>
+
+        <hr />
+
+        <!-- Fridge Allocation Table -->
+        <h5>Fridge Items</h5>
+        <table class="table table-bordered mt-2">
+            <thead class="table-light">
+                <tr>
+                    <th>Fridge Model</th>
+                    <th>Quantity Ordered</th>
+                    <th>Allocated Quantity</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderItems)
+                {
+                    var allocated = item.Fridge.FridgeAllocation
+                    .Where(a => a.CustomerID == Model.CustomerID && a.Status == "Allocated")
+                    .Sum(a => a.QuantityAllocated);
+
+                    var statusBadge = allocated switch
+                    {
+                        0 => "bg-secondary", // Pending
+                        var n when n < item.Quantity => "bg-warning text-dark", // Partially Allocated
+                        var n when n >= item.Quantity => "bg-success", // Fully Allocated
+                        _ => "bg-secondary"
+                    };
+
+                    var statusText = allocated switch
+                    {
+                        0 => "Pending",
+                        var n when n < item.Quantity => "Partially Allocated",
+                        var n when n >= item.Quantity => "Allocated",
+                        _ => "Pending"
+                    };
+
+                    <tr>
+                        <td>@item.Fridge.Model</td>
+                        <td>@item.Quantity</td>
+                        <td>@allocated</td>
+                        <td><span class="badge @statusBadge">@statusText</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
         <div class="mt-4 text-end">
             <a asp-action="MyAccount" class="btn btn-secondary">Back to Orders</a>
@@ -43,40 +92,41 @@
 </div>
 
 <style>
-/* Simple timeline styling */
-.timeline {
-    list-style-type: none;
-    padding-left: 0;
-    position: relative;
-}
+    /* Simple timeline styling */
+    .timeline {
+        list-style-type: none;
+        padding-left: 0;
+        position: relative;
+    }
 
-.timeline li {
-    padding: 10px 20px;
-    position: relative;
-    background: #f1f1f1;
-    margin-bottom: 10px;
-    border-radius: 6px;
-}
+        .timeline li {
+            padding: 10px 20px;
+            position: relative;
+            background: #f1f1f1;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
 
-.timeline li::before {
-    content: '';
-    position: absolute;
-    left: -15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 10px;
-    height: 10px;
-    background: #ccc;
-    border-radius: 50%;
-    border: 2px solid #fff;
-}
+            .timeline li::before {
+                content: '';
+                position: absolute;
+                left: -15px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 10px;
+                height: 10px;
+                background: #ccc;
+                border-radius: 50%;
+                border: 2px solid #fff;
+            }
 
-.timeline li.completed {
-    background: #d1e7dd;
-    color: #0f5132;
-}
+            .timeline li.completed {
+                background: #d1e7dd;
+                color: #0f5132;
+            }
 
-.timeline li.completed::before {
-    background: #198754;
-}
+                .timeline li.completed::before {
+                    background: #198754;
+                }
 </style>
+
