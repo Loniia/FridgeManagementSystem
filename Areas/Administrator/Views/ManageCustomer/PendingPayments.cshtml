@@ -1,0 +1,115 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.Payment>
+
+@{
+    ViewData["Title"] = "Pending Payments";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Verify Payments</h2>
+
+    <div class="top-bar d-flex justify-content-between align-items-center mb-3">
+        <a asp-controller="ManageCustomer" asp-action="Index" class="btn btn-back">
+            ← Go Back to Customers
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            No pending payments found.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Payment Ref</th>
+                    <th>Customer</th>
+                    <th>Order #</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Proof</th>
+                    <th style="width: 220px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var payment in Model)
+                {
+                    <tr>
+                        <td>@payment.PaymentReference</td>
+                        <td>@payment.Orders?.Customers?.FullName</td>
+                        <td>@payment.Orders?.OrderId</td>
+                        <td>R @payment.Amount.ToString("0.00")</td>
+                        <td>@payment.Method</td>
+                        <td>
+                            @if (payment.Status == "Pending" || payment.Status == "Awaiting Verification" || payment.Status == "AwaitingAdminApproval")
+                            {
+                                <span class="badge bg-warning text-dark">@payment.Status</span>
+                            }
+                            else if (payment.Status == "Paid")
+                            {
+                                <span class="badge bg-success">@payment.Status</span>
+                            }
+                            else if (payment.Status == "Rejected")
+                            {
+                                <span class="badge bg-danger">@payment.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@payment.Status</span>
+                            }
+                        </td>
+                        <td>@payment.PaymentDate.ToString("yyyy/MM/dd")</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(payment.ProofFilePath))
+                            {
+                                <a href="~/uploads/payments/@System.IO.Path.GetFileName(payment.ProofFilePath)"
+                                   target="_blank"
+                                   class="btn btn-outline-info btn-sm">
+                                    View Proof
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No File</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="VerifyPayment" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="paymentId" value="@payment.PaymentId" />
+                                <input type="hidden" name="approve" value="true" />
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+
+                            <form asp-action="VerifyPayment" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="paymentId" value="@payment.PaymentId" />
+                                <input type="hidden" name="approve" value="false" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+@section Scripts {
+    <script>
+        document.querySelectorAll("form").forEach(form => {
+            form.addEventListener("submit", function (e) {
+                const isApprove = this.querySelector("input[name='approve']").value === "true";
+                const message = isApprove
+                    ? "Are you sure you want to approve this payment?"
+                    : "Are you sure you want to reject this payment?";
+                if (!confirm(message)) e.preventDefault();
+            });
+        });
+    </script>
+}
+

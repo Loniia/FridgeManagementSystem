@@ -4,34 +4,49 @@
     ViewData["Title"] = "Order Confirmation";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Order #@Model.OrderId</h2>
+<div class="container mt-5">
+    <h2 class="mb-4 text-center text-primary">Order #@Model.OrderId</h2>
 
-    <div class="card p-4 mb-3">
-        <p><strong>Status:</strong> @Model.Status</p>
+    <!-- Order Info Card -->
+    <div class="card shadow-sm p-4 mb-4 border-0 rounded-4" style="background: #f8f9fa;">
+        <p><strong>Status:</strong> <span class="badge bg-info text-dark">@Model.Status</span></p>
         <p><strong>Order Date:</strong> @Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</p>
         <p><strong>Delivery Address:</strong> @Model.DeliveryAddress</p>
-        <p><strong>Total:</strong> R@Model.TotalAmount.ToString("0.00")</p>
+        <p><strong>Total:</strong> <span class="fs-5 fw-bold text-success">@($"R{Model.TotalAmount:0.00}")</span></p>
     </div>
 
-    <div class="card p-4">
-        <h5>Items</h5>
-        <ul class="list-group">
+    <!-- Items List Card -->
+    <div class="card shadow-sm p-4 border-0 rounded-4" style="background: #ffffff;">
+        <h5 class="mb-3 text-secondary">Items</h5>
+        <ul class="list-group list-group-flush">
             @foreach (var it in Model.OrderItems)
             {
-                <li class="list-group-item d-flex justify-content-between">
-                    <div>
-                        <strong>@it.Fridge?.Brand @it.Fridge?.Model</strong><br />
-                        <small>Qty: @it.Quantity</small>
-                    </div>
-                    <div>R@(it.Price * it.Quantity).ToString("0.00")</div>
-                </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 mb-2 rounded-3 shadow-sm" style="background: #f1f3f5;">
+                        <div>
+                            <strong>@it.Fridge?.Brand @it.Fridge?.Model</strong><br />
+                            <small class="text-muted">Qty: @it.Quantity</small>
+                        </div>
+                        <div class="fw-semibold">@($"R{it.Price * it.Quantity:0.00}")</div>
+                    </li>
             }
         </ul>
 
-        <div class="mt-3">
-            <a asp-action="MyAccount" class="btn btn-outline-primary">My Orders</a>
-            <a asp-action="Dashboard" class="btn btn-outline-secondary ms-2">Continue Shopping</a>
+        <div class="mt-4 d-flex justify-content-end gap-2">
+            <a asp-action="MyAccount" class="btn btn-outline-primary rounded-pill px-4">My Orders</a>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary rounded-pill px-4">Continue Shopping</a>
         </div>
     </div>
 </div>
+
+<style>
+    /* Optional: smooth shadow hover for items */
+    .list-group-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        transition: all 0.2s ease-in-out;
+    }
+
+    h2, h5 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+</style>

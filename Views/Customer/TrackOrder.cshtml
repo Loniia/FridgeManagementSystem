@@ -1,23 +1,82 @@
 ﻿@model FridgeManagementSystem.Models.Order
+
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Track Order";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Track Order #@Model.OrderId</h2>
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Track Order #@Model.OrderId</h2>
 
-    <div class="card p-4">
-        <p><strong>Status:</strong> @Model.Status</p>
+    <div class="card shadow-sm p-4">
+        <div class="mb-3">
+            <strong>Status:</strong> 
+            <span class="badge 
+                @(Model.Status == "Pending" ? "bg-warning text-dark" : 
+                  Model.Status == "Shipped" ? "bg-primary" : 
+                  Model.Status == "Delivered" ? "bg-success" : "bg-secondary")">
+                @Model.Status
+            </span>
+        </div>
+
         <p><strong>Ordered On:</strong> @Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</p>
-        <p><strong>Total:</strong> R@Model.TotalAmount.ToString("0.00")</p>
+        <p><strong>Total:</strong> @($"R{Model.TotalAmount:0.00}")</p>
 
         <hr />
-        <p><strong>Delivery Address</strong><br />@Model.DeliveryAddress</p>
 
+        <p><strong>Delivery Address:</strong><br />@Model.DeliveryAddress</p>
+
+        <!-- Timeline -->
         <div class="mt-4">
+            <h5>Order Progress</h5>
+            <ul class="timeline">
+                <li class="@(Model.Status == "Pending" || Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Order Placed</li>
+                <li class="@(Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Shipped</li>
+                <li class="@(Model.Status == "Delivered" ? "completed" : "")">Delivered</li>
+            </ul>
+        </div>
+
+        <div class="mt-4 text-end">
             <a asp-action="MyAccount" class="btn btn-secondary">Back to Orders</a>
         </div>
     </div>
 </div>
 
+<style>
+/* Simple timeline styling */
+.timeline {
+    list-style-type: none;
+    padding-left: 0;
+    position: relative;
+}
+
+.timeline li {
+    padding: 10px 20px;
+    position: relative;
+    background: #f1f1f1;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+.timeline li::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #ccc;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.timeline li.completed {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.timeline li.completed::before {
+    background: #198754;
+}
+</style>

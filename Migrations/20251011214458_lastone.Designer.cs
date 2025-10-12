@@ -4,6 +4,7 @@ using FridgeManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    partial class FridgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251011214458_lastone")]
+    partial class lastone
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -772,7 +775,7 @@ namespace FridgeManagementSystem.Migrations
                             Model = "Model-1",
                             Price = 6813m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 5,
+                            Quantity = 7,
                             Status = "Available",
                             SupplierID = 1,
                             UpdatedDate = new DateTime(2025, 10, 11, 23, 44, 50, 507, DateTimeKind.Local).AddTicks(3875)
@@ -823,7 +826,7 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 11),
                             DeliveryDate = new DateTime(2025, 10, 11, 23, 44, 50, 507, DateTimeKind.Local).AddTicks(4298),
                             FaultID = 0,
-                            FridgeType = "Double Door",
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge4.jpg",
                             IsActive = true,
                             Model = "Model-4",
@@ -842,7 +845,7 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 11),
                             DeliveryDate = new DateTime(2025, 10, 11, 23, 44, 50, 507, DateTimeKind.Local).AddTicks(4321),
                             FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge5.jpg",
                             IsActive = true,
                             Model = "Model-5",
@@ -861,7 +864,7 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 11),
                             DeliveryDate = new DateTime(2025, 10, 11, 23, 44, 50, 507, DateTimeKind.Local).AddTicks(4350),
                             FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge6.jpg",
                             IsActive = true,
                             Model = "Model-6",
@@ -913,12 +916,12 @@ namespace FridgeManagementSystem.Migrations
                         new
                         {
                             FridgeId = 9,
-                            Brand = "Defy",
+                            Brand = "Bosch",
                             Condition = "Working",
                             DateAdded = new DateOnly(2025, 10, 11),
                             DeliveryDate = new DateTime(2025, 10, 11, 23, 44, 50, 507, DateTimeKind.Local).AddTicks(4417),
                             FaultID = 0,
-                            FridgeType = "Single Door",
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge9.jpg",
                             IsActive = true,
                             Model = "Model-9",
@@ -951,7 +954,7 @@ namespace FridgeManagementSystem.Migrations
                         new
                         {
                             FridgeId = 11,
-                            Brand = "Bosch",
+                            Brand = "LG",
                             Condition = "Working",
                             DateAdded = new DateOnly(2025, 10, 11),
                             DeliveryDate = new DateTime(2025, 10, 11, 23, 44, 50, 507, DateTimeKind.Local).AddTicks(4501),
@@ -975,7 +978,7 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 11),
                             DeliveryDate = new DateTime(2025, 10, 11, 23, 44, 50, 507, DateTimeKind.Local).AddTicks(4532),
                             FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge12.jpg",
                             IsActive = true,
                             Model = "Model-12",
@@ -1436,7 +1439,7 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<string>("AssignedToRole")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CustomerID")
+                    b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
                     b.Property<int>("FridgeId")
@@ -2250,9 +2253,11 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.PurchaseRequest", b =>
                 {
-                    b.HasOne("FridgeManagementSystem.Models.Customer", null)
+                    b.HasOne("FridgeManagementSystem.Models.Customer", "Customer")
                         .WithMany("PurchaseRequest")
-                        .HasForeignKey("CustomerID");
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("FridgeManagementSystem.Models.Fridge", "Fridge")
                         .WithMany()
@@ -2265,6 +2270,8 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("InventoryID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Customer");
 
                     b.Navigation("Fridge");
 

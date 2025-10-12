@@ -245,7 +245,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             {
                 ItemFullNames = model.ItemFullNames,
                 Quantity = model.Quantity,
-                CustomerID = model.CustomerID,
                 RequestBy = "InventoryLiaison",
                 RequestType = "Fridge Purchase",
                 AssignedToRole = "PurchasingManager",
@@ -271,7 +270,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         public async Task<IActionResult> ProcessPurchaseRequests()
         {
             var requests = await _context.PurchaseRequests
-                .Include(r => r.Customer)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
@@ -280,7 +278,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 PurchaseRequestID = r.PurchaseRequestID,
                 RequestDate = r.RequestDate,
                 Status = r.Status,
-                CustomerName = r.Customer?.FullName,
                 Quantity = r.Quantity,
                 ItemName = r.ItemFullNames
             });

@@ -1,17 +1,41 @@
-﻿@model FridgeManagementSystem.ViewModels.PaymentConfirmationViewModel
+﻿@model FridgeManagementSystem.Models.Order
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Payment Confirmation";
+    var payment = ViewBag.Payment as FridgeManagementSystem.Models.Payment;
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-success text-white text-center py-4">
-                    <i class="fas fa-check-circle fa-3x mb-3"></i>
-                    <h2 class="mb-0">Payment Successful!</h2>
-                </div>
+<div class="container mt-5 text-center">
+    <div class="card shadow-lg p-5 border-0">
+        <h2 class="fw-bold mb-4 text-success">
+            @if (payment != null && payment.Status == "Paid")
+            {
+                <text>✅ Payment Successful 🎉</text>
+            }
+            else if (payment != null && payment.Status == "Pending")
+            {
+                <text>⏳ Payment Pending</text>
+            }
+            else if (payment != null && payment.Status == "AwaitingAdminApproval")
+            {
+                <text>🕒 Awaiting Admin Verification</text>
+            }
+            else
+            {
+                <text>Payment Received</text>
+            }
+        </h2>
+
+        @if (payment != null)
+        {
+            <p class="lead">Payment Method: <strong>@payment.Method</strong></p>
+            <p>Status: <strong>@payment.Status</strong></p>
+
+            @if (payment.Method == FridgeManagementSystem.Models.Method.EFT && !string.IsNullOrEmpty(payment.ProofFilePath))
+            {
+                <p>Proof of Payment: <a href="@payment.ProofFilePath" target="_blank">View Uploaded File</a></p>
+            }
+        }
 
                 <div class="card-body p-5">
                     <div class="row mb-4">
@@ -22,48 +46,49 @@
                         </div>
                         <div class="col-md-6">
                             <h5>Payment Information</h5>
-                            <p><strong>Amount Paid:</strong> R@Model.Amount.ToString("0.00")</p>
+                            <p><strong>Amount Paid:</strong> @($"R{Model.Amount:0.00}")</p>
                             <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
                             <p><strong>Status:</strong> <span class="badge bg-success">@Model.Status</span></p>
                         </div>
                     </div>
 
-                    @if (Model.OrderItems.Any())
+        <h5 class="fw-bold">Order Details</h5>
+
+        @if (Model.OrderItems != null && Model.OrderItems.Any())
+        {
+            <table class="table table-bordered mt-3">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fridge</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems)
                     {
-                            <div class="mt-4">
-                                <h5>Order Items</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Item</th>
-                                                <th>Quantity</th>
-                                                <th>Price</th>
-                                                <th>Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach (var item in Model.OrderItems)
-                                        {
-                                                    <tr>
-                                                        <td>@item.Fridge?.Brand @item.Fridge?.Model</td>
-                                                        <td>@item.Quantity</td>
-                                                        <td>R@item.Price.ToString("0.00")</td>
-                                                        <td>R@((item.Quantity * item.Price).ToString("0.00"))</td>
-                                                    </tr>
-                                        }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        <tr>
+                            <td>@item.Fridge?.FridgeType</td>
+                            <td>@item.Quantity</td>
+                            <td>@($"R {item.Price:N2}")</td>
+                            <td>@($"R {item.Price * item.Quantity:N2}")</td>
+                        </tr>
                     }
+                </tbody>
+            </table>
+
+            <h4 class="mt-4 fw-bold">
+                Total: @($"R {Model.OrderItems.Sum(i => i.Price * i.Quantity):N2}")
+            </h4>
+        }
 
                     <div class="text-center mt-5">
                         <a asp-action="Dashboard" class="btn btn-primary me-3">
                             <i class="fas fa-home me-2"></i>Back to Dashboard
                         </a>
-                        <a asp-action="OrderHistory" class="btn btn-outline-secondary">
-                            <i class="fas fa-history me-2"></i>View Order History
+                        <a asp-controller="Customer" asp-action="OrderHistory" class="btn btn-primary">
+                           <i class="fas fa-history me-2"></i>View Order History
                         </a>
                     </div>
                 </div>

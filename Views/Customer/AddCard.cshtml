@@ -1,72 +1,101 @@
 ﻿@model FridgeManagementSystem.ViewModels.PaymentViewModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Payment - Add Card";
+    ViewData["Title"] = "Payment";
 }
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
 <div class="container mt-5">
-    <h2 class="fw-bold mb-4 text-center">Payment</h2>
+    <h2 class="fw-bold mb-4 text-center">💳 Payment Details</h2>
 
     <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card p-4">
-                <form asp-action="AddCard" method="post" id="paymentForm">
-                    @Html.AntiForgeryToken()
-                    <input asp-for="OrderId" type="hidden" />
-                    <input asp-for="Amount" type="hidden" />
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 p-4">
 
-                    <!-- Payment Method -->
-                    <div class="mb-3">
-                        <label asp-for="Method" class="form-label fw-bold">Payment Method</label>
-                        <select asp-for="Method" class="form-select" id="paymentMethod">
-                            @foreach (var m in Enum.GetValues(typeof(FridgeManagementSystem.Models.Method)))
-                            {
-                                    <option value="@m">@m</option>
-                            }
+                <form asp-action="AddCard" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="OrderId" />
+                    <input type="hidden" asp-for="Amount" />
+
+                    <!-- PAYMENT METHOD SELECTION -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Payment Method</label>
+                        <select class="form-select" asp-for="Method" id="paymentMethod" onchange="togglePaymentSections()">
+                            <option value="Card">Credit / Debit Card</option>
+                            <option value="PayPal">PayPal</option>
+                            <option value="EFT">EFT (Bank Transfer)</option>
                         </select>
-                        <span asp-validation-for="Method" class="text-danger"></span>
                     </div>
 
-                    <!-- Card Payment Fields -->
-                    <div id="cardFields">
+                    <!-- CARD PAYMENT -->
+                    <div id="cardSection" class="payment-section">
+                        <h5 class="fw-bold mb-3">Card Details</h5>
+
                         <div class="mb-3">
-                            <label asp-for="CardholderName" class="form-label fw-bold">Cardholder Name</label>
+                            <label class="form-label">Cardholder Name</label>
                             <input asp-for="CardholderName" class="form-control" placeholder="Full name on card" />
-                            <span asp-validation-for="CardholderName" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="CardNumber" class="form-label fw-bold">Card Number</label>
-                            <input asp-for="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" />
-                            <span asp-validation-for="CardNumber" class="text-danger"></span>
+                            <label class="form-label">Card Number</label>
+                            <input asp-for="CardNumber" class="form-control" placeholder="**** **** **** ****" maxlength="16" />
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label asp-for="ExpiryDate" class="form-label fw-bold">Expiry Date</label>
+                                <label class="form-label">Expiry Date</label>
                                 <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" />
-                                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="CVV" class="form-label fw-bold">CVV</label>
-                                <input asp-for="CVV" class="form-control" maxlength="4" placeholder="CVV" />
-                                <span asp-validation-for="CVV" class="text-danger"></span>
+                                <label class="form-label">CVV</label>
+                                <input asp-for="CVV" class="form-control" placeholder="***" maxlength="3" />
                             </div>
                         </div>
                     </div>
 
-                    <!-- EFT Fields -->
-                    <div id="eftFields" style="display:none;">
-                        <div class="mb-3">
-                            <label asp-for="BankReference" class="form-label fw-bold">Bank Reference</label>
-                            <input asp-for="BankReference" class="form-control" placeholder="Enter bank reference" />
-                            <span asp-validation-for="BankReference" class="text-danger"></span>
+                    <!-- PAYPAL PAYMENT -->
+                    <div id="paypalSection" class="payment-section" style="display:none;">
+                        <h5 class="fw-bold mb-3">Pay with PayPal</h5>
+                        <p class="text-muted">
+                            You’ll be redirected to PayPal’s secure checkout page to complete your payment.
+                        </p>
+                        <div class="alert alert-info">
+                            <strong>Note:</strong> This is a demo flow — payment will be marked as pending until confirmed.
                         </div>
                     </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                            Pay R@Model.Amount.ToString("0.00")
+                    <!-- EFT PAYMENT -->
+                    <div id="eftSection" class="payment-section" style="display:none;">
+                        <h5 class="fw-bold mb-3">EFT / Bank Transfer</h5>
+                        <p class="text-muted">Please use the bank details below to make your payment:</p>
+
+                        <div class="border p-3 rounded mb-3 bg-light">
+                            <p><strong>Bank:</strong> Capitec Bank</p>
+                            <p><strong>Account Number:</strong> 1234567890</p>
+                            <p><strong>Branch Code:</strong> 470010</p>
+                            <p><strong>Reference:</strong> <span class="text-primary fw-bold">@("PAY-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper())</span></p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Upload Proof of Payment</label>
+                            <input type="file" asp-for="ProofOfPayment" class="form-control" accept=".jpg,.jpeg,.png,.pdf" />
+                            <span class="text-muted small">Accepted formats: JPG, PNG, PDF</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Your Bank Reference</label>
+                            <input asp-for="BankReference" class="form-control" placeholder="Enter your bank reference (optional)" />
+                        </div>
+
+                        <div class="alert alert-warning">
+                            Once you’ve uploaded proof, our admin team will verify your payment before your order is marked as paid.
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            Pay @Model.Amount.ToString("C")
                         </button>
                     </div>
                 </form>
@@ -75,150 +104,13 @@
     </div>
 </div>
 
-@section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
+<script>
+    function togglePaymentSections() {
+        const method = document.getElementById("paymentMethod").value;
+        document.getElementById("cardSection").style.display = method === "Card" ? "block" : "none";
+        document.getElementById("paypalSection").style.display = method === "PayPal" ? "block" : "none";
+        document.getElementById("eftSection").style.display = method === "EFT" ? "block" : "none";
+    }
 
-        <script>
-            console.log("Script loaded"); // Debug line
-
-            const methodSelect = document.getElementById('paymentMethod');
-            const cardFields = document.getElementById('cardFields');
-            const eftFields = document.getElementById('eftFields');
-            const paymentForm = document.getElementById('paymentForm');
-            const submitBtn = document.getElementById('submitBtn');
-
-            function toggleFields() {
-                console.log("Payment method changed to:", methodSelect.value); // Debug
-                if (methodSelect.value === 'Card') {
-                    cardFields.style.display = 'block';
-                    eftFields.style.display = 'none';
-                } else {
-                    cardFields.style.display = 'none';
-                    eftFields.style.display = 'block';
-                }
-            }
-
-            // Add form submission debug
-            paymentForm.addEventListener('submit', function(e) {
-                console.log("Form submitted"); // Debug
-                console.log("Form valid:", paymentForm.checkValidity()); // Debug
-
-                // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            });
-
-            methodSelect.addEventListener('change', toggleFields);
-            window.addEventListener('load', toggleFields);
-
-            // Debug: Log initial state
-            console.log("Initial payment method:", methodSelect.value);
-            console.log("Form action:", paymentForm.action);
-        </script>
-}
-
-
-@* @model FridgeManagementSystem.ViewModels.PaymentViewModel
-@{
-    Layout = "_Layout";
-    ViewData["Title"] = "Payment - Add Card";
-}
-
-<div class="container mt-5">
-    <h2 class="fw-bold mb-4 text-center">Payment</h2>
-
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card p-4">
-                <form asp-action="AddCard" method="post">
-                    @Html.AntiForgeryToken()
-                    <input asp-for="OrderId" type="hidden" />
-                    <input asp-for="Amount" type="hidden" />
-
-                    <!-- Payment Method -->
-                    <div class="mb-3">
-                        <label asp-for="Method" class="form-label fw-bold">Payment Method</label>
-                        <select asp-for="Method" class="form-select" id="paymentMethod">
-                            @foreach (var m in Enum.GetValues(typeof(FridgeManagementSystem.Models.Method)))
-                            {
-                                    <option value="@m" selected="@(m.ToString() == Model.Method.ToString() ? "selected" : null)">
-                                    @m
-                                    </option>
-                            }
-                        </select>
-                        <span asp-validation-for="Method" class="text-danger"></span>
-                    </div>
-
-                    <!-- Card Payment Fields -->
-                    <div id="cardFields">
-                        <div class="mb-3">
-                            <label asp-for="CardholderName" class="form-label fw-bold">Cardholder Name</label>
-                            <input asp-for="CardholderName" class="form-control" placeholder="Full name on card" />
-                            <span asp-validation-for="CardholderName" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="CardNumber" class="form-label fw-bold">Card Number</label>
-                            <input asp-for="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" />
-                            <span asp-validation-for="CardNumber" class="text-danger"></span>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="ExpiryDate" class="form-label fw-bold">Expiry Date</label>
-                                <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" />
-                                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="CVV" class="form-label fw-bold">CVV</label>
-                                <input asp-for="CVV" class="form-control" maxlength="4" placeholder="CVV" />
-                                <span asp-validation-for="CVV" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EFT Fields (example: Bank Reference) -->
-                    <div id="eftFields" style="display:none;">
-                        <div class="mb-3">
-                            <label asp-for="BankReference" class="form-label fw-bold">Bank Reference</label>
-                            <input asp-for="BankReference" class="form-control" placeholder="Enter bank reference" />
-                            <span asp-validation-for="BankReference" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            Pay R@Model.Amount.ToString("0.00")
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
-
-        <script>
-            const methodSelect = document.getElementById('paymentMethod');
-            const cardFields = document.getElementById('cardFields');
-            const eftFields = document.getElementById('eftFields');
-
-            function toggleFields() {
-                if (methodSelect.value === 'Card') {
-                    cardFields.style.display = 'block';
-                    eftFields.style.display = 'none';
-                } else {
-                    cardFields.style.display = 'none';
-                    eftFields.style.display = 'block';
-                }
-            }
-
-            methodSelect.addEventListener('change', toggleFields);
-            window.addEventListener('load', toggleFields);
-        </script>
-} *@
-
-
-
+    document.addEventListener("DOMContentLoaded", togglePaymentSections);
+</script>

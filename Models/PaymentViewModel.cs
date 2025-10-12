@@ -24,5 +24,6 @@ namespace FridgeManagementSystem.ViewModels
         public Order Orders { get; set; }
         // For EFT payments
         public string BankReference { get; set; }
+        public IFormFile ProofOfPayment { get; set; }
     }
 }

@@ -35,6 +35,8 @@ namespace FridgeManagementSystem.Data
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<DeliveryNote> DeliveryNotes { get; set; }
         // Customer E-Commerce Tables by Idah
+        //public DbSet<FinancialAccount> FinancialAccounts { get; set; }
+        //public DbSet<Transaction> Transactions { get; set; }
         public DbSet<CustomerNotification> CustomerNotifications { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Cart> Carts { get; set; }
@@ -99,12 +101,6 @@ namespace FridgeManagementSystem.Data
                 .HasMany(f => f.FridgeAllocation)
                 .WithOne(a => a.Fridge)
                 .HasForeignKey(a => a.FridgeId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            builder.Entity<Customer>()
-                .HasMany(c => c.PurchaseRequest)
-                .WithOne(p => p.Customer)
-                .HasForeignKey(p => p.CustomerID)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Fridge Relationships (Consolidated)
@@ -266,7 +262,6 @@ namespace FridgeManagementSystem.Data
             builder.Entity<FridgeAllocation>().HasQueryFilter(a => a.Fridge.IsActive);
             builder.Entity<Inventory>().HasQueryFilter(i => i.Fridge.IsActive);
             builder.Entity<ScrappedFridge>().HasQueryFilter(s => s.Fridge.IsActive);
-            builder.Entity<PurchaseRequest>().HasQueryFilter(p => p.Customer.IsActive);
             builder.Entity<FaultReport>().HasQueryFilter(fr => fr.Fridge.IsActive);
 
             // Configure enum conversions

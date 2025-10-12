@@ -80,7 +80,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             customer.IsVerified = true;
             await _context.SaveChangesAsync();
 
-            
+
 
             return RedirectToAction(nameof(Index));
         }
@@ -548,5 +548,46 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return File(pdfBytes, "application/pdf", $"Customer_{customer.CustomerID}_Allocations.pdf");
         }
+        [HttpGet]
+        public async Task<IActionResult> PendingPayments()
+        {
+            var pendingPayments = await _context.Payments
+                .Include(p => p.Orders)
+                .ThenInclude(o => o.Customers)
+                .Where(p => p.Status == "Pending" || p.Status == "Awaiting Verification" || p.Status == "AwaitingAdminApproval")
+                .ToListAsync();
+
+            return View(pendingPayments);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyPayment(int paymentId, bool approve)
+        {
+            var payment = await _context.Payments
+                .Include(p => p.Orders)
+                .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
+
+            if (payment == null)
+                return NotFound();
+
+            if (approve)
+            {
+                payment.Status = "Paid";
+                if (payment.Orders != null)
+                    payment.Orders.Status = "Paid";
+            }
+            else
+            {
+                payment.Status = "Rejected";
+                if (payment.Orders != null)
+                    payment.Orders.Status = "Pending";
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("PendingPayments");
+        }
+
+
     }
 }
