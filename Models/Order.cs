@@ -16,7 +16,7 @@ namespace FridgeManagementSystem.Models
         [Key]
         public int OrderId { get; set; }
 
-        [ForeignKey("Customer")]
+        [ForeignKey("Customers")]
         public int CustomerID { get; set; }
         public virtual Customer Customers { get; set; }
 

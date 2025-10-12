@@ -470,6 +470,22 @@ namespace FridgeManagementSystem.Controllers
             return View(order);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> OrderConfirmation(int id)
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Fridge)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerID == customerId);
+
+            if (order == null) return NotFound();
+
+            return View(order);
+        }
+
         // ==========================
         // 8. FAULT MANAGEMENT
         // ==========================
