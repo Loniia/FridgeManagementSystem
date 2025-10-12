@@ -21,19 +21,19 @@ namespace FridgeManagementSystem.Controllers
         private readonly FridgeDbContext _context;
         private readonly FridgeService _fridgeService;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<CustomerController> _logger;  // ✅ Add this line
+        private readonly ILogger<CustomerController> _logger;
 
         // Constructor
         public CustomerController(
             FridgeDbContext context,
             FridgeService fridgeService,
             UserManager<ApplicationUser> userManager,
-            ILogger<CustomerController> logger) // ✅ Add logger to constructor
+            ILogger<CustomerController> logger)
         {
             _context = context;
             _fridgeService = fridgeService;
             _userManager = userManager;
-            _logger = logger;  // ✅ Initialize it
+            _logger = logger;
         }
 
         // ==========================
@@ -45,23 +45,19 @@ namespace FridgeManagementSystem.Controllers
             if (userIdClaim == null)
                 return RedirectToAction("Login", "Account");
 
-            // Convert to int
             if (!int.TryParse(userIdClaim.Value, out int userId))
                 return RedirectToAction("Login", "Account");
 
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
 
-            // If customer record is missing, send back to login
             if (customer == null)
                 return RedirectToAction("Login", "Account");
 
-            // Start query for fridges
             var fridgesQuery = _context.Fridge
                 .Include(f => f.FridgeAllocation)
                 .AsQueryable();
 
-            // Apply search filter if provided
             if (!string.IsNullOrEmpty(search))
             {
                 fridgesQuery = fridgesQuery.Where(f =>
@@ -119,15 +115,13 @@ namespace FridgeManagementSystem.Controllers
             var fridge = await _context.Fridge.FindAsync(fridgeId);
             if (fridge == null) return NotFound();
 
-            // Try to find existing item even if it was soft-deleted
             var existingItem = cart.CartItems.FirstOrDefault(i => i.FridgeId == fridgeId);
             if (existingItem != null)
             {
                 if (existingItem.IsDeleted)
                 {
-                    // Reactivate previously deleted item
                     existingItem.IsDeleted = false;
-                    existingItem.Quantity = quantity; // reset to requested quantity OR keep previous? we set to requested
+                    existingItem.Quantity = quantity;
                     existingItem.Price = fridge.Price;
                     _context.CartItems.Update(existingItem);
                 }
@@ -149,15 +143,12 @@ namespace FridgeManagementSystem.Controllers
                 });
             }
 
-            // Ensure cart is active when adding items
             cart.IsActive = true;
             _context.Carts.Update(cart);
-
             await _context.SaveChangesAsync();
             return RedirectToAction("ViewCart");
         }
 
-        // Remove from cart 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveFromCart(int cartItemId)
@@ -182,16 +173,13 @@ namespace FridgeManagementSystem.Controllers
                 return RedirectToAction("ViewCart");
             }
 
-            // Soft delete instead of removing
             item.IsDeleted = true;
             _context.CartItems.Update(item);
-
             await _context.SaveChangesAsync();
             TempData["Success"] = "Item removed from cart.";
 
             return RedirectToAction("ViewCart");
         }
-
 
         // ==========================
         // 3. VIEW CART
@@ -206,7 +194,6 @@ namespace FridgeManagementSystem.Controllers
                 .ThenInclude(ci => ci.Fridge)
                 .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
-            // If cart is null, return empty view model or redirect
             if (cart == null)
             {
                 ViewBag.Message = "Your cart is empty.";
@@ -256,7 +243,6 @@ namespace FridgeManagementSystem.Controllers
                 return RedirectToAction("ViewCart");
             }
 
-            // ✅ Create new order
             var order = new Order
             {
                 CustomerID = customerId,
@@ -268,7 +254,6 @@ namespace FridgeManagementSystem.Controllers
                 TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
             };
 
-            // ✅ Add each cart item to the order
             foreach (var ci in cart.CartItems)
             {
                 order.OrderItems.Add(new OrderItem
@@ -279,18 +264,16 @@ namespace FridgeManagementSystem.Controllers
                 });
             }
 
-            // ✅ Save order and deactivate cart
             _context.Orders.Add(order);
             cart.IsActive = false;
             _context.Carts.Update(cart);
             await _context.SaveChangesAsync();
 
-            // ✅ Redirect to payment (AddCard) page
             return RedirectToAction("AddCard", new { orderId = order.OrderId });
         }
 
         // ==========================
-        // 6. PAYMENT METHODS
+        // 5. PAYMENT METHODS
         // ==========================
         [HttpGet]
         public async Task<IActionResult> AddCard(int orderId, decimal? amount)
@@ -313,7 +296,6 @@ namespace FridgeManagementSystem.Controllers
                 Orders = order
             };
 
-
             return View(vm);
         }
 
@@ -330,7 +312,6 @@ namespace FridgeManagementSystem.Controllers
 
             if (order == null) return Forbid();
 
-            // Recompute amount server-side for safety
             model.Amount = await _context.OrderItems
                 .Where(oi => oi.OrderId == model.OrderId)
                 .SumAsync(oi => oi.Price * oi.Quantity);
@@ -359,7 +340,7 @@ namespace FridgeManagementSystem.Controllers
             {
                 payment.PaymentReference = GeneratePaymentReference();
                 payment.BankReference = model.BankReference;
-                payment.Status = "Pending"; // awaiting admin approval
+                payment.Status = "Pending";
 
                 if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
                 {
@@ -377,7 +358,7 @@ namespace FridgeManagementSystem.Controllers
             }
             else if (model.Method == Method.PayPal)
             {
-                payment.Status = "Pending"; // mark pending until confirmation
+                payment.Status = "Pending";
                 order.Status = "AwaitingPayment";
             }
 
@@ -387,33 +368,8 @@ namespace FridgeManagementSystem.Controllers
             return RedirectToAction("PaymentConfirmation", new { orderId = order.OrderId });
         }
 
-
-        public async Task<IActionResult> PaymentConfirmation(int orderId)
-        {
-            var customerId = GetLoggedInCustomerId();
-            if (customerId == 0) return RedirectToAction("Login", "Account");
-
-            var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .ThenInclude(i => i.Fridge)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
-
-            if (order == null) return NotFound();
-
-            // Optionally include latest payment
-            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
-
-            ViewBag.Payment = payment;
-            return View(order);
-        }
-
-                model.Orders = order;
-                return View(model);
-            }
-        }
-
         // ==========================
-        // 7. PAYMENT CONFIRMATION
+        // 6. PAYMENT CONFIRMATION
         // ==========================
         [HttpGet]
         public async Task<IActionResult> PaymentConfirmation(int orderId)
@@ -458,7 +414,7 @@ namespace FridgeManagementSystem.Controllers
                 return NotFound("Customer profile not found.");
 
             var orders = await _context.Orders
-                .Where(o => o.CustomerID == customer.CustomerID) 
+                .Where(o => o.CustomerID == customer.CustomerID)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Fridge)
                 .OrderByDescending(o => o.OrderDate)
@@ -507,9 +463,8 @@ namespace FridgeManagementSystem.Controllers
 
             if (order == null)
             {
-                // Order not found, show a friendly message or redirect
                 TempData["ErrorMessage"] = "Order not found.";
-                return RedirectToAction("MyAccount"); // or another page
+                return RedirectToAction("MyAccount");
             }
 
             return View(order);
@@ -595,9 +550,8 @@ namespace FridgeManagementSystem.Controllers
             }
         }
 
-
         // ==========================
-        // 10. SERVICE HISTORY
+        // 9. SERVICE HISTORY
         // ==========================
         public async Task<IActionResult> UpcomingVisits()
         {
@@ -685,18 +639,14 @@ namespace FridgeManagementSystem.Controllers
             return new string('*', Math.Max(0, cleaned.Length - 4)) + last4;
         }
 
-
         private string GenerateFaultCode()
         {
             return "FLT-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
         }
+
         private string GeneratePaymentReference()
         {
             return "PAY-" + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
         }
-
-      
-
-
     }
 }

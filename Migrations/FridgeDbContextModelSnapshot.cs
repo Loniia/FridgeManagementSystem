@@ -809,7 +809,6 @@ namespace FridgeManagementSystem.Migrations
                             ImageUrl = "/images/fridges/fridge2.jpg",
                             IsActive = true,
                             Model = "Model-2",
-<<<<<<< HEAD
                             Price = 3572m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 3,
