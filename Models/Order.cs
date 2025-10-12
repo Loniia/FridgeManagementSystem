@@ -22,11 +22,12 @@ namespace FridgeManagementSystem.Models
 
         [Required]
         public DateTime OrderDate { get; set; } = DateTime.Now;
-
+        public decimal Amount { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public string PaymentMethod { get; set; }
         [Required]
         [Range(0.01, 1000000)]
         public decimal TotalAmount { get; set; }
-        public decimal Amount { get; set; }
         [Required(ErrorMessage = "Order status is required")]
         [StringLength(50)]
         public string Status { get; set; } // Processing, Packed, etc.
@@ -38,8 +39,6 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Contact Name is required")]
         [StringLength(50)]
         public string ContactName { get; set; }
-        public string PaymentMethod { get;set; }
-        public DateTime PaymentDate { get; set; }
         [Required(ErrorMessage = "Contact Phone is required")]
         [StringLength(50)]
         public string ContactPhone { get; set; }
