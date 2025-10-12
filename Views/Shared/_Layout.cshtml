@@ -138,6 +138,63 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>
+@inject FridgeManagementSystem.Services.INotificationService NotificationService
+@using System.Security.Claims
+
+@{
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+    int currentUserId = 0;
+    if (userIdClaim != null) int.TryParse(userIdClaim.Value, out currentUserId);
+    var unread = currentUserId == 0 ? new List<FridgeManagementSystem.Models.Notification>()
+                : NotificationService.GetUnreadAsync(currentUserId, 5).GetAwaiter().GetResult();
+    int unreadCount = unread.Count();
+}
+<li class="nav-item dropdown">
+    <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-bell"></i>
+        @if (unreadCount > 0)
+        {
+            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">@unreadCount</span>
+        }
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notifDropdown" style="min-width:300px;">
+        @if (unread.Any())
+        {
+            foreach (var n in unread)
+            {
+                <li>
+                    <a class="dropdown-item" href="@n.Url ?? " #""
+                       onclick="markAsRead(@n.NotificationId)">
+                        <div class="small text-muted">@n.CreatedAt.ToLocalTime().ToString("g")</div>
+                        <div>@n.Message</div>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+            }
+            <li>
+                <a class="dropdown-item text-center" href="@Url.Action("All", "Notifications")">View all notifications</a>
+            </li>
+        }
+        else
+        {
+            <li><span class="dropdown-item text-muted">No new notifications</span></li>
+        }
+    </ul>
+</li>
+
+@section Scripts {
+    <script>
+        async function markAsRead(id) {
+            try {
+                await fetch('/Notifications/MarkAsRead?id=' + id, { method: 'POST', headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value } });
+                location.href = document.querySelector('[data-notif-id="' + id + '"]').getAttribute('data-url') || '/';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+}
 
 

@@ -19,6 +19,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
     [Authorize(Roles = Roles.Admin)]
     public class ManageCustomerController : Controller
     {
+        private readonly INotificationService _notificationService;
         private readonly FridgeDbContext _context;
         private readonly IMaintenanceRequestService _mrService;
         private readonly CustomerService _customerService;   // ✅ use shared service
@@ -26,11 +27,12 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         public ManageCustomerController(
             FridgeDbContext context,
             IMaintenanceRequestService mrService,
-            CustomerService customerService)
+            CustomerService customerService, INotificationService notificationService)
         {
             _context = context;
             _mrService = mrService;
             _customerService = customerService;
+            _notificationService = notificationService;
         }
 
         // --------------------------
@@ -554,7 +556,10 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             var pendingPayments = await _context.Payments
                 .Include(p => p.Orders)
                 .ThenInclude(o => o.Customers)
-                .Where(p => p.Status == "Pending" || p.Status == "Awaiting Verification" || p.Status == "AwaitingAdminApproval")
+                .Where(p => p.Status == "Pending" ||
+                            p.Status == "Awaiting Verification" ||
+                            p.Status == "AwaitingAdminApproval")
+                .OrderByDescending(p => p.PaymentDate)
                 .ToListAsync();
 
             return View(pendingPayments);
@@ -566,22 +571,35 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         {
             var payment = await _context.Payments
                 .Include(p => p.Orders)
+                .ThenInclude(o => o.Customers)
                 .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
 
             if (payment == null)
-                return NotFound();
+                return NotFound("Payment not found.");
+
+            var order = payment.Orders;
+            if (order == null)
+                return BadRequest("Associated order not found.");
 
             if (approve)
             {
                 payment.Status = "Paid";
-                if (payment.Orders != null)
-                    payment.Orders.Status = "Paid";
+                order.Status = "Paid";
+
+                await _notificationService.CreateAsync(
+                    order.CustomerID,
+                    $"Your payment for Order #{order.OrderId} has been approved. Order is now marked as paid.",
+                    Url.Action("OrderDetails", "Customer", new { id = order.OrderId }));
             }
             else
             {
                 payment.Status = "Rejected";
-                if (payment.Orders != null)
-                    payment.Orders.Status = "Pending";
+                order.Status = "Pending";
+
+                await _notificationService.CreateAsync(
+                    order.CustomerID,
+                    $"Your payment for Order #{order.OrderId} was rejected. Please re-upload proof or contact support.",
+                    Url.Action("OrderDetails", "Customer", new { id = order.OrderId }));
             }
 
             await _context.SaveChangesAsync();

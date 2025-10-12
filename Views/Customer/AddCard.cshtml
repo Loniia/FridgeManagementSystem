@@ -104,13 +104,27 @@
     </div>
 </div>
 
-<script>
-    function togglePaymentSections() {
-        const method = document.getElementById("paymentMethod").value;
-        document.getElementById("cardSection").style.display = method === "Card" ? "block" : "none";
-        document.getElementById("paypalSection").style.display = method === "PayPal" ? "block" : "none";
-        document.getElementById("eftSection").style.display = method === "EFT" ? "block" : "none";
-    }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePaymentSections() {
+            const method = document.getElementById("paymentMethod").value;
+            document.getElementById("cardSection").style.display = method === "Card" ? "block" : "none";
+            document.getElementById("paypalSection").style.display = method === "PayPal" ? "block" : "none";
+            document.getElementById("eftSection").style.display = method === "EFT" ? "block" : "none";
+        }
 
-    document.addEventListener("DOMContentLoaded", togglePaymentSections);
-</script>
+        document.addEventListener("DOMContentLoaded", function () {
+            togglePaymentSections();
+
+            // Allow spaces in card number for readability
+            const cardInput = document.querySelector("input[name='CardNumber']");
+            if (cardInput) {
+                cardInput.addEventListener("input", function (e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    e.target.value = value.replace(/(.{4})/g, '$1 ').trim();
+                });
+            }
+        });
+    </script>
+}

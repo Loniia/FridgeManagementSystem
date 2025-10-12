@@ -181,6 +181,6 @@ namespace FridgeManagementSystem.Models
     }
     public enum Method
     {
-        Card, EFT, PayPal
+        Card, EFT
     }
 }
