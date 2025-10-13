@@ -4,6 +4,7 @@ using FridgeManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,8 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
+    [Migration("20251013071327_CreateFridgeDb")]
     partial class FridgeDbContextModelSnapshot : ModelSnapshot
     {
+        /// <inheritdoc/>
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -2558,6 +2561,7 @@ namespace FridgeManagementSystem.Migrations
                         });
 #pragma warning restore 612, 618
                 });
+            
         }
     }
 }
