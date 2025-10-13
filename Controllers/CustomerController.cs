@@ -522,7 +522,13 @@ namespace FridgeManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
         {
-            if (!ModelState.IsValid) return View(viewModel);
+            if (!ModelState.IsValid)
+            {
+                // ADD THESE 2 LINES - Repopulate dropdowns
+                viewModel.FridgeOptions = await GetCustomerFridgesAsync();
+                viewModel.PriorityOptions = GetPriorityOptions();
+                return View(viewModel);
+            }
 
             try
             {
@@ -545,8 +551,106 @@ namespace FridgeManagementSystem.Controllers
             }
             catch
             {
+                // ADD THESE 2 LINES - Repopulate dropdowns on error too
+                viewModel.FridgeOptions = await GetCustomerFridgesAsync();
+                viewModel.PriorityOptions = GetPriorityOptions();
                 TempData["ErrorMessage"] = "Error reporting fault.";
                 return View(viewModel);
+            }
+        }
+
+        // Add these small helper methods
+        private async Task<List<SelectListItem>> GetCustomerFridgesAsync()
+        {
+            var customerId = GetLoggedInCustomerId();
+            return await _context.Fridge
+                .Where(f => f.CustomerID == customerId && f.Status == "Active")
+                .Select(f => new SelectListItem
+                {
+                    Value = f.FridgeId.ToString(),
+                    Text = $"{f.Brand} {f.Model} - {f.SerialNumber}"
+                })
+                .ToListAsync();
+        }
+
+        private List<SelectListItem> GetPriorityOptions()
+        {
+            return new List<SelectListItem>
+    {
+        new SelectListItem { Value = "Low", Text = "Low" },
+        new SelectListItem { Value = "Medium", Text = "Medium" },
+        new SelectListItem { Value = "High", Text = "High" },
+        new SelectListItem { Value = "Critical", Text = "Critical" }
+    };
+        }
+        // Cancel Fault (if allowed)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelFault(int id)
+        {
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+                var fault = await _context.Faults
+                    .FirstOrDefaultAsync(f => f.FaultID == id && f.CustomerId == customerId);
+
+                if (fault == null)
+                {
+                    TempData["ErrorMessage"] = "Fault not found.";
+                    return RedirectToAction(nameof(MyFaults));
+                }
+
+                if (fault.Status != "Pending")
+                {
+                    TempData["ErrorMessage"] = "Only pending faults can be cancelled.";
+                    return RedirectToAction(nameof(FaultDetails), new { id });
+                }
+
+                fault.Status = "Cancelled";
+
+                _context.Update(fault);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Fault cancelled successfully.";
+                return RedirectToAction(nameof(MyFaults));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling fault");
+                TempData["ErrorMessage"] = "Error cancelling fault.";
+                return RedirectToAction(nameof(FaultDetails), new { id });
+            }
+        }
+
+        // Update Fault (if description needs updating)
+        public async Task<IActionResult> UpdateFaultDescription(int id, string description)
+        {
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+                var fault = await _context.Faults
+                    .FirstOrDefaultAsync(f => f.FaultID == id && f.CustomerId == customerId);
+
+                if (fault == null)
+                {
+                    return Json(new { success = false, message = "Fault not found." });
+                }
+
+                if (fault.Status != "Pending")
+                {
+                    return Json(new { success = false, message = "Only pending faults can be updated." });
+                }
+
+                fault.FaultDescription = description;
+                _context.Update(fault);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Fault description updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating fault description");
+                return Json(new { success = false, message = "Error updating fault description." });
             }
         }
 

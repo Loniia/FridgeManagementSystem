@@ -1,0 +1,215 @@
+﻿@model BusinessInfo
+@{
+    ViewData["Title"] = "Help & Support";
+    Layout = "_PublicLayout";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-5">Help & Support</h1>
+
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3>
+                                Need Assi@model BusinessInfo
+                                @{
+                                    ViewData["Title"] = "Help & Support";
+                                    Layout = "_PublicLayout";
+                                }
+
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h1 class="text-center mb-5">Help & Support</h1>
+
+                                            <!-- Contact Information -->
+                                            @if (Model != null)
+                                            {
+                                                <div class="card mb-4">
+                                                    <div class="card-body text-center">
+                                                        <h3>Need Help?</h3>
+                                                        <p class="lead">We're here to assist you</p>
+
+                                                        <div class="row mt-4">
+                                                            <div class="col-md-4">
+                                                                <div class="text-center">
+                                                                    <i class="fas fa-phone fa-2x text-primary mb-3"></i>
+                                                                    <h5>Call Us</h5>
+                                                                    <p>@Model.Phone</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="text-center">
+                                                                    <i class="fas fa-envelope fa-2x text-success mb-3"></i>
+                                                                    <h5>Email Us</h5>
+                                                                    <p>@Model.Email</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="text-center">
+                                                                    <i class="fas fa-map-marker-alt fa-2x text-warning mb-3"></i>
+                                                                    <h5>Visit Us</h5>
+                                                                    <p>@Model.Address</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- FAQ Section -->
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h3 class="text-center mb-4">Frequently Asked Questions</h3>
+
+                                                    <div class="accordion" id="faqAccordion">
+                                                        <!-- FAQ 1 -->
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header">
+                                                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                                                    How do I report a fridge fault?
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body">
+                                                                    Log into your customer account, go to "Report Fault" in the sidebar, select your fridge, and describe the issue. Our technicians will be notified immediately.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- FAQ 2 -->
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                                                    What are your response times?
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body">
+                                                                    We aim to respond to all fault reports within 2 hours during business hours (8 AM - 6 PM, Monday to Friday).
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- FAQ 3 -->
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                                                    How can I track my repair status?
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body">
+                                                                    You can track your repair status in the "My Faults" section of your customer dashboard. You'll see real-time updates from our technicians.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- FAQ 4 -->
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                                                    What if I need emergency support?
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body">
+                                                                    For emergency support outside business hours, please call our emergency line at the same phone number. We have technicians on call for urgent issues.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- FAQ 5 -->
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                                                    How do I register a new fridge?
+                                                                </button>
+                                                            </h2>
+                                                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                                <div class="accordion-body">
+                                                                    New fridges are typically registered by your administrator. If you need to add a fridge to your account, please contact your system administrator or call our support line.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Quick Links -->
+                                            <div class="card mt-4">
+                                                <div class="card-body text-center">
+                                                    <h4>Quick Links</h4>
+                                                    <div class="row mt-3">
+                                                        <div class="col-md-3">
+                                                            <a asp-action="Services" class="btn btn-outline-primary w-100 mb-2">Our Services</a>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <a asp-action="About" class="btn btn-outline-primary w-100 mb-2">About Us</a>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <a asp-action="Contact" class="btn btn-outline-primary w-100 mb-2">Contact</a>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 mb-2">Customer Login</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>stance?
+                            </h3>
+                            <p>We're here to help you with any questions or issues you may have.</p>
+
+                            @if (Model != null)
+                            {
+                                <div class="mt-4">
+                                    <h5>Contact Support</h5>
+                                    <p><i class="fas fa-phone me-2"></i> @Model.Phone</p>
+                                    <p><i class="fas fa-envelope me-2"></i> @Model.Email</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- FAQ Section -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Frequently Asked Questions</h3>
+                            <div class="accordion" id="faqAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                            How do I report a fridge fault?
+                                        </button>
+                                    </h2>
+                                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            You can report a fault through your customer dashboard by clicking on "Report Fault" and filling out the required information.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                            What are your response times?
+                                        </button>
+                                    </h2>
+                                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            We aim to respond to all fault reports within 2 hours during business hours.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

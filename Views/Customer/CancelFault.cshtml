@@ -1,0 +1,83 @@
+﻿@model FridgeManagementSystem.Models.Fault
+
+@{
+    ViewData["Title"] = "Cancel Fault Report";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h4 class="mb-0">Cancel Fault Report</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Are you sure you want to cancel this fault report?</strong>
+                </div>
+
+                <div class="fault-info mb-4">
+                    <h5>Fault Details:</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Fault Code:</dt>
+                        <dd class="col-sm-8">@Model.FaultCode</dd>
+
+                        <dt class="col-sm-4">Reported Date:</dt>
+                        <dd class="col-sm-8">@Model.ReportDate.ToString("MMM dd, yyyy")</dd>
+
+                        <dt class="col-sm-4">Priority:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge @GetPriorityBadgeClass(Model.Priority)">
+                                @Model.Priority
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Description:</dt>
+                        <dd class="col-sm-8">@Model.FaultDescription</dd>
+                    </dl>
+                </div>
+
+                <form asp-action="CancelFault" method="post">
+                    <input type="hidden" name="id" value="@Model.FaultID" />
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group">
+                        <label for="cancellationReason" class="form-label">Reason for Cancellation (Optional):</label>
+                        <textarea class="form-control" id="cancellationReason" name="cancellationReason"
+                                  rows="3" placeholder="Please provide a reason for cancellation..."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-danger flex-fill">
+                            <i class="fas fa-times-circle"></i> Confirm Cancellation
+                        </button>
+                        <a href="@Url.Action("FaultDetails", new { id = Model.FaultID })"
+                           class="btn btn-secondary flex-fill">
+                            <i class="fas fa-arrow-left"></i> Back to Details
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetPriorityBadgeClass(string priority)
+    {
+        return priority?.ToLower() switch
+        {
+            "low" => "bg-success",
+            "medium" => "bg-warning",
+            "high" => "bg-orange",
+            "critical" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<style>
+    .bg-orange {
+        background-color: #ff9800 !important;
+    }
+</style>
