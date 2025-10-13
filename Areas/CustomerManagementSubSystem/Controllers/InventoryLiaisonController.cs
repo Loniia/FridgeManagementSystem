@@ -129,67 +129,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         }
 
         // --------------------------
-        // Process Pending Allocations
-        // --------------------------
-        public async Task<IActionResult> ProcessPendingAllocations()
-        {
-            var pendingAllocations = await _context.FridgeAllocation
-                .Include(ca => ca.Customer)
-                .Include(ca => ca.Fridge)
-                .Where(ca => ca.Status == "Pending")
-                .ToListAsync();
-
-            var viewModel = pendingAllocations.Select(ca => new FridgeAllocationViewModel
-            {
-                AllocationID = ca.AllocationID,
-                CustomerName = ca.Customer.FullName,
-                FridgeId = ca.Fridge?.FridgeId ?? 0,
-                Model = ca.Fridge?.Model ?? "Not Allocated",
-                Status = ca.Status,
-                AllocationDate = ca.AllocationDate,
-                ReturnDate = ca.ReturnDate
-            });
-
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AllocateFridge(int allocationId)
-        {
-            var allocation = await _context.FridgeAllocation
-                .Include(ca => ca.Customer)
-                .Include(ca => ca.Fridge)
-                .FirstOrDefaultAsync(ca => ca.AllocationID == allocationId);
-
-            if (allocation == null)
-            {
-                TempData["ErrorMessage"] = "Allocation not found.";
-                return RedirectToAction(nameof(ProcessPendingAllocations));
-            }
-
-            var availableFridge = await _context.Fridge
-                .FirstOrDefaultAsync(f => f.Status == "Available" && f.IsActive);
-
-            if (availableFridge == null)
-            {
-                TempData["InfoMessage"] = "No available fridges. Request remains pending.";
-                return RedirectToAction(nameof(ProcessPendingAllocations));
-            }
-
-            allocation.FridgeId = availableFridge.FridgeId;
-            allocation.Status = "Allocated";
-            allocation.AllocationDate = DateOnly.FromDateTime(DateTime.Now);
-
-            availableFridge.Status = "Allocated";
-
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = $"Fridge {availableFridge.Brand} {availableFridge.Model} allocated to {allocation.Customer.FullName}.";
-            return RedirectToAction(nameof(ProcessPendingAllocations));
-        }
-
-        // --------------------------
         // Check Stock and Auto Create Purchase Request
         // --------------------------
         public async Task<IActionResult> CheckStock()
@@ -225,7 +164,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 TempData["InfoMessage"] = $"Stock is sufficient ({availableCount} available).";
             }
 
-            return RedirectToAction(nameof(ProcessPendingAllocations));
+            return RedirectToAction(nameof(CreatePurchaseRequest));
         }
 
         // --------------------------

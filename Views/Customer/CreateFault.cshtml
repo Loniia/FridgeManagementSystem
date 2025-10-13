@@ -5,48 +5,87 @@
 }
 
 <div class="container-fluid">
-    <!-- ... same header code ... -->
-
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-circle"></i> Report New Fault
+                    </h4>
+                </div>
                 <div class="card-body">
-                    <form asp-action="CreateFault" method="post">
-                        @Html.AntiForgeryToken()
+                    <!-- Display Messages -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="FridgeId" class="form-label">Select Fridge</label>
-                                    <select asp-for="FridgeId"
-                                            asp-items="Model.FridgeOptions"
-                                            class="form-select">
-                                        <option value="">-- Select Fridge --</option>
-                                    </select>
-                                    <span asp-validation-for="FridgeId" class="text-danger"></span>
+                    @if (Model != null)
+                    {
+                        <form asp-action="CreateFault" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="FridgeId" class="form-label">Select Fridge *</label>
+                                        <select asp-for="FridgeId"
+                                                asp-items="Model.FridgeOptions ?? new List<SelectListItem>()"
+                                                class="form-select">
+                                            <option value="">-- Select Fridge --</option>
+                                        </select>
+                                        <span asp-validation-for="FridgeId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Priority" class="form-label">Priority Level *</label>
+                                        <select asp-for="Priority"
+                                                asp-items="Model.PriorityOptions ?? new List<SelectListItem>()"
+                                                class="form-select">
+                                            <option value="">-- Select Priority --</option>
+                                        </select>
+                                        <span asp-validation-for="Priority" class="text-danger"></span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Priority" class="form-label">Priority Level</label>
-                                    <select asp-for="Priority"
-                                            asp-items="Model.PriorityOptions"
-                                            class="form-select">
-                                        <option value="">-- Select Priority --</option>
-                                    </select>
-                                    <span asp-validation-for="Priority" class="text-danger"></span>
-                                </div>
+
+                            <div class="form-group mb-4">
+                                <label asp-for="FaultDescription" class="form-label">Fault Description *</label>
+                                <textarea asp-for="FaultDescription" class="form-control" rows="5"
+                                          placeholder="Please describe the fault in detail..."></textarea>
+                                <span asp-validation-for="FaultDescription" class="text-danger"></span>
                             </div>
-                        </div>
 
-                        <div class="form-group mb-4">
-                            <label asp-for="FaultDescription" class="form-label">Fault Description</label>
-                            <textarea asp-for="FaultDescription" class="form-control" rows="5"></textarea>
-                            <span asp-validation-for="FaultDescription" class="text-danger"></span>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a asp-action="MyFaults" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-arrow-left"></i> Back to My Faults
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Report Fault
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> Error loading the form. Please try again.
                         </div>
-
-                        <!-- ... rest of the form ... -->
-                    </form>
+                        <a asp-action="MyFaults" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to My Faults
+                        </a>
+                    }
                 </div>
             </div>
         </div>

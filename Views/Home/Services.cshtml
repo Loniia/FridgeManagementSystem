@@ -1,0 +1,46 @@
+﻿@model BusinessInfo
+@{
+    ViewData["Title"] = "Our Services";
+    Layout = "_PublicLayout";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1>Our Services</h1>
+                <p class="lead">Comprehensive fridge management solutions</p>
+            </div>
+
+            @if (Model != null && !string.IsNullOrEmpty(Model.ServicesDescription))
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>Service Overview</h3>
+                        <p>@Model.ServicesDescription</p>
+                    </div>
+                </div>
+            }
+
+            <div class="row">
+                <!-- Add your specific services here -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h4>Fridge Maintenance</h4>
+                            <p>Regular maintenance and servicing to ensure optimal performance.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h4>Fault Repair</h4>
+                            <p>Quick and efficient fault diagnosis and repair services.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

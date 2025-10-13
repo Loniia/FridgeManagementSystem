@@ -18,8 +18,8 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Fault Description")]
         public string FaultDescription { get; set; }
 
-        // Dropdown options
-        public SelectList FridgeOptions { get; set; }
-        public SelectList PriorityOptions { get; set; }
+        // CHANGE THESE TO List<SelectListItem>
+        public List<SelectListItem> FridgeOptions { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> PriorityOptions { get; set; } = new List<SelectListItem>();
     }
 }

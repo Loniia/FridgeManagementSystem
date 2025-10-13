@@ -1,0 +1,57 @@
+﻿@model BusinessInfo
+@{
+    ViewData["Title"] = "Contact Us";
+    Layout = "_PublicLayout";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-5">Contact Us</h1>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Get In Touch</h3>
+                            @if (Model != null)
+                            {
+                                <p><strong><i class="fas fa-building me-2"></i>Company:</strong> @Model.CompanyName</p>
+                                <p><strong><i class="fas fa-phone me-2"></i>Phone:</strong> @Model.Phone</p>
+                                <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> @Model.Email</p>
+                                <p><strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong> @Model.Address</p>
+                                <p><strong><i class="fas fa-globe me-2"></i>Website:</strong> <a href="@Model.Website" target="_blank">@Model.Website</a></p>
+                            }
+                            else
+                            {
+                                <p>Business information not available. Please check back later.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Send us a Message</h3>
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Message</label>
+                                    <textarea class="form-control" rows="4" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
