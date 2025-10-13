@@ -550,16 +550,14 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return File(pdfBytes, "application/pdf", $"Customer_{customer.CustomerID}_Allocations.pdf");
         }
+        
         [HttpGet]
         public async Task<IActionResult> PendingPayments()
         {
             var pendingPayments = await _context.Payments
                 .Include(p => p.Orders)
                 .ThenInclude(o => o.Customers)
-                .Where(p => p.Status == "Pending" ||
-                            p.Status == "Awaiting Verification" ||
-                            p.Status == "AwaitingAdminApproval")
-                .OrderByDescending(p => p.PaymentDate)
+                .Where(p => p.Status == "Pending" || p.Status == "Awaiting Verification" || p.Status == "AwaitingAdminApproval")
                 .ToListAsync();
 
             return View(pendingPayments);
@@ -571,35 +569,22 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         {
             var payment = await _context.Payments
                 .Include(p => p.Orders)
-                .ThenInclude(o => o.Customers)
                 .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
 
             if (payment == null)
-                return NotFound("Payment not found.");
-
-            var order = payment.Orders;
-            if (order == null)
-                return BadRequest("Associated order not found.");
+                return NotFound();
 
             if (approve)
             {
                 payment.Status = "Paid";
-                order.Status = "Paid";
-
-                await _notificationService.CreateAsync(
-                    order.CustomerID,
-                    $"Your payment for Order #{order.OrderId} has been approved. Order is now marked as paid.",
-                    Url.Action("OrderDetails", "Customer", new { id = order.OrderId }));
+                if (payment.Orders != null)
+                    payment.Orders.Status = "Paid";
             }
             else
             {
                 payment.Status = "Rejected";
-                order.Status = "Pending";
-
-                await _notificationService.CreateAsync(
-                    order.CustomerID,
-                    $"Your payment for Order #{order.OrderId} was rejected. Please re-upload proof or contact support.",
-                    Url.Action("OrderDetails", "Customer", new { id = order.OrderId }));
+                if (payment.Orders != null)
+                    payment.Orders.Status = "Pending";
             }
 
             await _context.SaveChangesAsync();
