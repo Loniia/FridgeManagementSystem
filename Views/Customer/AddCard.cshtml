@@ -22,7 +22,7 @@
                         <label class="form-label fw-bold">Select Payment Method</label>
                         <select class="form-select" asp-for="Method" id="paymentMethod" onchange="togglePaymentSections()">
                             <option value="Card">Credit / Debit Card</option>
-                            <option value="PayPal">PayPal</option>
+                           
                             <option value="EFT">EFT (Bank Transfer)</option>
                         </select>
                     </div>
@@ -38,7 +38,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Card Number</label>
-                            <input asp-for="CardNumber" class="form-control" placeholder="**** **** **** ****" maxlength="16" />
+                            <input asp-for="CardNumber" class="form-control" placeholder="**** **** **** ****" maxlength="20" />
                         </div>
 
                         <div class="row mb-3">
@@ -53,16 +53,7 @@
                         </div>
                     </div>
 
-                    <!-- PAYPAL PAYMENT -->
-                    <div id="paypalSection" class="payment-section" style="display:none;">
-                        <h5 class="fw-bold mb-3">Pay with PayPal</h5>
-                        <p class="text-muted">
-                            You’ll be redirected to PayPal’s secure checkout page to complete your payment.
-                        </p>
-                        <div class="alert alert-info">
-                            <strong>Note:</strong> This is a demo flow — payment will be marked as pending until confirmed.
-                        </div>
-                    </div>
+                   
 
                     <!-- EFT PAYMENT -->
                     <div id="eftSection" class="payment-section" style="display:none;">
@@ -104,27 +95,13 @@
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        function togglePaymentSections() {
-            const method = document.getElementById("paymentMethod").value;
-            document.getElementById("cardSection").style.display = method === "Card" ? "block" : "none";
-            document.getElementById("paypalSection").style.display = method === "PayPal" ? "block" : "none";
-            document.getElementById("eftSection").style.display = method === "EFT" ? "block" : "none";
-        }
+<script>
+    function togglePaymentSections() {
+        const method = document.getElementById("paymentMethod").value;
+        document.getElementById("cardSection").style.display = method === "Card" ? "block" : "none";
+       
+        document.getElementById("eftSection").style.display = method === "EFT" ? "block" : "none";
+    }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            togglePaymentSections();
-
-            // Allow spaces in card number for readability
-            const cardInput = document.querySelector("input[name='CardNumber']");
-            if (cardInput) {
-                cardInput.addEventListener("input", function (e) {
-                    let value = e.target.value.replace(/\D/g, '');
-                    e.target.value = value.replace(/(.{4})/g, '$1 ').trim();
-                });
-            }
-        });
-    </script>
-}
+    document.addEventListener("DOMContentLoaded", togglePaymentSections);
+</script>
