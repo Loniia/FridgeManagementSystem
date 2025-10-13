@@ -13,11 +13,14 @@ using FridgeManagementSystem.Models;
 using FridgeManagementSystem.ViewModels;
 using TaskStatus = FridgeManagementSystem.Models.TaskStatus;
 using QuestPDF.Fluent;
+using FridgeManagementSystem.Services;
 
 namespace FridgeManagementSystem.Controllers
 {
     public class CustomerController : Controller
     {
+
+        private readonly INotificationService _notificationService;
         private readonly FridgeDbContext _context;
         private readonly FridgeService _fridgeService;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -28,12 +31,13 @@ namespace FridgeManagementSystem.Controllers
             FridgeDbContext context,
             FridgeService fridgeService,
             UserManager<ApplicationUser> userManager,
-            ILogger<CustomerController> logger)
+            ILogger<CustomerController> logger, INotificationService notificationService)
         {
             _context = context;
             _fridgeService = fridgeService;
             _userManager = userManager;
             _logger = logger;
+            _notificationService = notificationService;
         }
 
         // ==========================
@@ -273,7 +277,7 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // ==========================
-        // 5. PAYMENT METHODS
+        // PAYMENT METHODS (Card + EFT Only)
         // ==========================
         [HttpGet]
         public async Task<IActionResult> AddCard(int orderId, decimal? amount)
@@ -296,6 +300,7 @@ namespace FridgeManagementSystem.Controllers
                 Orders = order
             };
 
+
             return View(vm);
         }
 
@@ -312,6 +317,7 @@ namespace FridgeManagementSystem.Controllers
 
             if (order == null) return Forbid();
 
+            // Recompute amount server-side for safety
             model.Amount = await _context.OrderItems
                 .Where(oi => oi.OrderId == model.OrderId)
                 .SumAsync(oi => oi.Price * oi.Quantity);
@@ -340,7 +346,7 @@ namespace FridgeManagementSystem.Controllers
             {
                 payment.PaymentReference = GeneratePaymentReference();
                 payment.BankReference = model.BankReference;
-                payment.Status = "Pending";
+                payment.Status = "Pending"; // awaiting admin approval
 
                 if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
                 {
@@ -356,11 +362,7 @@ namespace FridgeManagementSystem.Controllers
 
                 order.Status = "AwaitingPayment";
             }
-            else if (model.Method == Method.PayPal)
-            {
-                payment.Status = "Pending";
-                order.Status = "AwaitingPayment";
-            }
+          
 
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
@@ -368,10 +370,8 @@ namespace FridgeManagementSystem.Controllers
             return RedirectToAction("PaymentConfirmation", new { orderId = order.OrderId });
         }
 
-        // ==========================
-        // 6. PAYMENT CONFIRMATION
-        // ==========================
-        [HttpGet]
+
+        // ✅ PAYMENT CONFIRMATION
         public async Task<IActionResult> PaymentConfirmation(int orderId)
         {
             var customerId = GetLoggedInCustomerId();
@@ -379,31 +379,24 @@ namespace FridgeManagementSystem.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Fridge)
-                .Include(o => o.Payments)
+                .ThenInclude(i => i.Fridge)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
 
-            if (order == null)
-            {
-                return NotFound();
-            }
+            if (order == null) return NotFound();
 
-            var payment = order.Payments?.FirstOrDefault();
+            // Optionally include latest payment
+            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
 
-            var viewModel = new PaymentConfirmationViewModel
-            {
-                OrderId = order.OrderId,
-                Amount = payment?.Amount ?? order.TotalAmount,
-                PaymentDate = payment?.PaymentDate ?? DateTime.Now,
-                PaymentMethod = payment?.Method.ToString() ?? "Card",
-                Status = payment?.Status ?? "Paid",
-                OrderItems = order.OrderItems?.ToList() ?? new List<OrderItem>()
-            };
-
-            return View(viewModel);
+            ViewBag.Payment = payment;
+            return View(order);
         }
 
-        [Authorize]
+        
+    
+
+
+
+[Authorize]
         public async Task<IActionResult> OrderHistory()
         {
             var appUser = await _userManager.GetUserAsync(User);
@@ -466,6 +459,22 @@ namespace FridgeManagementSystem.Controllers
                 TempData["ErrorMessage"] = "Order not found.";
                 return RedirectToAction("MyAccount");
             }
+
+            return View(order);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderConfirmation(int id)
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Fridge)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerID == customerId);
+
+            if (order == null) return NotFound();
 
             return View(order);
         }
@@ -742,7 +751,6 @@ namespace FridgeManagementSystem.Controllers
             var last4 = cleaned.Length >= 4 ? cleaned[^4..] : cleaned;
             return new string('*', Math.Max(0, cleaned.Length - 4)) + last4;
         }
-
         private string GenerateFaultCode()
         {
             return "FLT-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
@@ -752,5 +760,6 @@ namespace FridgeManagementSystem.Controllers
         {
             return "PAY-" + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
         }
+
     }
 }

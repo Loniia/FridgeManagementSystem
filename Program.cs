@@ -17,6 +17,7 @@ builder.Services.AddDbContext<FridgeDbContext>(options =>
 
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<FridgeService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
 // ✅ 2. Add Identity with int as key and custom ApplicationUser

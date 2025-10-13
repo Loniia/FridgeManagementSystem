@@ -1,0 +1,25 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.Notification>
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<h2>Notifications</h2>
+<table class="table">
+    <thead><tr><th>Date</th><th>Message</th><th>Action</th></tr></thead>
+    <tbody>
+        @foreach (var n in Model)
+        {
+            <tr class="@(n.IsRead ? "" : "table-warning")">
+                <td>@n.CreatedAt.ToLocalTime().ToString("g")</td>
+                <td>@n.Message</td>
+                <td>
+                    <form method="post" asp-action="MarkAsRead">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@n.NotificationId" />
+                        <button class="btn btn-sm btn-outline-primary">Mark as read</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

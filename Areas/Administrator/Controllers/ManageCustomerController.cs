@@ -19,6 +19,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
     [Authorize(Roles = Roles.Admin)]
     public class ManageCustomerController : Controller
     {
+        private readonly INotificationService _notificationService;
         private readonly FridgeDbContext _context;
         private readonly IMaintenanceRequestService _mrService;
         private readonly CustomerService _customerService;   // ✅ use shared service
@@ -26,11 +27,12 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         public ManageCustomerController(
             FridgeDbContext context,
             IMaintenanceRequestService mrService,
-            CustomerService customerService)
+            CustomerService customerService, INotificationService notificationService)
         {
             _context = context;
             _mrService = mrService;
             _customerService = customerService;
+            _notificationService = notificationService;
         }
 
         // --------------------------
@@ -548,6 +550,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return File(pdfBytes, "application/pdf", $"Customer_{customer.CustomerID}_Allocations.pdf");
         }
+        
         [HttpGet]
         public async Task<IActionResult> PendingPayments()
         {
