@@ -13,6 +13,11 @@
         <div class="alert alert-info">@TempData["InfoMessage"]</div>
     }
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
     @if (Model != null && Model.Any())
     {
         <table class="table table-striped">
@@ -37,17 +42,35 @@
                         <td>@item.QuantityAllocated</td>
                         <td>@item.QuantityPending</td>
                         <td>
-                            <span class="badge bg-warning">@item.Status</span>
+                            @if (item.QuantityPending > 0)
+                            {
+                                <span class="badge bg-warning">Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Allocated</span>
+                            }
                         </td>
                         <td>
-                            <!-- FIXED: Added area and controller -->
-                            <a asp-area="CustomerManagementSubSystem"
-                               asp-controller="CustomerLiaison"
-                               asp-action="Allocate"
-                               asp-route-customerId="@item.CustomerId"
-                               class="btn btn-primary btn-sm">
-                                Allocate
-                            </a>
+                            @if (item.QuantityPending > 0)
+                            {
+                                <!-- Only show Allocate button when there are pending fridges -->
+                                <form asp-area="CustomerManagementSubSystem"
+                                      asp-controller="CustomerLiaison"
+                                      asp-action="Allocate"
+                                      method="post" class="d-inline">
+                                    <input type="hidden" name="orderId" value="@item.OrderId" />
+                                    <input type="hidden" name="customerId" value="@item.CustomerId" />
+                                    <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+                                    <input type="hidden" name="fridgeId" value="@item.FridgeId" />
+                                    <button type="submit" class="btn btn-primary btn-sm">Allocate</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <!-- Disabled button when fully allocated -->
+                                <button class="btn btn-secondary btn-sm" disabled title="All fridges for this item have been allocated">Allocated</button>
+                            }
                         </td>
                     </tr>
                 }
@@ -80,15 +103,6 @@
 
 @section Scripts {
     <script>
-        console.log('ProcessPendingAllocations page loaded');
-
-        // Debug the Allocate links
-        document.querySelectorAll('a[asp-action="Allocate"]').forEach(link => {
-            link.addEventListener('click', function (e) {
-                console.log('Allocate link clicked:');
-                console.log(' - Customer ID:', this.getAttribute('asp-route-customerId'));
-                console.log(' - Full URL:', this.href);
-            });
-        });
+        console.log('✅ ProcessPendingAllocations page loaded');
     </script>
 }

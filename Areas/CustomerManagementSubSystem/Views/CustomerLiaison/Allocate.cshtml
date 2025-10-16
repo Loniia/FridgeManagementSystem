@@ -1,226 +1,150 @@
-﻿@model FridgeManagementSystem.Models.Order  
-
-@{
-    ViewData["Title"] = "Allocate Fridge";
-    var fridges = ViewBag.Fridges as List<FridgeManagementSystem.Models.Fridge>;
-    var order = ViewBag.Order as FridgeManagementSystem.Models.Order;
-}
-
-<h1>Allocate Fridge to @order.Customers.FullName</h1>
-
-@if (fridges == null || !fridges.Any())
-{
-    <p>No fridges available for allocation.</p>
-}
-else
-{
-    <form asp-action="Allocate" method="post">
-        <!-- Hidden fields to pass both orderId and customerId -->
-        <input type="hidden" name="orderId" value="@order.OrderId" />
-        <input type="hidden" name="customerId" value="@order.CustomerID" />
-
-        <div class="form-group">
-            <label for="fridgeSelect">Select a Fridge:</label>
-            <select class="form-control" id="fridgeSelect" name="fridgeId" required>
-                <option value="">-- Choose a Fridge --</option>
-                @foreach (var fridge in fridges)
-                {
-                    <option value="@fridge.FridgeId">@fridge.FridgeType</option>
-                }
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-2">Allocate Fridge</button>
-    </form>
-}
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success mt-3">
-        @TempData["Success"]
-    </div>
-}
-
-
-
-@* @model FridgeManagementSystem.Models.CustomerAllocationViewModel
+﻿@model FridgeManagementSystem.Models.FridgeAllocation
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Allocate Fridge";
+    var order = ViewBag.Order;
+    var customer = order?.Customers;
+    var availableFridges = ViewBag.Fridges as List<FridgeManagementSystem.Models.Fridge>;
 }
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     body {
-        background: linear-gradient(to right, #f0f4f8, #d9e2ec);
-        font-family: 'Segoe UI', sans-serif;
-        color: #333;
+        background: linear-gradient(135deg, #e0f7fa, #fce4ec);
+        font-family: 'Poppins', sans-serif;
     }
 
-    .allocation-card {
-        background: #ffffff;
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
         border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        padding: 30px;
-        margin-bottom: 30px;
     }
 
-        .allocation-card:hover {
-            transform: translateY(-10px) rotateX(5deg);
-            box-shadow: 0 30px 50px rgba(0,0,0,0.25);
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
         }
 
-    .fridge-card {
-        background: linear-gradient(145deg, #e3f2fd, #bbdefb);
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        margin-bottom: 15px;
-    }
-
-        .fridge-card:hover {
-            transform: translateY(-5px) rotateX(3deg);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
-
-    .fridge-image {
-        width: 100px;
-        height: 100px;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        background: linear-gradient(145deg, #ffffff, #e6e6e6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-allocate {
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
-        color: white;
+    h2 {
         font-weight: 600;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        text-align: center;
+        color: #4a148c;
+        text-shadow: 1px 1px 3px rgba(74, 20, 140, 0.2);
+        margin-bottom: 25px;
     }
 
-        .btn-allocate:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    .card-title {
+        color: #6a1b9a;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+
+    label {
+        color: #4a148c;
+        font-weight: 500;
+    }
+
+    select.form-select {
+        border-radius: 12px;
+        padding: 10px;
+        border: 2px solid #ce93d8;
+        box-shadow: 0 3px 6px rgba(206, 147, 216, 0.2);
+        transition: all 0.2s ease;
+    }
+
+        select.form-select:focus {
+            border-color: #8e24aa;
+            box-shadow: 0 0 10px rgba(142, 36, 170, 0.3);
+        }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 500;
+        padding: 10px 18px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #8e24aa, #d81b60);
+        border: none;
+        color: white;
+        box-shadow: 0 5px 15px rgba(216, 27, 96, 0.3);
+    }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #ab47bc, #ec407a);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(216, 27, 96, 0.4);
+        }
+
+    .btn-secondary {
+        background: #bdbdbd;
+        border: none;
+        color: #212121;
+    }
+
+        .btn-secondary:hover {
+            background: #9e9e9e;
+            transform: translateY(-2px);
         }
 
     .alert {
         border-radius: 12px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        font-weight: 500;
     }
 </style>
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Allocate Fridge to @Model.CustomerName</h2>
+<div class="container mt-5 mb-5">
+    <h2>✨ Allocate Fridge ✨</h2>
 
-    @if (TempData["ErrorMessage"] != null)
+    @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger text-center">@TempData["ErrorMessage"]</div>
-    }
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+        <div class="alert alert-danger shadow-sm">@TempData["Error"]</div>
     }
 
-    <div class="allocation-card mx-auto" style="max-width:800px;">
-        <form asp-action="Allocate" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="CustomerId" />
-            <input type="hidden" asp-for="CustomerName" />
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm">@TempData["Success"]</div>
+    }
 
-            <div class="mb-3">
-                <label asp-for="SelectedFridgeID" class="form-label">Select Fridge</label>
-                <select asp-for="SelectedFridgeID" class="form-select" required>
-                    <option value="">-- Choose a fridge --</option>
-                    @foreach (var fridge in Model.AvailableFridges)
-                    {
-                        <option value="@fridge.FridgeId">
-                            @fridge.Brand @fridge.Model (Stock: @fridge.Quantity)
-                        </option>
-                    }
-                </select>
-                <span asp-validation-for="SelectedFridgeID" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="QuantityAllocated" class="form-label">Quantity to Allocate</label>
-                <input asp-for="QuantityAllocated" type="number" min="1" class="form-control" required />
-                <span asp-validation-for="QuantityAllocated" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="ReturnDate" class="form-label">Expected Return Date</label>
-                <input asp-for="ReturnDate" type="date" class="form-control"
-                       min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
-                <span asp-validation-for="ReturnDate" class="text-danger"></span>
-            </div>
-
-            <button type="submit" class="btn btn-allocate w-100 py-2">Allocate Fridge</button>
-        </form>
+    <div class="glass-card p-4 mb-4">
+        <h5 class="card-title mb-3">👩‍💼 Customer Information</h5>
+        <p><strong>Customer:</strong> @customer?.FullName</p>
+        <p><strong>Email:</strong> @customer?.Email</p>
+        <p><strong>Phone:</strong> @customer?.PhoneNumber</p>
+        <p><strong>Order ID:</strong> @order?.OrderId</p>
+        <p><strong>Status:</strong> @order?.Status</p>
     </div>
 
-    <h4 class="mt-5 mb-3 text-center">Pending Orders</h4>
-    <div class="row">
-        @foreach (var item in Model.OrderItems)
-        {
-            <div class="col-md-6">
-                <div class="fridge-card d-flex align-items-center">
-                    <div class="fridge-image me-3">
-                        <i class="fas fa-refrigerator fa-2x text-primary"></i>
-                    </div>
-                    <div>
-                        <h5>@item.FridgeName</h5>
-                        <p>Ordered: @item.Quantity</p>
-                        <p>Price: @item.Price.ToString("C")</p>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+    <form asp-area="CustomerManagementSubSystem"
+          asp-controller="CustomerLiaison"
+          asp-action="Allocate"
+          method="post"
+          class="glass-card p-4">
+
+        <input type="hidden" name="orderId" value="@order?.OrderId" />
+        <input type="hidden" name="customerId" value="@customer?.CustomerID" />
+
+        <div class="form-group mb-4">
+            <label for="fridgeId" class="form-label"><strong>Select Available Fridge:</strong></label>
+            <select id="fridgeId" name="fridgeId" class="form-select" required>
+                <option value="">-- Select Fridge --</option>
+                @foreach (var fridge in availableFridges)
+                {
+                    <option value="@fridge.FridgeId">
+                        @($"{fridge.Brand} - {fridge.Model} ({fridge.FridgeType})")
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success me-3">💖 Allocate Fridge</button>
+            <a asp-action="ProcessPendingAllocations"
+               asp-area="CustomerManagementSubSystem"
+               asp-controller="CustomerLiaison"
+               class="btn btn-secondary">❌ Cancel</a>
+        </div>
+    </form>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        console.log('Allocate page loaded');
-
-        // Debug form submission
-        document.querySelector('form').addEventListener('submit', function (e) {
-            console.log('Form submitted!');
-            console.log('CustomerId:', document.querySelector('#CustomerId').value);
-            console.log('SelectedFridgeID:', document.querySelector('#SelectedFridgeID').value);
-            console.log('QuantityAllocated:', document.querySelector('#QuantityAllocated').value);
-            console.log('ReturnDate:', document.querySelector('#ReturnDate').value);
-
-            // Check if form is valid
-            if (!this.checkValidity()) {
-                console.log('Form is invalid - validation will prevent submission');
-            } else {
-                console.log('Form is valid - should submit');
-            }
-        });
-
-        // Check form state on page load
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('Form elements found:');
-            console.log('- CustomerId:', document.querySelector('#CustomerId')?.value);
-            console.log('- SelectedFridgeID:', document.querySelector('#SelectedFridgeID')?.value);
-            console.log('- QuantityAllocated:', document.querySelector('#QuantityAllocated')?.value);
-            console.log('- ReturnDate:', document.querySelector('#ReturnDate')?.value);
-
-            // Check for validation errors
-            const errors = document.querySelectorAll('.text-danger');
-            console.log('Validation errors found:', errors.length);
-            errors.forEach(error => {
-                console.log('Error:', error.textContent);
-            });
-        });
-    </script>
-} *@

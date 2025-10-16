@@ -16,7 +16,9 @@ namespace FridgeManagementSystem.Models
         [Required]
         [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
-
+        [Required]
+        [ForeignKey("OrderItem")]
+        public int OrderItemId { get; set; }
        
         [Required]
         [DataType(DataType.Date)]
@@ -35,7 +37,7 @@ namespace FridgeManagementSystem.Models
         //Navigation Property
         public virtual Customer Customer { get; set; }
         public virtual Fridge Fridge { get; set; }
-
+        public virtual OrderItem OrderItem { get; set; }
       
     }
 }
