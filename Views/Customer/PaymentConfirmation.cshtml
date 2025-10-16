@@ -41,12 +41,12 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <h5>Order Details</h5>
-                    <p><strong>Order ID:</strong> #@Model.OrderId</p>
+                   
                     <p><strong>Payment Date:</strong> @Model.PaymentDate.ToString("f")</p>
                 </div>
                 <div class="col-md-6">
                     <h5>Payment Information</h5>
-                    <p><strong>Amount Paid:</strong> @($"R{Model.Amount:0.00}")</p>
+                    <p><strong>Amount Paid:</strong> @($"R{Model.Amount}")</p>
                     <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
                     <p><strong>Status:</strong> <span class="badge bg-success">@Model.Status</span></p>
                 </div>
@@ -94,17 +94,220 @@
         </div>
     </div>
 </div>
-</div>
-</div>
 
 @section Styles {
     <style>
-        .card {
-            border-radius: 15px;
+        .container {
+            max-width: 1200px;
         }
 
-        .card-header {
-            border-radius: 15px 15px 0 0 !important;
+        .card {
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1) !important;
+            }
+
+        .text-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            margin-bottom: 2rem !important;
+        }
+
+        .card-body {
+            padding: 3rem !important;
+        }
+
+        .row.mb-4 {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+            .row.mb-4 .col-md-6 {
+                padding: 0 2rem;
+            }
+
+            .row.mb-4 h5 {
+                color: #2c3e50;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                border-bottom: 2px solid #dee2e6;
+                padding-bottom: 0.5rem;
+            }
+
+        .table {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin: 2rem 0;
+        }
+
+            .table thead {
+                background: linear-gradient(135deg, #2c3e50, #34495e);
+                color: white;
+            }
+
+            .table th {
+                border: none;
+                padding: 1.25rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-size: 0.9rem;
+            }
+
+            .table td {
+                padding: 1.25rem;
+                border-color: #f1f3f4;
+                vertical-align: middle;
+            }
+
+            .table tbody tr {
+                transition: all 0.3s ease;
+            }
+
+                .table tbody tr:hover {
+                    background-color: rgba(52, 152, 219, 0.05);
+                    transform: translateX(5px);
+                }
+
+        .badge {
+            padding: 0.6em 1.2em;
+            font-size: 0.85rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+                background: linear-gradient(135deg, #2980b9, #2471a3);
+            }
+
+            .btn-primary:active {
+                transform: translateY(0);
+            }
+
+        h4.fw-bold {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+
+        .lead {
+            font-size: 1.2rem;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        strong {
+            color: #2c3e50;
+        }
+
+        a[target="_blank"] {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+            a[target="_blank"]:hover {
+                color: #2980b9;
+                text-decoration: underline;
+            }
+
+        .text-center.mt-5 {
+            margin-top: 3rem !important;
+            padding-top: 2rem;
+            border-top: 2px solid #e9ecef;
+        }
+
+        @@media (max-width: 768px) {
+            .card-body
+
+        {
+            padding: 1.5rem !important;
+        }
+
+        .row.mb-4 {
+            padding: 1rem;
+        }
+
+            .row.mb-4 .col-md-6 {
+                padding: 0 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+        .text-success {
+            font-size: 2rem;
+        }
+
+        .table {
+            font-size: 0.9rem;
+        }
+
+            .table th,
+            .table td {
+                padding: 0.75rem;
+            }
+
+        .btn-primary {
+            display: block;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+            .btn-primary.me-3 {
+                margin-right: 0 !important;
+            }
+
+        }
+
+        @@media (max-width: 576px) {
+            .container
+
+        {
+            margin-top: 2rem !important;
+        }
+
+        .card {
+            margin: 0 10px;
+            padding: 1.5rem !important;
+        }
+
+        .text-success {
+            font-size: 1.75rem;
+        }
+
+        h4.fw-bold {
+            font-size: 1.5rem;
+        }
+
         }
     </style>
 }

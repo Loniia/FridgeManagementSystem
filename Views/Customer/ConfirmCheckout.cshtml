@@ -26,7 +26,7 @@
                             <td>@item.Fridge.Brand</td>
                             <td>@item.Quantity</td>
                             <td>@item.Fridge.Price.ToString("C")</td>
-                            <td>@(item.Fridge.Price * item.Quantity).ToString("C")</td>
+                            <td>@(item.Fridge.Price* item.Quantity).ToString("C")</td>
                         </tr>
                     }
                 </tbody>
@@ -52,8 +52,7 @@
                         <option value="">Select Method</option>
                         <option value="Card">Card</option>
                         <option value="EFT">EFT</option>
-                        <option value="CashOnDelivery">Cash on Delivery</option>
-                        <option value="Wallet">Wallet / Store Credit</option>
+
                     </select>
                     <span asp-validation-for="PaymentMethod" class="text-danger"></span>
                 </div>
@@ -63,3 +62,230 @@
         </div>
     </div>
 </div>
+
+<style>
+    .container {
+        max-width: 1200px;
+    }
+
+    .card {
+        border-radius: 16px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+        }
+
+    h2 {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 2rem !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h4 {
+        color: #34495e;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .table {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+        .table thead {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+
+        .table th {
+            border: none;
+            padding: 1.25rem;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .table td {
+            padding: 1.25rem;
+            border-color: #f1f3f4;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover td {
+            background-color: rgba(52, 152, 219, 0.05);
+            transform: translateX(5px);
+        }
+
+        .table tfoot {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+            .table tfoot th {
+                background: transparent;
+                color: #2c3e50;
+                font-size: 1.1rem;
+                padding: 1.5rem;
+            }
+
+    .form-control, .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.3rem rgba(25, 135, 84, 0.15);
+            background-color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+    .form-label {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #198754, #157347);
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(25, 135, 84, 0.3);
+        margin-top: 1rem !important;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(25, 135, 84, 0.4);
+            background: linear-gradient(135deg, #157347, #146c43);
+        }
+
+        .btn-success:active {
+            transform: translateY(-1px);
+        }
+
+    .text-danger {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
+
+    .text-end {
+        text-align: right !important;
+    }
+
+    @@media (max-width: 768px) {
+        .col-md-8
+
+    {
+        padding: 0 15px;
+    }
+
+    .card {
+        margin: 0 10px;
+        padding: 1.5rem !important;
+    }
+
+    h2 {
+        font-size: 2rem;
+        padding: 0 1rem;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+
+        .table th,
+        .table td {
+            padding: 0.875rem 0.75rem;
+        }
+
+    .btn-success {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        h2
+
+    {
+        font-size: 1.75rem;
+    }
+
+    .card {
+        border-radius: 12px;
+        padding: 1.25rem !important;
+    }
+
+    .table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .form-control, .form-select {
+        padding: 0.75rem;
+    }
+
+    .btn-success {
+        width: 100% !important;
+        margin-top: 1.5rem !important;
+    }
+
+    }
+
+    @@media (max-width: 400px) {
+        .table
+
+    {
+        font-size: 0.8rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h4 {
+        font-size: 1.25rem;
+    }
+
+    }
+</style>
