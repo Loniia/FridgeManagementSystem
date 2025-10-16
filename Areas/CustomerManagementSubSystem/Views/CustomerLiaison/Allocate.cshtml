@@ -115,6 +115,19 @@
         <p><strong>Phone:</strong> @customer?.PhoneNumber</p>
         <p><strong>Order ID:</strong> @order?.OrderId</p>
         <p><strong>Status:</strong> @order?.Status</p>
+
+        <!-- 🆕 Added Return Date display -->
+        <p>
+            <strong>Return Date:</strong>
+            @if (Model.ReturnDate.HasValue)
+            {
+                @Model.ReturnDate.Value.ToString("yyyy-MM-dd")
+            }
+            else
+            {
+                <span class="text-muted">Not yet returned</span>
+            }
+        </p>
     </div>
 
     <form asp-area="CustomerManagementSubSystem"

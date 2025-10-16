@@ -232,7 +232,7 @@ namespace CustomerManagementSubSystem.Controllers
             if (orderItem == null)
                 return NotFound("Order item not found.");
 
-            // Check how many are already allocated
+            // Check existing allocations
             var totalAllocated = _context.FridgeAllocation
                 .Where(fa => fa.OrderItemId == orderItemId && fa.CustomerID == customerId)
                 .Sum(fa => (int?)fa.QuantityAllocated) ?? 0;
@@ -244,7 +244,7 @@ namespace CustomerManagementSubSystem.Controllers
                 return RedirectToAction("ProcessPendingAllocations");
             }
 
-            // Allocate 1 fridge
+            // Allocate fridge
             var allocation = new FridgeAllocation
             {
                 FridgeId = fridge.FridgeId,
@@ -256,11 +256,10 @@ namespace CustomerManagementSubSystem.Controllers
             };
             _context.FridgeAllocation.Add(allocation);
 
-            // Update fridge status
+            // Update fridge and order
             fridge.Status = "Allocated";
-
-            // Update order status if all items allocated
             totalAllocated += 1;
+
             if (totalAllocated >= orderItem.Quantity)
             {
                 order.Status = "Fridge Allocated";
@@ -269,7 +268,21 @@ namespace CustomerManagementSubSystem.Controllers
 
             _context.SaveChanges();
 
-            TempData["Success"] = $"Fridge '{fridge.FridgeType}' allocated to {customer.FullName}.";
+            // Create ViewModel to show allocation info
+            var allocationVM = new FridgeAllocationViewModel
+            {
+                AllocationID = allocation.AllocationID,
+                FridgeId = fridge.FridgeId,
+                Brand = fridge.Brand,
+                Model = fridge.Model,
+                Status = fridge.Status,
+                CustomerName = customer.FullName,
+                QuantityAllocated = allocation.QuantityAllocated,
+                AllocationDate = allocation.AllocationDate,
+                ReturnDate = allocation.ReturnDate
+            };
+
+            TempData["Success"] = $"Fridge '{allocationVM.Brand} {allocationVM.Model}' allocated to {allocationVM.CustomerName}.";
 
             return RedirectToAction("ProcessPendingAllocations");
         }
