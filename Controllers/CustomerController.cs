@@ -107,49 +107,53 @@ namespace FridgeManagementSystem.Controllers
 
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId); // Remove the IsActive filter
 
             if (cart == null)
             {
-                cart = new Cart { CustomerID = customerId, IsActive = true };
+                // Create new cart if none exists
+                cart = new Cart
+                {
+                    CustomerID = customerId,
+                    IsActive = true
+                };
                 _context.Carts.Add(cart);
+                await _context.SaveChangesAsync();
+            }
+            else if (!cart.IsActive)
+            {
+                // Reactivate existing inactive cart instead of creating new one
+                cart.IsActive = true;
+                _context.Carts.Update(cart);
                 await _context.SaveChangesAsync();
             }
 
             var fridge = await _context.Fridge.FindAsync(fridgeId);
             if (fridge == null) return NotFound();
 
-            var existingItem = cart.CartItems.FirstOrDefault(i => i.FridgeId == fridgeId);
+            var existingItem = cart.CartItems.FirstOrDefault(i => i.FridgeId == fridgeId && !i.IsDeleted);
             if (existingItem != null)
             {
-                if (existingItem.IsDeleted)
-                {
-                    existingItem.IsDeleted = false;
-                    existingItem.Quantity = quantity;
-                    existingItem.Price = fridge.Price;
-                    _context.CartItems.Update(existingItem);
-                }
-                else
-                {
-                    existingItem.Quantity += quantity;
-                    existingItem.Price = fridge.Price;
-                    _context.CartItems.Update(existingItem);
-                }
+                existingItem.Quantity += quantity;
+                existingItem.Price = fridge.Price;
+                _context.CartItems.Update(existingItem);
             }
             else
             {
-                cart.CartItems.Add(new CartItem
+                var newCartItem = new CartItem
                 {
+                    CartId = cart.CartId,
                     FridgeId = fridgeId,
                     Quantity = quantity,
                     Price = fridge.Price,
                     IsDeleted = false
-                });
+                };
+                _context.CartItems.Add(newCartItem);
             }
 
-            cart.IsActive = true;
-            _context.Carts.Update(cart);
             await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Item added to cart successfully!";
             return RedirectToAction("ViewCart");
         }
 
@@ -196,9 +200,9 @@ namespace FridgeManagementSystem.Controllers
             var cart = await _context.Carts
                 .Include(c => c.CartItems.Where(ci => !ci.IsDeleted))
                 .ThenInclude(ci => ci.Fridge)
-                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive); // Keep IsActive here
 
-            if (cart == null)
+            if (cart == null || !cart.CartItems.Any())
             {
                 ViewBag.Message = "Your cart is empty.";
                 return View(new Cart { CartItems = new List<CartItem>() });
@@ -229,6 +233,52 @@ namespace FridgeManagementSystem.Controllers
             return View(cart);
         }
 
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> ConfirmCheckout(string fullName, string phoneNumber, string deliveryAddress)
+        //{
+        //    var customerId = GetLoggedInCustomerId();
+        //    if (customerId == 0) return RedirectToAction("Login", "Account");
+
+        //    var cart = await _context.Carts
+        //        .Include(c => c.CartItems.Where(ci => !ci.IsDeleted))
+        //        .ThenInclude(i => i.Fridge)
+        //        .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
+
+        //    if (cart == null || !cart.CartItems.Any())
+        //    {
+        //        TempData["Error"] = "Your cart is empty.";
+        //        return RedirectToAction("ViewCart");
+        //    }
+
+        //    var order = new Order
+        //    {
+        //        CustomerID = customerId,
+        //        OrderDate = DateTime.Now,
+        //        Status = "Pending",
+        //        DeliveryAddress = deliveryAddress,
+        //        ContactName = fullName,
+        //        ContactPhone = phoneNumber,
+        //        TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
+        //    };
+
+        //    foreach (var ci in cart.CartItems)
+        //    {
+        //        order.OrderItems.Add(new OrderItem
+        //        {
+        //            FridgeId = ci.FridgeId,
+        //            Quantity = ci.Quantity,
+        //            Price = ci.Price
+        //        });
+        //    }
+
+        //    _context.Orders.Add(order);
+        //    cart.IsActive = false;
+        //    _context.Carts.Update(cart);
+        //    await _context.SaveChangesAsync();
+
+        //    return RedirectToAction("AddCard", new { orderId = order.OrderId });
+        //}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmCheckout(string fullName, string phoneNumber, string deliveryAddress)
@@ -266,15 +316,23 @@ namespace FridgeManagementSystem.Controllers
                     Quantity = ci.Quantity,
                     Price = ci.Price
                 });
+
+                // ✅ Mark cart items as deleted
+                ci.IsDeleted = true;
+                _context.CartItems.Update(ci);
             }
 
             _context.Orders.Add(order);
+
+            // ✅ Mark cart as inactive
             cart.IsActive = false;
             _context.Carts.Update(cart);
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction("AddCard", new { orderId = order.OrderId });
         }
+
 
         // ==========================
         // PAYMENT METHODS (Card + EFT Only)
@@ -390,11 +448,6 @@ namespace FridgeManagementSystem.Controllers
             ViewBag.Payment = payment;
             return View(order);
         }
-
-        
-    
-
-
 
        [Authorize]
         public async Task<IActionResult> OrderHistory()
