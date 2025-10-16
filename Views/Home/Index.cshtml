@@ -1,4 +1,143 @@
 ﻿@model BusinessInfo
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- 🏠 Hero / Home Section -->
+<section id="home" class="d-flex align-items-center justify-content-center text-center text-white"
+         style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('/images/home-bg.jpg') center/cover no-repeat; height:100vh;">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Welcome to <span class="text-success">Fridge Management System</span></h1>
+        <p class="lead">Smart control. Efficient storage. Seamless management.</p>
+        <a href="#about" class="btn btn-success btn-lg mt-3">Learn More</a>
+    </div>
+</section>
+
+<!-- ℹ️ About Us Section -->
+<section id="about" class="py-5" style="background-color: #f7f7f7;">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">About Us</h2>
+        <p class="text-muted fs-5 mx-auto" style="max-width: 800px;">
+            Our system simplifies food inventory management through smart, real-time tracking and digital organization.
+            We aim to help households, businesses, and institutions manage their fridge and freezer contents efficiently,
+            reducing waste and improving storage planning.
+        </p>
+    </div>
+</section>
+
+<!-- 🧰 Services Section -->
+<section id="services" class="py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-5">Our Services</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="bi bi-thermometer-half display-4 text-success mb-3"></i>
+                        <h5 class="card-title">Temperature Monitoring</h5>
+                        <p class="text-muted">Monitor and log fridge temperatures automatically for better safety and efficiency.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="bi bi-box-seam display-4 text-success mb-3"></i>
+                        <h5 class="card-title">Inventory Tracking</h5>
+                        <p class="text-muted">Easily track products, expiry dates, and stock levels in real time.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="bi bi-people display-4 text-success mb-3"></i>
+                        <h5 class="card-title">Customer Management</h5>
+                        <p class="text-muted">Connect customer profiles with product records and monitor sales trends effortlessly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 👨‍💼 Team Section -->
+<section id="team" class="py-5" style="background-color: #f7f7f7;">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-5">Meet Our Team</h2>
+        <div class="row justify-content-center g-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <img src="/images/team1.jpg" class="card-img-top rounded-top" alt="Team Member 1">
+                    <div class="card-body">
+                        <h5 class="card-title mb-0">Lerato M.</h5>
+                        <p class="text-muted">Project Manager</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <img src="/images/team2.jpg" class="card-img-top rounded-top" alt="Team Member 2">
+                    <div class="card-body">
+                        <h5 class="card-title mb-0">Thabo K.</h5>
+                        <p class="text-muted">Lead Developer</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <img src="/images/team3.jpg" class="card-img-top rounded-top" alt="Team Member 3">
+                    <div class="card-body">
+                        <h5 class="card-title mb-0">Nokuthula R.</h5>
+                        <p class="text-muted">UI/UX Designer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 📞 Contact Section -->
+<section id="contact" class="py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">Contact Us</h2>
+        <p class="text-muted fs-5">We’d love to hear from you! Get in touch with us for any questions or collaboration ideas.</p>
+
+        <div class="mt-4">
+            <p class="mb-1"><i class="bi bi-envelope text-success me-2"></i> info@fridgemanagement.com</p>
+            <p class="mb-1"><i class="bi bi-telephone text-success me-2"></i> +27 67 123 4567</p>
+            <p><i class="bi bi-geo-alt text-success me-2"></i> 123 Innovation Street, Pretoria, South Africa</p>
+        </div>
+    </div>
+</section>
+
+<!-- 🌟 Footer -->
+<footer class="text-center py-4" style="background-color: #f7f7f7; border-top: 1px solid #e0e0e0;">
+    <p class="mb-0 text-muted">&copy; 2025 Dynamic Ice Inc. | Designed with ❤️ using Bootstrap</p>
+</footer>
+
+@section Scripts {
+    <script>
+        // Smooth scrolling enhancement for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+}
+
+
+@* @model BusinessInfo
 @{
     ViewData["Title"] = "Home";
     Layout = "_PublicLayout";
@@ -130,5 +269,5 @@
             transform: translateY(-5px);
         }
 </style>
-
+ *@
 
