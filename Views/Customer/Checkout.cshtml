@@ -21,61 +21,353 @@
     {
         <div class="row">
             <!-- Delivery Form -->
-            <div class="col-md-6">
+            <div class="col-lg-7">
                 <div class="card shadow-sm p-4 mb-4">
-                    <h5 class="fw-bold mb-3">Delivery Information</h5>
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Delivery Information</h5>
+                    </div>
                     <form asp-action="ConfirmCheckout" asp-controller="Customer" method="post">
                         @Html.AntiForgeryToken()
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Full Name</label>
-                            <input type="text" name="fullName" class="form-control" placeholder="Enter your full name" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Phone Number</label>
-                            <input type="text" name="phoneNumber" class="form-control" placeholder="Enter your phone number" required />
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Full Name</label>
+                                <input type="text" name="fullName" class="form-control" placeholder="Enter your full name" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <input type="text" name="phoneNumber" class="form-control" placeholder="Enter your phone number" required />
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Delivery Address</label>
-                            <textarea name="deliveryAddress" class="form-control" placeholder="Enter your delivery address" required></textarea>
+                            <textarea name="deliveryAddress" class="form-control" placeholder="Enter your complete delivery address including street, city, and postal code" rows="4" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Delivery Instructions (Optional)</label>
+                            <textarea name="deliveryInstructions" class="form-control" placeholder="Any special delivery instructions?" rows="2"></textarea>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg">Proceed to Payment</button>
+                            <button type="submit" class="btn btn-success btn-lg py-3">
+                                <i class="fas fa-lock me-2"></i>Proceed to Secure Payment
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
 
             <!-- Order Summary -->
-            <div class="col-md-6">
-                <div class="card shadow-sm p-4">
-                    <h5 class="fw-bold mb-3">Order Summary</h5>
-                    <ul class="list-group mb-3">
+            <div class="col-lg-5">
+                <div class="card shadow-sm p-4 sticky-top">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Order Summary</h5>
+                    </div>
+
+                    <div class="order-items mb-4">
                         @foreach (var item in Model.CartItems)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>@item.Fridge?.Brand @item.Fridge?.Model</strong><br />
-                                    <small>@item.Quantity × R @item.Price.ToString("N2")</small>
+                            <div class="order-item d-flex justify-content-between align-items-center mb-3 p-3 rounded">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded p-2 me-3">
+                                        <i class="fas fa-refrigerator text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="d-block">@item.Fridge?.Brand @item.Fridge?.Model</strong>
+                                        <small class="text-muted">Quantity: @item.Quantity</small>
+                                    </div>
                                 </div>
-                                <div>R @((item.Price * item.Quantity).ToString("N2"))</div>
-                            </li>
+                                <div class="text-end">
+                                    <div class="fw-bold">R @((item.Price * item.Quantity).ToString("N2"))</div>
+                                    <small class="text-muted">R @item.Price.ToString("N2") each</small>
+                                </div>
+                            </div>
                         }
-                    </ul>
+                    </div>
 
-                    <div class="border-top pt-2">
-                        <h5 class="text-end">
-                            Total:
-                            <span class="fw-bold text-success">
-                                R @Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("N2")
+                    <div class="price-breakdown">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal:</span>
+                            <span>R @Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("N2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Delivery Fee:</span>
+                            <span>R 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tax:</span>
+                            <span>R @((Model.CartItems.Sum(i => i.Price * i.Quantity) * 0.15m).ToString("N2"))</span>
+                        </div>
+                        <hr class="my-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold fs-5">Total:</span>
+                            <span class="fw-bold fs-4 text-success">
+                                R @((Model.CartItems.Sum(i => i.Price * i.Quantity) * 1.15m).ToString("N2"))
                             </span>
-                        </h5>
+                        </div>
+                    </div>
+
+                    <div class="security-badge mt-4 text-center">
+                        <div class="d-flex justify-content-center align-items-center text-muted">
+                            <i class="fas fa-shield-alt me-2 text-success"></i>
+                            <small>Secure checkout • 256-bit SSL encryption</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     }
 </div>
+
+<style>
+    .container {
+        max-width: 1400px;
+    }
+
+    .card {
+        border-radius: 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+        }
+
+    h2 {
+        color: #2c3e50;
+        font-weight: 800;
+        font-size: 2.75rem;
+        margin-bottom: 3rem !important;
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 2rem;
+    }
+
+    .order-item {
+        background: rgba(248, 249, 250, 0.8);
+        border: 1px solid rgba(233, 236, 239, 0.8);
+        transition: all 0.3s ease;
+    }
+
+        .order-item:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: #198754;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+        .form-control:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.3rem rgba(25, 135, 84, 0.15);
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+    .form-label {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #198754, #16a085);
+        border: none;
+        border-radius: 15px;
+        padding: 1.25rem 2rem;
+        font-weight: 700;
+        font-size: 1.2rem;
+        letter-spacing: 0.5px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 25px rgba(25, 135, 84, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(25, 135, 84, 0.4);
+            background: linear-gradient(135deg, #157347, #149174);
+        }
+
+        .btn-success:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-success::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-success:hover::before {
+            left: 100%;
+        }
+
+    .price-breakdown {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .alert-info {
+        border-radius: 15px;
+        border: none;
+        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+        color: #0c5460;
+        font-weight: 600;
+        padding: 2rem;
+        font-size: 1.2rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #2471a3);
+        }
+
+    .security-badge {
+        padding: 1rem;
+        background: rgba(25, 135, 84, 0.05);
+        border-radius: 10px;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+
+    hr {
+        border-top: 2px dashed #dee2e6;
+        opacity: 0.6;
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 0 15px;
+        }
+
+        .row {
+            margin: 0 -10px;
+        }
+
+        .col-lg-7, .col-lg-5 {
+            padding: 0 10px;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            margin: 0;
+            padding: 1.5rem !important;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            padding: 0 1rem;
+        }
+
+        .btn-success {
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .sticky-top {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .container {
+            margin-top: 1rem !important;
+        }
+
+        h2 {
+            font-size: 2rem;
+        }
+
+        .card {
+            border-radius: 15px;
+            padding: 1.25rem !important;
+        }
+
+        .form-control {
+            padding: 0.875rem;
+        }
+
+        .order-item {
+            flex-direction: column;
+            align-items: flex-start !important;
+            text-align: left;
+        }
+
+            .order-item .text-end {
+                text-align: left !important;
+                margin-top: 0.75rem;
+                width: 100%;
+            }
+
+        .price-breakdown {
+            padding: 1rem;
+        }
+    }
+
+    @@media (max-width: 400px) {
+        h2 {
+            font-size: 1.75rem;
+        }
+
+        h5.fw-bold {
+            font-size: 1.1rem;
+        }
+
+        .btn-success, .btn-primary {
+            padding: 0.875rem 1.25rem;
+            font-size: 1rem;
+        }
+
+        .card {
+            padding: 1rem !important;
+        }
+    }
+</style>

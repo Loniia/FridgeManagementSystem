@@ -7,46 +7,336 @@
 <div class="container mt-5">
     <h2 class="fw-bold mb-4 text-center">Payment Details</h2>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 p-4">
-                <form asp-action="ProcessPayment" method="post">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cardholder Name</label>
-                        <input type="text" name="CardholderName" class="form-control" placeholder="Full name on card" required />
+    <div class="row g-4">
+        <!-- Order Summary Section -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-medium">@Model.Amount.ToString("C")</span>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Card Number</label>
-                        <input type="text" name="CardNumber" class="form-control" placeholder="**** **** **** ****" maxlength="16" required />
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Tax (15%):</span>
+                        <span class="fw-medium">@((Model.Amount * 0.15m).ToString("C"))</span>
                     </div>
+                    <div class="d-flex justify-content-between fw-bold mt-3 pt-3 border-top">
+                        <span>Total Amount:</span>
+                        <span class="text-success fs-5">@((Model.Amount * 1.15m).ToString("C"))</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Expiry Date</label>
-                            <input type="text" name="ExpiryDate" class="form-control" placeholder="MM/YY" required />
+        <!-- Payment Form Section -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-primary"><i class="fas fa-credit-card me-2"></i>Payment Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="ProcessPayment" method="post" id="payment-form">
+                        <!-- Card Details -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3 text-uppercase small">Card Details</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Cardholder Name</label>
+                                <input type="text" name="CardholderName" class="form-control" placeholder="Full name as shown on card" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Card Number</label>
+                                <div class="input-group">
+                                    <input type="text" name="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required />
+                                    <span class="input-group-text bg-transparent border-start-0">
+                                        <i class="fab fa-cc-visa text-primary me-1"></i>
+                                        <i class="fab fa-cc-mastercard text-danger me-1"></i>
+                                        <i class="fab fa-cc-amex text-info"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Expiry Date</label>
+                                <input type="text" name="ExpiryDate" class="form-control" placeholder="MM/YY" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">CVV</label>
+                                <input type="password" name="CVV" class="form-control" placeholder="***" maxlength="3" required />
+                            </div>
+                            <div class="col-md-4 mb-3 d-flex align-items-end">
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" class="form-check-input" id="saveCard" />
+                                    <label class="form-check-label small" for="saveCard">
+                                        Save card for future payments
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">CVV</label>
-                            <input type="password" name="CVV" class="form-control" placeholder="***" maxlength="3" required />
+
+                        <!-- Billing Address -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 text-uppercase small">Billing Address</h6>
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="sameAsBilling" checked />
+                                <label class="form-check-label" for="sameAsBilling">
+                                    Billing address same as shipping
+                                </label>
+                            </div>
+                            <div id="billingAddress" class="row" style="display: none;">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Address Line 1</label>
+                                    <input type="text" class="form-control" placeholder="Street address" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Address Line 2</label>
+                                    <input type="text" class="form-control" placeholder="Apartment, suite, etc." />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">City</label>
+                                    <input type="text" class="form-control" placeholder="City" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">State/Province</label>
+                                    <input type="text" class="form-control" placeholder="State" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">ZIP/Postal Code</label>
+                                    <input type="text" class="form-control" placeholder="ZIP code" />
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
+                        <input type="hidden" name="Amount" value="@Model.Amount" />
+                        <input type="hidden" name="Method" value="Card" />
 
-                    <input type="hidden" name="Amount" value="@Model.Amount" />
-                    <input type="hidden" name="Method" value="Card" />
+                        <!-- Security Note -->
+                        <div class="alert alert-light border small mb-4">
+                            <div class="d-flex">
+                                <i class="fas fa-lock text-success me-2 mt-1"></i>
+                                <div>
+                                    <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We do not store your credit card details.
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success btn-lg">Pay @Model.Amount.ToString("C")</button>
-                    </div>
-                </form>
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg py-3 fw-bold">
+                                <i class="fas fa-lock me-2"></i>Pay @((Model.Amount * 1.15m).ToString("C"))
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .container {
+        max-width: 1200px;
+    }
 
+    .card {
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        overflow: hidden;
+    }
 
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+        }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control {
+        border: 1.5px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+        .form-control:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15);
+            background-color: #ffffff;
+        }
+
+    .form-label {
+        color: #495057;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 24px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.4);
+            background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+        }
+
+    h2 {
+        color: #2c3e50;
+        font-size: 2rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-primary {
+        color: #2c3e50 !important;
+    }
+
+    .border-top {
+        border-top: 2px solid #e9ecef !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    .form-check-label {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    .h-100 {
+        height: 100% !important;
+    }
+
+    input::placeholder {
+        color: #6c757d;
+        opacity: 0.7;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1.5px solid #e9ecef;
+        border-left: none;
+    }
+
+    .alert-light {
+        background-color: rgba(248, 249, 250, 0.8);
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .container
+
+    {
+        padding: 0 15px;
+    }
+
+    .card {
+        margin: 0 10px;
+        padding: 20px;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+    }
+
+    .col-md-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .container
+
+    {
+        margin-top: 2rem !important;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .btn-lg {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    }
+
+    @@media (max-width: 400px) {
+        .card
+
+    {
+        padding: 15px !important;
+    }
+
+    h5 {
+        font-size: 1.1rem;
+    }
+
+    }
+</style>
+
+<script>
+    // Toggle billing address fields
+    document.getElementById('sameAsBilling').addEventListener('change', function() {
+        const billingAddress = document.getElementById('billingAddress');
+        if (this.checked) {
+            billingAddress.style.display = 'none';
+        } else {
+            billingAddress.style.display = 'block';
+        }
+    });
+
+    // Format card number with spaces
+    document.querySelector('input[name="CardNumber"]').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        let formattedValue = '';
+
+        for (let i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) {
+                formattedValue += ' ';
+            }
+            formattedValue += value[i];
+        }
+
+        e.target.value = formattedValue;
+    });
+
+    // Format expiry date
+    document.querySelector('input[name="ExpiryDate"]').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+
+        e.target.value = value;
+    });
+</script>
 @* @model FridgeManagementSystem.ViewModels.PaymentViewModel
 @{
     Layout = "_Layout";
