@@ -24,7 +24,7 @@
             <div class="col-md-6">
                 <div class="card shadow-sm p-4 mb-4">
                     <h5 class="fw-bold mb-3">Delivery Information</h5>
-                    <form asp-action="ConfirmCheckout" method="post">
+                    <form asp-action="ConfirmCheckout" asp-controller="Customer" method="post">
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
@@ -46,7 +46,6 @@
                             <button type="submit" class="btn btn-success btn-lg">Proceed to Payment</button>
                         </div>
                     </form>
-
                 </div>
             </div>
 
@@ -80,4 +79,3 @@
         </div>
     }
 </div>
-

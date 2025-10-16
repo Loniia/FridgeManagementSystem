@@ -233,52 +233,9 @@ namespace FridgeManagementSystem.Controllers
             return View(cart);
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> ConfirmCheckout(string fullName, string phoneNumber, string deliveryAddress)
-        //{
-        //    var customerId = GetLoggedInCustomerId();
-        //    if (customerId == 0) return RedirectToAction("Login", "Account");
-
-        //    var cart = await _context.Carts
-        //        .Include(c => c.CartItems.Where(ci => !ci.IsDeleted))
-        //        .ThenInclude(i => i.Fridge)
-        //        .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
-
-        //    if (cart == null || !cart.CartItems.Any())
-        //    {
-        //        TempData["Error"] = "Your cart is empty.";
-        //        return RedirectToAction("ViewCart");
-        //    }
-
-        //    var order = new Order
-        //    {
-        //        CustomerID = customerId,
-        //        OrderDate = DateTime.Now,
-        //        Status = "Pending",
-        //        DeliveryAddress = deliveryAddress,
-        //        ContactName = fullName,
-        //        ContactPhone = phoneNumber,
-        //        TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
-        //    };
-
-        //    foreach (var ci in cart.CartItems)
-        //    {
-        //        order.OrderItems.Add(new OrderItem
-        //        {
-        //            FridgeId = ci.FridgeId,
-        //            Quantity = ci.Quantity,
-        //            Price = ci.Price
-        //        });
-        //    }
-
-        //    _context.Orders.Add(order);
-        //    cart.IsActive = false;
-        //    _context.Carts.Update(cart);
-        //    await _context.SaveChangesAsync();
-
-        //    return RedirectToAction("AddCard", new { orderId = order.OrderId });
-        //}
+        // ==========================
+        // 4. CHECKOUT - POST
+        // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmCheckout(string fullName, string phoneNumber, string deliveryAddress)
@@ -301,7 +258,7 @@ namespace FridgeManagementSystem.Controllers
             {
                 CustomerID = customerId,
                 OrderDate = DateTime.Now,
-                Status = "Pending",
+                Status = "Pending Payment",
                 DeliveryAddress = deliveryAddress,
                 ContactName = fullName,
                 ContactPhone = phoneNumber,
@@ -316,23 +273,79 @@ namespace FridgeManagementSystem.Controllers
                     Quantity = ci.Quantity,
                     Price = ci.Price
                 });
-
-                // ✅ Mark cart items as deleted
-                ci.IsDeleted = true;
-                _context.CartItems.Update(ci);
             }
 
             _context.Orders.Add(order);
-
-            // ✅ Mark cart as inactive
-            cart.IsActive = false;
-            _context.Carts.Update(cart);
-
             await _context.SaveChangesAsync();
 
             return RedirectToAction("AddCard", new { orderId = order.OrderId });
         }
 
+        // ✅ DEBUG VERSION: Check for pending orders and resume checkout
+        public async Task<IActionResult> ResumeCheckout()
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0)
+            {
+                TempData["Error"] = "Please log in first.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            _logger.LogInformation($"ResumeCheckout called for customer {customerId}");
+
+            try
+            {
+                // Check all possible pending statuses
+                var pendingOrders = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Fridge)
+                    .Where(o => o.CustomerID == customerId &&
+                               (o.Status == "Pending Payment" ||
+                                o.Status == "Pending" ||
+                                o.Status == "AwaitingPayment"))
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                _logger.LogInformation($"Found {pendingOrders.Count} pending orders for customer {customerId}");
+
+                if (pendingOrders.Any())
+                {
+                    var latestOrder = pendingOrders.First();
+                    _logger.LogInformation($"Redirecting to payment for order {latestOrder.OrderId} with status: {latestOrder.Status}");
+
+                    TempData["Success"] = "Found your pending order! Please complete payment.";
+                    return RedirectToAction("AddCard", new { orderId = latestOrder.OrderId });
+                }
+                else
+                {
+                    // Check what orders actually exist for this customer
+                    var allOrders = await _context.Orders
+                        .Where(o => o.CustomerID == customerId)
+                        .Select(o => new { o.OrderId, o.Status, o.OrderDate })
+                        .OrderByDescending(o => o.OrderDate)
+                        .ToListAsync();
+
+                    _logger.LogInformation($"Customer {customerId} has {allOrders.Count} total orders: {string.Join(", ", allOrders.Select(o => $"Order {o.OrderId} ({o.Status})"))}");
+
+                    if (allOrders.Any(o => o.Status == "Paid" || o.Status == "Completed"))
+                    {
+                        TempData["Info"] = "You don't have any pending orders. All your orders are completed or paid.";
+                    }
+                    else
+                    {
+                        TempData["Error"] = "No pending orders found. Please add items to your cart and checkout again.";
+                    }
+
+                    return RedirectToAction("ViewCart");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ResumeCheckout for customer {CustomerId}", customerId);
+                TempData["Error"] = "An error occurred while checking for pending orders. Please try again.";
+                return RedirectToAction("ViewCart");
+            }
+        }
 
         // ==========================
         // PAYMENT METHODS (Card + EFT Only)
@@ -399,12 +412,16 @@ namespace FridgeManagementSystem.Controllers
                 payment.CardNumber = MaskCardNumber(model.CardNumber);
                 payment.Status = "Paid";
                 order.Status = "Paid";
+
+                // ✅ ONLY CLEAR CART WHEN PAYMENT IS SUCCESSFUL
+                await ClearCartAfterSuccessfulPayment(customerId);
             }
             else if (model.Method == Method.EFT)
             {
                 payment.PaymentReference = GeneratePaymentReference();
                 payment.BankReference = model.BankReference;
-                payment.Status = "Pending"; // awaiting admin approval
+                payment.Status = "Pending";
+                order.Status = "AwaitingPayment";
 
                 if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
                 {
@@ -417,15 +434,34 @@ namespace FridgeManagementSystem.Controllers
                     payment.ProofFilePath = "/uploads/payments/" + fileName;
                     payment.Status = "AwaitingAdminApproval";
                 }
-
-                order.Status = "AwaitingPayment";
             }
-          
 
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("PaymentConfirmation", new { orderId = order.OrderId });
+        }
+
+        // ✅ NEW METHOD: Clear cart only after successful payment
+        private async Task ClearCartAfterSuccessfulPayment(int customerId)
+        {
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
+
+            if (cart != null)
+            {
+                // Mark all cart items as deleted
+                foreach (var item in cart.CartItems.Where(ci => !ci.IsDeleted))
+                {
+                    item.IsDeleted = true;
+                }
+
+                // Mark cart as inactive
+                cart.IsActive = false;
+
+                await _context.SaveChangesAsync();
+            }
         }
 
 
