@@ -1,4 +1,49 @@
-﻿@model FridgeManagementSystem.Models.CustomerAllocationViewModel
+﻿@model FridgeManagementSystem.Models.Order  
+
+@{
+    ViewData["Title"] = "Allocate Fridge";
+    var fridges = ViewBag.Fridges as List<FridgeManagementSystem.Models.Fridge>;
+    var order = ViewBag.Order as FridgeManagementSystem.Models.Order;
+}
+
+<h1>Allocate Fridge to @order.Customers.FullName</h1>
+
+@if (fridges == null || !fridges.Any())
+{
+    <p>No fridges available for allocation.</p>
+}
+else
+{
+    <form asp-action="Allocate" method="post">
+        <!-- Hidden fields to pass both orderId and customerId -->
+        <input type="hidden" name="orderId" value="@order.OrderId" />
+        <input type="hidden" name="customerId" value="@order.CustomerID" />
+
+        <div class="form-group">
+            <label for="fridgeSelect">Select a Fridge:</label>
+            <select class="form-control" id="fridgeSelect" name="fridgeId" required>
+                <option value="">-- Choose a Fridge --</option>
+                @foreach (var fridge in fridges)
+                {
+                    <option value="@fridge.FridgeId">@fridge.FridgeType</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2">Allocate Fridge</button>
+    </form>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mt-3">
+        @TempData["Success"]
+    </div>
+}
+
+
+
+@* @model FridgeManagementSystem.Models.CustomerAllocationViewModel
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Allocate Fridge";
@@ -178,4 +223,4 @@
             });
         });
     </script>
-}
+} *@

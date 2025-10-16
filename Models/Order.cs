@@ -32,6 +32,11 @@ namespace FridgeManagementSystem.Models
         [StringLength(50)]
         public string Status { get; set; } // Processing, Packed, etc.
 
+        [Required(ErrorMessage = "Order status is required")]
+        [StringLength(50)]
+        [EnumDataType(typeof(OrderStatus))]
+        public OrderStatus OrderProgress { get; set; }// use enum
+
         [Required(ErrorMessage = "Delivery address is required")]
         [StringLength(500)]
         public string DeliveryAddress { get; set; }

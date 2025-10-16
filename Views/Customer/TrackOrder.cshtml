@@ -14,7 +14,8 @@
             <strong>Status:</strong>
             <span class="badge
                 @(Model.Status == "Pending" ? "bg-warning text-dark" :
-                  Model.Status == "Allocated" ? "bg-info text-dark" :
+                  Model.Status == "Paid" ? "bg-success" :
+                  Model.Status == "Fridge Allocated" ? "bg-info text-dark" :
                   Model.Status == "Shipped" ? "bg-primary" :
                   Model.Status == "Delivered" ? "bg-success" : "bg-secondary")">
                 @Model.Status
@@ -28,14 +29,22 @@
 
         <p><strong>Delivery Address:</strong><br />@Model.DeliveryAddress</p>
 
-        <!-- Timeline -->
+        <!-- ✅ Order Progress using Enum -->
         <div class="mt-4">
             <h5>Order Progress</h5>
-            <ul class="timeline">
-                <li class="@(Model.Status == "Pending" || Model.Status == "Allocated" || Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Order Placed</li>
-                <li class="@(Model.Status == "Allocated" || Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Fridge Allocated</li>
-                <li class="@(Model.Status == "Shipped" || Model.Status == "Delivered" ? "completed" : "")">Shipped</li>
-                <li class="@(Model.Status == "Delivered" ? "completed" : "")">Delivered</li>
+            <ul class="list-group">
+                <li class="list-group-item @(Model.OrderProgress >= FridgeManagementSystem.Models.OrderStatus.OrderPlaced ? "bg-success text-white" : "")">
+                    Order Placed
+                </li>
+                <li class="list-group-item @(Model.OrderProgress >= FridgeManagementSystem.Models.OrderStatus.FridgeAllocated ? "bg-success text-white" : "")">
+                    Fridge Allocated
+                </li>
+                <li class="list-group-item @(Model.OrderProgress >= FridgeManagementSystem.Models.OrderStatus.Shipped ? "bg-success text-white" : "")">
+                    Shipped
+                </li>
+                <li class="list-group-item @(Model.OrderProgress >= FridgeManagementSystem.Models.OrderStatus.Delivered ? "bg-success text-white" : "")">
+                    Delivered
+                </li>
             </ul>
         </div>
 
@@ -92,41 +101,14 @@
 </div>
 
 <style>
-    /* Simple timeline styling */
-    .timeline {
-        list-style-type: none;
-        padding-left: 0;
-        position: relative;
+    /* Green progress styling */
+    .list-group-item {
+        transition: all 0.3s ease;
+        border-radius: 6px;
     }
 
-        .timeline li {
-            padding: 10px 20px;
-            position: relative;
-            background: #f1f1f1;
-            margin-bottom: 10px;
-            border-radius: 6px;
-        }
-
-            .timeline li::before {
-                content: '';
-                position: absolute;
-                left: -15px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 10px;
-                height: 10px;
-                background: #ccc;
-                border-radius: 50%;
-                border: 2px solid #fff;
-            }
-
-            .timeline li.completed {
-                background: #d1e7dd;
-                color: #0f5132;
-            }
-
-                .timeline li.completed::before {
-                    background: #198754;
-                }
+    .bg-success.text-white {
+        font-weight: 600;
+    }
 </style>
 

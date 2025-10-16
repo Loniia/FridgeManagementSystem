@@ -167,155 +167,211 @@ namespace CustomerManagementSubSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Allocate fridge to customer
-        public async Task<IActionResult> Allocate(int customerId)
+        //// GET: Allocate fridge to customer
+        //public async Task<IActionResult> Allocate(int customerId)
+        //{
+        //    _logger.LogInformation("=== ALLOCATE GET STARTED ===");
+        //    _logger.LogInformation($"Received customerId: {customerId}");
+
+        //    if (customerId == 0)
+        //    {
+        //        _logger.LogWarning("CustomerId is 0 - redirecting to Index");
+        //        TempData["ErrorMessage"] = "Customer ID is missing!";
+        //        return RedirectToAction("Index");
+        //    }
+
+        //    var customer = await _customerService.GetCustomerDetailsAsync(customerId);
+        //    if (customer == null)
+        //    {
+        //        _logger.LogWarning($"Customer not found with ID: {customerId}");
+        //        return NotFound();
+        //    }
+
+        //    _logger.LogInformation($"Customer found: {customer.FullName} (ID: {customer.CustomerID})");
+
+        //    // Get customer's orders with status Paid or Pending
+        //    var paidOrPendingItems = await _context.OrderItems
+        //        .Where(oi => oi.Order.CustomerID == customerId &&
+        //                     (oi.Order.Status == "Paid" || oi.Order.Status == "Pending"))
+        //        .Include(oi => oi.Fridge)
+        //        .Include(oi => oi.Order) // Make sure Order is included
+        //        .ToListAsync();
+
+        //    _logger.LogInformation($"Found {paidOrPendingItems.Count} order items for customer");
+
+        //    // Filter out fully allocated items
+        //    var pendingItems = new List<CustomerOrderItemViewModel>();
+        //    foreach (var item in paidOrPendingItems)
+        //    {
+        //        _logger.LogInformation($"Processing order item: Fridge {item.FridgeId}, Quantity {item.Quantity}, Order Status: {item.Order?.Status}");
+
+        //        var totalAllocated = await _context.FridgeAllocation
+        //            .Where(fa => fa.CustomerID == customerId && fa.FridgeId == item.FridgeId)
+        //            .SumAsync(fa => (int?)fa.QuantityAllocated) ?? 0;
+
+        //        _logger.LogInformation($"Total already allocated: {totalAllocated}");
+
+        //        if (totalAllocated < item.Quantity)
+        //        {
+        //            pendingItems.Add(new CustomerOrderItemViewModel
+        //            {
+        //                FridgeId = item.FridgeId,
+        //                FridgeName = item.Fridge.Brand + " " + item.Fridge.Model,
+        //                Quantity = item.Quantity,
+        //                Price = item.Price
+        //            });
+        //            _logger.LogInformation($"✅ Added to pending items: {item.Fridge.Brand} {item.Fridge.Model}");
+        //        }
+        //        else
+        //        {
+        //            _logger.LogInformation($"❌ Skipped - already fully allocated");
+        //        }
+        //    }
+
+        //    var model = new CustomerAllocationViewModel
+        //    {
+        //        CustomerId = customer.CustomerID,
+        //        CustomerName = customer.FullName,
+        //        Status = "Pending",
+        //        OrderItems = pendingItems,
+        //        AvailableFridges = pendingItems.Select(p => _context.Fridge
+        //                                            .FirstOrDefault(f => f.FridgeId == p.FridgeId && f.IsActive && f.Quantity > 0))
+        //                                      .Where(f => f != null)
+        //                                      .ToList()
+        //    };
+
+        //    _logger.LogInformation($"Final model - AvailableFridges count: {model.AvailableFridges.Count}");
+        //    _logger.LogInformation($"Final model - OrderItems count: {model.OrderItems.Count}");
+
+        //    if (!model.AvailableFridges.Any())
+        //    {
+        //        _logger.LogWarning("No available fridges - redirecting to Index");
+        //        TempData["ErrorMessage"] = "No fridges available for allocation.";
+        //        return RedirectToAction("Index");
+        //    }
+
+        //    _logger.LogInformation("=== ALLOCATE GET COMPLETED - RETURNING VIEW ===");
+        //    return View(model);
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Allocate(CustomerAllocationViewModel model)
+        //{
+        //    _logger.LogInformation("=== ALLOCATE POST STARTED ===");
+        //    _logger.LogInformation($"Model received - CustomerId: {model.CustomerId}, SelectedFridgeID: {model.SelectedFridgeID}, QuantityAllocated: {model.QuantityAllocated}");
+
+        //    // TEMPORARY: Bypass validation for testing
+        //    if (model.SelectedFridgeID == 0)
+        //    {
+        //        ModelState.AddModelError("SelectedFridgeID", "Please select a fridge");
+        //    }
+        //    if (model.QuantityAllocated <= 0)
+        //    {
+        //        ModelState.AddModelError("QuantityAllocated", "Quantity must be greater than 0");
+        //    }
+
+        //    if (!ModelState.IsValid)
+        //    {
+        //        _logger.LogWarning("Model validation failed");
+        //        await ReloadViewModelData(model);
+        //        return View(model);
+        //    }
+
+        //    try
+        //    {
+        //        // Your existing allocation logic here...
+        //        var fridge = await _context.Fridge.FindAsync(model.SelectedFridgeID);
+        //        if (fridge == null)
+        //        {
+        //            ModelState.AddModelError("", "Fridge not found");
+        //            await ReloadViewModelData(model);
+        //            return View(model);
+        //        }
+
+        //        _logger.LogInformation($"Allocating {model.QuantityAllocated} fridges to customer {model.CustomerId}");
+
+        //        // Perform allocation (simplified for testing)
+        //        var allocation = new FridgeAllocation
+        //        {
+        //            CustomerID = model.CustomerId,
+        //            FridgeId = model.SelectedFridgeID,
+        //            AllocationDate = DateOnly.FromDateTime(DateTime.Now),
+        //            ReturnDate = model.ReturnDate ?? DateOnly.FromDateTime(DateTime.Now.AddYears(1)),
+        //            Status = "Allocated",
+        //            QuantityAllocated = model.QuantityAllocated
+        //        };
+        //        _context.FridgeAllocation.Add(allocation);
+
+        //        await _context.SaveChangesAsync();
+
+        //        TempData["SuccessMessage"] = $"Successfully allocated {model.QuantityAllocated} fridge(s)!";
+        //        return RedirectToAction(nameof(Allocate), new { customerId = model.CustomerId });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error during allocation");
+        //        ModelState.AddModelError("", $"Error: {ex.Message}");
+        //        await ReloadViewModelData(model);
+        //        return View(model);
+        //    }
+        //}
+
+        // GET: CustomerLiaison/Allocate
+        public IActionResult Allocate(int orderId, int customerId)
         {
-            _logger.LogInformation("=== ALLOCATE GET STARTED ===");
-            _logger.LogInformation($"Received customerId: {customerId}");
+            var order = _context.Orders
+                .Include(o => o.Customers)
+                .FirstOrDefault(o => o.OrderId == orderId && o.CustomerID == customerId);
 
-            if (customerId == 0)
-            {
-                _logger.LogWarning("CustomerId is 0 - redirecting to Index");
-                TempData["ErrorMessage"] = "Customer ID is missing!";
-                return RedirectToAction("Index");
-            }
-
-            var customer = await _customerService.GetCustomerDetailsAsync(customerId);
-            if (customer == null)
-            {
-                _logger.LogWarning($"Customer not found with ID: {customerId}");
+            if (order == null)
                 return NotFound();
-            }
 
-            _logger.LogInformation($"Customer found: {customer.FullName} (ID: {customer.CustomerID})");
+            // Get only available fridges (not yet allocated)
+            var availableFridges = _context.Fridge
+                .Where(f => !_context.FridgeAllocation.Any(a => a.FridgeId == f.FridgeId))
+                .ToList();
 
-            // Get customer's orders with status Paid or Pending
-            var paidOrPendingItems = await _context.OrderItems
-                .Where(oi => oi.Order.CustomerID == customerId &&
-                             (oi.Order.Status == "Paid" || oi.Order.Status == "Pending"))
-                .Include(oi => oi.Fridge)
-                .Include(oi => oi.Order) // Make sure Order is included
-                .ToListAsync();
-
-            _logger.LogInformation($"Found {paidOrPendingItems.Count} order items for customer");
-
-            // Filter out fully allocated items
-            var pendingItems = new List<CustomerOrderItemViewModel>();
-            foreach (var item in paidOrPendingItems)
-            {
-                _logger.LogInformation($"Processing order item: Fridge {item.FridgeId}, Quantity {item.Quantity}, Order Status: {item.Order?.Status}");
-
-                var totalAllocated = await _context.FridgeAllocation
-                    .Where(fa => fa.CustomerID == customerId && fa.FridgeId == item.FridgeId)
-                    .SumAsync(fa => (int?)fa.QuantityAllocated) ?? 0;
-
-                _logger.LogInformation($"Total already allocated: {totalAllocated}");
-
-                if (totalAllocated < item.Quantity)
-                {
-                    pendingItems.Add(new CustomerOrderItemViewModel
-                    {
-                        FridgeId = item.FridgeId,
-                        FridgeName = item.Fridge.Brand + " " + item.Fridge.Model,
-                        Quantity = item.Quantity,
-                        Price = item.Price
-                    });
-                    _logger.LogInformation($"✅ Added to pending items: {item.Fridge.Brand} {item.Fridge.Model}");
-                }
-                else
-                {
-                    _logger.LogInformation($"❌ Skipped - already fully allocated");
-                }
-            }
-
-            var model = new CustomerAllocationViewModel
-            {
-                CustomerId = customer.CustomerID,
-                CustomerName = customer.FullName,
-                Status = "Pending",
-                OrderItems = pendingItems,
-                AvailableFridges = pendingItems.Select(p => _context.Fridge
-                                                    .FirstOrDefault(f => f.FridgeId == p.FridgeId && f.IsActive && f.Quantity > 0))
-                                              .Where(f => f != null)
-                                              .ToList()
-            };
-
-            _logger.LogInformation($"Final model - AvailableFridges count: {model.AvailableFridges.Count}");
-            _logger.LogInformation($"Final model - OrderItems count: {model.OrderItems.Count}");
-
-            if (!model.AvailableFridges.Any())
-            {
-                _logger.LogWarning("No available fridges - redirecting to Index");
-                TempData["ErrorMessage"] = "No fridges available for allocation.";
-                return RedirectToAction("Index");
-            }
-
-            _logger.LogInformation("=== ALLOCATE GET COMPLETED - RETURNING VIEW ===");
-            return View(model);
+            ViewBag.Fridges = availableFridges;
+            ViewBag.Order = order;
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Allocate(CustomerAllocationViewModel model)
+        public IActionResult Allocate(int orderId, int customerId, int fridgeId)
         {
-            _logger.LogInformation("=== ALLOCATE POST STARTED ===");
-            _logger.LogInformation($"Model received - CustomerId: {model.CustomerId}, SelectedFridgeID: {model.SelectedFridgeID}, QuantityAllocated: {model.QuantityAllocated}");
+            var order = _context.Orders
+                .Include(o => o.Customers)
+                .FirstOrDefault(o => o.OrderId == orderId && o.CustomerID == customerId);
 
-            // TEMPORARY: Bypass validation for testing
-            if (model.SelectedFridgeID == 0)
+            if (order == null)
+                return NotFound();
+
+            var fridge = _context.Fridge.FirstOrDefault(f => f.FridgeId == fridgeId);
+            if (fridge == null)
+                return NotFound();
+
+            var allocation = new FridgeAllocation
             {
-                ModelState.AddModelError("SelectedFridgeID", "Please select a fridge");
-            }
-            if (model.QuantityAllocated <= 0)
-            {
-                ModelState.AddModelError("QuantityAllocated", "Quantity must be greater than 0");
-            }
+                FridgeId = fridge.FridgeId,
+                CustomerID = customerId,
+                AllocationDate = DateOnly.FromDateTime(DateTime.Now)
+            };
 
-            if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("Model validation failed");
-                await ReloadViewModelData(model);
-                return View(model);
-            }
+            _context.FridgeAllocation.Add(allocation);
 
-            try
-            {
-                // Your existing allocation logic here...
-                var fridge = await _context.Fridge.FindAsync(model.SelectedFridgeID);
-                if (fridge == null)
-                {
-                    ModelState.AddModelError("", "Fridge not found");
-                    await ReloadViewModelData(model);
-                    return View(model);
-                }
+            // Update the order status
+            order.Status = "Fridge Allocated";
+            order.OrderProgress = OrderStatus.FridgeAllocated;
 
-                _logger.LogInformation($"Allocating {model.QuantityAllocated} fridges to customer {model.CustomerId}");
+            _context.SaveChanges();
 
-                // Perform allocation (simplified for testing)
-                var allocation = new FridgeAllocation
-                {
-                    CustomerID = model.CustomerId,
-                    FridgeId = model.SelectedFridgeID,
-                    AllocationDate = DateOnly.FromDateTime(DateTime.Now),
-                    ReturnDate = model.ReturnDate ?? DateOnly.FromDateTime(DateTime.Now.AddYears(1)),
-                    Status = "Allocated",
-                    QuantityAllocated = model.QuantityAllocated
-                };
-                _context.FridgeAllocation.Add(allocation);
+            TempData["Success"] = $"Fridge {fridge.FridgeType} successfully allocated to {order.Customers.FullName}.";
 
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = $"Successfully allocated {model.QuantityAllocated} fridge(s)!";
-                return RedirectToAction(nameof(Allocate), new { customerId = model.CustomerId });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during allocation");
-                ModelState.AddModelError("", $"Error: {ex.Message}");
-                await ReloadViewModelData(model);
-                return View(model);
-            }
+            return RedirectToAction("Index");
         }
+
 
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
         {

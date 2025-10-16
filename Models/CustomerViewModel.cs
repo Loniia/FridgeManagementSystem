@@ -19,11 +19,15 @@ namespace FridgeManagementSystem.Models
         public DateOnly RegistrationDate { get; set; }
         public string StatusDisplay => IsActive ? "Active" : "Inactive";
 
-        //Navigation Property
+        //Navigation Properties
         public List<FridgeViewModel> AvailableFridges { get; set; }
         public List<FridgeViewModel> Fridges { get; set; } = new List<FridgeViewModel>();
         public List<FridgeAllocationViewModel> FridgeAllocations { get; set; } = new List<FridgeAllocationViewModel>();
-        public int TotalFridgesAllocated => FridgeAllocations?.Sum(a => a.QuantityAllocated) ?? 0;
-    }
 
+        // Calculated properties
+        public int TotalFridgesAllocated => FridgeAllocations?.Sum(a => a.QuantityAllocated) ?? 0;
+
+        // ✅ Add this to keep track of the relevant order for allocation
+        public int LatestOrderId { get; set; } // <-- assign this in your controller when populating the ViewModel
+    }
 }

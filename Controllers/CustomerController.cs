@@ -396,7 +396,7 @@ namespace FridgeManagementSystem.Controllers
 
 
 
-[Authorize]
+       [Authorize]
         public async Task<IActionResult> OrderHistory()
         {
             var appUser = await _userManager.GetUserAsync(User);
@@ -450,15 +450,40 @@ namespace FridgeManagementSystem.Controllers
             return View(orders);
         }
 
-        public async Task<IActionResult> TrackOrder(int orderId)
+        public IActionResult TrackOrder(int? orderId)
         {
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            var order = _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Fridge) // ✅ Load the Fridge for each order item
+                        .ThenInclude(f => f.FridgeAllocation) // ✅ Also load the FridgeAllocation
+                .Include(o => o.Payments)
+                .OrderByDescending(o => o.OrderDate)
+                .FirstOrDefault(o => !orderId.HasValue || o.OrderId == orderId);
 
             if (order == null)
+                return NotFound();
+
+            // Set progress based on status
+            switch (order.Status)
             {
-                TempData["ErrorMessage"] = "Order not found.";
-                return RedirectToAction("MyAccount");
+                case "Paid":
+                    order.OrderProgress = OrderStatus.OrderPlaced;
+                    break;
+                case "Fridge Allocated":
+                    order.OrderProgress = OrderStatus.FridgeAllocated;
+                    break;
+                case "Shipped":
+                    order.OrderProgress = OrderStatus.Shipped;
+                    break;
+                case "Delivered":
+                    order.OrderProgress = OrderStatus.Delivered;
+                    break;
+                default:
+                    order.OrderProgress = OrderStatus.OrderPlaced;
+                    break;
             }
+
+            _context.SaveChanges();
 
             return View(order);
         }
