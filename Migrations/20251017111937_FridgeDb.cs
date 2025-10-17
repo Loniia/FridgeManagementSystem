@@ -562,34 +562,6 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FridgeAllocation",
-                columns: table => new
-                {
-                    AllocationID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerID = table.Column<int>(type: "int", nullable: false),
-                    FridgeId = table.Column<int>(type: "int", nullable: false),
-                    AllocationDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    ReturnDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    QuantityAllocated = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FridgeAllocation", x => x.AllocationID);
-                    table.ForeignKey(
-                        name: "FK_FridgeAllocation_Customers_CustomerID",
-                        column: x => x.CustomerID,
-                        principalTable: "Customers",
-                        principalColumn: "CustomerID");
-                    table.ForeignKey(
-                        name: "FK_FridgeAllocation_Fridge_FridgeId",
-                        column: x => x.FridgeId,
-                        principalTable: "Fridge",
-                        principalColumn: "FridgeId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Inventory",
                 columns: table => new
                 {
@@ -862,6 +834,40 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FridgeAllocation",
+                columns: table => new
+                {
+                    AllocationID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerID = table.Column<int>(type: "int", nullable: false),
+                    FridgeId = table.Column<int>(type: "int", nullable: false),
+                    OrderItemId = table.Column<int>(type: "int", nullable: false),
+                    AllocationDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    ReturnDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    QuantityAllocated = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FridgeAllocation", x => x.AllocationID);
+                    table.ForeignKey(
+                        name: "FK_FridgeAllocation_Customers_CustomerID",
+                        column: x => x.CustomerID,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerID");
+                    table.ForeignKey(
+                        name: "FK_FridgeAllocation_Fridge_FridgeId",
+                        column: x => x.FridgeId,
+                        principalTable: "Fridge",
+                        principalColumn: "FridgeId");
+                    table.ForeignKey(
+                        name: "FK_FridgeAllocation_OrderItems_OrderItemId",
+                        column: x => x.OrderItemId,
+                        principalTable: "OrderItems",
+                        principalColumn: "OrderItemId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RequestsForQuotation",
                 columns: table => new
                 {
@@ -1075,18 +1081,18 @@ namespace FridgeManagementSystem.Migrations
                 columns: new[] { "FridgeId", "Brand", "Condition", "CustomerID", "DateAdded", "DeliveryDate", "FaultID", "FridgeType", "ImageUrl", "IsActive", "LocationId", "Model", "Price", "PurchaseDate", "Quantity", "SerialNumber", "Status", "SupplierID", "UpdatedDate", "WarrantyExpiry" },
                 values: new object[,]
                 {
-                    { 1, "LG", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6146), 0, "Double Door", "/images/fridges/fridge1.jpg", true, null, "Model-1", 3556m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(5683), null },
-                    { 2, "Samsung", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6197), 0, "Single Door", "/images/fridges/fridge2.jpg", true, null, "Model-2", 11583m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6157), null },
-                    { 3, "LG", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6234), 0, "Single Door", "/images/fridges/fridge3.jpg", true, null, "Model-3", 5561m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6199), null },
-                    { 4, "Defy", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6259), 0, "Single Door", "/images/fridges/fridge4.jpg", true, null, "Model-4", 11762m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 6, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6236), null },
-                    { 5, "Hisense", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6309), 0, "Mini Fridge", "/images/fridges/fridge5.jpg", true, null, "Model-5", 9096m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6284), null },
-                    { 6, "Samsung", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6340), 0, "Double Door", "/images/fridges/fridge6.jpg", true, null, "Model-6", 11585m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 7, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6318), null },
-                    { 7, "Defy", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6364), 0, "Double Door", "/images/fridges/fridge7.jpg", true, null, "Model-7", 6752m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6341), null },
-                    { 8, "Hisense", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6387), 0, "Single Door", "/images/fridges/fridge8.jpg", true, null, "Model-8", 9672m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 8, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6365), null },
-                    { 9, "Bosch", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6409), 0, "Double Door", "/images/fridges/fridge9.jpg", true, null, "Model-9", 11988m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6388), null },
-                    { 10, "Bosch", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6444), 0, "Double Door", "/images/fridges/fridge10.jpg", true, null, "Model-10", 9930m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 6, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6413), null },
-                    { 11, "Samsung", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6497), 0, "Single Door", "/images/fridges/fridge11.jpg", true, null, "Model-11", 11900m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6475), null },
-                    { 12, "Defy", "Working", null, new DateOnly(2025, 10, 16), new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6520), 0, "Single Door", "/images/fridges/fridge12.jpg", true, null, "Model-12", 7812m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 8, null, "Available", 1, new DateTime(2025, 10, 16, 4, 32, 53, 100, DateTimeKind.Local).AddTicks(6498), null }
+                    { 1, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1368), 0, "Single Door", "/images/fridges/fridge1.jpg", true, null, "Model-1", 7692m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(918), null },
+                    { 2, "Samsung", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1444), 0, "Single Door", "/images/fridges/fridge2.jpg", true, null, "Model-2", 8579m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1394), null },
+                    { 3, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1498), 0, "Double Door", "/images/fridges/fridge3.jpg", true, null, "Model-3", 7687m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1448), null },
+                    { 4, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1933), 0, "Single Door", "/images/fridges/fridge4.jpg", true, null, "Model-4", 7378m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1881), null },
+                    { 5, "Bosch", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1965), 0, "Single Door", "/images/fridges/fridge5.jpg", true, null, "Model-5", 5826m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1936), null },
+                    { 6, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2007), 0, "Double Door", "/images/fridges/fridge6.jpg", true, null, "Model-6", 10428m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 8, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1976), null },
+                    { 7, "Samsung", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2041), 0, "Single Door", "/images/fridges/fridge7.jpg", true, null, "Model-7", 7550m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 7, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2009), null },
+                    { 8, "LG", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2072), 0, "Mini Fridge", "/images/fridges/fridge8.jpg", true, null, "Model-8", 3848m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2043), null },
+                    { 9, "Samsung", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2102), 0, "Double Door", "/images/fridges/fridge9.jpg", true, null, "Model-9", 8928m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 7, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2074), null },
+                    { 10, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2154), 0, "Single Door", "/images/fridges/fridge10.jpg", true, null, "Model-10", 6910m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2106), null },
+                    { 11, "Hisense", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2212), 0, "Mini Fridge", "/images/fridges/fridge11.jpg", true, null, "Model-11", 7766m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2181), null },
+                    { 12, "Bosch", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2240), 0, "Double Door", "/images/fridges/fridge12.jpg", true, null, "Model-12", 8323m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2214), null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1258,6 +1264,11 @@ namespace FridgeManagementSystem.Migrations
                 name: "IX_FridgeAllocation_FridgeId",
                 table: "FridgeAllocation",
                 column: "FridgeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FridgeAllocation_OrderItemId",
+                table: "FridgeAllocation",
+                column: "OrderItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inventory_FridgeID",
@@ -1449,9 +1460,6 @@ namespace FridgeManagementSystem.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "OrderItems");
-
-            migrationBuilder.DropTable(
                 name: "Payments");
 
             migrationBuilder.DropTable(
@@ -1473,16 +1481,19 @@ namespace FridgeManagementSystem.Migrations
                 name: "PurchaseOrders");
 
             migrationBuilder.DropTable(
-                name: "MaintenanceVisit");
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "MaintenanceVisit");
 
             migrationBuilder.DropTable(
                 name: "Faults");
 
             migrationBuilder.DropTable(
                 name: "Quotations");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "MaintenanceRequest");
