@@ -1,0 +1,339 @@
+﻿@{
+    ViewData["Title"] = "Reports Dashboard";
+    Layout = "_Layout";
+}
+
+<!-- ✅ Inline AdminKit Styles -->
+<style>
+    :root {
+        --primary: #3b7ddd;
+        --secondary: #6c757d;
+        --success: #1cbb8c;
+        --info: #17a2b8;
+        --warning: #fcb92c;
+        --danger: #dc3545;
+        --light: #f8f9fa;
+        --dark: #343a40;
+        --background: #f4f6f9;
+        --card-bg: #ffffff;
+        --text-color: #212529;
+        --muted-text: #6c757d;
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+        --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--text-color);
+        font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    h1, h5 {
+        font-weight: 600;
+    }
+
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        background-color: var(--card-bg);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+    .card-header {
+        background-color: transparent !important;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 600;
+    }
+
+    .card-title {
+        color: var(--text-color);
+        margin-bottom: 0;
+    }
+
+    .shadow-sm {
+        box-shadow: var(--shadow-sm) !important;
+    }
+
+    .btn {
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        transition: var(--transition);
+        padding: 0.45rem 1.1rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+        .btn-primary:hover {
+            background-color: #2f6ad9;
+            border-color: #2f6ad9;
+        }
+
+    .btn-success {
+        background-color: var(--success);
+        border-color: var(--success);
+    }
+
+        .btn-success:hover {
+            background-color: #17a97e;
+            border-color: #17a97e;
+        }
+
+    .text-muted {
+        color: var(--muted-text) !important;
+    }
+
+    .feather-32 {
+        width: 32px;
+        height: 32px;
+    }
+
+    .container-fluid {
+        padding: 2rem;
+    }
+
+    /* Table styling (for Top Customers, etc.) */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    thead {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    tr:hover {
+        background-color: #f1f3f5;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #adb5bd;
+        border-radius: 4px;
+    }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #868e96;
+        }
+</style>
+
+<div class="container-fluid p-0">
+
+    <!-- PAGE HEADER -->
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <h1 class="h3 mb-1">Fridge Management Reports</h1>
+            <p class="text-muted mb-0">AdminKit-style dashboard: summary cards, charts, and insights.</p>
+        </div>
+
+        <div class="col-md-6 d-flex gap-2 justify-content-md-end">
+            <input type="date" id="fromDate" class="form-control w-auto" value="@ViewBag.FromDate" />
+            <input type="date" id="toDate" class="form-control w-auto" value="@ViewBag.ToDate" />
+            <button id="filterBtn" class="btn btn-primary px-3">Apply</button>
+            <button id="exportPdfBtn" class="btn btn-success px-3">Export All to PDF</button>
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Customers</h6>
+                            <h2 class="mb-0">@ViewBag.TotalCustomers</h2>
+                        </div>
+                        <div class="ms-3 text-primary">
+                            <i data-feather="users" class="feather-32"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Fridges</h6>
+                            <h2 class="mb-0">@ViewBag.TotalFridges</h2>
+                        </div>
+                        <div class="ms-3 text-info">
+                            <i data-feather="box" class="feather-32"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Active Faults</h6>
+                            <h2 class="mb-0">@ViewBag.ActiveFaults</h2>
+                        </div>
+                        <div class="ms-3 text-warning">
+                            <i data-feather="alert-triangle" class="feather-32"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Sales (Orders)</h6>
+                            <h2 class="mb-0">R @String.Format("{0:N2}", ViewBag.TotalSales)</h2>
+                            <small class="text-muted d-block">Purchases: R @String.Format("{0:N2}", ViewBag.TotalPurchases)</small>
+                            <small class="text-muted d-block">Net Profit: R @String.Format("{0:N2}", ViewBag.NetProfit)</small>
+                        </div>
+                        <div class="ms-3 text-success">
+                            <i data-feather="trending-up" class="feather-32"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Monthly Sales (Last 12 months)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Top Faults</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="faultsChart" height="140"></canvas>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Maintenance Summary</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="maintenanceChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADDITIONAL STATS -->
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Top Customers</h5>
+                </div>
+                <div class="card-body">
+                    <div id="topCustomersTable">
+                        <p class="text-muted">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Inventory by Model</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="inventoryChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DISTRIBUTION + SUPPLIER -->
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Fridge Distribution by Province</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="locationChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Supplier Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div id="supplierTable">
+                        <p class="text-muted">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTRACTS -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">Active Contracts</h5>
+                </div>
+                <div class="card-body">
+                    <div id="contractsTable">
+                        <p class="text-muted mb-0">No contract data available.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/reports-dashboard.js"></script>
+    <script>
+        feather.replace();
+    </script>
+}

@@ -9,6 +9,7 @@
     var locationsUrl = Url.Action("Index", "ManageLocation", new { area = "Administrator" });
     var suppliersUrl = Url.Action("Index", "ManageSupplier", new { area = "Administrator" });
     var businessInfoUrl = Url.Action("Index", "BusinessInfo", new { area = "Administrator" });
+    var reportsUrl = Url.Action("Index", "Reports", new { area = "Administrator" });
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -95,6 +96,20 @@
                 <div class="card-body">
                     <h5 class="card-title">Business Settings</h5>
                     <p class="card-text">Manage company information and system settings.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Reports Card -->
+    <!-- Reports Card -->
+    <div class="col-md-3 mb-3">
+        <a href="@Url.Action("Index", "Reports", new { area = "Administrator" })" style="text-decoration: none;">
+            <div class="card text-white bg-danger h-100">
+                <div class="card-header">Reports</div>
+                <div class="card-body">
+                    <h5 class="card-title">Reports Dashboard</h5>
+                    <p class="card-text">View all system reports including sales, purchases, faults, and maintenance.</p>
                 </div>
             </div>
         </a>
