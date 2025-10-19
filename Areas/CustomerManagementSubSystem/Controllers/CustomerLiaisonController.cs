@@ -226,9 +226,8 @@ namespace CustomerManagementSubSystem.Controllers
             if (customer == null)
                 return NotFound("Customer not found.");
 
-            // ✅ Eager-load Customer on Fridge
+            // ✅ Ensure the Fridge is loaded with related Customer if any
             var fridge = _context.Fridge
-                .Include(f => f.Customer) // <--- added
                 .FirstOrDefault(f => f.FridgeId == fridgeId);
             if (fridge == null)
                 return NotFound("Fridge not found.");
@@ -263,6 +262,7 @@ namespace CustomerManagementSubSystem.Controllers
 
             // Update fridge and order
             fridge.Status = "Allocated";
+            fridge.CustomerID = customerId; // ✅ Ensure fridge is linked to that customer
             totalAllocated += 1;
 
             if (totalAllocated >= orderItem.Quantity)
@@ -282,23 +282,22 @@ namespace CustomerManagementSubSystem.Controllers
                 IsActive = true
             };
             _context.MaintenanceRequest.Add(maintenanceRequest);
-            _context.SaveChanges(); // Save to get MaintenanceRequestId
+            _context.SaveChanges();
 
-            // ✅ Create MaintenanceVisit linked to the request
+            // ✅ Create MaintenanceVisit linked to the request and customer
             var maintenanceVisit = new MaintenanceVisit
             {
                 FridgeId = fridge.FridgeId,
-                MaintenanceRequestId = maintenanceRequest.MaintenanceRequestId, // Link FK
-                EmployeeID = 1, // Assign your available employee
+                MaintenanceRequestId = maintenanceRequest.MaintenanceRequestId,
+                EmployeeID = 1,
                 ScheduledDate = DateTime.Now.AddDays(30),
                 ScheduledTime = new TimeSpan(10, 0, 0),
-                Status = FridgeManagementSystem.Models.TaskStatus.Scheduled,
-                VisitNotes = $"Initial maintenance visit scheduled automatically for {fridge.Customer.FullName}." // <--- updated
+              
             };
             _context.MaintenanceVisit.Add(maintenanceVisit);
             _context.SaveChanges();
 
-            // Create ViewModel to show allocation info
+            // Create ViewModel
             var allocationVM = new FridgeAllocationViewModel
             {
                 AllocationID = allocation.AllocationID,
