@@ -319,8 +319,8 @@
                 @foreach (var requests in Model)
                 {
                     <tr>
-                        <td>@requests.Fridge.Customer?.FullName</td>
-                        <td>@requests.Fridge.Customer?.Location?.Address</td>
+                        <td>@requests.Fridge?.Customer?.FullName</td>
+                        <td>@requests.Fridge?.Customer?.Location.Address</td>
                         <td>@requests.Fridge?.Brand</td>
                         <td>@requests.Fridge?.Model</td>
                         <td>@requests.RequestDate.ToString("yyyy-MM-dd")</td>
