@@ -192,7 +192,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 Quantity = model.Quantity,
                 RequestBy = "Inventory Liaison",
                 RequestType = "Fridge Purchase",
-                AssignedToRole = "Purchasing Manager",
+                AssignedToRole = EmployeeRoles.PurchasingManager,
                 RequestDate = DateOnly.FromDateTime(DateTime.Now),
                 Status = "Pending",
                 IsActive = true,
