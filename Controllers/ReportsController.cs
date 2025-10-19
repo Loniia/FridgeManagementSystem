@@ -7,12 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering; 
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace FridgeManagementSystem.Areas.Administrator.Controllers
+namespace FridgeManagementSystem.Controllers
 {
-    [Area("Administrator")]
-    [Authorize(Roles = "Admin")]
     public class ReportsController : Controller
     {
         private readonly FridgeDbContext _context;
