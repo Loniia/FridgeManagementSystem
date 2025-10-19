@@ -226,7 +226,10 @@ namespace CustomerManagementSubSystem.Controllers
             if (customer == null)
                 return NotFound("Customer not found.");
 
-            var fridge = _context.Fridge.FirstOrDefault(f => f.FridgeId == fridgeId);
+            // ✅ Eager-load Customer on Fridge
+            var fridge = _context.Fridge
+                .Include(f => f.Customer) // <--- added
+                .FirstOrDefault(f => f.FridgeId == fridgeId);
             if (fridge == null)
                 return NotFound("Fridge not found.");
 
@@ -290,7 +293,7 @@ namespace CustomerManagementSubSystem.Controllers
                 ScheduledDate = DateTime.Now.AddDays(30),
                 ScheduledTime = new TimeSpan(10, 0, 0),
                 Status = FridgeManagementSystem.Models.TaskStatus.Scheduled,
-                VisitNotes = $"Initial maintenance visit scheduled automatically for {customer.FullName}."
+                VisitNotes = $"Initial maintenance visit scheduled automatically for {fridge.Customer.FullName}." // <--- updated
             };
             _context.MaintenanceVisit.Add(maintenanceVisit);
             _context.SaveChanges();
@@ -314,6 +317,7 @@ namespace CustomerManagementSubSystem.Controllers
 
             return RedirectToAction("ProcessPendingAllocations");
         }
+
 
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
         {
