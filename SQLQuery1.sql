@@ -62,19 +62,6 @@ VALUES
 
 SELECT EmployeeId, FullName FROM Employees;
 
-INSERT INTO MaintenanceRequest (FridgeId, RequestDate, TaskStatus, IsActive)
-VALUES
-(1, '2025-10-01', 0, 1), -- Pending
-(2, '2025-10-03', 1, 1), -- InProgress
-(3, '2025-10-05', 2, 1), -- Complete
-(4, '2025-10-07', 0, 1), -- Pending
-(5, '2025-10-09', 3, 1), -- Cancelled
-(6, '2025-10-11', 0, 1), -- Pending
-(7, '2025-10-13', 4, 1), -- Scheduled
-(8, '2025-10-15', 5, 1), -- OnHold
-(9, '2025-10-17', 6, 1), -- Rescheduled
-(10, '2025-10-19', 1, 1); -- InProgress
-
 SELECT MaintenanceRequestId FROM MaintenanceRequest;
 
 SELECT mv.MaintenanceVisitId, mv.MaintenanceRequestId, mv.ScheduledDate, mv.Status,
@@ -83,19 +70,12 @@ FROM MaintenanceVisit mv
 JOIN Fridge f ON mv.FridgeId = f.FridgeId
 ORDER BY mv.ScheduledDate DESC;
 
+SELECT o.OrderId, o.CustomerID, c.FullName
+FROM Orders o
+LEFT JOIN Customers c ON o.CustomerID = c.CustomerID
+WHERE o.Status IN ('Paid', 'Fridge Allocated');
 
-INSERT INTO MaintenanceVisit (FridgeId, EmployeeID, MaintenanceRequestId, ScheduledDate, ScheduledTime, VisitNotes, Status)
-VALUES
-(1, 4, 22, '2025-10-20', '09:00:00', 'Routine check and cleaning.', 0),
-(2, 4, 21, '2025-10-21', '10:30:00', 'Replaced faulty compressor.', 2),
-(3, 4, 13, '2025-10-22', '11:15:00', 'Checked cooling efficiency.', 0),
-(4, 4, 14, '2025-10-23', '08:45:00', 'Cleaned condenser coils.', 1),
-(5, 4, 16, '2025-10-24', '14:00:00', 'Lubricated moving parts.', 0),
-(6, 4, 20, '2025-10-25', '13:20:00', 'Inspected electrical connections.', 0),
-(7, 4, 17, '2025-10-26', '15:10:00', 'Replaced door gasket.', 2),
-(8, 4, 18, '2025-10-27', '09:30:00', 'Checked thermostat settings.', 0),
-(9, 4, 19, '2025-10-28', '10:00:00', 'Fixed minor leakage.', 1),
-(10, 4, 15, '2025-10-29', '11:45:00', 'Full maintenance inspection.', 0);
+
 
 SELECT MaintenanceVisitId FROM MaintenanceVisit;
 
@@ -186,79 +166,14 @@ VALUES
 
 SELECT SupplierId FROM Suppliers;
 
-INSERT INTO Inventory (FridgeID, Quantity, LastUpdated)
-VALUES
-(1, 10, '2025-01-02'),
-(2, 8, '2025-01-05'),
-(3, 12, '2025-01-10'),
-(4, 7, '2025-01-15'),
-(5, 9, '2025-02-01'),
-(6, 6, '2025-02-10'),
-(7, 15, '2025-02-20'),
-(8, 11, '2025-03-01'),
-(9, 13, '2025-03-10'),
-(10, 5, '2025-03-20');
-
-INSERT INTO PurchaseRequests 
-(FridgeId, InventoryID, RequestDate, ItemFullNames, RequestBy, AssignedToRole, Status, RequestType, RequestNumber, Quantity, IsActive, IsViewed, ViewedDate)
-VALUES
-(NULL, 1, '2025-01-03', 'Commercial Beverage Fridge', 'Lerato Mokoena', 'PurchasingManager', 'Approved', 'Equipment', 'PR-2025-001', 5, 1, 0, NULL),
-(NULL, 2, '2025-01-10', 'Mini Cooler', 'John Nkuna', 'PurchasingManager', 'Pending', 'Replacement', 'PR-2025-002', 3, 1, 0, NULL),
-(NULL, 3, '2025-01-18', 'Large Cold Storage Unit', 'Sibongile Dlamini', 'PurchasingManager', 'Approved', 'Expansion', 'PR-2025-003', 2, 1, 1, '2025-01-19'),
-(NULL, 4, '2025-02-01', 'Display Fridge', 'Tebogo Maseko', 'PurchasingManager', 'Approved', 'Retail', 'PR-2025-004', 6, 1, 0, NULL),
-(NULL, 5, '2025-02-10', 'Beverage Freezer', 'Ayanda Ndlovu', 'PurchasingManager', 'Pending', 'Equipment', 'PR-2025-005', 4, 1, 0, NULL),
-(NULL, 6, '2025-02-20', 'Ice Cream Display Unit', 'Samantha Molefe', 'PurchasingManager', 'Approved', 'Replacement', 'PR-2025-006', 3, 1, 1, '2025-02-21'),
-(NULL, 7, '2025-03-05', 'Bar Cooler', 'Kabelo Khoza', 'PurchasingManager', 'Rejected', 'Equipment', 'PR-2025-007', 2, 1, 0, NULL),
-(NULL, 8, '2025-03-15', 'Deep Freezer', 'Thabo Mthembu', 'PurchasingManager', 'Approved', 'Replacement', 'PR-2025-008', 5, 1, 1, '2025-03-16'),
-(NULL, 9, '2025-03-25', 'Drinks Cooler', 'Amanda Sithole', 'PurchasingManager', 'Pending', 'Retail', 'PR-2025-009', 4, 1, 0, NULL),
-(NULL, 10, '2025-04-02', 'Cold Beverage Fridge', 'Lucky Maduna', 'PurchasingManager', 'Approved', 'Expansion', 'PR-2025-010', 6, 1, 1, '2025-04-03');
-
-INSERT INTO RequestsForQuotation (RFQNumber, PurchaseRequestID, CreatedDate, Deadline, Status, Description, RequiredQuantity)
-VALUES
-('RFQ-2025-001', 1, '2025-01-05', '2025-01-12', 'Draft', 'Quotation for Commercial Beverage Fridges', 5),
-('RFQ-2025-002', 2, '2025-01-15', '2025-01-22', 'Draft', 'Quotation for Mini Coolers', 3),
-('RFQ-2025-003', 3, '2025-02-02', '2025-02-09', 'Sent', 'Quotation for Large Cold Storage Units', 2),
-('RFQ-2025-004', 4, '2025-02-11', '2025-02-18', 'Draft', 'Quotation for Display Fridges', 6),
-('RFQ-2025-005', 5, '2025-02-25', '2025-03-04', 'Sent', 'Quotation for Beverage Freezers', 4),
-('RFQ-2025-006', 6, '2025-03-10', '2025-03-17', 'Draft', 'Quotation for Ice Cream Display Units', 3),
-('RFQ-2025-007', 7, '2025-03-20', '2025-03-27', 'Closed', 'Quotation for Bar Coolers', 2),
-('RFQ-2025-008', 8, '2025-03-28', '2025-04-04', 'Draft', 'Quotation for Deep Freezers', 5),
-('RFQ-2025-009', 9, '2025-04-05', '2025-04-12', 'Sent', 'Quotation for Drinks Coolers', 4),
-('RFQ-2025-010', 10, '2025-04-10', '2025-04-17', 'Draft', 'Quotation for Cold Beverage Fridges', 6);
-
-
-INSERT INTO Faults
-(
-    FaultDescription,
-    FaultCode,
-    Status,
-    Priority,
-    ScheduledDate,
-    ReportDate,
-    Notes,
-    ApplianceType,
-    InitialAssessment,
-    EstimatedRepairTime,
-    RequiredParts,
-    IsUrgent,
-    CreatedDate,
-    UpdatedDate,
-    Category,
-    FridgeId,
-    AssignedTechnicianId,
-    CustomerId
-)
-VALUES
-('Compressor not cooling properly', 'FC-001', 'Pending', 'High', '2025-10-25', '2025-10-15', 'Customer reported that fridge is not cooling well.', 'Refrigerator', 'Possible gas leak or compressor issue.', 4.5, 'Compressor unit, refrigerant gas', 1, GETDATE(), GETDATE(), 'Cooling Issue', 1, 2, 1),
-('Door seal is worn out', 'FC-002', 'Diagnosing', 'Medium', '2025-10-26', '2025-10-16', 'Fridge door not closing properly.', 'Refrigerator', 'Seal appears damaged on the right side.', 2, 'New rubber door seal', 0, GETDATE(), GETDATE(), 'DoorSeal', 2, 2, 2),
-('Fridge light not working', 'FC-003', 'Repairing', 'Low', '2025-10-28', '2025-10-18', 'Light bulb does not turn on.', 'Refrigerator', 'Likely a burnt bulb or wiring issue.', 1, 'Replacement bulb', 0, GETDATE(), GETDATE(), 'Electrical', 3, 2, 3),
-('Noisy operation', 'FC-004', 'Testing', 'Medium', '2025-10-29', '2025-10-19', 'Strange noise from the back.', 'Freezer', 'Fan motor may be loose.', 3, 'Fan motor', 0, GETDATE(), GETDATE(), 'NoiseVibration', 4, 2, 11),
-('Fridge leaking water', 'FC-005', 'Resolved', 'High', '2025-10-25', '2025-10-17', 'Water pooling at the bottom.', 'Refrigerator', 'Drain pipe clogged.', 2, 'Drain pipe replacement', 1, GETDATE(), GETDATE(), 'WaterLeak', 5, 2, 5),
-('Power cable damaged', 'FC-006', 'Pending', 'High', '2025-10-27', '2025-10-18', 'Cable is frayed near plug.', 'Refrigerator', 'Electrical hazard risk.', 1, 'Power cable', 1, GETDATE(), GETDATE(), 'Electrical', 6, 2, 12),
-('Thermostat malfunction', 'FC-007', 'InProgress', 'High', '2025-10-26', '2025-10-15', 'Temperature not stable.', 'Freezer', 'Thermostat sensor faulty.', 5, 'Thermostat sensor', 1, GETDATE(), GETDATE(), 'Thermostat', 7, 2, 7),
-('Fridge not turning on', 'FC-008', 'Pending', 'Critical', '2025-10-24', '2025-10-18', 'Customer reports fridge dead.', 'Refrigerator', 'Possible fuse or compressor issue.', 6, 'Fuse, compressor', 1, GETDATE(), GETDATE(), 'PowerIssue', 8, 2, 8),
-('Excessive frost build-up', 'FC-009', 'Diagnosing', 'Medium', '2025-10-27', '2025-10-19', 'Frost forming on inner walls.', 'Freezer', 'Defrost timer might be stuck.', 3.5, 'Defrost timer', 0, GETDATE(), GETDATE(), 'CoolingIssue', 9, 2, 9),
-('Vibration during operation', 'FC-010', 'Testing', 'Low', '2025-10-30', '2025-10-19', 'Customer feels vibration.', 'Freezer', 'Compressor mount loose.', 1.5, 'Compressor mount bolts', 0, GETDATE(), GETDATE(), 'NoiseVibration', 10, 2, 10);
+DELETE FROM Suppliers;
+DELETE FROM Inventory;
+DELETE FROM PurchaseRequests;
+DELETE FROM RequestsForQuotation;
+DELETE FROM Quotations;
+DELETE FROM PurchaseOrders;
+DELETE FROM DeliveryNotes;
+DELETE FROM Faults;
 
 SELECT FridgeId FROM Fridge;
 SELECT CustomerId FROM Customers;
