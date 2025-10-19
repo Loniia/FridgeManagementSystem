@@ -23,7 +23,9 @@ namespace FridgeManagementSystem.Models
         [DataType(DataType.Currency)]
         [Display(Name = "Quotation Amount")]
         public decimal QuotationAmount { get; set; }
+        public  string Description { get; set; }
 
+        public decimal RequiredQuantity { get; set; }
         [StringLength(20)]
         [Display(Name = "Status")]
         public string Status { get; set; }

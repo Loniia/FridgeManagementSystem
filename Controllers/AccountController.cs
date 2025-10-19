@@ -104,7 +104,7 @@ namespace FridgeManagementSystem.Controllers
                     EmployeeRoles.CustomerManager => Redirect("~/CustomerManagementSubsystem/CustomerManagementHome"),
                     EmployeeRoles.FaultTechnician => Redirect("~/FaultTechSubsystem/Faults"),
                     EmployeeRoles.MaintenanceTechnician => Redirect("~/MaintenanceSubSystem/MaintenanceHome"),
-                    EmployeeRoles.PurchasingManager => Redirect("~/PurchasingSubsystem/Purchasing"),
+                    EmployeeRoles.PurchasingManager => RedirectToAction("Index", "Purchase", new { area = "PurchasingSubsystem" }),
                     _ => RedirectToAction("Index", "Home")
                 };
             }

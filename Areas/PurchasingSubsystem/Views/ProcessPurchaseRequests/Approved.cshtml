@@ -1,0 +1,97 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.PurchaseRequest>
+@{
+    ViewData["Title"] = "Approved Purchase Requests";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center py-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark">
+                <i class="bi bi-check-circle text-success me-2"></i>Approved Purchase Requests
+            </h1>
+            <p class="text-muted mb-0">View all approved requests and their RFQ status</p>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="badge bg-success fs-6">@Model.Count() Approved</span>
+            <a asp-action="Pending" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-clock-history me-1"></i> Pending
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-5">
+            <i class="bi bi-check-circle display-4 text-info mb-3"></i>
+            <h4>No Approved Requests</h4>
+            <p class="text-muted">No purchase requests have been approved yet.</p>
+            <a asp-action="Pending" class="btn btn-primary mt-2">
+                <i class="bi bi-clock-history me-1"></i> View Pending Requests
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Approved Requests History</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Request #</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Requested By</th>
+                                <th>Approval Date</th>
+                                <th>RFQs Created</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var request in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <strong>@request.RequestNumber</strong>
+                                    </td>
+                                    <td>
+                                        <div>@request.ItemFullNames</div>
+                                        <small class="text-muted">@request.RequestType</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">@request.Quantity units</span>
+                                    </td>
+                                    <td>@request.RequestBy</td>
+                                    <td>
+                                        @if (request.ApprovalDate.HasValue)
+                                        {
+                                            <div>@request.ApprovalDate.Value.ToString("dd MMM yyyy")</div>
+                                            <small class="text-muted">@request.ApprovalDate.Value.ToString("hh:mm tt")</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var rfqCount = 0; // You'll need to get this from your RFQ context
+                                        }
+                                        <span class="badge bg-info">@rfqCount RFQs</span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-action="Details" asp-route-id="@request.PurchaseRequestID"
+                                               class="btn btn-outline-info">Details</a>
+                                            <a href="@Url.Action("Index", "RFQs", new { area = "PurchasingSubsystem" })"
+                                               class="btn btn-outline-primary">View RFQs</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 
-namespace FridgeManagementSystem.Controllers
+namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
 {
+    [Area("PurchasingSubsystem")] // ? ADD THIS LINE!
     public class PurchaseController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -25,4 +26,3 @@ namespace FridgeManagementSystem.Controllers
         }
     }
 }
-   

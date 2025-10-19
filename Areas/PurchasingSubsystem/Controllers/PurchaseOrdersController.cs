@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Models;
 #nullable disable
-namespace FridgeManagementSystem.Controllers
+namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers  
 {
+    [Area("PurchasingSubsystem")]  // ← ADD THIS ATTRIBUTE!
     public class PurchaseOrdersController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -20,6 +21,7 @@ namespace FridgeManagementSystem.Controllers
         {
             return View(await _context.PurchaseOrders.ToListAsync());
         }
+
 
         // GET: PurchaseOrders/Details/5
         public async Task<IActionResult> Details(int? id)
