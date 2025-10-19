@@ -206,44 +206,6 @@ namespace CustomerManagementSubSystem.Controllers
             return View();
         }
 
-        //// GET: CustomerLiaison/Allocate
-        //[HttpGet]
-        //[Route("/CustomerManagementSubSystem/CustomerLiaison/Allocate")]
-        //public IActionResult AllocateGet(int orderId, int customerId, int orderItemId, int fridgeId = 0)
-        //{
-        //    // ✅ Validate all required IDs
-        //    if (orderId <= 0 || customerId <= 0 || orderItemId <= 0)
-        //        return NotFound("Missing allocation details.");
-
-        //    // ✅ Fetch the order with customer
-        //    var order = _context.Orders
-        //        .Include(o => o.Customers)
-        //        .Include(o => o.OrderItems)
-        //        .FirstOrDefault(o => o.OrderId == orderId && o.CustomerID == customerId);
-
-        //    if (order == null)
-        //        return NotFound("Order not found.");
-
-        //    // ✅ Get the specific OrderItem
-        //    var orderItem = order.OrderItems.FirstOrDefault(oi => oi.OrderItemId == orderItemId);
-        //    if (orderItem == null)
-        //        return NotFound("Order item not found.");
-
-        //    // ✅ Get list of available fridges
-        //    var availableFridges = _context.Fridge
-        //        .Where(f => !_context.FridgeAllocation.Any(a => a.FridgeId == f.FridgeId))
-        //        .ToList();
-
-        //    // ✅ Pass all info to the view
-        //    ViewBag.Fridges = availableFridges;
-        //    ViewBag.Order = order;
-        //    ViewBag.CustomerId = customerId;
-        //    ViewBag.OrderItemId = orderItemId;
-        //    ViewBag.FridgeId = fridgeId; // optional: if a fridge is pre-selected
-
-        //    return View();
-        //}
-
         // POST: CustomerLiaison/Allocate
         [HttpPost]
         [ValidateAntiForgeryToken]
