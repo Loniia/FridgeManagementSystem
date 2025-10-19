@@ -20,6 +20,190 @@
     }
 
     // ---------------------------
+    // Render South Africa Map with Fridge Distribution
+    // ---------------------------
+    async function renderSouthAfricaMap() {
+        try {
+            const res = await fetch('/Reports/LocationMapData');
+            const locationData = await res.json();
+
+            // Hide loading indicator
+            document.getElementById('mapLoading').style.display = 'none';
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const mapContainer = document.getElementById('southAfricaMap');
+
+            // Clear previous map
+            mapContainer.querySelector('svg')?.remove();
+
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.setAttribute("viewBox", "0 0 800 600");
+
+            // Simplified South Africa province coordinates (centers)
+            const provinces = {
+                'Gauteng': { x: 400, y: 300, color: '#3b7ddd' },
+                'Western Cape': { x: 200, y: 450, color: '#1cbb8c' },
+                'KwaZulu-Natal': { x: 450, y: 350, color: '#fcb92c' },
+                'Eastern Cape': { x: 300, y: 450, color: '#dc3545' },
+                'Free State': { x: 350, y: 250, color: '#6c757d' },
+                'Limpopo': { x: 450, y: 200, color: '#17a2b8' },
+                'Mpumalanga': { x: 500, y: 300, color: '#6610f2' },
+                'North West': { x: 350, y: 200, color: '#e83e8c' },
+                'Northern Cape': { x: 250, y: 300, color: '#fd7e14' }
+            };
+
+            // Create province areas
+            Object.entries(provinces).forEach(([province, info]) => {
+                const provinceData = locationData.find(d => d.Province === province);
+                const fridgeCount = provinceData?.FridgeCount || 0;
+
+                // Determine circle size based on fridge count
+                let radius = 20;
+                if (fridgeCount > 15) radius = 35;
+                else if (fridgeCount > 5) radius = 28;
+                else if (fridgeCount === 0) radius = 15;
+
+                // Determine color intensity based on count
+                let opacity = fridgeCount > 0 ? 0.8 : 0.3;
+                let fillColor = fridgeCount > 0 ? info.color : '#cccccc';
+
+                const circle = document.createElementNS(svgNS, "circle");
+                circle.setAttribute("cx", info.x);
+                circle.setAttribute("cy", info.y);
+                circle.setAttribute("r", radius);
+                circle.setAttribute("fill", fillColor);
+                circle.setAttribute("opacity", opacity);
+                circle.setAttribute("class", "province-area");
+                circle.setAttribute("data-province", province);
+                circle.setAttribute("data-count", fridgeCount);
+
+                // Add hover effects
+                circle.addEventListener('mouseenter', function (e) {
+                    showMapTooltip(e, province, fridgeCount, provinceData);
+                });
+                circle.addEventListener('mouseleave', hideMapTooltip);
+
+                svg.appendChild(circle);
+
+                // Add province label
+                const text = document.createElementNS(svgNS, "text");
+                text.setAttribute("x", info.x);
+                text.setAttribute("y", info.y + 4);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("fill", fridgeCount > 0 ? "white" : "#666666");
+                text.setAttribute("font-size", "12");
+                text.setAttribute("font-weight", "bold");
+                text.textContent = province;
+                svg.appendChild(text);
+
+                // Add fridge count
+                const countText = document.createElementNS(svgNS, "text");
+                countText.setAttribute("x", info.x);
+                countText.setAttribute("y", info.y + 20);
+                countText.setAttribute("text-anchor", "middle");
+                countText.setAttribute("fill", fridgeCount > 0 ? "white" : "#666666");
+                countText.setAttribute("font-size", "10");
+                countText.textContent = `${fridgeCount} fridges`;
+                svg.appendChild(countText);
+            });
+
+            // Add city markers for locations with fridges
+            locationData.forEach(provinceData => {
+                provinceData.Locations.forEach(location => {
+                    if (location.FridgeCount > 0) {
+                        const province = provinces[provinceData.Province];
+                        if (province) {
+                            // Add some random variation to prevent overlapping
+                            const variationX = (Math.random() - 0.5) * 50;
+                            const variationY = (Math.random() - 0.5) * 50;
+
+                            const marker = document.createElementNS(svgNS, "circle");
+                            marker.setAttribute("cx", province.x + variationX);
+                            marker.setAttribute("cy", province.y + variationY);
+                            marker.setAttribute("r", 4);
+                            marker.setAttribute("fill", "#ff6b6b");
+                            marker.setAttribute("class", "location-marker");
+                            marker.setAttribute("data-location", `${location.Address}, ${provinceData.City}`);
+                            marker.setAttribute("data-fridges", location.FridgeCount);
+
+                            marker.addEventListener('mouseenter', function (e) {
+                                showLocationTooltip(e, location, provinceData.City);
+                            });
+                            marker.addEventListener('mouseleave', hideMapTooltip);
+
+                            svg.appendChild(marker);
+                        }
+                    }
+                });
+            });
+
+            mapContainer.appendChild(svg);
+
+        } catch (error) {
+            console.error('Error loading map data:', error);
+            document.getElementById('mapLoading').innerHTML =
+                '<p class="text-danger">Error loading map data. Please try again.</p>';
+        }
+    }
+
+    // ---------------------------
+    // Map Tooltip Functions
+    // ---------------------------
+    function showMapTooltip(event, province, count, provinceData) {
+        let tooltip = document.getElementById('mapTooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'mapTooltip';
+            tooltip.className = 'map-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        const cities = provinceData?.Locations?.map(l =>
+            `${l.Address} (${l.FridgeCount} fridges)`
+        ).join('<br>') || 'No fridges';
+
+        tooltip.innerHTML = `
+            <strong>${province}</strong><br>
+            Total Fridges: ${count}<br>
+            <small>${cities}</small>
+        `;
+
+        tooltip.style.left = (event.pageX + 10) + 'px';
+        tooltip.style.top = (event.pageY - 10) + 'px';
+        tooltip.style.display = 'block';
+    }
+
+    function showLocationTooltip(event, location, city) {
+        let tooltip = document.getElementById('mapTooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'mapTooltip';
+            tooltip.className = 'map-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        tooltip.innerHTML = `
+            <strong>${location.Address}</strong><br>
+            ${city}<br>
+            Fridges: ${location.FridgeCount}<br>
+            <small>Postal: ${location.PostalCode}</small>
+        `;
+
+        tooltip.style.left = (event.pageX + 10) + 'px';
+        tooltip.style.top = (event.pageY - 10) + 'px';
+        tooltip.style.display = 'block';
+    }
+
+    function hideMapTooltip() {
+        const tooltip = document.getElementById('mapTooltip');
+        if (tooltip) {
+            tooltip.style.display = 'none';
+        }
+    }
+
+    // ---------------------------
     // Render Monthly Sales chart
     // ---------------------------
     async function renderSalesChart() {
@@ -198,6 +382,7 @@
         renderLocationChart();
         renderSupplierTable();
         renderContractsTable();
+        renderSouthAfricaMap(); // Add this line
     }
 
     // ---------------------------

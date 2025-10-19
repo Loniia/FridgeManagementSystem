@@ -179,61 +179,31 @@ namespace FridgeManagementSystem.Controllers
             return Json(data);
         }
 
+        // Add this to your ReportsController
         [HttpGet]
-        public async Task<JsonResult> LocationDistribution()
+        public async Task<JsonResult> LocationMapData()
         {
-            var data = await _context.Fridge
-                .Where(f => f.LocationId != null)
-                .GroupBy(f => f.Location.Province)
+            var locationData = await _context.Locations
+                .Where(l => l.IsActive)
+                .Include(l => l.Fridge)
+                .GroupBy(l => new { l.Province, l.City })
                 .Select(g => new
                 {
-                    Province = g.Key,
-                    Count = g.Count()
+                    Province = g.Key.Province,
+                    City = g.Key.City,
+                    FridgeCount = g.Sum(l => l.Fridge.Count(f => f.IsActive)),
+                    Locations = g.Select(l => new
+                    {
+                        l.Address,
+                        l.PostalCode,
+                        FridgeCount = l.Fridge.Count(f => f.IsActive)
+                    }).ToList()
                 })
-                .OrderByDescending(x => x.Count)
+                .OrderByDescending(x => x.FridgeCount)
                 .ToListAsync();
 
-            return Json(data);
+            return Json(locationData);
         }
 
-        [HttpGet]
-        public async Task<JsonResult> SupplierPerformance(int top = 10)
-        {
-            var data = await _context.PurchaseOrders
-                .GroupBy(po => new { po.SupplierID, po.Supplier })
-                .Select(g => new
-                {
-                    g.Key.SupplierID,
-                    SupplierName = g.Key.Supplier != null ? g.Key.Supplier.Name : "Unknown",
-                    OrdersCount = g.Count(),
-                    TotalAmount = g.Sum(x => x.TotalAmount)
-                })
-                .OrderByDescending(x => x.TotalAmount)
-                .Take(top)
-                .ToListAsync();
-
-            return Json(data);
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> MaintenanceSummary()
-        {
-            var data = await _context.MaintenanceRequest
-                .GroupBy(m => m.TaskStatus)
-                .Select(g => new
-                {
-                    Status = g.Key,
-                    Count = g.Count()
-                })
-                .ToListAsync();
-
-            return Json(data);
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> ContractsActive()
-        {
-            return Json(new List<object>());
-        }
     }
 }
