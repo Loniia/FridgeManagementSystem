@@ -173,12 +173,14 @@ namespace FridgeManagementSystem.Models
     }
     public enum ShopType
     {
-        Shebeen ,
-        Warehouse,
-        Restuarant,
-        SuperMarket,
-        Spaza
+        Personal = 0,   // for single-person / individual customers
+        Shebeen = 1,
+        Warehouse = 2,
+        Restaurant = 3,  
+        SuperMarket = 4,
+        Spaza = 5
     }
+
     public enum Method
     {
         Card, EFT

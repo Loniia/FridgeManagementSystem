@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 //using QuestPDF;
 
-namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
+namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
 {
     [Area("MaintenanceSubSystem")]
     public class MaintenanceController : Controller
@@ -52,7 +52,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
                 .Include(r => r.Fridge)
                     .ThenInclude(f => f.Customer)
                        .ThenInclude(c=>c.Location)
-                .Where(r => r.IsActive)
+                .Where(r => r.IsActive )
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
@@ -82,27 +82,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
         // ✅ GET: Schedule Visit
         public IActionResult ScheduleVisit()
         {
-            // Only show requests that are not already scheduled
-            var requests = _context.MaintenanceRequest
-                 .Include(r => r.Fridge)
-                     .ThenInclude(f => f.Customer)
-                         .ThenInclude(c => c.Location)
-                 // Ensure the request is active and has no scheduled visit attached
-                 .Where(r => r.IsActive &&
-                             !_context.MaintenanceVisit.Any(v => v.MaintenanceRequestId == r.MaintenanceRequestId &&
-                                                                 v.Status == Models.TaskStatus.Scheduled))
-                 .ToList();
-            ViewBag.Requests = new SelectList(requests, "MaintenanceRequestId", "Fridge.FridgeName");
-
-            ViewBag.RequestsJson = Newtonsoft.Json.JsonConvert.SerializeObject(
-                requests.Select(r => new
-                {
-                    id = r.MaintenanceRequestId,
-                    customer = r.Fridge?.Customer?.FullName ?? "N/A",
-                    customerAddress = r.Fridge?.Customer?.Location?.Address?? "N/A",
-                    model = r.Fridge?.Model ?? "N/A"
-                })
-            );
+            PopulateRequestsViewBag();
 
             return View(new MaintenanceVisit
             {
@@ -116,29 +96,36 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ScheduleVisit(MaintenanceVisit model)
         {
+            // Repopulate dropdown and JSON in case of errors
+            PopulateRequestsViewBag();
+
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Please provide all required fields.";
-                return RedirectToAction("ScheduleVisit");
+                return View(model);
             }
 
             var request = _context.MaintenanceRequest
+                .Include(r => r.Fridge)
+                    .ThenInclude(f => f.Customer)
+                        .ThenInclude(c => c.Location)
                 .FirstOrDefault(r => r.MaintenanceRequestId == model.MaintenanceRequestId);
 
             if (request == null)
             {
                 TempData["Error"] = "Selected request does not exist.";
-                return RedirectToAction("ScheduleVisit");
+                return View(model);
             }
 
             model.FridgeId = request.FridgeId;
             model.MaintenanceRequestId = request.MaintenanceRequestId;
 
-            var technician = _context.Employees.FirstOrDefault();
+            // Pick the first active technician
+            var technician = MaintenanceTechnicians.FirstOrDefault();
             if (technician == null)
             {
                 TempData["Error"] = "No maintenance technician available. Please add one first.";
-                return RedirectToAction("ScheduleVisit");
+                return View(model);
             }
 
             model.EmployeeID = technician.EmployeeID;
@@ -150,6 +137,38 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
 
             TempData["Message"] = "Maintenance visit scheduled successfully!";
             return RedirectToAction("ScheduleVisit");
+        }
+        // ✅ Helper: populate dropdown and JSON safely
+        private void PopulateRequestsViewBag()
+        {
+            var requests = _context.MaintenanceRequest
+                .Include(r => r.Fridge)
+                    .ThenInclude(f => f.Customer)
+                        .ThenInclude(c => c.Location)
+                .Where(r => r.IsActive &&
+                            !_context.MaintenanceVisit.Any(v => v.MaintenanceRequestId == r.MaintenanceRequestId &&
+                                                                v.Status == Models.TaskStatus.Scheduled))
+                .ToList();
+
+            // Null-safe: replace missing data with "N/A"
+            var requestItems = requests.Select(r => new
+            {
+                Id = r.MaintenanceRequestId,
+                Display = $"{r.Fridge?.Brand ?? "N/A"} - {r.Fridge?.Model ?? "N/A"} | {r.Fridge?.Customer?.FullName ?? "N/A"} ({r.Fridge?.Customer?.Location?.City ?? "N/A"})"
+            }).ToList();
+
+            ViewBag.Requests = new SelectList(requestItems, "Id", "Display");
+
+            // JSON for JS auto-populate fields
+            ViewBag.RequestsJson = Newtonsoft.Json.JsonConvert.SerializeObject(
+                requests.Select(r => new
+                {
+                    id = r.MaintenanceRequestId,
+                    customer = r.Fridge?.Customer?.FullName ?? "N/A",
+                    customerAddress = r.Fridge?.Customer?.Location?.Address ?? "N/A",
+                    model = r.Fridge?.Model ?? "N/A"
+                })
+            );
         }
 
         // ✅ Show visits
@@ -213,6 +232,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
                 .Include(v => v.MaintenanceRequest)
                     .ThenInclude(r => r.Fridge)
                         .ThenInclude(f => f.Customer)
+                          .ThenInclude(c=>c.Location)
                 .Include(v => v.Employee)
                 .Include(v => v.FaultReport)
                 .FirstOrDefault(v => v.MaintenanceVisitId == visitId);
@@ -334,6 +354,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
                 .Include(v => v.MaintenanceRequest)
                     .ThenInclude(r => r.Fridge)
                         .ThenInclude(f => f.Customer)
+                          .ThenInclude(c=>c.Location)
                 .FirstOrDefault(v => v.MaintenanceVisitId == visitId);
 
             if (visit == null)
@@ -400,6 +421,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSytem.Controllers
         {
             var fridge = _context.Fridge
                 .Include(f => f.Customer)
+                    .ThenInclude(c=>c.Location)
                 .FirstOrDefault(f => f.FridgeId == fridgeId);
 
             var visit = _context.MaintenanceVisit

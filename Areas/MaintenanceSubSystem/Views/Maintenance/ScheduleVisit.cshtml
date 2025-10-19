@@ -1,8 +1,6 @@
 ﻿@model FridgeManagementSystem.Models.MaintenanceVisit
 
-@{
-    ViewData["Title"] = "Schedule Maintenance Visit";
-}
+
 
 <style>
     /* Main container styling */
@@ -195,6 +193,7 @@
         }
 </style>
 
+
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
@@ -215,11 +214,12 @@
                     <label for="requestSelect" class="form-label">Select Maintenance Request</label>
                     <select id="requestSelect" name="MaintenanceRequestId" class="form-select" required>
                         <option value="">-- Select Request --</option>
-                        @foreach (var r in (SelectList)ViewBag.Requests)
+                        @foreach (var r in (SelectList)(ViewBag.Requests ?? new SelectList(Enumerable.Empty<object>())))
                         {
                             <option value="@r.Value">@r.Text</option>
                         }
                     </select>
+
                 </div>
 
                 <div class="mb-3">
@@ -263,14 +263,15 @@
 
 @section Scripts {
     <script>
-        // Full data from ViewBag
-        const requestsData = @Html.Raw(ViewBag.RequestsJson);
+        // Parse the JSON from ViewBag
+        const requestsData = @Html.Raw(ViewBag.RequestsJson ?? "[]");
 
         const requestSelect = document.getElementById('requestSelect');
         const customerNameInput = document.getElementById('customerName');
         const customerAddressInput = document.getElementById('customerAddress');
         const fridgeModelInput = document.getElementById('fridgeModel');
 
+        // Populate fields when selection changes
         requestSelect.addEventListener('change', function () {
             const selectedId = parseInt(this.value);
             const request = requestsData.find(r => r.id === selectedId);
@@ -286,7 +287,7 @@
             }
         });
 
-        // Set default date/time to today/now if empty
+        // Initialize default date/time if empty
         const dateInput = document.getElementById('ScheduledDate');
         const timeInput = document.getElementById('ScheduledTime');
 
@@ -297,10 +298,11 @@
 
         if (!timeInput.value) {
             const now = new Date();
-            timeInput.value = now.toTimeString().slice(0,5); // HH:MM
+            timeInput.value = now.toTimeString().slice(0, 5); // HH:MM
         }
     </script>
 }
+
 
 @* @model FinalYearProject.Models.MaintenanceVisit
 

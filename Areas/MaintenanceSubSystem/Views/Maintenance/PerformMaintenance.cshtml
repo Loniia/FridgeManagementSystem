@@ -260,7 +260,7 @@
     <div class="responsive-container mt-3">
 
         <!-- Start Maintenance Button at the top -->
-        @if (Model.MaintenanceRequest?.TaskStatus == FridgeManagementSystem.Models.TaskStatus.Scheduled)
+        @if (Model.MaintenanceRequest?.TaskStatus == FridgeManagementSystem.Models.TaskStatus.Scheduled || Model.MaintenanceRequest?.TaskStatus == FridgeManagementSystem.Models.TaskStatus.Rescheduled)
         {
             <div class="d-grid gap-2 mb-4">
                 <form asp-action="StartMaintenance" method="post">

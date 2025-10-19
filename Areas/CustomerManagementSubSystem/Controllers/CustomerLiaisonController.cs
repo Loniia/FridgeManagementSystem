@@ -167,44 +167,46 @@ namespace CustomerManagementSubSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: CustomerLiaison/Allocate
         [HttpGet]
         [Route("/CustomerManagementSubSystem/CustomerLiaison/Allocate")]
         public IActionResult AllocateGet(int orderId, int customerId, int orderItemId, int fridgeId = 0)
         {
-            // ✅ Validate all required IDs
             if (orderId <= 0 || customerId <= 0 || orderItemId <= 0)
                 return NotFound("Missing allocation details.");
 
-            // ✅ Fetch the order with customer
             var order = _context.Orders
                 .Include(o => o.Customers)
                 .Include(o => o.OrderItems)
                 .FirstOrDefault(o => o.OrderId == orderId && o.CustomerID == customerId);
 
-            if (order == null)
-                return NotFound("Order not found.");
+            if (order == null) return NotFound("Order not found.");
 
-            // ✅ Get the specific OrderItem
             var orderItem = order.OrderItems.FirstOrDefault(oi => oi.OrderItemId == orderItemId);
-            if (orderItem == null)
-                return NotFound("Order item not found.");
+            if (orderItem == null) return NotFound("Order item not found.");
 
-            // ✅ Get list of available fridges (optional: filter by fridge type/model if needed)
             var availableFridges = _context.Fridge
                 .Where(f => !_context.FridgeAllocation.Any(a => a.FridgeId == f.FridgeId))
                 .ToList();
 
-            // ✅ Pass all info to the view
+            // ✅ Load the next maintenance visit for this customer/fridge
+            var nextVisit = _context.MaintenanceVisit
+                .Include(v => v.Employee)
+                .Include(v => v.Fridge)
+                .Where(v => v.FridgeId == fridgeId && v.Status == FridgeManagementSystem.Models.TaskStatus.Scheduled)
+                .OrderBy(v => v.ScheduledDate)
+                .FirstOrDefault();
+
             ViewBag.Fridges = availableFridges;
             ViewBag.Order = order;
             ViewBag.CustomerId = customerId;
             ViewBag.OrderItemId = orderItemId;
-            ViewBag.FridgeId = fridgeId; // optional: if a fridge is pre-selected
+            ViewBag.FridgeId = fridgeId;
+            ViewBag.NextVisit = nextVisit; // ✅ Pass to view
 
             return View();
         }
 
+        // POST: CustomerLiaison/Allocate
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("/CustomerManagementSubSystem/CustomerLiaison/Allocate")]
@@ -268,6 +270,31 @@ namespace CustomerManagementSubSystem.Controllers
 
             _context.SaveChanges();
 
+            // ✅ Create MaintenanceRequest
+            var maintenanceRequest = new MaintenanceRequest
+            {
+                FridgeId = fridge.FridgeId,
+                RequestDate = DateTime.Now,
+                TaskStatus = FridgeManagementSystem.Models.TaskStatus.Pending,
+                IsActive = true
+            };
+            _context.MaintenanceRequest.Add(maintenanceRequest);
+            _context.SaveChanges(); // Save to get MaintenanceRequestId
+
+            // ✅ Create MaintenanceVisit linked to the request
+            var maintenanceVisit = new MaintenanceVisit
+            {
+                FridgeId = fridge.FridgeId,
+                MaintenanceRequestId = maintenanceRequest.MaintenanceRequestId, // Link FK
+                EmployeeID = 1, // Assign your available employee
+                ScheduledDate = DateTime.Now.AddDays(30),
+                ScheduledTime = new TimeSpan(10, 0, 0),
+                Status = FridgeManagementSystem.Models.TaskStatus.Scheduled,
+                VisitNotes = $"Initial maintenance visit scheduled automatically for {customer.FullName}."
+            };
+            _context.MaintenanceVisit.Add(maintenanceVisit);
+            _context.SaveChanges();
+
             // Create ViewModel to show allocation info
             var allocationVM = new FridgeAllocationViewModel
             {
@@ -282,7 +309,8 @@ namespace CustomerManagementSubSystem.Controllers
                 ReturnDate = allocation.ReturnDate
             };
 
-            TempData["Success"] = $"Fridge '{allocationVM.Brand} {allocationVM.Model}' allocated to {allocationVM.CustomerName}.";
+            TempData["Success"] = $"Fridge '{allocationVM.Brand} {allocationVM.Model}' allocated to {allocationVM.CustomerName}. " +
+                                  $"A maintenance visit has been scheduled for {maintenanceVisit.ScheduledDate:dd MMM yyyy}.";
 
             return RedirectToAction("ProcessPendingAllocations");
         }
