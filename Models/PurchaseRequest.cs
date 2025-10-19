@@ -49,6 +49,17 @@ namespace FridgeManagementSystem.Models
         public virtual Fridge Fridge { get; set; }
 
         public virtual Inventory Inventory { get; set; }
+        [StringLength(500)]
+        public string ApprovalNotes { get; set; }
+
+        [DataType(DataType.Date)]
+        public DateTime? ApprovalDate { get; set; }
+
+        [StringLength(50)]
+        public string Priority { get; set; } = "Medium"; // "Low", "Medium", "High", "Urgent"
+
+        // For RFQ creation
+        public int? CreatedRFQID { get; set; } // Links to the RFQ created from this request
 
     }
 }
