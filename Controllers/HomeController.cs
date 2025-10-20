@@ -133,19 +133,23 @@ namespace FridgeManagementSystem.Controllers
         // -----------------------
         // FAQ Section
         // -----------------------
+        // In your HomeController
         [AllowAnonymous]
         public IActionResult FAQ()
         {
             var faqs = new List<(string Question, string Answer)>
             {
-                ("How do I create an account?", "Click the Sign Up button and follow the instructions."),
-                ("How can I track my fridge order?", "Go to Orders > Track Order and enter your order ID."),
-                ("What is the warranty period?", "All fridges have a 2-year warranty from the date of purchase."),
-                ("Can I request installation?", "Yes! Choose installation during checkout or contact support.")
+                ("How do I create an account?", "To create an account, click the Sign Up button at the top right, fill in your details, and confirm your email."),
+                ("How can I track my fridge order?", "Go to Orders > Track Order and enter your order ID. You'll see your delivery status and estimated arrival."),
+                ("What is the warranty period?", "All fridges come with a 2-year warranty covering manufacturing defects."),
+                ("Can I request installation?", "Yes, you can request installation during checkout or contact support to schedule a visit."),
+                ("Do you provide maintenance services?", "Yes, we offer optional maintenance services. Check our Services page for details."),
+                ("How do I return a fridge?", "Returns are accepted within 14 days of purchase. Contact support to initiate a return.")
             };
 
             return View(faqs);
         }
+
 
         [HttpPost]
         [AllowAnonymous]
