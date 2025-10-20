@@ -3,14 +3,14 @@ using FridgeManagementSystem.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FridgeManagementSystem.Areas.Administrator.Controllers
+namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
 {
-    [Area("Administrator")]
-    public class ManageSupplierController : Controller
+    [Area("PurchasingSubsystem")]
+    public class ManageSuppliersController : Controller
     {
         private readonly FridgeDbContext _context;
 
-        public ManageSupplierController(FridgeDbContext context)
+        public ManageSuppliersController(FridgeDbContext context)
         {
             _context = context;
         }

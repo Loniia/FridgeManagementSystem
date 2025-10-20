@@ -25,7 +25,9 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
             var pendingRequests = await _context.PurchaseRequests
                 .Include(pr => pr.Fridge)
                 .Include(pr => pr.Inventory)
-                .Where(pr => pr.Status == "Pending" && pr.IsActive)
+                .Where(pr => pr.Status == "Pending" &&
+                             pr.IsActive &&
+                             pr.AssignedToRole == "PurchasingManager") 
                 .OrderByDescending(pr => pr.RequestDate)
                 .ToListAsync();
 
@@ -38,7 +40,9 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
             var approvedRequests = await _context.PurchaseRequests
                 .Include(pr => pr.Fridge)
                 .Include(pr => pr.Inventory)
-                .Where(pr => pr.Status == "Approved" && pr.IsActive)
+                .Where(pr => pr.Status == "Approved" &&
+                             pr.IsActive &&
+                             pr.AssignedToRole == "PurchasingManager") // ← ADD THIS FILTER
                 .OrderByDescending(pr => pr.ApprovalDate)
                 .ToListAsync();
 
@@ -51,7 +55,9 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
             var rejectedRequests = await _context.PurchaseRequests
                 .Include(pr => pr.Fridge)
                 .Include(pr => pr.Inventory)
-                .Where(pr => pr.Status == "Rejected" && pr.IsActive)
+                .Where(pr => pr.Status == "Rejected" &&
+                             pr.IsActive &&
+                             pr.AssignedToRole == "PurchasingManager") // ← ADD THIS FILTER
                 .OrderByDescending(pr => pr.RequestDate)
                 .ToListAsync();
 
