@@ -15,6 +15,7 @@ namespace FridgeManagementSystem.Models
         [EnumDataType(typeof(TaskStatus))]
         public TaskStatus TaskStatus { get; set; } = TaskStatus.Pending;
         public bool IsActive { get; set; } = true;
+        public DateTime? CompletedDate { get; set; }
         [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
         public virtual Fridge Fridge { get; set; }
