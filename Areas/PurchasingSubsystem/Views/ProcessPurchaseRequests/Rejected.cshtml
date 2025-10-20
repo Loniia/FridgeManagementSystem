@@ -1,0 +1,116 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.PurchaseRequest>
+@{
+    ViewData["Title"] = "Rejected Purchase Requests";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center py-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark">
+                <i class="bi bi-x-circle text-danger me-2"></i>Rejected Purchase Requests
+            </h1>
+            <p class="text-muted mb-0">View all rejected purchase requests</p>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="badge bg-danger fs-6">@Model.Count() Rejected</span>
+            <a asp-action="Pending" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-clock-history me-1"></i> Pending
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-success text-center py-5">
+            <i class="bi bi-check-circle display-4 text-success mb-3"></i>
+            <h4>No Rejected Requests</h4>
+            <p class="text-muted">Great! No purchase requests have been rejected.</p>
+            <a asp-action="Pending" class="btn btn-primary mt-2">
+                <i class="bi bi-clock-history me-1"></i> View Pending Requests
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Rejected Requests History</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Request #</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Requested By</th>
+                                <th>Request Date</th>
+                                <th>Rejection Date</th>
+                                <th>Rejection Reason</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var request in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <strong>@request.RequestNumber</strong>
+                                    </td>
+                                    <td>
+                                        <div>@request.ItemFullNames</div>
+                                        <small class="text-muted">@request.RequestType</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@request.Quantity units</span>
+                                    </td>
+                                    <td>@request.RequestBy</td>
+                                    <td>@request.RequestDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @if (request.ApprovalDate.HasValue)
+                                        {
+                                            <div>@request.ApprovalDate.Value.ToString("dd MMM yyyy")</div>
+                                            <small class="text-muted">@request.ApprovalDate.Value.ToString("hh:mm tt")</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(request.ApprovalNotes))
+                                        {
+                                            <span class="text-truncate d-inline-block" style="max-width: 200px;"
+                                                  data-bs-toggle="tooltip" title="@request.ApprovalNotes">
+                                                @request.ApprovalNotes
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No reason provided</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-action="Details" asp-route-id="@request.PurchaseRequestID"
+                                               class="btn btn-outline-info">Details</a>
+                                            <a asp-action="Process" asp-route-id="@request.PurchaseRequestID"
+                                               class="btn btn-outline-warning">Re-review</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

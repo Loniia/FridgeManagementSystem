@@ -1,0 +1,103 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.PurchaseRequest>
+@{
+    ViewData["Title"] = "Pending Purchase Requests";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center py-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark">
+                <i class="bi bi-clock-history text-warning me-2"></i>Pending Purchase Requests
+            </h1>
+            <p class="text-muted mb-0">Review and process requests from Customer Management</p>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="badge bg-warning fs-6">@Model.Count() Pending</span>
+            <a asp-action="Stats" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-graph-up"></i> Stats
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-5">
+            <i class="bi bi-inbox display-4 text-info mb-3"></i>
+            <h4>No Pending Requests</h4>
+            <p class="text-muted">All purchase requests have been processed. Check back later for new requests.</p>
+            <a asp-action="Approved" class="btn btn-outline-primary mt-2">
+                <i class="bi bi-check-circle me-1"></i> View Approved Requests
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var request in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">@request.RequestNumber</h6>
+                            <div>
+                                @if (!request.IsViewed)
+                                {
+                                    <span class="badge bg-danger">NEW</span>
+                                }
+                                <span class="badge bg-warning">@request.RequestType</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-primary mb-3">@request.ItemFullNames</h6>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Quantity:</span>
+                                    <strong class="text-dark">@request.Quantity units</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Requested By:</span>
+                                    <strong>@request.RequestBy</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Date:</span>
+                                    <span>@request.RequestDate.ToString("dd MMM yyyy")</span>
+                                </div>
+                            </div>
+
+                            @if (request.Fridge != null)
+                            {
+                                <div class="border-top pt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-box me-1"></i>@request.Fridge.Brand
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a asp-action="Process" asp-route-id="@request.PurchaseRequestID" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-gear me-1"></i> Process Request
+                                </a>
+                                <a asp-action="QuickApprove" asp-route-id="@request.PurchaseRequestID" 
+                                   class="btn btn-outline-success btn-sm" 
+                                   onclick="return confirm('Quick approve this request?')">
+                                    <i class="bi bi-lightning me-1"></i> Quick Approve
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

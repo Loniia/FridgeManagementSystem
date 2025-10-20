@@ -375,7 +375,7 @@
                             <li><i class="fas fa-search"></i> Track order status</li>
                             <li><i class="fas fa-history"></i> Order history</li>
                         </ul>
-                        <a asp-controller="PurchaseOrders" asp-action="Index" class="btn">Manage Purchase Orders</a>
+                        <a asp-area="PurchasingSubsystem" asp-controller="PurchaseOrders" asp-action="Index" class="btn">Manage Purchase Orders</a>
                     </div>
                 </div>
 
@@ -391,7 +391,7 @@
                             <li><i class="fas fa-history"></i> Request history</li>
                             <li><i class="fas fa-chart-bar"></i> Request analytics</li>
                         </ul>
-                        <a asp-controller="PurchaseRequests" asp-action="Index" class="btn">Manage Purchase Requests</a>
+                        <a asp-area="PurchasingSubsystem" asp-controller="ProcessPurchaseRequests" asp-action="Pending" class="btn">Process Purchase Requests</a>
                     </div>
                 </div>
 
@@ -407,7 +407,7 @@
                             <li><i class="fas fa-check-circle"></i> Approve quotations</li>
                             <li><i class="fas fa-file-download"></i> Download quotes</li>
                         </ul>
-                        <a asp-controller="Quotations" asp-action="Index" class="btn">Manage Quotations</a>
+                        <a asp-area="PurchasingSubsystem" asp-controller="Quotations" asp-action="Index" class="btn">Manage Quotations</a>
                     </div>
                 </div>
 
@@ -423,7 +423,7 @@
                             <li><i class="fas fa-check-double"></i> Verify deliveries</li>
                             <li><i class="fas fa-archive"></i> Archive records</li>
                         </ul>
-                        <a asp-controller="DeliveryNotes" asp-action="Index" class="btn">Manage Delivery Notes</a>
+                        <a asp-area="PurchasingSubsystem" asp-controller="DeliveryNotes" asp-action="Index" class="btn">Manage Delivery Notes</a>
                     </div>
                 </div>
 
@@ -439,7 +439,7 @@
                             <li><i class="fas fa-star"></i> Rate suppliers</li>
                             <li><i class="fas fa-file-alt"></i> Supplier contracts</li>
                         </ul>
-                        <a asp-controller="Suppliers" asp-action="Index" class="btn">Manage Suppliers</a>
+                        <a asp-area="PurchasingSubsystem" asp-controller="Suppliers" asp-action="Index" class="btn">Manage Suppliers</a>
                     </div>
                 </div>
 
@@ -447,29 +447,7 @@
         </div>
     </section>
 
-    @* <!-- Stats Section -->
-    <section class="stats">
-        <div class="container">
-            <div class="stats-container">
-                <div class="stat-box">
-                    <div class="stat-number">@ViewData["ActiveOrders"]</div>
-                    <div class="stat-title">Active Purchase Orders</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">@ViewData["PendingApprovals"]</div>
-                    <div class="stat-title">Pending Approvals</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">@ViewData["WeeklyDeliveries"]</div>
-                    <div class="stat-title">Delivery Notes This Week</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">R @ViewData["MonthlySpending"]</div>
-                    <div class="stat-title">Monthly Spending</div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @* 
  *@
     <!-- Footer -->
     <footer>
@@ -512,4 +490,3 @@
         });
     </script>
 </body>
-</html>

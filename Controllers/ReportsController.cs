@@ -7,12 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering; 
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace FridgeManagementSystem.Areas.Administrator.Controllers
+namespace FridgeManagementSystem.Controllers
 {
-    [Area("Administrator")]
-    [Authorize(Roles = "Admin")]
     public class ReportsController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -182,17 +180,25 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> LocationDistribution()
+        public async Task<JsonResult> LocationMapData()
         {
-            var data = await _context.Fridge
-                .Where(f => f.LocationId != null)
-                .GroupBy(f => f.Location.Province)
-                .Select(g => new
+            var data = await _context.Locations
+                .Where(l => l.IsActive)
+                .Include(l => l.Fridge)
+                .Include(l => l.Customer)
+                .Include(l => l.Employee)
+                .Select(l => new
                 {
-                    Province = g.Key,
-                    Count = g.Count()
+                    l.Province,
+                    l.City,
+                    l.Address,
+                    l.PostalCode,
+                    l.Latitude,
+                    l.Longitude,
+                    FridgeCount = l.Fridge.Count(f => f.IsActive),
+                    CustomerCount = l.Customer.Count(c => c.IsActive),
+                    EmployeeCount = l.Employee.Count(e => e.Status=="Active")
                 })
-                .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
             return Json(data);
@@ -202,11 +208,13 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         public async Task<JsonResult> SupplierPerformance(int top = 10)
         {
             var data = await _context.PurchaseOrders
-                .GroupBy(po => new { po.SupplierID, po.Supplier })
+                .Include(po => po.Supplier)
+                .Where(po => po.SupplierID != 0)
+                .GroupBy(po => new { po.SupplierID, po.Supplier.Name})
                 .Select(g => new
                 {
-                    g.Key.SupplierID,
-                    SupplierName = g.Key.Supplier != null ? g.Key.Supplier.Name : "Unknown",
+                    SupplierID = g.Key.SupplierID,
+                    SupplierName = g.Key.Name,
                     OrdersCount = g.Count(),
                     TotalAmount = g.Sum(x => x.TotalAmount)
                 })
@@ -220,22 +228,18 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         [HttpGet]
         public async Task<JsonResult> MaintenanceSummary()
         {
-            var data = await _context.MaintenanceRequest
-                .GroupBy(m => m.TaskStatus)
+            var data = await _context.MaintenanceVisit
+                .GroupBy(m => m.Status)
                 .Select(g => new
                 {
                     Status = g.Key,
                     Count = g.Count()
                 })
+                .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
             return Json(data);
         }
 
-        [HttpGet]
-        public async Task<JsonResult> ContractsActive()
-        {
-            return Json(new List<object>());
-        }
     }
 }

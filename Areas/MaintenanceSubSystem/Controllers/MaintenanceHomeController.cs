@@ -4,7 +4,7 @@ using FridgeManagementSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-
+using System.Text.Json; // for serialization
 namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
 {
     [Area("MaintenanceSubSystem")]
@@ -20,40 +20,76 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
         }
 
 
-
-        // HomePage 
         public IActionResult Index()
         {
-            // Count everything from MaintenanceRequest for consistency
-            var startOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var model = new MaintenanceDashboardViewModel();
+            var requests = _context.MaintenanceRequest
+                .Include(r => r.Fridge) // include fridge for customer info
+                .AsQueryable();
 
-            // Requests still pending
-            ViewBag.PendingRequests = _context.MaintenanceRequest
-                .Count(r => r.TaskStatus == Models.TaskStatus.Pending && r.IsActive);
+            // Counts by status
+            model.PendingRequests = requests.Count(r => r.TaskStatus == Models.TaskStatus.Pending && r.IsActive);
+            model.ScheduledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Scheduled && r.IsActive);
+            model.RescheduledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Rescheduled && r.IsActive);
+            model.InProgressVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.InProgress && r.IsActive);
+            model.CompletedTasks = requests.Count(r => r.TaskStatus == Models.TaskStatus.Complete && r.IsActive);
+            model.CancelledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Cancelled && r.IsActive);
 
-            // Visits currently scheduled (requests with Scheduled status)
-            ViewBag.ScheduledVisits = _context.MaintenanceRequest
-                .Count(r => r.TaskStatus == Models.TaskStatus.Scheduled && r.IsActive);
+            // Completion %
+            var total = (double)(model.PendingRequests + model.ScheduledVisits + model.RescheduledVisits +
+                                 model.InProgressVisits + model.CompletedTasks + model.CancelledVisits);
+            model.CompletionPercent = total > 0 ? (int)Math.Round(100.0 * model.CompletedTasks / total) : 0;
 
-            // Visits that were rescheduled
-            ViewBag.RescheduledVisits = _context.MaintenanceRequest
-                .Count(r => r.TaskStatus == Models.TaskStatus.Rescheduled && r.IsActive);
+            // Category chart
+            model.CategoryLabels = new List<string> { "Pending", "Scheduled", "Rescheduled", "InProgress", "Completed", "Cancelled" };
+            model.CategoryValues = new List<int> {
+        model.PendingRequests,
+        model.ScheduledVisits,
+        model.RescheduledVisits,
+        model.InProgressVisits,
+        model.CompletedTasks,
+        model.CancelledVisits
+    };
 
-            // Visits in progress
-            ViewBag.InProgressVisits = _context.MaintenanceRequest
-                .Count(r => r.TaskStatus == Models.TaskStatus.InProgress && r.IsActive);
+            // 30-day trend
+            int days = 30;
+            var today = DateTime.Today;
+            var start = today.AddDays(-days + 1);
 
-            // Completed requests this month
-            ViewBag.CompletedTasks = _context.MaintenanceRequest
-                .Count(r => r.TaskStatus == Models.TaskStatus.Complete &&
-                           r.RequestDate >= startOfMonth && r.IsActive);
+            var completedInRange = _context.MaintenanceRequest
+                .Where(r => r.TaskStatus == Models.TaskStatus.Complete &&
+                            r.RequestDate >= start &&
+                            r.RequestDate < today.AddDays(1) && // include today
+                            r.IsActive)
+                .Select(r => r.RequestDate)
+                .ToList();
 
-            // Cancelled requests
-            ViewBag.CancelledVisits = _context.MaintenanceRequest
-                .Count(r => r.TaskStatus == Models.TaskStatus.Cancelled && r.IsActive);
+            model.TrendLabels = new List<string>();
+            model.TrendCompletedCounts = new List<int>();
+            for (int i = 0; i < days; i++)
+            {
+                var day = start.AddDays(i);
+                model.TrendLabels.Add(day.ToString("MMM d"));
+                model.TrendCompletedCounts.Add(completedInRange.Count(d => d.Date == day));
+            }
 
-            return View();
+            // Today’s completed visits
+            var startOfToday = today;
+            var endOfToday = today.AddDays(1);
+
+            model.TodayVisits = _context.MaintenanceRequest
+    .Include(r => r.Fridge)
+    .Where(r => r.TaskStatus == Models.TaskStatus.Complete &&
+                r.CompletedDate >= startOfToday &&
+                r.CompletedDate < endOfToday &&
+                r.IsActive)
+    .OrderBy(r => r.CompletedDate)
+    .ToList();
+
+
+            return View(model);
         }
+
 
 
 

@@ -192,12 +192,12 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 Quantity = model.Quantity,
                 RequestBy = "Inventory Liaison",
                 RequestType = "Fridge Purchase",
-                AssignedToRole = "Purchasing Manager",
+                AssignedToRole = EmployeeRoles.PurchasingManager,
                 RequestDate = DateOnly.FromDateTime(DateTime.Now),
                 Status = "Pending",
                 IsActive = true,
                 FridgeId = model.FridgeId, // optional link (nullable)
-                InventoryID = model.InventoryID ?? 0// if it comes from stock
+                InventoryID = model.InventoryID != 0 ? model.InventoryID : (int?)null // only set if from stock
             };
 
             // Generate unique Request Number
@@ -213,6 +213,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             TempData["SuccessMessage"] = $"Purchase request {newRequest.RequestNumber} created successfully!";
             return RedirectToAction(nameof(ProcessPurchaseRequests));
         }
+
 
         // --------------------------
         // Process Purchase Requests (List)

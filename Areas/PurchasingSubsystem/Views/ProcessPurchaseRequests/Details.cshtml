@@ -1,0 +1,159 @@
+﻿@model FridgeManagementSystem.Models.PurchaseRequest
+@{
+    ViewData["Title"] = "Purchase Request Details";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-dark">
+                            <i class="bi bi-file-text text-primary me-2"></i>Purchase Request Details
+                        </h4>
+                        <span class="badge
+                            @(Model.Status == "Approved" ? "bg-success" :
+                              Model.Status == "Rejected" ? "bg-danger" : "bg-warning") fs-6">
+                            @Model.Status
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3 border-bottom pb-2">
+                                <i class="bi bi-info-circle me-1"></i>Basic Information
+                            </h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td class="text-muted" width="40%">Request Number:</td>
+                                    <td><strong>@Model.RequestNumber</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Item Name:</td>
+                                    <td>@Model.ItemFullNames</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Quantity:</td>
+                                    <td><span class="badge bg-primary">@Model.Quantity units</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Request Type:</td>
+                                    <td>@Model.RequestType</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Assigned To:</td>
+                                    <td>@Model.AssignedToRole</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3 border-bottom pb-2">
+                                <i class="bi bi-calendar me-1"></i>Timeline
+                            </h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td class="text-muted" width="40%">Requested By:</td>
+                                    <td><strong>@Model.RequestBy</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Request Date:</td>
+                                    <td>@Model.RequestDate.ToString("dd MMM yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Viewed Date:</td>
+                                    <td>
+                                        @if (Model.ViewedDate.HasValue)
+                                        {
+                                            @Model.ViewedDate.Value.ToString("dd MMM yyyy hh:mm tt")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not viewed</span>
+                                        }
+                                    </td>
+                                </tr>
+                                @if (Model.ApprovalDate.HasValue)
+                                {
+                                    <tr>
+                                        <td class="text-muted">
+                                            @(Model.Status == "Approved" ? "Approval Date:" : "Rejection Date:")
+                                        </td>
+                                        <td>@Model.ApprovalDate.Value.ToString("dd MMM yyyy hh:mm tt")</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Fridge Information -->
+                    @if (Model.Fridge != null)
+                    {
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3 border-bottom pb-2">
+                                    <i class="bi bi-box me-1"></i>Fridge Information
+                                </h6>
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <strong>Fridge Name:</strong> @Model.Fridge.Brand
+                                            </div>
+                                            <div class="col-md-6">
+                                                <strong>Model:</strong> @Model.Fridge.Model
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Processing Notes -->
+                    @if (!string.IsNullOrEmpty(Model.ApprovalNotes))
+                    {
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3 border-bottom pb-2">
+                                    <i class="bi bi-chat-text me-1"></i>Processing Notes
+                                </h6>
+                                <div class="card border-0
+                                    @(Model.Status == "Approved" ? "bg-success bg-opacity-10" :
+                                      Model.Status == "Rejected" ? "bg-danger bg-opacity-10" : "bg-warning bg-opacity-10")">
+                                    <div class="card-body">
+                                        <p class="mb-0">@Model.ApprovalNotes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3 justify-content-end border-top pt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                        @if (Model.Status == "Pending")
+                        {
+                            <a asp-action="Process" asp-route-id="@Model.PurchaseRequestID"
+                               class="btn btn-primary">
+                                <i class="bi bi-gear me-1"></i>Process Request
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-action="Process" asp-route-id="@Model.PurchaseRequestID"
+                               class="btn btn-outline-warning">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Re-process
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

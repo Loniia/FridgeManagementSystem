@@ -12,7 +12,7 @@ using Rotativa.AspNetCore;
 using System.IO;
 using Microsoft.Extensions.Logging; // Add this for ILogger
 
-namespace CustomerManagementSubSystem.Controllers
+namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 {
     [Area("CustomerManagementSubSystem")]
     public class CustomerLiaisonController : Controller
@@ -167,44 +167,46 @@ namespace CustomerManagementSubSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: CustomerLiaison/Allocate
         [HttpGet]
         [Route("/CustomerManagementSubSystem/CustomerLiaison/Allocate")]
         public IActionResult AllocateGet(int orderId, int customerId, int orderItemId, int fridgeId = 0)
         {
-            // ✅ Validate all required IDs
             if (orderId <= 0 || customerId <= 0 || orderItemId <= 0)
                 return NotFound("Missing allocation details.");
 
-            // ✅ Fetch the order with customer
             var order = _context.Orders
                 .Include(o => o.Customers)
                 .Include(o => o.OrderItems)
                 .FirstOrDefault(o => o.OrderId == orderId && o.CustomerID == customerId);
 
-            if (order == null)
-                return NotFound("Order not found.");
+            if (order == null) return NotFound("Order not found.");
 
-            // ✅ Get the specific OrderItem
             var orderItem = order.OrderItems.FirstOrDefault(oi => oi.OrderItemId == orderItemId);
-            if (orderItem == null)
-                return NotFound("Order item not found.");
+            if (orderItem == null) return NotFound("Order item not found.");
 
-            // ✅ Get list of available fridges (optional: filter by fridge type/model if needed)
             var availableFridges = _context.Fridge
                 .Where(f => !_context.FridgeAllocation.Any(a => a.FridgeId == f.FridgeId))
                 .ToList();
 
-            // ✅ Pass all info to the view
+            // ✅ Load the next maintenance visit for this customer/fridge
+            var nextVisit = _context.MaintenanceVisit
+                .Include(v => v.Employee)
+                .Include(v => v.Fridge)
+                .Where(v => v.FridgeId == fridgeId && v.Status == FridgeManagementSystem.Models.TaskStatus.Scheduled)
+                .OrderBy(v => v.ScheduledDate)
+                .FirstOrDefault();
+
             ViewBag.Fridges = availableFridges;
             ViewBag.Order = order;
             ViewBag.CustomerId = customerId;
             ViewBag.OrderItemId = orderItemId;
-            ViewBag.FridgeId = fridgeId; // optional: if a fridge is pre-selected
+            ViewBag.FridgeId = fridgeId;
+            ViewBag.NextVisit = nextVisit; // ✅ Pass to view
 
             return View();
         }
 
+        // POST: CustomerLiaison/Allocate
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("/CustomerManagementSubSystem/CustomerLiaison/Allocate")]
@@ -224,7 +226,9 @@ namespace CustomerManagementSubSystem.Controllers
             if (customer == null)
                 return NotFound("Customer not found.");
 
-            var fridge = _context.Fridge.FirstOrDefault(f => f.FridgeId == fridgeId);
+            // ✅ Ensure the Fridge is loaded with related Customer if any
+            var fridge = _context.Fridge
+                .FirstOrDefault(f => f.FridgeId == fridgeId);
             if (fridge == null)
                 return NotFound("Fridge not found.");
 
@@ -258,6 +262,7 @@ namespace CustomerManagementSubSystem.Controllers
 
             // Update fridge and order
             fridge.Status = "Allocated";
+            fridge.CustomerID = customerId; // ✅ Ensure fridge is linked to that customer
             totalAllocated += 1;
 
             if (totalAllocated >= orderItem.Quantity)
@@ -268,7 +273,36 @@ namespace CustomerManagementSubSystem.Controllers
 
             _context.SaveChanges();
 
-            // Create ViewModel to show allocation info
+            // ✅ Before creating a MaintenanceRequest, check if one already exists for this fridge
+            var existingRequest = _context.MaintenanceRequest
+                .FirstOrDefault(mr => mr.FridgeId == fridge.FridgeId && mr.IsActive && mr.TaskStatus == Models.TaskStatus.Pending);
+
+            if (existingRequest == null)
+            {
+                // Create a new request
+                var maintenanceRequest = new MaintenanceRequest
+                {
+                    FridgeId = fridge.FridgeId,
+                    
+                    RequestDate = DateTime.Now.AddDays(30), // schedule 30 days later
+                    TaskStatus = Models.TaskStatus.Pending,
+                    IsActive = true
+                };
+                _context.MaintenanceRequest.Add(maintenanceRequest);
+                _context.SaveChanges();
+
+                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated to {customer.FullName}. " +
+                                      $"A maintenance request has been created for {maintenanceRequest.RequestDate:dd MMM yyyy}.";
+            }
+            else
+            {
+                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated to {customer.FullName}. " +
+                                      $"Existing maintenance request for {existingRequest.RequestDate:dd MMM yyyy} is still pending.";
+            }
+
+
+
+            // Create ViewModel
             var allocationVM = new FridgeAllocationViewModel
             {
                 AllocationID = allocation.AllocationID,
@@ -282,10 +316,10 @@ namespace CustomerManagementSubSystem.Controllers
                 ReturnDate = allocation.ReturnDate
             };
 
-            TempData["Success"] = $"Fridge '{allocationVM.Brand} {allocationVM.Model}' allocated to {allocationVM.CustomerName}.";
-
+            
             return RedirectToAction("ProcessPendingAllocations");
         }
+
 
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
         {

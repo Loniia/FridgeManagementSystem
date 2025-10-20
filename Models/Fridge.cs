@@ -52,7 +52,7 @@ namespace FridgeManagementSystem.Models
         public virtual Inventory Inventories { get; set; }
         public virtual ScrappedFridge ScrappedFridges { get; set; }
         public virtual Supplier Supplier { get; set; }
-        public virtual Customer? Customer { get; set; }
+        public virtual Customer Customer { get; set; }
         public virtual ICollection<MaintenanceRequest> MaintenanceRequest { get; set; }
         public virtual ICollection<MaintenanceVisit> MaintenanceVisit { get; set; }
     

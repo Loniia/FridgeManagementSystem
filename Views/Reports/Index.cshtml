@@ -137,6 +137,69 @@
         ::-webkit-scrollbar-thumb:hover {
             background-color: #868e96;
         }
+
+    /* Map Styles */
+    .province-area {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .province-area:hover {
+        filter: brightness(1.1);
+        transform: scale(1.02);
+    }
+
+    .location-marker {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+
+    .location-marker:hover {
+        transform: scale(1.3);
+        animation: none;
+    }
+
+    @@keyframes pulse {
+        0% { opacity: 0.8; }
+        50% { opacity: 1; }
+        100% { opacity: 0.8; }
+    }
+
+    .map-tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 1000;
+        max-width: 200px;
+        display: none;
+    }
+
+    .map-legend {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    #southAfricaMap {
+        position: relative;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #mapLoading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+    }
 </style>
 
 <div class="container-fluid p-0">
@@ -225,7 +288,49 @@
         </div>
     </div>
 
-    <!-- CHARTS -->
+    <!-- REAL-TIME MAP SECTION -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Fridge Distribution Map</h5>
+                    <div class="text-muted small" id="mapLastUpdated">
+                        <i class="fas fa-sync-alt me-1"></i> Real-time
+                    </div>
+                </div>
+                <div class="btn-group mb-3" role="group">
+  <button class="btn btn-outline-primary" id="toggleFridges">Fridges</button>
+  <button class="btn btn-outline-success" id="toggleCustomers">Customers</button>
+  <button class="btn btn-outline-warning" id="toggleEmployees">Employees</button>
+</div>
+
+                <div class="card-body">
+                    <div id="southAfricaMap" style="height: 400px; position: relative;">
+                        <!-- SVG Map will be rendered here -->
+                        <div class="text-center py-5" id="mapLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading map...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading fridge distribution map...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Map Legend -->
+                    <div class="mt-3">
+                        <div class="row text-center">
+                            <div class="col"><span class="badge bg-success">●</span> 1-5 Fridges</div>
+                            <div class="col"><span class="badge bg-warning">●</span> 6-15 Fridges</div>
+                            <div class="col"><span class="badge bg-danger">●</span> 16+ Fridges</div>
+                            <div class="col"><span class="badge bg-secondary">●</span> Hotspot (Heatmap)</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS SECTION -->
     <div class="row mt-4">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
@@ -287,17 +392,6 @@
     </div>
 
     <!-- DISTRIBUTION + SUPPLIER -->
-    <div class="row mt-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Fridge Distribution by Province</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="locationChart" height="140"></canvas>
-                </div>
-            </div>
-        </div>
 
         <div class="col-lg-6">
             <div class="card shadow-sm border-0">
@@ -314,26 +408,120 @@
     </div>
 
     <!-- CONTRACTS -->
-    <div class="row mt-4 mb-5">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Active Contracts</h5>
-                </div>
-                <div class="card-body">
-                    <div id="contractsTable">
-                        <p class="text-muted mb-0">No contract data available.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script src="~/js/reports-dashboard.js"></script>
     <script>
         feather.replace();
     </script>
+    <!-- Leaflet and Heatmap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script>
+                        document.addEventListener("DOMContentLoaded", async function () {
+            const mapContainer = document.getElementById("southAfricaMap");
+            const loading = document.getElementById("mapLoading");
+            loading.style.display = "block";
+
+            // Initialize Leaflet Map (South Africa center)
+            const map = L.map('southAfricaMap').setView([-28.4793, 24.6727], 7);
+
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            // Fetch data from controller
+            const response = await fetch('/Reports/LocationMapData');
+            const locations = await response.json();
+            loading.style.display = "none";
+
+            // Layer groups for toggling
+            const fridgeLayer = L.layerGroup().addTo(map);
+            const customerLayer = L.layerGroup().addTo(map);
+            const employeeLayer = L.layerGroup().addTo(map);
+
+            const heatPoints = [];
+
+            locations.forEach(loc => {
+                // Ensure coordinates are numbers
+                const lat = parseFloat(loc.Latitude);
+                const lng = parseFloat(loc.Longitude);
+
+                if (isNaN(lat) || isNaN(lng)) {
+                    console.warn("Invalid coordinates for", loc.City, loc.Province);
+                    return;
+                }
+
+                const popupHtml = `
+                    <strong>${loc.City}, ${loc.Province}</strong><br>
+                    <small>Fridges: ${loc.FridgeCount}</small><br>
+                    <small>Customers: ${loc.CustomerCount}</small><br>
+                    <small>Employees: ${loc.EmployeeCount}</small>
+                `;
+
+                // --- FRIDGES MARKERS ---
+                let fridgeColor = 'green';
+                if (loc.FridgeCount > 15) fridgeColor = 'red';
+                else if (loc.FridgeCount > 5) fridgeColor = 'orange';
+
+                const fridgeMarker = L.circleMarker([lat, lng], {
+                    radius: 8,
+                    color: fridgeColor,
+                    fillColor: fridgeColor,
+                    fillOpacity: 0.8
+                }).bindPopup(popupHtml);
+                fridgeMarker.addTo(fridgeLayer);
+
+                // --- CUSTOMERS MARKERS ---
+                const customerMarker = L.circleMarker([lat, lng], {
+                    radius: 6,
+                    color: 'blue',
+                    fillColor: 'blue',
+                    fillOpacity: 0.7
+                }).bindPopup(popupHtml);
+                customerMarker.addTo(customerLayer);
+
+                // --- EMPLOYEES MARKERS ---
+                const employeeMarker = L.circleMarker([lat, lng], {
+                    radius: 6,
+                    color: 'yellow',
+                    fillColor: 'yellow',
+                    fillOpacity: 0.7
+                }).bindPopup(popupHtml);
+                employeeMarker.addTo(employeeLayer);
+
+                // --- HEATMAP POINT ---
+                const intensity = loc.FridgeCount + loc.CustomerCount + loc.EmployeeCount;
+                heatPoints.push([lat, lng, Math.min(intensity / 10, 1)]);
+            });
+
+            // Heatmap Layer
+            const heatLayer = L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 10 }).addTo(map);
+
+            // --- TOGGLE BUTTONS ---
+            document.getElementById("toggleFridges").addEventListener("click", () => {
+                if (map.hasLayer(fridgeLayer)) map.removeLayer(fridgeLayer);
+                else map.addLayer(fridgeLayer);
+            });
+
+            document.getElementById("toggleCustomers").addEventListener("click", () => {
+                if (map.hasLayer(customerLayer)) map.removeLayer(customerLayer);
+                else map.addLayer(customerLayer);
+            });
+
+            document.getElementById("toggleEmployees").addEventListener("click", () => {
+                if (map.hasLayer(employeeLayer)) map.removeLayer(employeeLayer);
+                else map.addLayer(employeeLayer);
+            });
+        });
+
+    </script>
+
 }

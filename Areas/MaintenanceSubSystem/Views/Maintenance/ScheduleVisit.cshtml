@@ -1,7 +1,7 @@
 ﻿@model FridgeManagementSystem.Models.MaintenanceVisit
 
 @{
-    ViewData["Title"] = "Schedule Maintenance Visit";
+    ViewData["Title"] = "Schedule Visit";
 }
 
 <style>
@@ -195,6 +195,9 @@
         }
 </style>
 
+
+
+
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
@@ -211,15 +214,18 @@
             }
 
             <form asp-action="ScheduleVisit" method="post">
+                @Html.AntiForgeryToken()
+
                 <div class="mb-3">
                     <label for="requestSelect" class="form-label">Select Maintenance Request</label>
-                    <select id="requestSelect" name="MaintenanceRequestId" class="form-select" required>
+
+                    <!-- use tag helper asp-items to render the SelectList safely -->
+                    <select asp-for="MaintenanceRequestId" asp-items="ViewBag.Requests" class="form-select" id="requestSelect" required>
                         <option value="">-- Select Request --</option>
-                        @foreach (var r in (SelectList)ViewBag.Requests)
-                        {
-                            <option value="@r.Value">@r.Text</option>
-                        }
                     </select>
+
+                    <!-- quick debug: show how many options the controller provided -->
+                    <small class="text-muted">Available: @(ViewBag.Requests == null ? 0 : ((IEnumerable<SelectListItem>)ViewBag.Requests).Count())</small>
                 </div>
 
                 <div class="mb-3">
@@ -263,18 +269,17 @@
 
 @section Scripts {
     <script>
-        // Full data from ViewBag
-        const requestsData = @Html.Raw(ViewBag.RequestsJson);
+        // Parse JSON safely
+        const requestsData = @Html.Raw(ViewBag.RequestsJson ?? "[]");
 
         const requestSelect = document.getElementById('requestSelect');
         const customerNameInput = document.getElementById('customerName');
         const customerAddressInput = document.getElementById('customerAddress');
         const fridgeModelInput = document.getElementById('fridgeModel');
 
-        requestSelect.addEventListener('change', function () {
-            const selectedId = parseInt(this.value);
-            const request = requestsData.find(r => r.id === selectedId);
-
+        // Helper to fill the readonly fields
+        function fillDetailsById(id) {
+            const request = requestsData.find(r => r.id === id);
             if (request) {
                 customerNameInput.value = request.customer;
                 customerAddressInput.value = request.customerAddress;
@@ -284,23 +289,31 @@
                 customerAddressInput.value = '';
                 fridgeModelInput.value = '';
             }
+        }
+
+        // On change: populate fields
+        requestSelect.addEventListener('change', function () {
+            const id = parseInt(this.value) || 0;
+            fillDetailsById(id);
         });
 
-        // Set default date/time to today/now if empty
-        const dateInput = document.getElementById('ScheduledDate');
-        const timeInput = document.getElementById('ScheduledTime');
-
-        if (!dateInput.value) {
-            const today = new Date();
-            dateInput.value = today.toISOString().split('T')[0];
-        }
-
-        if (!timeInput.value) {
-            const now = new Date();
-            timeInput.value = now.toTimeString().slice(0,5); // HH:MM
-        }
+        // Optional: preselect the first available option on page load (if any)
+        (function preselectFirst() {
+            // wait until options rendered
+            setTimeout(() => {
+                if (requestSelect.options.length > 1 && !requestSelect.value) {
+                    // select the first item after placeholder (index 1)
+                    requestSelect.selectedIndex = 1;
+                    const selectedId = parseInt(requestSelect.value);
+                    fillDetailsById(selectedId);
+                }
+            }, 50);
+        })();
     </script>
+
+    <partial name="_ValidationScriptsPartial" />
 }
+
 
 @* @model FinalYearProject.Models.MaintenanceVisit
 

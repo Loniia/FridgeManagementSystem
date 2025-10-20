@@ -196,10 +196,10 @@ namespace FridgeManagementSystem.Data
 
             // --- Customer -> Order (1-to-many) ---
             builder.Entity<Customer>()
-                .HasMany<Order>()
-                .WithOne()
-                .HasForeignKey(o => o.CustomerID)
-                .OnDelete(DeleteBehavior.Cascade);
+             .HasMany(c => c.Orders)
+             .WithOne(o => o.Customers)
+             .HasForeignKey(o => o.CustomerID)
+             .OnDelete(DeleteBehavior.Cascade);
 
             // --- Order -> OrderItem (1-to-many) ---
             builder.Entity<Order>()
@@ -215,7 +215,14 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey<Payment>(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-           
+            builder.Entity<PurchaseRequest>()
+               .HasOne(pr => pr.Inventory)
+               .WithMany()
+               .HasForeignKey(pr => pr.InventoryID)
+               .IsRequired(false)  // allows null
+               .OnDelete(DeleteBehavior.NoAction);
+
+
 
             // --- 🌟 Seed Supplier 🌟 ---
             builder.Entity<Supplier>().HasData(

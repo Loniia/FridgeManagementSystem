@@ -5,6 +5,9 @@
     var order = ViewBag.Order;
     var customer = order?.Customers;
     var availableFridges = ViewBag.Fridges as List<FridgeManagementSystem.Models.Fridge>;
+
+    // ✅ Get next scheduled maintenance visit from ViewBag
+    var nextVisit = ViewBag.NextVisit as FridgeManagementSystem.Models.MaintenanceVisit;
 }
 
 <style>
@@ -116,7 +119,7 @@
         <p><strong>Order ID:</strong> @order?.OrderId</p>
         <p><strong>Status:</strong> @order?.Status</p>
 
-        <!-- 🆕 Added Return Date display -->
+        <!-- Return Date -->
         <p>
             <strong>Return Date:</strong>
             @if (Model.ReturnDate.HasValue)
@@ -126,6 +129,19 @@
             else
             {
                 <span class="text-muted">Not yet returned</span>
+            }
+        </p>
+
+        <!-- Next Maintenance Visit -->
+        <p>
+            <strong>Next Maintenance Visit:</strong>
+            @if (nextVisit != null)
+            {
+                @($"{nextVisit.ScheduledDate:yyyy-MM-dd} at {nextVisit.ScheduledTime:hh\\:mm} with {nextVisit.Employee?.FullName}")
+            }
+            else
+            {
+                <span class="text-muted">Not scheduled yet</span>
             }
         </p>
     </div>
@@ -138,6 +154,7 @@
 
         <input type="hidden" name="orderId" value="@order?.OrderId" />
         <input type="hidden" name="customerId" value="@customer?.CustomerID" />
+        <input type="hidden" name="orderItemId" value="@ViewBag.OrderItemId" />
 
         <div class="form-group mb-4">
             <label for="fridgeId" class="form-label"><strong>Select Available Fridge:</strong></label>
@@ -161,3 +178,4 @@
         </div>
     </form>
 </div>
+
