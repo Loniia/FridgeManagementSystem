@@ -3,7 +3,6 @@ using FridgeManagementSystem.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-#nullable disable
 
 namespace FridgeManagementSystem.Controllers
 {
@@ -558,7 +557,77 @@ namespace FridgeManagementSystem.Controllers
         {
             return _context.Fridge.Any(e => e.FridgeId == id);
         }
+
+        // Add this to your existing FaultsController
+        [HttpGet]
+        [Route("Faults/Reports")]
+        public async Task<IActionResult> Reports(int? month, int? year)
+        {
+            ViewData["Sidebar"] = "FaultTechSubsystem";
+
+            var selectedMonth = month ?? DateTime.Now.Month;
+            var selectedYear = year ?? DateTime.Now.Year;
+            var startDate = new DateTime(selectedYear, selectedMonth, 1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
+
+            // Use existing DashboardViewModel and extend it
+            var reportData = new DashboardViewModel();
+
+            // Get basic stats (reusing your existing queries)
+            reportData.TotalFaults = await _context.Faults
+                .CountAsync(f => f.ReportDate >= startDate && f.ReportDate <= endDate);
+
+            reportData.HighPriorityFaults = await _context.Faults
+                .CountAsync(f => f.ReportDate >= startDate && f.ReportDate <= endDate && f.Priority == "High");
+
+            reportData.UnattendedFaults = await _context.Faults
+                .CountAsync(f => f.ReportDate >= startDate && f.ReportDate <= endDate && f.Status == "Pending");
+
+            // Get recent faults for the period
+            reportData.RecentFaults = await _context.Faults
+                .Include(f => f.Fridge)
+                .Include(f => f.Fridge.Customer)
+                .Where(f => f.ReportDate >= startDate && f.ReportDate <= endDate)
+                .OrderByDescending(f => f.ReportDate)
+                .Take(10)
+                .ToListAsync();
+
+            // Additional report data using existing models
+            ViewBag.SelectedMonth = selectedMonth;
+            ViewBag.SelectedYear = selectedYear;
+            ViewBag.MonthName = new DateTime(selectedYear, selectedMonth, 1).ToString("MMMM yyyy");
+
+            // Top brands with faults
+            var topBrands = await _context.Faults
+                .Where(f => f.ReportDate >= startDate && f.ReportDate <= endDate)
+                .Include(f => f.Fridge)
+                .GroupBy(f => f.Fridge.Brand)
+                .Select(g => new { Brand = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(5)
+                .ToListAsync();
+            ViewBag.TopBrands = topBrands;
+
+            // Common fault categories
+            var commonFaults = await _context.Faults
+                .Where(f => f.ReportDate >= startDate && f.ReportDate <= endDate)
+                .GroupBy(f => f.Priority)
+                .Select(g => new { Priority = g.Key, Count = g.Count() })
+                .ToListAsync();
+            ViewBag.CommonFaults = commonFaults;
+
+            // Repair statistics
+            var repairStats = await _context.RepairSchedules
+                .Where(r => r.CreatedDate >= startDate && r.CreatedDate <= endDate)
+                .GroupBy(r => r.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+            ViewBag.RepairStats = repairStats;
+
+            return View(reportData);
+        }
     }
+
 
     // Dashboard ViewModel class
     public class DashboardViewModel

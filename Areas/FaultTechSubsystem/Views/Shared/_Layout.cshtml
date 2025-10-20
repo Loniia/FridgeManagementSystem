@@ -1,4 +1,4 @@
-﻿@* Layout for Fault Technician *@
+﻿@* Layout for Fault Technician - FIXED VERSION *@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,6 +133,30 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        .sign-out {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 1rem;
+            background-color: #23272b;
+        }
+
+            .sign-out a {
+                display: block;
+                color: white;
+                text-decoration: none;
+                padding: 0.5rem;
+                text-align: center;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+
+                .sign-out a:hover {
+                    background-color: #495057;
+                    text-decoration: none;
+                    color: white;
+                }
     </style>
 </head>
 <body>
@@ -149,35 +173,33 @@
         <div class="user-panel">
             <div class="user-card">
                 <img src="~/images/technician.jpg" alt="Fault Technician" />
-                <h4>@User.Identity.Name</h4>
+                <h4>@User.Identity?.Name ?? "Fault Technician"</h4>
                 <p>Fault Technician</p>
             </div>
         </div>
 
-        <!-- Fault Technician Menu -->
+        <!-- Fault Technician Menu - ONLY LINKS THAT WORK WITHOUT IDs -->
         <ul class="sidebar-menu">
             <li>
                 <span class="menu-header" id="faultHeader">
                     <i class="fas fa-tools"></i> Fault Management
                     <i class="fas fa-chevron-down float-end"></i>
                 </span>
-                <ul class="collapse list-unstyled" id="faultTechnicianSubmenu">
+                <ul class="collapse list-unstyled show" id="faultTechnicianSubmenu">
                     <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Index"><i class="fas fa-list"></i> View Faults</a></li>
-                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Process"><i class="fas fa-wrench"></i> Process Fault</a></li>
-                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Repair"><i class="fas fa-tools"></i> Repair Fault</a></li>
-                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Complete"><i class="fas fa-check"></i> Complete Repair</a></li>
-                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="UpdateCondition"><i class="fas fa-exclamation-triangle"></i> Update Condition</a></li>
-                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Details"><i class="fas fa-info-circle"></i> Fault Details</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Index"><i class="fas fa-list"></i> View All Faults</a></li>
+                    <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                    <!-- Removed links that require IDs: Process, Repair, Complete, UpdateCondition, Details -->
+                    <!-- These should be accessed from the fault list where IDs are available -->
                 </ul>
             </li>
         </ul>
 
         <!-- General Pages -->
         <ul class="sidebar-menu">
-            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="About"><i class="fas fa-info"></i> About Us</a></li>
-            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Services"><i class="fas fa-concierge-bell"></i> Services</a></li>
-            <li><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Contact"><i class="fas fa-envelope"></i> Contact Us</a></li>
+            <li><a asp-area="" asp-controller="Home" asp-action="About"><i class="fas fa-info"></i> About Us</a></li>
+            <li><a asp-area="" asp-controller="Home" asp-action="Services"><i class="fas fa-concierge-bell"></i> Services</a></li>
+            <li><a asp-area="" asp-controller="Home" asp-action="Contact"><i class="fas fa-envelope"></i> Contact Us</a></li>
         </ul>
 
         <!-- Account -->
@@ -197,21 +219,36 @@
     <div class="main-content" id="mainContent">
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
             <div class="container-fluid">
-                <a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Dashboard" class="navbar-brand">Dynamic Ice Inc</a>
+                <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard" class="navbar-brand">Dynamic Ice Inc</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="topNavbar">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Dashboard" class="nav-link">Home</a></li>
-                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="About" class="nav-link">About</a></li>
-                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Services" class="nav-link">Services</a></li>
-                        <li class="nav-item"><a asp-area="FaultTechSubsystem" asp-controller="FaultTech" asp-action="Contact" class="nav-link">Contact</a></li>
+                        <li class="nav-item">
+                            <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard" class="nav-link">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Index" class="nav-link">All Faults</a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-area="" asp-controller="Home" asp-action="About" class="nav-link">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-area="" asp-controller="Home" asp-action="Services" class="nav-link">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-area="" asp-controller="Home" asp-action="Contact" class="nav-link">Contact</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
-                        <form asp-area="" asp-page="/Account/Logout" method="post">
-                            <button type="submit" class="btn btn-link">Logout</button>
-                        </form>
+                        <li class="nav-item">
+                            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                <button type="submit" class="btn btn-link nav-link" style="border: none; background: none; color: inherit;">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -227,9 +264,22 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        $(function () {
+        $(document).ready(function () {
+            // Initialize sidebar toggle state
+            updateFixedToggle();
+
+            // Set active nav link based on current URL
             $('.navbar .nav-link').each(function () {
-                if ((this.href) === window.location.href) $(this).addClass('active');
+                if (this.href === window.location.href) {
+                    $(this).addClass('active');
+                }
+            });
+
+            // Set active sidebar link
+            $('.sidebar-menu a').each(function () {
+                if (this.href === window.location.href) {
+                    $(this).addClass('active');
+                }
             });
 
             $('.sidebar-menu a').on('click', function () {
@@ -237,28 +287,38 @@
                 $(this).addClass('active');
             });
 
+            // Fault management submenu toggle - start expanded
             $('#faultHeader').on('click', function () {
                 $('#faultTechnicianSubmenu').collapse('toggle');
             });
 
+            // Sidebar toggle functionality
             $('#sidebarToggle').on('click', function () {
                 $('#sidebar').toggleClass('sidebar-collapsed');
                 updateFixedToggle();
             });
 
+            // Fixed toggle button functionality
             $('#sidebarFixedToggle').on('click', function () {
                 $('#sidebar').removeClass('sidebar-collapsed');
                 updateFixedToggle();
             });
 
+            // Update fixed toggle button visibility
             function updateFixedToggle() {
                 if ($('#sidebar').hasClass('sidebar-collapsed')) {
                     $('#sidebarFixedToggle').show();
+                    $('#mainContent').css('margin-left', '0');
                 } else {
                     $('#sidebarFixedToggle').hide();
+                    $('#mainContent').css('margin-left', '250px');
                 }
             }
-            updateFixedToggle();
+
+            // Handle window resize
+            $(window).resize(function () {
+                updateFixedToggle();
+            });
         });
     </script>
 

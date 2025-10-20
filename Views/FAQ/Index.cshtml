@@ -1,0 +1,384 @@
+﻿@{
+    ViewData["Title"] = "Frequently Asked Questions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .page-title {
+        text-align: center;
+        margin: 30px 0;
+        color: #1a73e8;
+    }
+
+    .faq-container {
+        display: grid;
+        grid-template-columns: 1fr 3fr;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .sidebar {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+
+        .sidebar h3 {
+            color: #1a73e8;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+            .sidebar ul li {
+                margin-bottom: 10px;
+            }
+
+                .sidebar ul li a {
+                    color: #555;
+                    text-decoration: none;
+                    display: block;
+                    padding: 8px 10px;
+                    border-radius: 5px;
+                    transition: all 0.3s;
+                }
+
+                    .sidebar ul li a:hover, .sidebar ul li a.active {
+                        background-color: #e8f0fe;
+                        color: #1a73e8;
+                    }
+
+    .faq-content {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .faq-section {
+        margin-bottom: 40px;
+    }
+
+        .faq-section h2 {
+            color: #1a73e8;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+        }
+
+    .faq-item {
+        margin-bottom: 20px;
+        border: 1px solid #eaeaea;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .faq-question {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+
+        .faq-question:hover {
+            background: #e8f0fe;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 20px;
+            color: #1a73e8;
+        }
+
+    .faq-answer {
+        padding: 0 20px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+        padding: 20px;
+        max-height: 500px;
+    }
+
+    .faq-item.active .faq-question::after {
+        content: '-';
+    }
+
+    .search-box {
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+            .search-box input:focus {
+                border-color: #1a73e8;
+            }
+
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #777;
+    }
+
+    @@media (max-width: 768px) {
+        .faq-container {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+            position: static;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <h1 class="page-title">Frequently Asked Questions</h1>
+
+    <div class="search-box">
+        <input type="text" id="faqSearch" placeholder="Search FAQs...">
+        <span class="search-icon">🔍</span>
+    </div>
+
+    <div class="faq-container">
+        <div class="sidebar">
+            <h3>Categories</h3>
+            <ul>
+                <li><a href="#general" class="nav-link active">General System</a></li>
+                <li><a href="#fault" class="nav-link">Fridge Fault</a></li>
+                <li><a href="#maintenance" class="nav-link">Fridge Maintenance</a></li>
+                <li><a href="#customer" class="nav-link">Customer Management</a></li>
+                <li><a href="#purchasing" class="nav-link">Purchasing</a></li>
+            </ul>
+        </div>
+
+        <div class="faq-content">
+            <!-- General System FAQs -->
+            <div id="general" class="faq-section">
+                <h2>General System FAQs</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">What is the Dynamic Ice Inc?</div>
+                    <div class="faq-answer">
+                        <p>The Dynamic Ice Inc is a comprehensive web-based solution designed to streamline operations for a beverage manufacturer that provides fridges to its customers. It replaces manual, paper-based processes with an efficient digital system.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Who are the typical users of this system?</div>
+                    <div class="faq-answer">
+                        <p>The system is designed for various roles within the organization:</p>
+                        <ul>
+                            <li>Customer Liaison - Manages customer data and fridge allocations</li>
+                            <li>Inventory Liaison - Manages fridge inventory and stock levels</li>
+                            <li>Fault Technicians - Handles fault reports and repairs</li>
+                            <li>Maintenance Technicians - Schedules and performs maintenance</li>
+                            <li>Purchasing Manager - Manages suppliers and purchase orders</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I log in to the system?</div>
+                    <div class="faq-answer">
+                        <p>Use the credentials provided by your system administrator. Your login will determine which features and data you can access based on your role in the organization.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fridge Fault FAQs -->
+            <div id="fault" class="faq-section">
+                <h2>Fridge Fault Subsystem</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do customers report a fault?</div>
+                    <div class="faq-answer">
+                        <p>Customers can report faults through multiple channels:</p>
+                        <ul>
+                            <li>Directly through the customer portal</li>
+                            <li>By calling the customer service hotline</li>
+                            <li>Via email to the designated fault reporting address</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">As a Fault Technician, how do I process a new fault report?</div>
+                    <div class="faq-answer">
+                        <p>Navigate to the 'View Faults' page, locate the fault with 'New' status, and click the 'Process' button. This will assign the fault to you and change its status.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">How can customers track the status of their reported fault?</div>
+                    <div class="faq-answer">
+                        <p>Customers can check their fault status through the customer portal or by contacting customer service. The system provides real-time updates on fault status.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fridge Maintenance FAQs -->
+            <div id="maintenance" class="faq-section">
+                <h2>Fridge Maintenance Subsystem</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I schedule a maintenance visit?</div>
+                    <div class="faq-answer">
+                        <p>Navigate to the Maintenance section, select the customer or fridge that needs maintenance, and click "Schedule Visit". Set the date, time, and type of maintenance required.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What information is included in a fridge's service history?</div>
+                    <div class="faq-answer">
+                        <p>The service history includes all previous maintenance visits, fault reports and repairs, parts replaced, technician notes, and service dates.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Can I create a fault report during a maintenance visit?</div>
+                    <div class="faq-answer">
+                        <p>Yes, if during a maintenance visit you identify an issue that requires repair, you can create a fault report directly from the Maintenance subsystem.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Management FAQs -->
+            <div id="customer" class="faq-section">
+                <h2>Customer Management</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I allocate a fridge to a customer?</div>
+                    <div class="faq-answer">
+                        <p>Navigate to the Customer Management section, select the customer, and click "Allocate Fridge". Select from available fridges and assign it with relevant details.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What should I do when fridge inventory levels are low?</div>
+                    <div class="faq-answer">
+                        <p>Create an internal purchase request. This request will be automatically forwarded to the Purchasing Manager for action.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchasing FAQs -->
+            <div id="purchasing" class="faq-section">
+                <h2>Purchasing Subsystem</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question">How do I process a purchase request?</div>
+                    <div class="faq-answer">
+                        <p>Navigate to the Purchase Requests section, review the request details, and either approve or reject it. If approved, create a Request for Quotation.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What is the process for creating a purchase order?</div>
+                    <div class="faq-answer">
+                        <p>After receiving quotations from suppliers, compare them, select the preferred supplier, and create a purchase order. Track the shipment until delivery.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const faqItems = document.querySelectorAll('.faq-item');
+        const faqSearch = document.getElementById('faqSearch');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        // FAQ toggle functionality
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+
+            question.addEventListener('click', () => {
+                // Close all other items
+                faqItems.forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('active');
+                    }
+                });
+
+                // Toggle current item
+                item.classList.toggle('active');
+            });
+        });
+
+        // Simple search functionality
+        faqSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const sections = document.querySelectorAll('.faq-section');
+
+            sections.forEach(section => {
+                const items = section.querySelectorAll('.faq-item');
+                let sectionHasVisibleItems = false;
+
+                items.forEach(item => {
+                    const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                    const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+
+                    if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                        item.style.display = 'block';
+                        sectionHasVisibleItems = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Show/hide entire section based on search results
+                section.style.display = sectionHasVisibleItems ? 'block' : 'none';
+            });
+        });
+
+        // Navigation functionality
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Remove active class from all links
+                navLinks.forEach(l => l.classList.remove('active'));
+
+                // Add active class to clicked link
+                this.classList.add('active');
+
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+
+                if (targetSection) {
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    });
+</script>

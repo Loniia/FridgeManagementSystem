@@ -21,14 +21,12 @@
             <i class="fas fa-chevron-down float-end"></i>
         </h6>
         <div class="collapse show" id="faultTechnicianSubmenu">
-            <ul class="list-unstyled">
-                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Index" class="nav-link"><i class="fas fa-list"></i> View Faults</a></li>
-                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Process" class="nav-link"><i class="fas fa-wrench"></i> Process Fault</a></li>
-                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Repair" class="nav-link"><i class="fas fa-tools"></i> Repair Fault</a></li>
-                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Complete" class="nav-link"><i class="fas fa-check"></i> Complete Repair</a></li>
-                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="UpdateCondition" class="nav-link"><i class="fas fa-exclamation-triangle"></i> Update Condition</a></li>
-                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Details" class="nav-link"><i class="fas fa-info-circle"></i> Fault Details</a></li>
+            <ul class="collapse list-unstyled show" id="faultTechnicianSubmenu">
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Index"><i class="fas fa-list"></i> View All Faults</a></li>
+                <li><a asp-area="FaultTechSubsystem" asp-controller="Faults" asp-action="Reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <!-- Removed links that require IDs: Process, Repair, Complete, UpdateCondition, Details -->
+                <!-- These should be accessed from the fault list where IDs are available -->
             </ul>
         </div>
     </div>
