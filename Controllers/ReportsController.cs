@@ -179,30 +179,29 @@ namespace FridgeManagementSystem.Controllers
             return Json(data);
         }
 
-        // Add this to your ReportsController
         [HttpGet]
         public async Task<JsonResult> LocationMapData()
         {
-            var locationData = await _context.Locations
+            var data = await _context.Locations
                 .Where(l => l.IsActive)
                 .Include(l => l.Fridge)
-                .GroupBy(l => new { l.Province, l.City })
-                .Select(g => new
+                .Include(l => l.Customer)
+                .Include(l => l.Employee)
+                .Select(l => new
                 {
-                    Province = g.Key.Province,
-                    City = g.Key.City,
-                    FridgeCount = g.Sum(l => l.Fridge.Count(f => f.IsActive)),
-                    Locations = g.Select(l => new
-                    {
-                        l.Address,
-                        l.PostalCode,
-                        FridgeCount = l.Fridge.Count(f => f.IsActive)
-                    }).ToList()
+                    l.Province,
+                    l.City,
+                    l.Address,
+                    l.PostalCode,
+                    l.Latitude,
+                    l.Longitude,
+                    FridgeCount = l.Fridge.Count(f => f.IsActive),
+                    CustomerCount = l.Customer.Count(c => c.IsActive),
+                    EmployeeCount = l.Employee.Count(e => e.Status=="Active")
                 })
-                .OrderByDescending(x => x.FridgeCount)
                 .ToListAsync();
 
-            return Json(locationData);
+            return Json(data);
         }
 
     }
