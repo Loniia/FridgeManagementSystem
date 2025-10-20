@@ -186,18 +186,13 @@ namespace FridgeManagementSystem.Controllers
             var locationData = await _context.Locations
                 .Where(l => l.IsActive)
                 .Include(l => l.Fridge)
-                .GroupBy(l => new { l.Province, l.City })
-                .Select(g => new
+                .Select(l => new
                 {
-                    Province = g.Key.Province,
-                    City = g.Key.City,
-                    FridgeCount = g.Sum(l => l.Fridge.Count(f => f.IsActive)),
-                    Locations = g.Select(l => new
-                    {
-                        l.Address,
-                        l.PostalCode,
-                        FridgeCount = l.Fridge.Count(f => f.IsActive)
-                    }).ToList()
+                    l.Province,
+                    l.City,
+                    l.Address,
+                    l.PostalCode,
+                    FridgeCount = l.Fridge.Count(f => f.IsActive)
                 })
                 .OrderByDescending(x => x.FridgeCount)
                 .ToListAsync();

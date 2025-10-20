@@ -1,0 +1,89 @@
+﻿@model List<(string Question, string Answer)>
+@{
+    ViewData["Title"] = "FAQ";
+    Layout = "_Layout";
+}
+
+<div class="container my-5">
+    <h1 class="mb-4">Frequently Asked Questions</h1>
+
+    <!-- FAQ Accordion -->
+    <div class="accordion" id="faqAccordion">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading@i">
+                    <button class="accordion-button @((i > 0 ? "collapsed" : ""))" type="button" data-bs-toggle="collapse" data-bs-target="#collapse@i" aria-expanded="@(i == 0 ? "true" : "false")" aria-controls="collapse@i">
+                        @Model[i].Question
+                    </button>
+                </h2>
+                <div id="collapse@i" class="accordion-collapse collapse @((i == 0 ? "show" : ""))" aria-labelledby="heading@i" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        @Model[i].Answer
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Message form -->
+    <div class="mt-5">
+        <h3>Still have questions?</h3>
+        <p>Send us a message and we'll get back to you!</p>
+
+        @if (TempData["MessageError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["MessageError"]</div>
+        }
+        @if (TempData["MessageSuccess"] != null)
+        {
+            <div class="alert alert-success">@TempData["MessageSuccess"]</div>
+        }
+
+        <form asp-action="FAQMessage" method="post">
+            <div class="mb-3">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label>Message</label>
+                <textarea name="message" class="form-control" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+    </div>
+
+    <!-- Optional AI Chat -->
+    <div class="mt-5">
+        <h3>Need instant help?</h3>
+        <div id="aiChatBox" style="border:1px solid #ddd; padding:15px; border-radius:8px; max-width:500px;">
+            <div id="chatMessages" style="height:200px; overflow-y:auto; margin-bottom:10px;"></div>
+            <input type="text" id="chatInput" class="form-control" placeholder="Ask me anything..." />
+            <button id="chatSend" class="btn btn-success mt-2">Send</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple AI mock-up
+        const chatMessages = document.getElementById("chatMessages");
+        const chatInput = document.getElementById("chatInput");
+        const chatSend = document.getElementById("chatSend");
+
+        chatSend.addEventListener("click", () => {
+            const msg = chatInput.value.trim();
+            if (!msg) return;
+
+            chatMessages.innerHTML += `<div><strong>You:</strong> ${msg}</div>`;
+            chatInput.value = "";
+
+            // Mock AI response
+            setTimeout(() => {
+                chatMessages.innerHTML += `<div><strong>AI:</strong> Sorry, I'm just a demo bot. Please contact support!</div>`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 500);
+        });
+    </script>
+}
+
