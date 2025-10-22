@@ -16,6 +16,7 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Please describe the fault")]
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         [Display(Name = "Fault Description")]
+        public FaultType FaultType { get; set; }
         public string FaultDescription { get; set; }
 
         // CHANGE THESE TO List<SelectListItem>

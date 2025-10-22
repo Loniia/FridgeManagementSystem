@@ -1,138 +1,180 @@
-﻿@model FridgeManagementSystem.Models.Fault
-
+﻿@model FridgeManagementSystem.Models.FaultReport
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Fault Details";
 }
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Fault Report Details</h4>
-                <div>
-                    @if (Model.Status == "Pending")
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Fault Details - @Model.FaultType
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Display Messages -->
+                    @if (TempData["SuccessMessage"] != null)
                     {
-                        <a href="@Url.Action("CancelFault", new { id = Model.FaultID })"
-                           class="btn btn-outline-danger btn-sm me-2">
-                            <i class="fas fa-times"></i> Cancel Report
-                        </a>
-                    }
-                    <a href="@Url.Action("MyFaults")" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Status Alert -->
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>Basic Information</h5>
-                        <dl class="row">
-                            <dt class="col-sm-4">Fault Code:</dt>
-                            <dd class="col-sm-8"><strong>@Model.FaultCode</strong></dd>
-
-                            <dt class="col-sm-4">Status:</dt>
-                            <dd class="col-sm-8">
-                                <span class="badge @GetStatusBadgeClass(Model.Status)">
-                                    @Model.Status
-                                </span>
-                            </dd>
-
-                            <dt class="col-sm-4">Priority:</dt>
-                            <dd class="col-sm-8">
-                                <span class="badge @GetPriorityBadgeClass(Model.Priority)">
-                                    @Model.Priority
-                                </span>
-                            </dd>
-
-                            <dt class="col-sm-4">Reported Date:</dt>
-                            <dd class="col-sm-8">@Model.ReportDate.ToString("MMM dd, yyyy hh:mm tt")</dd>
-                        </dl>
-                    </div>
-
-                    <div class="col-md-6">
-                        <h5>Assignment</h5>
-                        <dl class="row">
-                            <dt class="col-sm-4">Fridge:</dt>
-                            <dd class="col-sm-8">@Model.Fridge?.Model</dd>
-
-                            <dt class="col-sm-4">Serial Number:</dt>
-                            <dd class="col-sm-8">@Model.Fridge?.SerialNumber</dd>
-
-                            @if (Model.AssignedTechnician != null)
-                            {
-                                <dt class="col-sm-4">Technician:</dt>
-                                <dd class="col-sm-8">@Model.AssignedTechnician.FullName</dd>
-                            }
-                        </dl>
-                    </div>
-                </div>
-
-                <!-- Editable Fault Description -->
-                <div class="mt-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5>Fault Description</h5>
-                        @if (Model.Status == "Pending")
-                        {
-                            <button type="button" class="btn btn-outline-primary btn-sm"
-                                    id="editDescriptionBtn">
-                                <i class="fas fa-edit"></i> Edit Description
-                            </button>
-                        }
-                    </div>
-
-                    <div id="descriptionDisplay">
-                        <p class="text-muted">@Model.FaultDescription</p>
-                    </div>
-
-                    <div id="descriptionEdit" style="display: none;">
-                        <textarea class="form-control" id="faultDescription" rows="4">@Model.FaultDescription</textarea>
-                        <div class="mt-2">
-                            <button type="button" class="btn btn-success btn-sm" id="saveDescriptionBtn">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <button type="button" class="btn btn-secondary btn-sm" id="cancelEditBtn">
-                                <i class="fas fa-times"></i> Cancel
-                            </button>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                    </div>
-                </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
-                <!-- Repair Schedules -->
-                @if (Model.RepairSchedules != null && Model.RepairSchedules.Any())
-                {
-                    <div class="mt-4">
-                        <h5>Repair Schedules</h5>
-                        <div class="list-group">
-                            @foreach (var schedule in Model.RepairSchedules.OrderByDescending(rs => rs.RepairDate))
+                    <div class="row">
+                        <!-- Basic Information -->
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Basic Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Report Date:</dt>
+                                        <dd class="col-sm-8">@Model.ReportDate.ToString("dd MMM yyyy HH:mm")</dd>
+
+                                        <dt class="col-sm-4">Fridge:</dt>
+                                        <dd class="col-sm-8">
+                                            @if (Model.Fridge != null)
+                                            {
+                                                @Model.Fridge.Brand @Model.Fridge.Model
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </dd>
+
+                                        <dt class="col-sm-4">Fault Type:</dt>
+                                        <dd class="col-sm-8">
+                                            <span class="badge bg-info">@Model.FaultType</span>
+                                        </dd>
+
+                                        <dt class="col-sm-4">Urgency Level:</dt>
+                                        <dd class="col-sm-8">
+                                            @{
+                                                var urgencyBadgeClass = Model.UrgencyLevel.ToString() switch
+                                                {
+                                                    "Low" => "bg-secondary",
+                                                    "Medium" => "bg-warning",
+                                                    "High" => "bg-danger",
+                                                    "Critical" => "bg-dark",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @urgencyBadgeClass">@Model.UrgencyLevel</span>
+                                        </dd>
+
+                                        <dt class="col-sm-4">Status:</dt>
+                                        <dd class="col-sm-8">
+                                            @{
+                                                var statusBadgeClass = Model.StatusFilter?.ToLower() switch
+                                                {
+                                                    "pending" => "bg-warning",
+                                                    "in progress" => "bg-primary",
+                                                    "resolved" => "bg-success",
+                                                    "cancelled" => "bg-secondary",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @statusBadgeClass">@Model.StatusFilter</span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fault Description & Actions -->
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Fault Description</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>@Model.FaultDescription</p>
+                                </div>
+                            </div>
+
+                            <!-- Technician Information (if assigned) -->
+                            @if (Model.Fault?.AssignedTechnician != null)
                             {
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1">Scheduled Repair</h6>
-                                        <small>@(schedule.RepairDate?.ToString("MMM dd, yyyy") ?? "Not scheduled")</small>
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Assigned Technician</h5>
                                     </div>
-                                    <p class="mb-1">@schedule.RepairNotes</p>
-                                    <small>Status: @schedule.Status</small>
+                                    <div class="card-body">
+                                        <p class="mb-1">
+                                            <strong>@Model.Fault.AssignedTechnician.FullName</strong>
+                                        </p>
+                                        <p class="text-muted mb-0">
+                                            <small>@Model.Fault.AssignedTechnician</small>
+                                        </p>
+                                    </div>
                                 </div>
                             }
+
+                            <!-- Actions -->
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Actions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <a asp-action="MyFaults" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left"></i> Back to My Faults
+                                        </a>
+
+                                        @if (Model.StatusFilter == "Pending")
+                                        {
+                                            <button type="button" class="btn btn-danger"
+                                                    onclick="cancelFault(@Model.FaultReportId)">
+                                                <i class="fas fa-times"></i> Cancel Fault Report
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                }
+
+                    <!-- Repair Progress (if available) -->
+                    @if (Model.Fault?.RepairSchedules != null && Model.Fault.RepairSchedules.Any())
+                    {
+                        <div class="card mt-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Repair Progress</h5>
+                            </div>
+                            <div class="card-body">
+                                @foreach (var repair in Model.Fault.RepairSchedules.OrderByDescending(r => r.CreatedDate))
+                                {
+                                    <div class="mb-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="mb-1">@repair.Status</h6>
+                                            <small class="text-muted">@repair.CreatedDate.ToString("dd MMM yyyy HH:mm")</small>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(repair.Diagnosis))
+                                        {
+                                            <p class="mb-1"><strong>Diagnosis:</strong> @repair.Diagnosis</p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(repair.RepairNotes))
+                                        {
+                                            <p class="mb-0"><strong>Notes:</strong> @repair.RepairNotes</p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -140,119 +182,20 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            // Edit Description Toggle
-            $('#editDescriptionBtn').click(function () {
-                $('#descriptionDisplay').hide();
-                $('#descriptionEdit').show();
-                $(this).hide();
-            });
-
-            $('#cancelEditBtn').click(function () {
-                $('#descriptionEdit').hide();
-                $('#descriptionDisplay').show();
-                $('#editDescriptionBtn').show();
-                // Reset textarea to original value
-                $('#faultDescription').val('@Html.Raw(Model.FaultDescription)');
-            });
-
-            // Save Description
-            $('#saveDescriptionBtn').click(function () {
-                var newDescription = $('#faultDescription').val();
-                var faultId = @Model.FaultID;
-
-                if (!newDescription.trim()) {
-                    alert('Please enter a fault description.');
-                    return;
-                }
-
-                $.ajax({
-                    url: '@Url.Action("UpdateFaultDescription", "Customer")',
-                    type: 'POST',
-                    data: {
-                        id: faultId,
-                        description: newDescription
-                    },
-                    success: function (response) {
+        function cancelFault(faultReportId) {
+            if (confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')) {
+                $.post('@Url.Action("CancelFault")', { id: faultReportId })
+                    .done(function (response) {
                         if (response.success) {
-                            // Update displayed description
-                            $('#descriptionDisplay p').text(newDescription);
-                            $('#descriptionEdit').hide();
-                            $('#descriptionDisplay').show();
-                            $('#editDescriptionBtn').show();
-
-                            // Show success message
-                            showAlert('Description updated successfully!', 'success');
+                            location.reload();
                         } else {
-                            showAlert(response.message, 'error');
+                            alert(response.message || 'Error cancelling fault report.');
                         }
-                    },
-                    error: function () {
-                        showAlert('Error updating description. Please try again.', 'error');
-                    }
-                });
-            });
-
-            function showAlert(message, type) {
-                var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-                var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-
-                var alertHtml = `
-                    <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                        <i class="fas ${icon}"></i> ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                `;
-
-                $('.card-body').prepend(alertHtml);
-
-                // Auto dismiss after 5 seconds
-                setTimeout(function() {
-                    $('.alert').alert('close');
-                }, 5000);
+                    })
+                    .fail(function () {
+                        alert('Error cancelling fault report.');
+                    });
             }
-        });
+        }
     </script>
 }
-
-@functions {
-    private string GetStatusBadgeClass(string status)
-    {
-        return status?.ToLower() switch
-        {
-            "pending" => "bg-warning",
-            "in progress" => "bg-primary",
-            "completed" => "bg-success",
-            "cancelled" => "bg-secondary",
-            _ => "bg-secondary"
-        };
-    }
-
-    private string GetPriorityBadgeClass(string priority)
-    {
-        return priority?.ToLower() switch
-        {
-            "low" => "bg-success",
-            "medium" => "bg-warning",
-            "high" => "bg-orange",
-            "critical" => "bg-danger",
-            _ => "bg-secondary"
-        };
-    }
-}
-
-<style>
-    .bg-orange {
-        background-color: #ff9800 !important;
-    }
-
-    .card {
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        border: 1px solid rgba(0, 0, 0, 0.125);
-    }
-
-    .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-    }
-</style>

@@ -20,7 +20,7 @@ namespace FridgeManagementSystem.Models
         [Required]
         [Display(Name = "Condition")]
         public string Condition { get; set; } = "Working"; // Working, Under Repair, Faulty, Scrapped
-
+        public string Notes { get; set; } // Nullable by default
         public DateTime PurchaseDate { get; set; }
 
         [Display(Name = "Warranty Expiry")]
