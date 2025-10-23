@@ -601,22 +601,24 @@ namespace FridgeManagementSystem.Controllers
             try
             {
                 var customerId = GetLoggedInCustomerId();
-                var faults = await _context.Faults
-                    .Include(f => f.Fridge)
-                    .Include(f => f.AssignedTechnician)
-                    .Where(f => f.CustomerId == customerId)
-                    .OrderByDescending(f => f.FaultID)
+
+                // ✅ CHANGED: Query FaultReport instead of Fault
+                var faultReports = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .Include(fr => fr.Fault) // Include the linked Fault if it exists
+                    .ThenInclude(f => f.AssignedTechnician) // Include technician info
+                    .Where(fr => fr.Fridge.CustomerID == customerId) // Filter by customer's fridges
+                    .OrderByDescending(fr => fr.ReportDate)
                     .ToListAsync();
 
-                return View(faults);
+                return View(faultReports);
             }
             catch
             {
                 TempData["ErrorMessage"] = "Error loading faults.";
-                return View(new List<Fault>());
+                return View(new List<FaultReport>());
             }
         }
-
         public async Task<IActionResult> FaultDetails(int? id)
         {
             if (id == null) return NotFound();
@@ -624,13 +626,18 @@ namespace FridgeManagementSystem.Controllers
             try
             {
                 var customerId = GetLoggedInCustomerId();
-                var fault = await _context.Faults
-                    .Include(f => f.Fridge)
-                    .Include(f => f.AssignedTechnician)
-                    .Include(f => f.RepairSchedules)
-                    .FirstOrDefaultAsync(f => f.FaultID == id && f.CustomerId == customerId);
 
-                return fault == null ? NotFound() : View(fault);
+                // ✅ CHANGED: Query FaultReport instead of Fault
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .Include(fr => fr.Fault) // Include linked Fault record
+                    .ThenInclude(f => f.AssignedTechnician)
+                    .Include(fr => fr.Fault)
+                    .ThenInclude(f => f.RepairSchedules) // Include repair progress
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
+
+                return faultReport == null ? NotFound() : View(faultReport);
             }
             catch
             {
@@ -639,7 +646,15 @@ namespace FridgeManagementSystem.Controllers
             }
         }
 
-        public IActionResult CreateFault() => View();
+        public async Task<IActionResult> CreateFault()
+        {
+            var viewModel = new CreateFaultViewModel
+            {
+                FridgeOptions = await GetCustomerFridgesAsync(),
+                PriorityOptions = GetPriorityOptions()
+            };
+            return View(viewModel);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -647,7 +662,6 @@ namespace FridgeManagementSystem.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // ADD THESE 2 LINES - Repopulate dropdowns
                 viewModel.FridgeOptions = await GetCustomerFridgesAsync();
                 viewModel.PriorityOptions = GetPriorityOptions();
                 return View(viewModel);
@@ -655,31 +669,43 @@ namespace FridgeManagementSystem.Controllers
 
             try
             {
-                var fault = new Fault
+                // ✅ CHANGED: Create FaultReport instead of Fault
+                var faultReport = new FaultReport
                 {
                     FridgeId = viewModel.FridgeId,
-                    Priority = viewModel.Priority,
                     FaultDescription = viewModel.FaultDescription,
-                    CustomerId = GetLoggedInCustomerId(),
-                    Status = "Pending",
                     ReportDate = DateTime.Now,
-                    FaultCode = GenerateFaultCode()
+                    UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
+                    FaultType = FaultType.Electrical, // Indicates customer-reported
+                    StatusFilter = "Pending" // Initial status
                 };
 
-                _context.Add(fault);
+                _context.FaultReport.Add(faultReport);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Fault reported successfully.";
-                return RedirectToAction(nameof(FaultDetails), new { id = fault.FaultID });
+                TempData["SuccessMessage"] = "Fault reported successfully! Our technicians will review it shortly.";
+                return RedirectToAction(nameof(FaultDetails), new { id = faultReport.FaultReportId });
             }
             catch
             {
-                // ADD THESE 2 LINES - Repopulate dropdowns on error too
                 viewModel.FridgeOptions = await GetCustomerFridgesAsync();
                 viewModel.PriorityOptions = GetPriorityOptions();
                 TempData["ErrorMessage"] = "Error reporting fault.";
                 return View(viewModel);
             }
+        }
+
+        // Helper method
+        private UrgencyLevel MapPriorityToUrgency(string priority)
+        {
+            return priority switch
+            {
+                "Critical" => UrgencyLevel.Critical,
+                "High" => UrgencyLevel.High,
+                "Medium" => UrgencyLevel.Medium,
+                "Low" => UrgencyLevel.Low,
+                _ => UrgencyLevel.Medium
+            };
         }
 
         // Add these small helper methods
@@ -714,33 +740,38 @@ namespace FridgeManagementSystem.Controllers
             try
             {
                 var customerId = GetLoggedInCustomerId();
-                var fault = await _context.Faults
-                    .FirstOrDefaultAsync(f => f.FaultID == id && f.CustomerId == customerId);
 
-                if (fault == null)
+                // ✅ CHANGED: Find FaultReport instead of Fault
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
+
+                if (faultReport == null)
                 {
-                    TempData["ErrorMessage"] = "Fault not found.";
+                    TempData["ErrorMessage"] = "Fault report not found.";
                     return RedirectToAction(nameof(MyFaults));
                 }
 
-                if (fault.Status != "Pending")
+                // Check if it's still cancellable (only pending reports)
+                if (faultReport.StatusFilter != "Pending")
                 {
-                    TempData["ErrorMessage"] = "Only pending faults can be cancelled.";
+                    TempData["ErrorMessage"] = "Only pending fault reports can be cancelled.";
                     return RedirectToAction(nameof(FaultDetails), new { id });
                 }
 
-                fault.Status = "Cancelled";
-
-                _context.Update(fault);
+                // Update status
+                faultReport.StatusFilter = "Cancelled";
+                _context.FaultReport.Update(faultReport);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Fault cancelled successfully.";
+                TempData["SuccessMessage"] = "Fault report cancelled successfully.";
                 return RedirectToAction(nameof(MyFaults));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error cancelling fault");
-                TempData["ErrorMessage"] = "Error cancelling fault.";
+                _logger.LogError(ex, "Error cancelling fault report");
+                TempData["ErrorMessage"] = "Error cancelling fault report.";
                 return RedirectToAction(nameof(FaultDetails), new { id });
             }
         }
@@ -751,21 +782,25 @@ namespace FridgeManagementSystem.Controllers
             try
             {
                 var customerId = GetLoggedInCustomerId();
-                var fault = await _context.Faults
-                    .FirstOrDefaultAsync(f => f.FaultID == id && f.CustomerId == customerId);
 
-                if (fault == null)
+                // ✅ CHANGED: Find FaultReport instead of Fault
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
+
+                if (faultReport == null)
                 {
-                    return Json(new { success = false, message = "Fault not found." });
+                    return Json(new { success = false, message = "Fault report not found." });
                 }
 
-                if (fault.Status != "Pending")
+                if (faultReport.StatusFilter != "Pending")
                 {
-                    return Json(new { success = false, message = "Only pending faults can be updated." });
+                    return Json(new { success = false, message = "Only pending fault reports can be updated." });
                 }
 
-                fault.FaultDescription = description;
-                _context.Update(fault);
+                faultReport.FaultDescription = description;
+                _context.FaultReport.Update(faultReport);
                 await _context.SaveChangesAsync();
 
                 return Json(new { success = true, message = "Fault description updated successfully." });
@@ -774,6 +809,32 @@ namespace FridgeManagementSystem.Controllers
             {
                 _logger.LogError(ex, "Error updating fault description");
                 return Json(new { success = false, message = "Error updating fault description." });
+            }
+        }
+
+        public async Task<IActionResult> FaultStatus(int? id)
+        {
+            if (id == null) return NotFound();
+
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .Include(fr => fr.Fault)
+                        .ThenInclude(f => f.AssignedTechnician)
+                    .Include(fr => fr.Fault)
+                        .ThenInclude(f => f.RepairSchedules)
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
+
+                return faultReport == null ? NotFound() : View(faultReport);
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Error loading fault status.";
+                return RedirectToAction(nameof(MyFaults));
             }
         }
 

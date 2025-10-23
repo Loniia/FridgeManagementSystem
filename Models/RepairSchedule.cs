@@ -76,11 +76,11 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
-        // Navigation properties
-        [ForeignKey("FaultID")]
-        public virtual Fault Fault { get; set; }
+        [ForeignKey("FaultReport")]
+        public int FaultReportId { get; set; }
+        public virtual FaultReport FaultReport { get; set; }
 
-       
+
         public virtual Fridge Fridge { get; set; }
 
         [ForeignKey("Employee")]

@@ -1,4 +1,4 @@
-﻿@model FridgeManagementSystem.Models.Fault
+﻿@model FridgeManagementSystem.Models.FaultReport
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -8,16 +8,16 @@
 
 <div class="modal-header">
     <h5 class="modal-title" id="updateStatusModalLabel">
-        <i class="fas fa-sync-alt"></i> Update Status - Fault #F@(Model.FaultID.ToString("D4"))
+        <i class="fas fa-sync-alt"></i> Update Status - Fault #F@(Model.FaultReportId.ToString("D4"))
     </h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
-<form asp-action="UpdateStatus" asp-route-id="@Model.FaultID" id="statusForm" method="post">
+<form asp-action="UpdateStatus" asp-route-id="@Model.FaultReportId" id="statusForm" method="post">
     <div class="modal-body">
         @Html.AntiForgeryToken()
 
-        <input type="hidden" asp-for="FaultID" />
+        <input type="hidden" asp-for="FaultReportId" />
 
         <div class="mb-3">
             <label class="form-label">Current Description</label>
@@ -28,15 +28,16 @@
             <label class="form-label">Current Priority</label>
             <p class="form-control-plaintext">
                 @{
-                    var priorityBadgeClass = Model.Priority switch
+                    var priorityBadgeClass = Model.UrgencyLevel.ToString() switch
                     {
-                        "High" => "badge bg-danger",
+                        "High" or "Critical" or "Emergency" => "badge bg-danger",
                         "Medium" => "badge bg-warning",
                         "Low" => "badge bg-info",
                         _ => "badge bg-secondary"
                     };
+                    var priorityText = Model.UrgencyLevel.ToString();
                 }
-                <span class="@priorityBadgeClass">@Model.Priority</span>
+                <span class="@priorityBadgeClass">@priorityText</span>
             </p>
         </div>
 
@@ -44,7 +45,7 @@
             <label class="form-label">Current Status</label>
             <p class="form-control-plaintext">
                 @{
-                    var statusBadgeClass = Model.Status switch
+                    var statusBadgeClass = Model.StatusFilter switch
                     {
                         "Pending" => "badge bg-danger",
                         "In Progress" => "badge bg-warning",
@@ -53,7 +54,7 @@
                         _ => "badge bg-info"
                     };
                 }
-                <span class="@statusBadgeClass">@Model.Status</span>
+                <span class="@statusBadgeClass">@Model.StatusFilter</span>
             </p>
         </div>
 
@@ -70,7 +71,7 @@
 
         <div id="resolutionNotes" class="form-group mt-3" style="display: none;">
             <label for="resolutionDetails" class="form-label">Resolution Details (Optional)</label>
-            <textarea id="resolutionDetails" class="form-control" rows="3"
+            <textarea name="resolutionDetails" id="resolutionDetails" class="form-control" rows="3"
                       placeholder="Add any notes about the resolution..."></textarea>
         </div>
     </div>
@@ -110,9 +111,12 @@
                         // Close modal and refresh page
                         $('#updateStatusModal').modal('hide');
                         location.reload();
+                    } else {
+                        alert(response.message || 'Error updating status.');
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
                     alert('Error updating status. Please try again.');
                 }
             });

@@ -1,6 +1,7 @@
-﻿@model FridgeManagementSystem.Models.Fault
+﻿@model FridgeManagementSystem.Models.FaultReport
 
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Cancel Fault Report";
 }
 
@@ -19,39 +20,70 @@
                 <div class="fault-info mb-4">
                     <h5>Fault Details:</h5>
                     <dl class="row">
-                        <dt class="col-sm-4">Fault Code:</dt>
-                        <dd class="col-sm-8">@Model.FaultCode</dd>
-
                         <dt class="col-sm-4">Reported Date:</dt>
                         <dd class="col-sm-8">@Model.ReportDate.ToString("MMM dd, yyyy")</dd>
 
-                        <dt class="col-sm-4">Priority:</dt>
+                        <dt class="col-sm-4">Fault Type:</dt>
                         <dd class="col-sm-8">
-                            <span class="badge @GetPriorityBadgeClass(Model.Priority)">
-                                @Model.Priority
+                            <span class="badge bg-info">@Model.FaultType</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Urgency Level:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge @GetUrgencyBadgeClass(Model.UrgencyLevel)">
+                                @Model.UrgencyLevel
                             </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Fridge:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Fridge != null)
+                            {
+                                @Model.Fridge.Brand @Model.Fridge.Model
+                                <small class="text-muted">(@Model.Fridge.SerialNumber)</small>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
                         </dd>
 
                         <dt class="col-sm-4">Description:</dt>
                         <dd class="col-sm-8">@Model.FaultDescription</dd>
+
+                        <dt class="col-sm-4">Current Status:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge @GetStatusBadgeClass(Model.StatusFilter)">
+                                @Model.StatusFilter
+                            </span>
+                        </dd>
                     </dl>
                 </div>
 
                 <form asp-action="CancelFault" method="post">
-                    <input type="hidden" name="id" value="@Model.FaultID" />
+                    <input type="hidden" name="id" value="@Model.FaultReportId" />
                     @Html.AntiForgeryToken()
 
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label for="cancellationReason" class="form-label">Reason for Cancellation (Optional):</label>
                         <textarea class="form-control" id="cancellationReason" name="cancellationReason"
                                   rows="3" placeholder="Please provide a reason for cancellation..."></textarea>
+                        <small class="form-text text-muted">
+                            This will help us improve our service.
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> Once cancelled, this fault report cannot be reopened.
+                        You will need to create a new fault report if the issue persists.
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-danger flex-fill">
                             <i class="fas fa-times-circle"></i> Confirm Cancellation
                         </button>
-                        <a href="@Url.Action("FaultDetails", new { id = Model.FaultID })"
+                        <a href="@Url.Action("FaultDetails", new { id = Model.FaultReportId })"
                            class="btn btn-secondary flex-fill">
                             <i class="fas fa-arrow-left"></i> Back to Details
                         </a>
@@ -63,14 +95,27 @@
 </div>
 
 @functions {
-    private string GetPriorityBadgeClass(string priority)
+    private string GetUrgencyBadgeClass(UrgencyLevel urgencyLevel)
     {
-        return priority?.ToLower() switch
+        return urgencyLevel switch
         {
-            "low" => "bg-success",
-            "medium" => "bg-warning",
-            "high" => "bg-orange",
-            "critical" => "bg-danger",
+            UrgencyLevel.Low => "bg-success",
+            UrgencyLevel.Medium => "bg-warning",
+            UrgencyLevel.High => "bg-orange",
+            UrgencyLevel.Critical => "bg-danger",
+            UrgencyLevel.Emergency => "bg-dark",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "in progress" => "bg-primary",
+            "resolved" => "bg-success",
+            "cancelled" => "bg-secondary",
             _ => "bg-secondary"
         };
     }
@@ -79,5 +124,13 @@
 <style>
     .bg-orange {
         background-color: #ff9800 !important;
+    }
+
+    .fault-info dl dt {
+        font-weight: 600;
+    }
+
+    .fault-info dl dd {
+        margin-bottom: 0.5rem;
     }
 </style>

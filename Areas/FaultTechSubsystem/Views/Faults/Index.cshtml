@@ -1,13 +1,11 @@
-﻿@model IEnumerable<FridgeManagementSystem.Models.Fault>
+﻿@model IEnumerable<FridgeManagementSystem.Models.FaultReport>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-}
-@{
-    ViewData["Title"] = "View Faults";
+    ViewData["Title"] = "View Fault Reports";
 }
 
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">View Faults</h1>
+    <h1 class="h3 mb-4 text-gray-800">View Fault Reports</h1>
 
     <!-- Search Bar -->
     <div class="card shadow mb-4">
@@ -21,19 +19,20 @@
         </div>
     </div>
 
-    <!-- Faults Table -->
+    <!-- Fault Reports Table -->
     <div class="card shadow">
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead class="thead-light">
                         <tr>
-                            <th>Fault Code</th>
+                            <th>Report ID</th>
                             <th>Customer Name</th>
                             <th>Fridge Model</th>
+                            <th>Fault Type</th>
                             <th>Description</th>
                             <th>Date Reported</th>
-                            <th>Priority</th>
+                            <th>Urgency</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -44,39 +43,43 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>F@(item.FaultID.ToString("D3"))</td>
+                                    <td>FR@(item.FaultReportId.ToString("D3"))</td>
                                     <td>@(item.Fridge?.Customer?.FullName ?? "N/A")</td>
                                     <td>@(item.Fridge?.Model ?? "N/A")</td>
+                                    <td>
+                                        <span class="badge bg-info">@item.FaultType</span>
+                                    </td>
                                     <td>@item.FaultDescription</td>
                                     <td>@item.ReportDate.ToString("yyyy-MM-dd")</td>
                                     <td>
-                                        <span class="badge @(item.Priority == "High" ? "bg-danger" :
-                                                        item.Priority == "Medium" ? "bg-warning" : "bg-info")">
-                                            @item.Priority
+                                        <span class="badge @(item.UrgencyLevel == UrgencyLevel.Critical || item.UrgencyLevel == UrgencyLevel.Emergency ? "bg-danger" :
+                                                        item.UrgencyLevel == UrgencyLevel.High ? "bg-warning" :
+                                                        item.UrgencyLevel == UrgencyLevel.Medium ? "bg-info" : "bg-secondary")">
+                                            @item.UrgencyLevel
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge @(item.Status == "Pending" ? "bg-danger" :
-                                                        item.Status == "In Progress" ? "bg-warning" :
-                                                        item.Status == "Resolved" ? "bg-success" : "bg-secondary")">
-                                            @item.Status
+                                        <span class="badge @(item.StatusFilter == "Pending" ? "bg-danger" :
+                                                        item.StatusFilter == "In Progress" ? "bg-warning" :
+                                                        item.StatusFilter == "Resolved" ? "bg-success" : "bg-secondary")">
+                                            @item.StatusFilter
                                         </span>
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a asp-action="Details" asp-route-id="@item.FaultID" class="btn btn-outline-info btn-sm" title="View Details">
+                                            <a asp-action="Details" asp-route-id="@item.FaultReportId" class="btn btn-outline-info btn-sm" title="View Details">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a asp-action="Process" asp-route-id="@item.FaultID" class="btn btn-outline-primary btn-sm" title="Process Fault">
+                                            <a asp-action="Process" asp-route-id="@item.FaultReportId" class="btn btn-outline-primary btn-sm" title="Process Fault">
                                                 <i class="fas fa-cogs"></i>
                                             </a>
-                                            @if (item.Status == "In Progress" || item.Status == "Diagnosing")
+                                            @if (item.StatusFilter == "In Progress" || item.StatusFilter == "Diagnosing")
                                             {
-                                                <a asp-action="Repair" asp-route-id="@item.FaultID" class="btn btn-outline-warning btn-sm" title="Start Repair">
+                                                <a asp-action="Repair" asp-route-id="@item.FaultReportId" class="btn btn-outline-warning btn-sm" title="Start Repair">
                                                     <i class="fas fa-tools"></i>
                                                 </a>
                                             }
-                                            <a asp-action="UpdateCondition" asp-route-id="@item.FaultID" class="btn btn-outline-secondary btn-sm" title="Update Condition">
+                                            <a asp-action="UpdateCondition" asp-route-id="@item.FaultReportId" class="btn btn-outline-secondary btn-sm" title="Update Condition">
                                                 <i class="fas fa-thermometer-half"></i>
                                             </a>
                                         </div>
@@ -87,7 +90,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="8" class="text-center">No faults found</td>
+                                <td colspan="9" class="text-center">No fault reports found</td>
                             </tr>
                         }
                     </tbody>
@@ -97,6 +100,6 @@
     </div>
 
     <div class="alert alert-info mt-4">
-        <strong>Note:</strong> Use the action buttons to manage each fault. Start with "Process" for new faults.
+        <strong>Note:</strong> Use the action buttons to manage each fault report. Start with "Process" for new fault reports.
     </div>
 </div>

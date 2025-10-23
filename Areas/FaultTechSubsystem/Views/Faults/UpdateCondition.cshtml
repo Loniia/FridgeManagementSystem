@@ -3,18 +3,18 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Update Fridge Condition";
-    var faultInfo = ViewBag.FaultInfo as FridgeManagementSystem.Models.Fault;
+    var faultReport = ViewBag.FaultReport as FridgeManagementSystem.Models.FaultReport;
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 text-gray-800">Update Fridge Condition</h1>
         <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Faults
+            <i class="fas fa-arrow-left"></i> Back to Fault Reports
         </a>
     </div>
 
-    @if (faultInfo != null)
+    @if (faultReport != null)
     {
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-info text-white">
@@ -34,10 +34,15 @@
                         <span class="badge @GetConditionBadgeClass(Model.Condition)">@Model.Condition</span>
                     </div>
                     <div class="col-md-4">
-                        <strong>Related Fault:</strong> F@(faultInfo.FaultID.ToString("D3"))<br>
-                        <strong>Fault Status:</strong>
-                        <span class="badge @GetStatusBadgeClass(faultInfo.Status)">@faultInfo.Status</span><br>
-                        <strong>Description:</strong> @faultInfo.FaultDescription
+                        <strong>Related Fault Report:</strong> FR@(faultReport.FaultReportId.ToString("D3"))<br>
+                        <strong>Fault Type:</strong> <span class="badge bg-info">@faultReport.FaultType</span><br>
+                        <strong>Report Status:</strong>
+                        <span class="badge @GetStatusBadgeClass(faultReport.StatusFilter)">@faultReport.StatusFilter</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <strong>Fault Description:</strong> @faultReport.FaultDescription
                     </div>
                 </div>
             </div>
@@ -67,16 +72,32 @@
                             <span asp-validation-for="Condition" class="text-danger"></span>
                         </div>
 
-                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Notes" class="control-label">Condition Notes (Optional)</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"
+                                      placeholder="Add any notes about the fridge condition..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Auto-resolve warning -->
+                        @if (faultReport != null && faultReport.StatusFilter != "Resolved")
+                        {
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-info-circle"></i> Automatic Status Update</h6>
+                                <p class="mb-0">
+                                    Setting condition to <strong>"Working"</strong> will automatically mark the related fault report as <strong>"Resolved"</strong>.
+                                </p>
+                            </div>
+                        }
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Update Condition
                             </button>
                             <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-                            @if (faultInfo != null)
+                            @if (faultReport != null)
                             {
-                                <a asp-action="Process" asp-route-id="@faultInfo.FaultID" class="btn btn-primary">
+                                <a asp-action="Process" asp-route-id="@faultReport.FaultReportId" class="btn btn-primary">
                                     <i class="fas fa-cogs"></i> Back to Process
                                 </a>
                             }
@@ -98,7 +119,7 @@
                             <li><strong class="text-success">Working:</strong> Fully functional, ready for use</li>
                             <li><strong class="text-warning">Under Repair:</strong> Currently being repaired</li>
                             <li><strong class="text-danger">Faulty:</strong> Has issues, needs repair</li>
-                            <li><strong class="text-secondary">Scrapped:</strong> Beyond repair, for disposal</li>
+                            <li><strong class="text-dark">Scrapped:</strong> Beyond repair, for disposal</li>
                         </ul>
                     </div>
 
@@ -109,7 +130,25 @@
                             <p class="mb-1"><strong>Name:</strong> @Model.Customer.FullName</p>
                             <p class="mb-1"><strong>Phone:</strong> @Model.Customer.PhoneNumber</p>
                             <p class="mb-1"><strong>Email:</strong> @Model.Customer.Email</p>
-                            <p class="mb-0"><strong>Address:</strong> @Model.Customer.Location</p>
+                            <p class="mb-0">
+                                <strong>Location:</strong>
+                                @(Model.Customer.Location != null ?
+                                    $"{Model.Customer.Location.Address}, {Model.Customer.Location.City}" : "N/A")
+                            </p>
+                        </div>
+                    }
+
+                    <!-- Repair History Summary -->
+                    @if (faultReport?.RepairSchedules != null && faultReport.RepairSchedules.Any())
+                    {
+                        <div class="mt-3">
+                            <h6 class="font-weight-bold">Recent Repair Activity</h6>
+                            @foreach (var repair in faultReport.RepairSchedules.OrderByDescending(r => r.CreatedDate).Take(2))
+                            {
+                                <p class="mb-1 small">
+                                    <strong>@repair.Status:</strong> @repair.CreatedDate.ToString("MM/dd HH:mm")
+                                </p>
+                            }
                         </div>
                     }
                 </div>
@@ -126,23 +165,23 @@
             "working" => "bg-success",
             "under repair" => "bg-warning",
             "faulty" => "bg-danger",
-            "scrapped" => "bg-secondary",
+            "scrapped" => "bg-dark",
             _ => "bg-secondary"
         };
     }
 
-    public string GetStatusBadgeClass(string status)
+    public string GetStatusBadgeClass(string statusFilter)
     {
-        return status?.ToLower() switch
+        return statusFilter?.ToLower() switch
         {
             "pending" => "bg-warning",
-            "in progress" => "bg-info",
+            "in progress" => "bg-primary",
             "resolved" => "bg-success",
-            "closed" => "bg-secondary",
-            "diagnosing" => "bg-primary",
+            "cancelled" => "bg-secondary",
+            "diagnosing" => "bg-info",
             "awaiting parts" => "bg-warning",
             "repairing" => "bg-danger",
-            "testing" => "bg-info",
+            "testing" => "bg-primary",
             "completed" => "bg-success",
             _ => "bg-secondary"
         };

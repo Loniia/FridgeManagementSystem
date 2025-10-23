@@ -141,7 +141,7 @@ namespace FridgeManagementSystem.Data
 
             // RepairSchedule relationships
             builder.Entity<RepairSchedule>()
-                .HasOne(r => r.Fault)
+                .HasOne(r => r.FaultReport)
                 .WithMany(f => f.RepairSchedules)
                 .HasForeignKey(r => r.FaultID)
                 .OnDelete(DeleteBehavior.NoAction);

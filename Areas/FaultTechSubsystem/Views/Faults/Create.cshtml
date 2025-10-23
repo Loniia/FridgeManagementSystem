@@ -1,4 +1,4 @@
-﻿@model FridgeManagementSystem.Models.Fault
+﻿@model FridgeManagementSystem.Models.FaultReport
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -29,11 +29,35 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label asp-for="Priority" class="control-label">Priority Level</label>
-                        <select asp-for="Priority" class="form-control" asp-items="ViewBag.PriorityOptions">
-                            <option value="">-- Select Priority --</option>
+                        <label asp-for="FaultType" class="control-label">Fault Type</label>
+                        <select asp-for="FaultType" class="form-control" asp-items="Html.GetEnumSelectList<FaultType>()">
+                            <option value="">-- Select Fault Type --</option>
                         </select>
-                        <span asp-validation-for="Priority" class="text-danger"></span>
+                        <span asp-validation-for="FaultType" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="UrgencyLevel" class="control-label">Urgency Level</label>
+                        <select asp-for="UrgencyLevel" class="form-control" asp-items="Html.GetEnumSelectList<UrgencyLevel>()">
+                            <option value="">-- Select Urgency --</option>
+                        </select>
+                        <span asp-validation-for="UrgencyLevel" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="StatusFilter" class="control-label">Initial Status</label>
+                        <select asp-for="StatusFilter" class="form-control">
+                            <option value="">-- Select Status --</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Diagnosing">Diagnosing</option>
+                        </select>
+                        <span asp-validation-for="StatusFilter" class="text-danger"></span>
                     </div>
                 </div>
             </div>
@@ -43,21 +67,14 @@
                 <textarea asp-for="FaultDescription" class="form-control" rows="4"
                           placeholder="Please describe the fault in detail..."></textarea>
                 <span asp-validation-for="FaultDescription" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Status" class="control-label">Initial Status</label>
-                <select asp-for="Status" class="form-control" asp-items="ViewBag.StatusOptions">
-                    <option value="">-- Select Status --</option>
-                </select>
-                <span asp-validation-for="Status" class="text-danger"></span>
+                <small class="form-text text-muted">
+                    Be as detailed as possible to help technicians diagnose the issue quickly.
+                </small>
             </div>
 
             <div class="form-group mt-4">
                 <button type="submit" class="btn btn-primary">
-                    <a asp-action="Dashboard">
                     <i class="fas fa-save"></i> Report Fault
-                    </a>
                 </button>
                 <a asp-action="Index" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to List
@@ -74,11 +91,14 @@
     <script>
         $(document).ready(function() {
             // Set default values if not selected
-            if ($('#Status').val() === '') {
-                $('#Status').val('Pending');
+            if ($('#StatusFilter').val() === '') {
+                $('#StatusFilter').val('Pending');
             }
-            if ($('#Priority').val() === '') {
-                $('#Priority').val('Low');
+            if ($('#UrgencyLevel').val() === '') {
+                $('#UrgencyLevel').val('@UrgencyLevel.Medium');
+            }
+            if ($('#FaultType').val() === '') {
+                $('#FaultType').val('@FaultType.Electrical');
             }
         });
     </script>
