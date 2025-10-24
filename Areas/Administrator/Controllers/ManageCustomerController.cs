@@ -82,7 +82,13 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             customer.IsVerified = true;
             await _context.SaveChangesAsync();
 
+            // Notify customer
+            await _notificationService.CreateAsync(
+                customer.ApplicationUserId.Value,
+                "Your registration has been approved. You can now log in."
+            );
 
+            TempData["Message"] = $"Customer {customer.FullName} approved.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -99,16 +105,14 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             customer.IsActive = false;
             customer.UpdatedAt = DateTime.Now; // optional if you added it
 
-            // Create a notification for the customer
-            var notification = new CustomerNotification
-            {
-                CustomerId = customer.CustomerID,
-                Message = $"Dear {customer.FullName}, your registration has been rejected. Please contact support for more details."
-            };
-
-            _context.CustomerNotifications.Add(notification);
+           
+          
             await _context.SaveChangesAsync();
-
+            // Notify customer
+            await _notificationService.CreateAsync(
+                customer.ApplicationUserId.Value,
+                "Your registration has been rejected. Please contact support."
+            );
             TempData["Message"] = $"Customer {customer.FullName} has been rejected, and notified.";
             return RedirectToAction(nameof(Index));
         }

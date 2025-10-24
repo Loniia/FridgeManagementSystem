@@ -1,5 +1,6 @@
 ﻿using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
+using FridgeManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,19 +21,21 @@ namespace FridgeManagementSystem.Controllers
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly FridgeDbContext _context;
         private readonly ILogger<AccountController> _logger;
+        private readonly INotificationService _notificationService;
 
         public AccountController(
              UserManager<ApplicationUser> userManager,
              SignInManager<ApplicationUser> signInManager,
              RoleManager<IdentityRole<int>> roleManager,
              FridgeDbContext context,
-             ILogger<AccountController> logger)
+             ILogger<AccountController> logger,INotificationService notificationService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _context = context;
             _logger = logger;
+            _notificationService = notificationService;
         }
 
         // --------------------
@@ -61,7 +64,7 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
-            // Check for rejected customers after successful login
+            // Check customer approval
             if (await _userManager.IsInRoleAsync(user, Roles.Customer))
             {
                 var customer = await _context.Customers
@@ -69,23 +72,21 @@ namespace FridgeManagementSystem.Controllers
 
                 if (customer != null)
                 {
-                    // Block rejected or unverified customers
-                    if (!customer.IsVerified || !customer.IsActive)
+                    if (!customer.IsVerified && customer.IsActive)
                     {
                         await _signInManager.SignOutAsync();
+                        TempData["LoginError"] = "Your registration is awaiting admin approval.";
+                        return RedirectToAction("Login");
+                    }
 
-                        string message = !customer.IsVerified
-                            ? "Your registration has been rejected. Please contact support."
-                            : "Your account is inactive. Contact support.";
-
-                        // Store message temporarily
-                        TempData["LoginError"] = message;
-
-                        return RedirectToAction("Login", "Account");
+                    if (!customer.IsActive)
+                    {
+                        await _signInManager.SignOutAsync();
+                        TempData["LoginError"] = "Your registration has been rejected. Please contact support.";
+                        return RedirectToAction("Login");
                     }
                 }
             }
-
             var roles = await _userManager.GetRolesAsync(user);
             _logger.LogInformation($"User {user.UserName} roles: {string.Join(",", roles)}");
 
@@ -186,24 +187,21 @@ namespace FridgeManagementSystem.Controllers
 
             _context.Customers.Add(customer);
 
-            // Optional: keep AdminNotifications only if you added that DbSet
-            if (_context.Database.CanConnect())
-            {
-                try
-                {
-                    if (_context.Model.FindEntityType(typeof(AdminNotification)) != null)
-                    {
-                        _context.AdminNotifications.Add(new AdminNotification
-                        {
-                            Message = $"New customer {customer.FullName} registered — awaiting verification."
-                        });
-                    }
-                }
-                catch { /* ignore if AdminNotifications not present */ }
-            }
+            
 
             await _context.SaveChangesAsync();
-            TempData["Message"] = "Registration successful. Wait for admin approval.";
+            // Notify the admins
+            var adminIds = await _userManager.GetUsersInRoleAsync(Roles.Admin);
+            foreach (var admin in adminIds)
+            {
+                await _notificationService.CreateAsync(
+                    admin.Id,
+                    $"New customer '{customer.FullName}' is awaiting approval.",
+                    "/Administrator/ManageCustomer/Index"
+                );
+            }
+            // ✅ Show success popup BEFORE redirect
+            TempData["RegistrationSuccess"] = "Registration successful! Your account is awaiting admin approval.";
             return RedirectToAction("Login");
         }
 

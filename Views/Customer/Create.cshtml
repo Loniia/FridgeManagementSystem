@@ -43,6 +43,12 @@
     <button type="submit" class="btn btn-primary">Create</button>
     <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </form>
+@if (TempData["RegistrationSuccess"] != null)
+{
+    <script>
+        alert("@TempData["RegistrationSuccess"]");
+    </script>
+}
 
 @section Scripts {
     @{
