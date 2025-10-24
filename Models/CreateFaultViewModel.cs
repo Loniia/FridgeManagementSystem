@@ -13,13 +13,15 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Please select priority")]
         public string Priority { get; set; }
 
+        [Required(ErrorMessage = "Please select fault type")]
+        [Display(Name = "Fault Type")]
+        public FaultType FaultType { get; set; }  // ✅ CORRECT - No StringLength on enum
+
         [Required(ErrorMessage = "Please describe the fault")]
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         [Display(Name = "Fault Description")]
-        public FaultType FaultType { get; set; }
-        public string FaultDescription { get; set; }
+        public string FaultDescription { get; set; }  // ✅ CORRECT - StringLength on string
 
-        // CHANGE THESE TO List<SelectListItem>
         public List<SelectListItem> FridgeOptions { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> PriorityOptions { get; set; } = new List<SelectListItem>();
     }

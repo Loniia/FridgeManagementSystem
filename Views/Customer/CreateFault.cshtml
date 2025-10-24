@@ -2,6 +2,11 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Report New Fault";
+
+    // Get the pre-selection status and fridge info
+    var hasPreselectedFridge = ViewBag.HasPreselectedFridge as bool? ?? false;
+    var selectedFridgeInfo = ViewBag.SelectedFridgeInfo as string ?? string.Empty;
+    var orderContext = ViewBag.OrderContext as string ?? string.Empty;
 }
 
 <div class="container-fluid">
@@ -29,24 +34,70 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     }
+                    @if (TempData["InfoMessage"] != null)
+                    {
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="fas fa-info-circle"></i> @TempData["InfoMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["WarningMessage"] != null)
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> @TempData["WarningMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
                     @if (Model != null)
                     {
                         <form asp-action="CreateFault" method="post">
                             @Html.AntiForgeryToken()
 
+                            <!-- Hidden field for FridgeId when pre-selected -->
+                            @if (hasPreselectedFridge)
+                            {
+                                <input type="hidden" asp-for="FridgeId" />
+                            }
+
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="FridgeId" class="form-label">Select Fridge *</label>
-                                        <select asp-for="FridgeId"
-                                                asp-items="Model.FridgeOptions ?? new List<SelectListItem>()"
-                                                class="form-select">
-                                            <option value="">-- Select Fridge --</option>
-                                        </select>
-                                        <span asp-validation-for="FridgeId" class="text-danger"></span>
+                                <!-- Fridge Selection - Only show if NOT pre-selected -->
+                                @if (!hasPreselectedFridge)
+                                {
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="FridgeId" class="form-label">Select Fridge *</label>
+                                            <select asp-for="FridgeId"
+                                                    asp-items="Model.FridgeOptions ?? new List<SelectListItem>()"
+                                                    class="form-select">
+                                                <option value="">-- Select Fridge --</option>
+                                            </select>
+                                            <span asp-validation-for="FridgeId" class="text-danger"></span>
+                                            <small class="form-text text-muted">
+                                                <i class="fas fa-info-circle"></i>
+                                                Select the fridge that needs repair
+                                            </small>
+                                        </div>
                                     </div>
-                                </div>
+                                }
+                                else
+                                {
+                                    <!-- Show selected fridge information -->
+                                    <div class="col-md-12">
+                                        <div class="alert alert-info">
+                                            <h6><i class="fas fa-refrigerator me-2"></i>Reporting Fault For:</h6>
+                                            <p class="mb-0">
+                                                <strong>@selectedFridgeInfo@orderContext</strong>
+                                            </p>
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                You can report a different fridge by going back to your orders
+                                            </small>
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Priority Level -->
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label asp-for="Priority" class="form-label">Priority Level *</label>
@@ -58,40 +109,55 @@
                                         <span asp-validation-for="Priority" class="text-danger"></span>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- ✅ NEW: Fault Type Dropdown -->
-                            <div class="row">
+                                <!-- Fault Type -->
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label asp-for="FaultType" class="form-label">Fault Type *</label>
-                                        <select asp-for="FaultType"
-                                                asp-items="Model.FridgeOptions ?? new List<SelectListItem>()"
-                                                class="form-select">
+                                        <select asp-for="FaultType" class="form-select">
                                             <option value="">-- Select Fault Type --</option>
+                                            <option value="Electrical">Electrical</option>
+                                            <option value="DoorSeal">Door Seal</option>
+                                            <option value="CoolingIssue">Cooling Issue</option>
+                                            <option value="NoiseVibration">Noise/Vibration</option>
+                                            <option value="PowerIssue">Power Issue</option>
+                                            <option value="Compressor">Compressor</option>
+                                            <option value="Thermostat">Thermostat</option>
+                                            <option value="WaterLeak">Water Leak</option>
+                                            <option value="IceMaker">Ice Maker</option>
                                         </select>
                                         <span asp-validation-for="FaultType" class="text-danger"></span>
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle"></i>
+                                            Select the type of fault you're experiencing
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- Fault Description -->
+                                <div class="col-12">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="FaultDescription" class="form-label">Fault Description *</label>
+                                        <textarea asp-for="FaultDescription" class="form-control" rows="4"
+                                                  placeholder="Please describe the issue in detail..."></textarea>
+                                        <span asp-validation-for="FaultDescription" class="text-danger"></span>
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle"></i>
+                                            Provide as much detail as possible to help us diagnose the issue
+                                        </small>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="form-group mb-4">
-                                <label asp-for="FaultDescription" class="form-label">Fault Description *</label>
-                                <textarea asp-for="FaultDescription" class="form-control" rows="5"
-                                          placeholder="Please describe the fault in detail..."></textarea>
-                                <span asp-validation-for="FaultDescription" class="text-danger"></span>
-                                <small class="form-text text-muted">
-                                    <i class="fas fa-info-circle"></i> Please be as detailed as possible to help our technicians diagnose the issue quickly.
-                                </small>
-                            </div>
-
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a asp-action="MyFaults" class="btn btn-secondary me-md-2">
-                                    <i class="fas fa-arrow-left"></i> Back to My Faults
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane"></i> Report Fault
-                                </button>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-paper-plane me-1"></i>Report Fault
+                                    </button>
+                                    <a href="@Url.Action("OrderHistory", "Customer")" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Orders
+                                    </a>
+                                </div>
                             </div>
                         </form>
                     }
@@ -112,4 +178,50 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            // Auto-select the fridge if there's only one option (only when dropdown is visible)
+            if ($('#FridgeId').length > 0) {
+                var fridgeOptions = $('#FridgeId option').length;
+                if (fridgeOptions === 2) { // 1 option + the default "Select Fridge" option
+                    $('#FridgeId option:eq(1)').prop('selected', true);
+                }
+            }
+
+            // Set default priority to Medium
+            if ($('#Priority').val() === '') {
+                $('#Priority').val('Medium');
+            }
+
+            // Character count and validation for description
+            $('#FaultDescription').on('input', function() {
+                var length = $(this).val().length;
+                var maxLength = 500; // Match your StringLength attribute
+
+                // Update character counter
+                var counter = $(this).siblings('.char-counter');
+                if (counter.length === 0) {
+                    $(this).after('<div class="char-counter form-text text-muted"></div>');
+                    counter = $(this).siblings('.char-counter');
+                }
+                counter.text(length + '/' + maxLength + ' characters');
+
+                // Update validation styling
+                if (length > 0 && length <= maxLength) {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                    counter.removeClass('text-danger').addClass('text-success');
+                } else if (length > maxLength) {
+                    $(this).removeClass('is-valid').addClass('is-invalid');
+                    counter.removeClass('text-success').addClass('text-danger');
+                } else {
+                    $(this).removeClass('is-valid is-invalid');
+                    counter.removeClass('text-success text-danger');
+                }
+            });
+
+            // Trigger input event to initialize character counter
+            $('#FaultDescription').trigger('input');
+        });
+    </script>
 }
