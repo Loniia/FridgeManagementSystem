@@ -20,7 +20,7 @@ namespace FridgeManagementSystem.Models
 
         [Required]
         [Display(Name = "Priority")]
-        public string Priority { get; set; } = "Medium"; // Low, Medium, High
+        public string Priority { get; set; } = "Medium"; // Low, Medium, High.
 
         public DateTime ScheduledDate { get; set; }
 
