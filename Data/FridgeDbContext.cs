@@ -242,7 +242,7 @@ namespace FridgeManagementSystem.Data
             var rnd = new Random();
             string[] brands = { "Samsung", "LG", "Hisense", "Defy", "Bosch" };
             string[] types = { "Single Door", "Double Door", "Mini Fridge" };
-            for (int i = 1; i <= 12; i++)
+            for (int i = 1; i <= 30; i++)
             {
                 fridges.Add(new Fridge
                 {

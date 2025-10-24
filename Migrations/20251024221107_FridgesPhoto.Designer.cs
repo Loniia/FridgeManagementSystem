@@ -4,6 +4,7 @@ using FridgeManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    partial class FridgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251024221107_FridgesPhoto")]
+    partial class FridgesPhoto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -769,7 +772,7 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 25),
                             DeliveryDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(7401),
                             FaultReportId = 0,
-                            FridgeType = "Single Door",
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge1.jpg",
                             IsActive = true,
                             Model = "Model-1",
@@ -783,7 +786,7 @@ namespace FridgeManagementSystem.Migrations
                         new
                         {
                             FridgeId = 2,
-                            Brand = "LG",
+                            Brand = "Defy",
                             Condition = "Working",
                             DateAdded = new DateOnly(2025, 10, 25),
                             DeliveryDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(7447),
@@ -807,13 +810,13 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 25),
                             DeliveryDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(7474),
                             FaultReportId = 0,
-                            FridgeType = "Single Door",
+                            FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge3.jpg",
                             IsActive = true,
                             Model = "Model-3",
                             Price = 6341m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 1,
+                            Quantity = 9,
                             Status = "Available",
                             SupplierID = 1,
                             UpdatedDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(7449)
@@ -870,7 +873,7 @@ namespace FridgeManagementSystem.Migrations
                             Model = "Model-6",
                             Price = 6980m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 8,
+                            Quantity = 1,
                             Status = "Available",
                             SupplierID = 1,
                             UpdatedDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(7529)
@@ -940,7 +943,7 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 25),
                             DeliveryDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(7904),
                             FaultReportId = 0,
-                            FridgeType = "Double Door",
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge10.jpg",
                             IsActive = true,
                             Model = "Model-10",
@@ -959,7 +962,7 @@ namespace FridgeManagementSystem.Migrations
                             DateAdded = new DateOnly(2025, 10, 25),
                             DeliveryDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(7959),
                             FaultReportId = 0,
-                            FridgeType = "Mini Fridge",
+                            FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge11.jpg",
                             IsActive = true,
                             Model = "Model-11",
@@ -1231,7 +1234,7 @@ namespace FridgeManagementSystem.Migrations
                             Model = "Model-25",
                             Price = 9289m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 4,
+                            Quantity = 9,
                             Status = "Available",
                             SupplierID = 1,
                             UpdatedDate = new DateTime(2025, 10, 25, 0, 11, 2, 200, DateTimeKind.Local).AddTicks(8393)
@@ -1612,6 +1615,7 @@ namespace FridgeManagementSystem.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
