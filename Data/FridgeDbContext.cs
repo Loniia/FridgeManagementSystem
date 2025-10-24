@@ -141,7 +141,7 @@ namespace FridgeManagementSystem.Data
 
             // RepairSchedule relationships
             builder.Entity<RepairSchedule>()
-                .HasOne(r => r.Fault)
+                .HasOne(r => r.FaultReport)
                 .WithMany(f => f.RepairSchedules)
                 .HasForeignKey(r => r.FaultID)
                 .OnDelete(DeleteBehavior.NoAction);
@@ -215,7 +215,14 @@ namespace FridgeManagementSystem.Data
                 .HasForeignKey<Payment>(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-           
+            builder.Entity<PurchaseRequest>()
+               .HasOne(pr => pr.Inventory)
+               .WithMany()
+               .HasForeignKey(pr => pr.InventoryID)
+               .IsRequired(false)  // allows null
+               .OnDelete(DeleteBehavior.NoAction);
+
+
 
             // --- 🌟 Seed Supplier 🌟 ---
             builder.Entity<Supplier>().HasData(

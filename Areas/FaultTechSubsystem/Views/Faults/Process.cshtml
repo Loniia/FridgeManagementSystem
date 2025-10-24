@@ -2,37 +2,54 @@
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Process Fault";
-    var faultInfo = ViewBag.FaultInfo as FridgeManagementSystem.Models.Fault;
+    ViewData["Title"] = "Process Fault Report";
+    var faultReport = ViewBag.FaultReport as FridgeManagementSystem.Models.FaultReport;
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-gray-800">Process Fault</h1>
+        <h1 class="h3 text-gray-800">Process Fault Report</h1>
         <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Faults
+            <i class="fas fa-arrow-left"></i> Back to Fault Reports
         </a>
     </div>
 
-    @if (faultInfo != null)
+    @if (faultReport != null)
     {
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-primary text-white">
-                <h6 class="m-0 font-weight-bold">Fault Information</h6>
+                <h6 class="m-0 font-weight-bold">Fault Report Information</h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
-                        <strong>Fault No:</strong> F@(faultInfo.FaultID.ToString("D3"))<br>
-                        <strong>Priority:</strong> <span class="badge @GetPriorityBadgeClass(faultInfo.Priority)">@faultInfo.Priority</span>
+                        <strong>Report No:</strong> FR@(faultReport.FaultReportId.ToString("D3"))<br>
+                        <strong>Fault Type:</strong> <span class="badge bg-info">@faultReport.FaultType</span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Status:</strong> <span class="badge @GetStatusBadgeClass(faultInfo.Status)">@faultInfo.Status</span><br>
-                        <strong>Reported:</strong> @faultInfo.CreatedDate.ToString("yyyy/MM/dd")
+                        <strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(faultReport.UrgencyLevel)">@faultReport.UrgencyLevel</span><br>
+                        <strong>Status:</strong> <span class="badge @GetStatusBadgeClass(faultReport.StatusFilter)">@faultReport.StatusFilter</span>
                     </div>
-                    <div class="col-md-6">
-                        <strong>Description:</strong> @faultInfo.FaultDescription<br>
-                        <strong>Fridge:</strong> @(faultInfo.Fridge?.Model ?? "N/A") - @(faultInfo.Fridge?.SerialNumber ?? "N/A")
+                    <div class="col-md-3">
+                        <strong>Reported:</strong> @faultReport.ReportDate.ToString("yyyy/MM/dd")<br>
+                        <strong>Source:</strong>
+                        @if (faultReport.MaintenanceVisitId > 0)
+                        {
+                            <text>Maintenance</text>
+                        }
+                        else
+                        {
+                            <text>Customer</text>
+                        }
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Fridge:</strong> @(faultReport.Fridge?.Model ?? "N/A")<br>
+                        <strong>Serial:</strong> @(faultReport.Fridge?.SerialNumber ?? "N/A")
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <strong>Description:</strong> @faultReport.FaultDescription
                     </div>
                 </div>
             </div>
@@ -43,13 +60,15 @@
         <div class="col-lg-8">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Fault Processing</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Fault Report Processing</h6>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Process" asp-route-id="@faultInfo?.FaultID">
+                    <!-- FIXED FORM: Added method="post" and RepairID hidden field -->
+                    <form asp-action="Process" asp-route-id="@faultReport?.FaultReportId" method="post">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" asp-for="FaultID" />
+                        <input type="hidden" asp-for="FaultReportId" />
                         <input type="hidden" asp-for="FridgeId" />
+                        <input type="hidden" asp-for="RepairID" />
 
                         <div class="form-group mb-3">
                             <label asp-for="Diagnosis" class="control-label">Initial Diagnosis</label>
@@ -91,9 +110,9 @@
                             </button>
                             <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 
-                            @if (faultInfo?.Status != "Resolved")
+                            @if (faultReport?.StatusFilter != "Resolved")
                             {
-                                <a asp-action="Repair" asp-route-id="@faultInfo?.FaultID" class="btn btn-warning">
+                                <a asp-action="Repair" asp-route-id="@faultReport?.FaultReportId" class="btn btn-warning">
                                     <i class="fas fa-tools"></i> Start Repair
                                 </a>
                             }
@@ -119,6 +138,19 @@
                             <li><strong>Completed:</strong> Fault resolved and verified</li>
                         </ol>
                     </div>
+
+                    @if (faultReport?.RepairSchedules != null && faultReport.RepairSchedules.Any())
+                    {
+                        <div class="alert alert-warning mt-3">
+                            <h6><i class="fas fa-history"></i> Recent Activity</h6>
+                            @foreach (var repair in faultReport.RepairSchedules.OrderByDescending(r => r.CreatedDate).Take(2))
+                            {
+                                <p class="mb-1 small">
+                                    <strong>@repair.Status</strong> - @repair.CreatedDate.ToString("MM/dd HH:mm")
+                                </p>
+                            }
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -126,30 +158,32 @@
 </div>
 
 @functions {
-    public string GetStatusBadgeClass(string status)
+    public string GetStatusBadgeClass(string statusFilter)
     {
-        return status?.ToLower() switch
+        return statusFilter?.ToLower() switch
         {
             "pending" => "bg-warning",
-            "in progress" => "bg-info",
+            "in progress" => "bg-primary",
             "resolved" => "bg-success",
-            "closed" => "bg-secondary",
-            "diagnosing" => "bg-primary",
+            "cancelled" => "bg-secondary",
+            "diagnosing" => "bg-info",
             "awaiting parts" => "bg-warning",
             "repairing" => "bg-danger",
-            "testing" => "bg-info",
+            "testing" => "bg-primary",
             "completed" => "bg-success",
             _ => "bg-secondary"
         };
     }
 
-    public string GetPriorityBadgeClass(string priority)
+    public string GetUrgencyBadgeClass(UrgencyLevel urgencyLevel)
     {
-        return priority?.ToLower() switch
+        return urgencyLevel switch
         {
-            "high" => "bg-danger",
-            "medium" => "bg-warning",
-            "low" => "bg-success",
+            UrgencyLevel.Critical => "bg-danger",
+            UrgencyLevel.Emergency => "bg-dark",
+            UrgencyLevel.High => "bg-warning",
+            UrgencyLevel.Medium => "bg-info",
+            UrgencyLevel.Low => "bg-success",
             _ => "bg-secondary"
         };
     }

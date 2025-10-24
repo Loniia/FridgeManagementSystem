@@ -20,7 +20,7 @@ namespace FridgeManagementSystem.Models
         [Required]
         [Display(Name = "Condition")]
         public string Condition { get; set; } = "Working"; // Working, Under Repair, Faulty, Scrapped
-
+        public string Notes { get; set; } // Nullable by default
         public DateTime PurchaseDate { get; set; }
 
         [Display(Name = "Warranty Expiry")]
@@ -37,7 +37,7 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("Location")]
         public int? LocationId { get; set; }
         public Location Location { get; set; }  
-        public int FaultID { get; set; }
+        public int FaultReportId { get; set; }
         public int Quantity { get; set; }
         public DateTime DeliveryDate { get; set; }
         public string Status { get; set; } // e.g., Received, In Transit, Delivered

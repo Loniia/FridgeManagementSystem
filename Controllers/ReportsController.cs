@@ -179,30 +179,66 @@ namespace FridgeManagementSystem.Controllers
             return Json(data);
         }
 
-        // Add this to your ReportsController
         [HttpGet]
         public async Task<JsonResult> LocationMapData()
         {
-            var locationData = await _context.Locations
+            var data = await _context.Locations
                 .Where(l => l.IsActive)
                 .Include(l => l.Fridge)
-                .GroupBy(l => new { l.Province, l.City })
-                .Select(g => new
+                .Include(l => l.Customer)
+                .Include(l => l.Employee)
+                .Select(l => new
                 {
-                    Province = g.Key.Province,
-                    City = g.Key.City,
-                    FridgeCount = g.Sum(l => l.Fridge.Count(f => f.IsActive)),
-                    Locations = g.Select(l => new
-                    {
-                        l.Address,
-                        l.PostalCode,
-                        FridgeCount = l.Fridge.Count(f => f.IsActive)
-                    }).ToList()
+                    l.Province,
+                    l.City,
+                    l.Address,
+                    l.PostalCode,
+                    l.Latitude,
+                    l.Longitude,
+                    FridgeCount = l.Fridge.Count(f => f.IsActive),
+                    CustomerCount = l.Customer.Count(c => c.IsActive),
+                    EmployeeCount = l.Employee.Count(e => e.Status=="Active")
                 })
-                .OrderByDescending(x => x.FridgeCount)
                 .ToListAsync();
 
-            return Json(locationData);
+            return Json(data);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> SupplierPerformance(int top = 10)
+        {
+            var data = await _context.PurchaseOrders
+                .Include(po => po.Supplier)
+                .Where(po => po.SupplierID != 0)
+                .GroupBy(po => new { po.SupplierID, po.Supplier.Name})
+                .Select(g => new
+                {
+                    SupplierID = g.Key.SupplierID,
+                    SupplierName = g.Key.Name,
+                    OrdersCount = g.Count(),
+                    TotalAmount = g.Sum(x => x.TotalAmount)
+                })
+                .OrderByDescending(x => x.TotalAmount)
+                .Take(top)
+                .ToListAsync();
+
+            return Json(data);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> MaintenanceSummary()
+        {
+            var data = await _context.MaintenanceVisit
+                .GroupBy(m => m.Status)
+                .Select(g => new
+                {
+                    Status = g.Key,
+                    Count = g.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+
+            return Json(data);
         }
 
     }

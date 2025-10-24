@@ -15,6 +15,10 @@ namespace FridgeManagementSystem.Models
         public string Province { get; set; }
         [Required(ErrorMessage = "Postal code is required")]
         public string PostalCode { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+
+
         // Soft delete flag
         public bool IsActive { get; set; } = true;
         public virtual ICollection<Customer> Customer { get; set; }

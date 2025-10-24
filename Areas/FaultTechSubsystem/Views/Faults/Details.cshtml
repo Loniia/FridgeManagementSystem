@@ -1,18 +1,20 @@
-﻿@model FridgeManagementSystem.Models.Fault
+﻿@model FridgeManagementSystem.Models.FaultReport
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Fault Details Page";
+    ViewData["Title"] = "Fault Report Details";
 }
 
 <div class="container-fluid">
     <!-- Header -->
     <div class="row mb-3 border-bottom pb-2">
         <div class="col-md-8">
-            <h5 class="fw-bold">Fault Details Page</h5>
-            <p><strong>Fault No:</strong> F@(Model.FaultID.ToString("D3"))</p>
-            <p><strong>Priority:</strong> @Model.Priority</p>
-            <p><strong>Date Reported:</strong> @Model.CreatedDate.ToString("yyyy/MM/dd")</p>
+            <h5 class="fw-bold">Fault Report Details</h5>
+            <p><strong>Report No:</strong> FR@(Model.FaultReportId.ToString("D3"))</p>
+            <p><strong>Fault Type:</strong> <span class="badge bg-info">@Model.FaultType</span></p>
+            <p><strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(Model.UrgencyLevel)">@Model.UrgencyLevel</span></p>
+            <p><strong>Date Reported:</strong> @Model.ReportDate.ToString("yyyy/MM/dd")</p>
+            <p><strong>Status:</strong> <span class="badge @GetStatusBadgeClass(Model.StatusFilter)">@Model.StatusFilter</span></p>
         </div>
         <div class="col-md-4 text-end">
             <img src="~/images/logo.png" alt="Company Logo" style="max-height:60px;" />
@@ -21,10 +23,31 @@
 
     <!-- Details Section -->
     <div class="border p-3 mb-3">
-        <h6 class="fw-bold mb-3 text-center">Details</h6>
+        <h6 class="fw-bold mb-3 text-center">Fault Details</h6>
         <div class="row">
-            <!-- Fridge Information -->
+            <!-- Fault Information -->
             <div class="col-md-6 border-end">
+                <h6 class="fw-bold">Fault Information:</h6>
+                <p><strong>Description:</strong> @Model.FaultDescription</p>
+                <p>
+                    <strong>Reported By:</strong>
+                    @if (Model.MaintenanceVisitId > 0)
+                    {
+                        <text>Maintenance Technician</text>
+                    }
+                    else
+                    {
+                        <text>Customer</text>
+                    }
+                </p>
+                @if (Model.MaintenanceVisit != null)
+                {
+                    <p><strong>Maintenance Visit:</strong> @Model.MaintenanceVisit.ScheduledDate.ToString("yyyy/MM/dd")</p>
+                }
+            </div>
+
+            <!-- Fridge Information -->
+            <div class="col-md-6">
                 <h6 class="fw-bold">Fridge Information:</h6>
                 @if (Model.Fridge != null)
                 {
@@ -32,29 +55,51 @@
                     <p><strong>Model:</strong> @Model.Fridge.Model</p>
                     <p><strong>Brand:</strong> @Model.Fridge.Brand</p>
                     <p><strong>Type:</strong> @Model.Fridge.FridgeType</p>
+                    <p><strong>Condition:</strong> <span class="badge @GetConditionBadgeClass(Model.Fridge.Condition)">@Model.Fridge.Condition</span></p>
                 }
                 else
                 {
                     <p class="text-muted">No fridge information available.</p>
                 }
             </div>
-
-            <!-- Repair History -->
-            <div class="col-md-6">
-                <h6 class="fw-bold">Repair History:</h6>
-                @if (Model.RepairSchedules.Any())
-                {
-                    foreach (var repair in Model.RepairSchedules)
-                    {
-                        <p>@repair.RepairNotes</p>
-                    }
-                }
-                else
-                {
-                    <p class="text-muted">First time repair for this fridge.</p>
-                }
-            </div>
         </div>
+    </div>
+
+    <!-- Repair History -->
+    <div class="border p-3 mb-3">
+        <h6 class="fw-bold mb-3 text-center">Repair History</h6>
+        @if (Model.RepairSchedules != null && Model.RepairSchedules.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Repair Date</th>
+                            <th>Status</th>
+                            <th>Diagnosis</th>
+                            <th>Repair Notes</th>
+                            <th>Parts Used</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var repair in Model.RepairSchedules.OrderByDescending(r => r.CreatedDate))
+                        {
+                            <tr>
+                                <td>@repair.CreatedDate.ToString("yyyy/MM/dd")</td>
+                                <td><span class="badge @GetRepairStatusBadgeClass(repair.Status)">@repair.Status</span></td>
+                                <td>@(repair.Diagnosis ?? "N/A")</td>
+                                <td>@(repair.RepairNotes ?? "N/A")</td>
+                                <td>@(repair.PartsUsed ?? "N/A")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">No repair history available for this fault report.</p>
+        }
     </div>
 
     <!-- Customer Information -->
@@ -77,7 +122,6 @@
                         <td>@Model.Fridge.Customer.Email</td>
                         <td>@Model.Fridge.Customer.PhoneNumber</td>
                         <td>@Model.Fridge.Customer.Location</td>
-
                     </tr>
                 </tbody>
             </table>
@@ -88,13 +132,78 @@
         }
     </div>
 
-    <!-- Buttons -->
+    <!-- Action Buttons -->
     <div class="mt-3">
-        <button type="button" class="btn btn-danger" onclick="window.print()">
-            <i class="fas fa-print"></i> Print
-        </button>
-        <a asp-action="Index" class="btn btn-secondary">Close</a>
+        <div class="btn-group" role="group">
+            <a asp-action="Process" asp-route-id="@Model.FaultReportId" class="btn btn-primary">
+                <i class="fas fa-cogs"></i> Process Fault
+            </a>
+            @if (Model.StatusFilter == "In Progress" || Model.StatusFilter == "Diagnosing")
+            {
+                <a asp-action="Repair" asp-route-id="@Model.FaultReportId" class="btn btn-warning">
+                    <i class="fas fa-tools"></i> Start Repair
+                </a>
+            }
+            <a asp-action="UpdateCondition" asp-route-id="@Model.FaultReportId" class="btn btn-secondary">
+                <i class="fas fa-thermometer-half"></i> Update Condition
+            </a>
+            <button type="button" class="btn btn-danger" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+        </div>
     </div>
 </div>
 
+@functions {
+    public string GetUrgencyBadgeClass(UrgencyLevel urgencyLevel)
+    {
+        return urgencyLevel switch
+        {
+            UrgencyLevel.Critical => "bg-danger",
+            UrgencyLevel.Emergency => "bg-dark",
+            UrgencyLevel.High => "bg-warning",
+            UrgencyLevel.Medium => "bg-info",
+            UrgencyLevel.Low => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
 
+    public string GetStatusBadgeClass(string statusFilter)
+    {
+        return statusFilter?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "in progress" => "bg-primary",
+            "resolved" => "bg-success",
+            "cancelled" => "bg-secondary",
+            "diagnosing" => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetRepairStatusBadgeClass(string repairStatus)
+    {
+        return repairStatus?.ToLower() switch
+        {
+            "diagnosing" => "bg-info",
+            "awaiting parts" => "bg-warning",
+            "repairing" => "bg-danger",
+            "testing" => "bg-primary",
+            "completed" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetConditionBadgeClass(string condition)
+    {
+        return condition?.ToLower() switch
+        {
+            "working" => "bg-success",
+            "under repair" => "bg-warning",
+            "faulty" => "bg-danger",
+            "scrapped" => "bg-dark",
+            _ => "bg-secondary"
+        };
+    }
+}

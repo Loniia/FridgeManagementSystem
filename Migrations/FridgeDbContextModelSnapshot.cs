@@ -697,7 +697,7 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<DateTime>("DeliveryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("FaultID")
+                    b.Property<int>("FaultReportId")
                         .HasColumnType("int");
 
                     b.Property<string>("FridgeType")
@@ -718,6 +718,9 @@ namespace FridgeManagementSystem.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -761,230 +764,230 @@ namespace FridgeManagementSystem.Migrations
                         new
                         {
                             FridgeId = 1,
-                            Brand = "Bosch",
+                            Brand = "Samsung",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6900),
-                            FaultID = 0,
-                            FridgeType = "Single Door",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1847),
+                            FaultReportId = 0,
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge1.jpg",
                             IsActive = true,
                             Model = "Model-1",
-                            Price = 9732m,
+                            Price = 11834m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 9,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6721)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1493)
                         },
                         new
                         {
                             FridgeId = 2,
-                            Brand = "Samsung",
+                            Brand = "Defy",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6931),
-                            FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1910),
+                            FaultReportId = 0,
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge2.jpg",
                             IsActive = true,
                             Model = "Model-2",
-                            Price = 10346m,
+                            Price = 6335m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 4,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6921)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1853)
                         },
                         new
                         {
                             FridgeId = 3,
-                            Brand = "Defy",
+                            Brand = "LG",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6940),
-                            FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1944),
+                            FaultReportId = 0,
+                            FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge3.jpg",
                             IsActive = true,
                             Model = "Model-3",
-                            Price = 5174m,
+                            Price = 6400m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 9,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6932)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1912)
                         },
                         new
                         {
                             FridgeId = 4,
-                            Brand = "Hisense",
+                            Brand = "Samsung",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6949),
-                            FaultID = 0,
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1968),
+                            FaultReportId = 0,
                             FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge4.jpg",
                             IsActive = true,
                             Model = "Model-4",
-                            Price = 7524m,
+                            Price = 6810m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 9,
+                            Quantity = 7,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6941)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1946)
                         },
                         new
                         {
                             FridgeId = 5,
-                            Brand = "LG",
+                            Brand = "Defy",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6957),
-                            FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1991),
+                            FaultReportId = 0,
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge5.jpg",
                             IsActive = true,
                             Model = "Model-5",
-                            Price = 4734m,
+                            Price = 10476m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 2,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6950)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1970)
                         },
                         new
                         {
                             FridgeId = 6,
                             Brand = "Defy",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6970),
-                            FaultID = 0,
-                            FridgeType = "Mini Fridge",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2019),
+                            FaultReportId = 0,
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge6.jpg",
                             IsActive = true,
                             Model = "Model-6",
-                            Price = 9264m,
+                            Price = 6450m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 8,
+                            Quantity = 1,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6962)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1999)
                         },
                         new
                         {
                             FridgeId = 7,
-                            Brand = "Samsung",
+                            Brand = "Bosch",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6979),
-                            FaultID = 0,
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2041),
+                            FaultReportId = 0,
                             FridgeType = "Double Door",
                             ImageUrl = "/images/fridges/fridge7.jpg",
                             IsActive = true,
                             Model = "Model-7",
-                            Price = 10765m,
+                            Price = 5093m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 5,
+                            Quantity = 6,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6971)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2021)
                         },
                         new
                         {
                             FridgeId = 8,
-                            Brand = "Samsung",
+                            Brand = "Defy",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6987),
-                            FaultID = 0,
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2062),
+                            FaultReportId = 0,
                             FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge8.jpg",
                             IsActive = true,
                             Model = "Model-8",
-                            Price = 9719m,
+                            Price = 6581m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 5,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6980)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2042)
                         },
                         new
                         {
                             FridgeId = 9,
                             Brand = "Bosch",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6996),
-                            FaultID = 0,
-                            FridgeType = "Single Door",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2083),
+                            FaultReportId = 0,
+                            FridgeType = "Mini Fridge",
                             ImageUrl = "/images/fridges/fridge9.jpg",
                             IsActive = true,
                             Model = "Model-9",
-                            Price = 11230m,
+                            Price = 11707m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 7,
+                            Quantity = 2,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(6988)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2063)
                         },
                         new
                         {
                             FridgeId = 10,
-                            Brand = "Hisense",
+                            Brand = "Defy",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(7044),
-                            FaultID = 0,
-                            FridgeType = "Double Door",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2118),
+                            FaultReportId = 0,
+                            FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge10.jpg",
                             IsActive = true,
                             Model = "Model-10",
-                            Price = 11723m,
-                            PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 9,
-                            Status = "Available",
-                            SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(7012)
-                        },
-                        new
-                        {
-                            FridgeId = 11,
-                            Brand = "LG",
-                            Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(7080),
-                            FaultID = 0,
-                            FridgeType = "Double Door",
-                            ImageUrl = "/images/fridges/fridge11.jpg",
-                            IsActive = true,
-                            Model = "Model-11",
-                            Price = 11340m,
+                            Price = 3644m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Quantity = 5,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(7060)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2087)
+                        },
+                        new
+                        {
+                            FridgeId = 11,
+                            Brand = "Bosch",
+                            Condition = "Working",
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2248),
+                            FaultReportId = 0,
+                            FridgeType = "Double Door",
+                            ImageUrl = "/images/fridges/fridge11.jpg",
+                            IsActive = true,
+                            Model = "Model-11",
+                            Price = 9576m,
+                            PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Quantity = 7,
+                            Status = "Available",
+                            SupplierID = 1,
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2224)
                         },
                         new
                         {
                             FridgeId = 12,
-                            Brand = "Samsung",
+                            Brand = "Bosch",
                             Condition = "Working",
-                            DateAdded = new DateOnly(2025, 10, 19),
-                            DeliveryDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(7107),
-                            FaultID = 0,
+                            DateAdded = new DateOnly(2025, 10, 24),
+                            DeliveryDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2270),
+                            FaultReportId = 0,
                             FridgeType = "Single Door",
                             ImageUrl = "/images/fridges/fridge12.jpg",
                             IsActive = true,
                             Model = "Model-12",
-                            Price = 11113m,
+                            Price = 7122m,
                             PurchaseDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Quantity = 4,
+                            Quantity = 9,
                             Status = "Available",
                             SupplierID = 1,
-                            UpdatedDate = new DateTime(2025, 10, 19, 19, 59, 58, 925, DateTimeKind.Local).AddTicks(7082)
+                            UpdatedDate = new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2250)
                         });
                 });
 
@@ -1074,6 +1077,12 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
                     b.Property<string>("PostalCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1140,6 +1149,9 @@ namespace FridgeManagementSystem.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaintenanceRequestId"));
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("FridgeId")
                         .HasColumnType("int");
@@ -1293,9 +1305,6 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CustomersCustomerID")
-                        .HasColumnType("int");
-
                     b.Property<string>("DeliveryAddress")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -1325,8 +1334,6 @@ namespace FridgeManagementSystem.Migrations
                     b.HasKey("OrderId");
 
                     b.HasIndex("CustomerID");
-
-                    b.HasIndex("CustomersCustomerID");
 
                     b.ToTable("Orders");
                 });
@@ -1501,7 +1508,10 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int?>("FridgeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("InventoryID")
+                    b.Property<int?>("InventoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("InventoryID1")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -1555,6 +1565,8 @@ namespace FridgeManagementSystem.Migrations
                     b.HasIndex("FridgeId");
 
                     b.HasIndex("InventoryID");
+
+                    b.HasIndex("InventoryID1");
 
                     b.ToTable("PurchaseRequests");
                 });
@@ -1628,6 +1640,12 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int>("FaultID")
                         .HasColumnType("int");
 
+                    b.Property<int>("FaultID1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FaultReportId")
+                        .HasColumnType("int");
+
                     b.Property<int>("FridgeId")
                         .HasColumnType("int");
 
@@ -1674,6 +1692,8 @@ namespace FridgeManagementSystem.Migrations
                     b.HasIndex("Employee");
 
                     b.HasIndex("FaultID");
+
+                    b.HasIndex("FaultID1");
 
                     b.HasIndex("FridgeId");
 
@@ -2241,15 +2261,11 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Order", b =>
                 {
-                    b.HasOne("FridgeManagementSystem.Models.Customer", null)
-                        .WithMany()
+                    b.HasOne("FridgeManagementSystem.Models.Customer", "Customers")
+                        .WithMany("Orders")
                         .HasForeignKey("CustomerID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("FridgeManagementSystem.Models.Customer", "Customers")
-                        .WithMany("Orders")
-                        .HasForeignKey("CustomersCustomerID");
 
                     b.Navigation("Customers");
                 });
@@ -2322,10 +2338,13 @@ namespace FridgeManagementSystem.Migrations
                         .HasForeignKey("FridgeId");
 
                     b.HasOne("FridgeManagementSystem.Models.Inventory", "Inventory")
-                        .WithMany("PurchaseRequests")
+                        .WithMany()
                         .HasForeignKey("InventoryID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("FridgeManagementSystem.Models.Inventory", null)
+                        .WithMany("PurchaseRequests")
+                        .HasForeignKey("InventoryID1");
 
                     b.Navigation("Fridge");
 
@@ -2357,9 +2376,15 @@ namespace FridgeManagementSystem.Migrations
                         .WithMany()
                         .HasForeignKey("Employee");
 
-                    b.HasOne("FridgeManagementSystem.Models.Fault", "Fault")
+                    b.HasOne("FridgeManagementSystem.Models.FaultReport", "FaultReport")
                         .WithMany("RepairSchedules")
                         .HasForeignKey("FaultID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FridgeManagementSystem.Models.Fault", null)
+                        .WithMany("RepairSchedules")
+                        .HasForeignKey("FaultID1")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -2369,7 +2394,7 @@ namespace FridgeManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Fault");
+                    b.Navigation("FaultReport");
 
                     b.Navigation("FaultTechnician");
 
@@ -2507,6 +2532,11 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Fault", b =>
+                {
+                    b.Navigation("RepairSchedules");
+                });
+
+            modelBuilder.Entity("FridgeManagementSystem.Models.FaultReport", b =>
                 {
                     b.Navigation("RepairSchedules");
                 });

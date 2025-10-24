@@ -1,0 +1,98 @@
+﻿@model FridgeManagementSystem.Models.FaultReport
+@{
+    ViewData["Title"] = "Fault Status";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-tasks"></i> Fault Status & History
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Status Timeline -->
+                    <div class="timeline">
+                        <div class="timeline-item @(Model.StatusFilter != "Pending" ? "completed" : "")">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6>Fault Reported</h6>
+                                <p class="text-muted">@Model.ReportDate.ToString("MMM dd, yyyy HH:mm")</p>
+                                <p>Fault reported by customer</p>
+                            </div>
+                        </div>
+
+                        @if (Model.Fault?.RepairSchedules != null)
+                        {
+                            foreach (var repair in Model.Fault.RepairSchedules.OrderBy(r => r.CreatedDate))
+                            {
+                                <div class="timeline-item @(repair.Status == "Completed" ? "completed" : "")">
+                                    <div class="timeline-marker bg-primary"></div>
+                                    <div class="timeline-content">
+                                        <h6>@repair.Status</h6>
+                                        <p class="text-muted">@repair.CreatedDate.ToString("MMM dd, yyyy HH:mm")</p>
+                                        @if (!string.IsNullOrEmpty(repair.Diagnosis))
+                                        {
+                                            <p><strong>Diagnosis:</strong> @repair.Diagnosis</p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(repair.RepairNotes))
+                                        {
+                                            <p><strong>Notes:</strong> @repair.RepairNotes</p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        @if (Model.StatusFilter == "Resolved")
+                        {
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6>Fault Resolved</h6>
+                                    <p class="text-muted">@DateTime.Now.ToString("MMM dd, yyyy HH:mm")</p>
+                                    <p>Fault has been successfully resolved</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+        padding-left: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+    }
+
+    .timeline-item.completed .timeline-marker {
+        background-color: #28a745 !important;
+    }
+
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 3px solid #007bff;
+    }
+</style>

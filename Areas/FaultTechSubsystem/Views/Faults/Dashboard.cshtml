@@ -14,7 +14,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Faults
+                                Total Fault Reports
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalFaults</div>
                         </div>
@@ -81,13 +81,13 @@
         </div>
     </div>
 
-    <!-- Recent Faults -->
+    <!-- Recent Fault Reports -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Recent Fault Reports</h6>
-                    <a asp-action="Index" class="btn btn-primary btn-sm">View All Faults</a>
+                    <a asp-action="Index" class="btn btn-primary btn-sm">View All Fault Reports</a>
                 </div>
                 <div class="card-body">
                     @if (Model.RecentFaults.Any())
@@ -96,35 +96,39 @@
                             <table class="table table-bordered" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
-                                        <th>Fault ID</th>
+                                        <th>Report ID</th>
+                                        <th>Fault Type</th>
                                         <th>Description</th>
                                         <th>Status</th>
-                                        <th>Priority</th>
+                                        <th>Urgency</th>
                                         <th>Fridge Model</th>
                                         <th>Customer</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var fault in Model.RecentFaults)
+                                    @foreach (var faultReport in Model.RecentFaults)
                                     {
                                         <tr>
-                                            <td>F@(fault.FaultID.ToString("D3"))</td>
-                                            <td>@fault.FaultDescription</td>
+                                            <td>FR@(faultReport.FaultReportId.ToString("D3"))</td>
                                             <td>
-                                                <span class="badge @GetStatusBadgeClass(fault.Status)">@fault.Status</span>
+                                                <span class="badge bg-info">@faultReport.FaultType</span>
+                                            </td>
+                                            <td>@faultReport.FaultDescription</td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(faultReport.StatusFilter)">@faultReport.StatusFilter</span>
                                             </td>
                                             <td>
-                                                <span class="badge @GetPriorityBadgeClass(fault.Priority)">@fault.Priority</span>
+                                                <span class="badge @GetUrgencyBadgeClass(faultReport.UrgencyLevel)">@faultReport.UrgencyLevel</span>
                                             </td>
-                                            <td>@(fault.Fridge?.Model ?? "N/A")</td>
-                                            <td>@(fault.Fridge?.Customer?.FullName ?? "N/A")</td>
+                                            <td>@(faultReport.Fridge?.Model ?? "N/A")</td>
+                                            <td>@(faultReport.Fridge?.Customer?.FullName ?? "N/A")</td>
                                             <td>
-                                                <a asp-action="Details" asp-route-id="@fault.FaultID"
+                                                <a asp-action="Details" asp-route-id="@faultReport.FaultReportId"
                                                    class="btn btn-info btn-sm">View</a>
-                                                @if (fault.Status == "Pending" || fault.Status == "Diagnosing")
+                                                @if (faultReport.StatusFilter == "Pending" || faultReport.StatusFilter == "Diagnosing")
                                                 {
-                                                    <a asp-action="Process" asp-route-id="@fault.FaultID"
+                                                    <a asp-action="Process" asp-route-id="@faultReport.FaultReportId"
                                                        class="btn btn-primary btn-sm">Process</a>
                                                 }
                                             </td>
@@ -139,7 +143,7 @@
                         <div class="text-center py-4">
                             <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
                             <p class="text-muted">No recent fault reports found.</p>
-                            <p class="text-muted small">New faults will appear here as they are reported.</p>
+                            <p class="text-muted small">New fault reports will appear here as they are reported.</p>
                         </div>
                     }
                 </div>
@@ -159,13 +163,13 @@
                         <div class="col-md-3 text-center mb-3">
                             <a asp-action="Index" class="btn btn-primary btn-lg btn-block">
                                 <i class="fas fa-list fa-2x mb-2"></i><br>
-                                View All Faults
+                                View All Reports
                             </a>
                         </div>
                         <div class="col-md-3 text-center mb-3">
                             <a asp-action="Index" class="btn btn-warning btn-lg btn-block">
                                 <i class="fas fa-cogs fa-2x mb-2"></i><br>
-                                Process Faults
+                                Process Reports
                             </a>
                         </div>
                         <div class="col-md-3 text-center mb-3">
@@ -188,14 +192,14 @@
 </div>
 
 @functions {
-    public string GetStatusBadgeClass(string status)
+    public string GetStatusBadgeClass(string statusFilter)
     {
-        return status?.ToLower() switch
+        return statusFilter?.ToLower() switch
         {
             "pending" => "bg-warning",
             "in progress" => "bg-info",
             "resolved" => "bg-success",
-            "closed" => "bg-secondary",
+            "cancelled" => "bg-secondary",
             "diagnosing" => "bg-primary",
             "awaiting parts" => "bg-warning",
             "repairing" => "bg-danger",
@@ -205,13 +209,15 @@
         };
     }
 
-    public string GetPriorityBadgeClass(string priority)
+    public string GetUrgencyBadgeClass(UrgencyLevel urgencyLevel)
     {
-        return priority?.ToLower() switch
+        return urgencyLevel switch
         {
-            "high" => "bg-danger",
-            "medium" => "bg-warning",
-            "low" => "bg-success",
+            UrgencyLevel.Critical => "bg-danger",
+            UrgencyLevel.Emergency => "bg-dark",
+            UrgencyLevel.High => "bg-warning",
+            UrgencyLevel.Medium => "bg-info",
+            UrgencyLevel.Low => "bg-success",
             _ => "bg-secondary"
         };
     }

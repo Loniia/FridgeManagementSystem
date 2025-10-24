@@ -17,29 +17,110 @@
 <h2 class="mb-3">Order #@Model.OrderId</h2>
 <p><strong>Date:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
 
-<table class="table table-hover shadow-sm rounded">
-    <thead class="table-header-gradient text-white">
-        <tr>
-            <th>Item</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.OrderItems)
-        {
-            <tr>
-                <td>@($"{item.Fridge.Brand} {item.Fridge.Model}")</td>
-                <td>@item.Quantity</td>
-                <td>@($"R{item.Price:0.00}")</td>
-                <td>@($"R{item.Price * item.Quantity:0.00}")</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<!-- Order Summary -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Order Summary</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover shadow-sm rounded">
+            <thead class="table-header-gradient text-white">
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderItems)
+                {
+                    <tr>
+                        <td>@($"{item.Fridge.Brand} {item.Fridge.Model}")</td>
+                        <td>@item.Quantity</td>
+                        <td>@($"R{item.Price:0.00}")</td>
+                        <td>@($"R{item.Price * item.Quantity:0.00}")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <p class="mt-3 mb-0"><strong>Total:</strong> @($"R{Model.TotalAmount:0.00}")</p>
+    </div>
+</div>
 
-<p class="mt-3"><strong>Total:</strong> @($"R{Model.TotalAmount:0.00}")</p>
+<!-- Individual Fridge Items -->
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-refrigerator me-2"></i>Your Fridges</h5>
+    </div>
+    <div class="card-body">
+        @if (!Model.OrderItems.Any())
+        {
+            <div class="alert alert-info">
+                No fridges found in this order.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Fridge Details</th>
+                            <th>Serial Number</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <!-- Show each individual fridge instance -->
+                            @for (int i = 0; i < item.Quantity; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.Fridge.Brand @item.Fridge.Model</strong>
+                                        <br>
+                                        <small class="text-muted">@item.Fridge.FridgeType</small>
+                                        <br>
+                                        <small class="text-muted">Unit @(i + 1) of @item.Quantity</small>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Fridge.SerialNumber))
+                                        {
+                                            <code>@item.Fridge.SerialNumber</code>
+                                        }
+                                     
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@GetFridgeStatusBadgeColor(item.Fridge.Status)">
+                                            @item.Fridge.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.Fridge.Status == "Allocated")
+                                        {
+                                            <!-- In your Order History view -->
+                                            <a href="@Url.Action("CreateFault", "Customer", new { fridgeId = item.FridgeId, orderId = item.OrderId })"
+                                               class="btn btn-warning btn-sm">
+                                                <i class="fas fa-exclamation-triangle"></i> Report Fault
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
 
 <!-- CSS Styling -->
 <style>
@@ -59,6 +140,11 @@
 
     .btn-success.btn-3d {
         background: linear-gradient(145deg, #1cc88a, #17a673);
+        color: #fff;
+    }
+
+    .btn-warning.btn-3d {
+        background: linear-gradient(145deg, #f6c23e, #dda20a);
         color: #fff;
     }
 
@@ -88,13 +174,62 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
+    /* Card Styling */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        font-weight: 600;
+    }
+
+    /* Badge Styling */
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.4em 0.6em;
+    }
+
     /* Total styling */
     p strong {
         font-size: 1.1rem;
         color: #224abe;
     }
 
+    /* Serial number styling */
+    code {
+        background: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #e83e8c;
+    }
+
     @@media print {
-        .btn, .d-flex { display: none; } /* Hide buttons in print */
+        .btn, .d-flex, .card-header.bg-light {
+            display: none;
+        }
+
+        .card {
+            border: 1px solid #dee2e6;
+            box-shadow: none;
+        }
     }
 </style>
+
+@functions {
+    private string GetFridgeStatusBadgeColor(string status)
+    {
+        return status switch
+        {
+            "Active" => "success",
+            "Inactive" => "secondary",
+            "Faulty" => "warning",
+            "Under Maintenance" => "info",
+            "Scrapped" => "danger",
+            _ => "secondary"
+        };
+    }
+}

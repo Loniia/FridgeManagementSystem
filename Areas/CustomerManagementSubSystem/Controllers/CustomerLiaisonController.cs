@@ -12,7 +12,7 @@ using Rotativa.AspNetCore;
 using System.IO;
 using Microsoft.Extensions.Logging; // Add this for ILogger
 
-namespace CustomerManagementSubSystem.Controllers
+namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 {
     [Area("CustomerManagementSubSystem")]
     public class CustomerLiaisonController : Controller
@@ -226,7 +226,9 @@ namespace CustomerManagementSubSystem.Controllers
             if (customer == null)
                 return NotFound("Customer not found.");
 
-            var fridge = _context.Fridge.FirstOrDefault(f => f.FridgeId == fridgeId);
+            // ✅ Ensure the Fridge is loaded with related Customer if any
+            var fridge = _context.Fridge
+                .FirstOrDefault(f => f.FridgeId == fridgeId);
             if (fridge == null)
                 return NotFound("Fridge not found.");
 
@@ -260,6 +262,7 @@ namespace CustomerManagementSubSystem.Controllers
 
             // Update fridge and order
             fridge.Status = "Allocated";
+            fridge.CustomerID = customerId; // ✅ Ensure fridge is linked to that customer
             totalAllocated += 1;
 
             if (totalAllocated >= orderItem.Quantity)
@@ -270,32 +273,36 @@ namespace CustomerManagementSubSystem.Controllers
 
             _context.SaveChanges();
 
-            // ✅ Create MaintenanceRequest
-            var maintenanceRequest = new MaintenanceRequest
-            {
-                FridgeId = fridge.FridgeId,
-                RequestDate = DateTime.Now,
-                TaskStatus = FridgeManagementSystem.Models.TaskStatus.Pending,
-                IsActive = true
-            };
-            _context.MaintenanceRequest.Add(maintenanceRequest);
-            _context.SaveChanges(); // Save to get MaintenanceRequestId
+            // ✅ Before creating a MaintenanceRequest, check if one already exists for this fridge
+            var existingRequest = _context.MaintenanceRequest
+                .FirstOrDefault(mr => mr.FridgeId == fridge.FridgeId && mr.IsActive && mr.TaskStatus == Models.TaskStatus.Pending);
 
-            // ✅ Create MaintenanceVisit linked to the request
-            var maintenanceVisit = new MaintenanceVisit
+            if (existingRequest == null)
             {
-                FridgeId = fridge.FridgeId,
-                MaintenanceRequestId = maintenanceRequest.MaintenanceRequestId, // Link FK
-                EmployeeID = 1, // Assign your available employee
-                ScheduledDate = DateTime.Now.AddDays(30),
-                ScheduledTime = new TimeSpan(10, 0, 0),
-                Status = FridgeManagementSystem.Models.TaskStatus.Scheduled,
-                VisitNotes = $"Initial maintenance visit scheduled automatically for {customer.FullName}."
-            };
-            _context.MaintenanceVisit.Add(maintenanceVisit);
-            _context.SaveChanges();
+                // Create a new request
+                var maintenanceRequest = new MaintenanceRequest
+                {
+                    FridgeId = fridge.FridgeId,
+                    
+                    RequestDate = DateTime.Now.AddDays(30), // schedule 30 days later
+                    TaskStatus = Models.TaskStatus.Pending,
+                    IsActive = true
+                };
+                _context.MaintenanceRequest.Add(maintenanceRequest);
+                _context.SaveChanges();
 
-            // Create ViewModel to show allocation info
+                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated to {customer.FullName}. " +
+                                      $"A maintenance request has been created for {maintenanceRequest.RequestDate:dd MMM yyyy}.";
+            }
+            else
+            {
+                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated to {customer.FullName}. " +
+                                      $"Existing maintenance request for {existingRequest.RequestDate:dd MMM yyyy} is still pending.";
+            }
+
+
+
+            // Create ViewModel
             var allocationVM = new FridgeAllocationViewModel
             {
                 AllocationID = allocation.AllocationID,
@@ -309,11 +316,10 @@ namespace CustomerManagementSubSystem.Controllers
                 ReturnDate = allocation.ReturnDate
             };
 
-            TempData["Success"] = $"Fridge '{allocationVM.Brand} {allocationVM.Model}' allocated to {allocationVM.CustomerName}. " +
-                                  $"A maintenance visit has been scheduled for {maintenanceVisit.ScheduledDate:dd MMM yyyy}.";
-
+            
             return RedirectToAction("ProcessPendingAllocations");
         }
+
 
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
         {

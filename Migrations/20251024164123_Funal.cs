@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FridgeManagementSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class FridgeDb : Migration
+    public partial class Funal : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -115,6 +115,8 @@ namespace FridgeManagementSystem.Migrations
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Province = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Latitude = table.Column<double>(type: "float", nullable: false),
+                    Longitude = table.Column<double>(type: "float", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -169,9 +171,6 @@ namespace FridgeManagementSystem.Migrations
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    PurchaseOrderID = table.Column<int>(type: "int", nullable: false),
-                    QuotationID = table.Column<int>(type: "int", nullable: false),
-                    FridgeId = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -418,6 +417,7 @@ namespace FridgeManagementSystem.Migrations
                     Model = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     SerialNumber = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Condition = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     WarrantyExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -425,7 +425,7 @@ namespace FridgeManagementSystem.Migrations
                     SupplierID = table.Column<int>(type: "int", nullable: false),
                     CustomerID = table.Column<int>(type: "int", nullable: true),
                     LocationId = table.Column<int>(type: "int", nullable: true),
-                    FaultID = table.Column<int>(type: "int", nullable: false),
+                    FaultReportId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     DeliveryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -462,7 +462,6 @@ namespace FridgeManagementSystem.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CustomerID = table.Column<int>(type: "int", nullable: false),
-                    CustomersCustomerID = table.Column<int>(type: "int", nullable: true),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -480,11 +479,6 @@ namespace FridgeManagementSystem.Migrations
                     table.ForeignKey(
                         name: "FK_Orders_Customers_CustomerID",
                         column: x => x.CustomerID,
-                        principalTable: "Customers",
-                        principalColumn: "CustomerID");
-                    table.ForeignKey(
-                        name: "FK_Orders_Customers_CustomersCustomerID",
-                        column: x => x.CustomersCustomerID,
                         principalTable: "Customers",
                         principalColumn: "CustomerID");
                 });
@@ -590,6 +584,7 @@ namespace FridgeManagementSystem.Migrations
                     RequestDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TaskStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CompletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     FridgeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -713,59 +708,13 @@ namespace FridgeManagementSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RepairSchedules",
-                columns: table => new
-                {
-                    RepairID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FaultID = table.Column<int>(type: "int", nullable: false),
-                    FridgeId = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Diagnosis = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    RepairType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    RepairNotes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    PartsUsed = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    RequiredParts = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    RepairCost = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    ActualRepairTime = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    DiagnosisDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RepairStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RepairEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TestingDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RepairDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Employee = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RepairSchedules", x => x.RepairID);
-                    table.ForeignKey(
-                        name: "FK_RepairSchedules_Employees_Employee",
-                        column: x => x.Employee,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeID");
-                    table.ForeignKey(
-                        name: "FK_RepairSchedules_Faults_FaultID",
-                        column: x => x.FaultID,
-                        principalTable: "Faults",
-                        principalColumn: "FaultID");
-                    table.ForeignKey(
-                        name: "FK_RepairSchedules_Fridge_FridgeId",
-                        column: x => x.FridgeId,
-                        principalTable: "Fridge",
-                        principalColumn: "FridgeId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PurchaseRequests",
                 columns: table => new
                 {
                     PurchaseRequestID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FridgeId = table.Column<int>(type: "int", nullable: true),
-                    InventoryID = table.Column<int>(type: "int", nullable: false),
+                    InventoryID = table.Column<int>(type: "int", nullable: true),
                     RequestDate = table.Column<DateOnly>(type: "date", nullable: false),
                     ItemFullNames = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     RequestBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -777,7 +726,12 @@ namespace FridgeManagementSystem.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsViewed = table.Column<bool>(type: "bit", nullable: false),
                     ViewedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CustomerID = table.Column<int>(type: "int", nullable: true)
+                    ApprovalNotes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ApprovalDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Priority = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CreatedRFQID = table.Column<int>(type: "int", nullable: true),
+                    CustomerID = table.Column<int>(type: "int", nullable: true),
+                    InventoryID1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -795,6 +749,11 @@ namespace FridgeManagementSystem.Migrations
                     table.ForeignKey(
                         name: "FK_PurchaseRequests_Inventory_InventoryID",
                         column: x => x.InventoryID,
+                        principalTable: "Inventory",
+                        principalColumn: "InventoryID");
+                    table.ForeignKey(
+                        name: "FK_PurchaseRequests_Inventory_InventoryID1",
+                        column: x => x.InventoryID1,
                         principalTable: "Inventory",
                         principalColumn: "InventoryID");
                 });
@@ -925,7 +884,7 @@ namespace FridgeManagementSystem.Migrations
                     FridgeId = table.Column<int>(type: "int", nullable: false),
                     StatusFilter = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MaintenanceVisitId = table.Column<int>(type: "int", nullable: false),
-                    FaultID = table.Column<int>(type: "int", nullable: false),
+                    FaultID = table.Column<int>(type: "int", nullable: true),
                     CustomerID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -987,6 +946,8 @@ namespace FridgeManagementSystem.Migrations
                     RequestForQuotationId = table.Column<int>(type: "int", nullable: false),
                     ReceivedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     QuotationAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RequiredQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     SupplierId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -1003,6 +964,59 @@ namespace FridgeManagementSystem.Migrations
                         column: x => x.SupplierId,
                         principalTable: "Suppliers",
                         principalColumn: "SupplierID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RepairSchedules",
+                columns: table => new
+                {
+                    RepairID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FaultID = table.Column<int>(type: "int", nullable: false),
+                    FridgeId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Diagnosis = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    RepairType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    RepairNotes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    PartsUsed = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    RequiredParts = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    RepairCost = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    ActualRepairTime = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    DiagnosisDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RepairStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RepairEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TestingDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RepairDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FaultReportId = table.Column<int>(type: "int", nullable: false),
+                    Employee = table.Column<int>(type: "int", nullable: true),
+                    FaultID1 = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RepairSchedules", x => x.RepairID);
+                    table.ForeignKey(
+                        name: "FK_RepairSchedules_Employees_Employee",
+                        column: x => x.Employee,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeID");
+                    table.ForeignKey(
+                        name: "FK_RepairSchedules_FaultReport_FaultID",
+                        column: x => x.FaultID,
+                        principalTable: "FaultReport",
+                        principalColumn: "FaultReportId");
+                    table.ForeignKey(
+                        name: "FK_RepairSchedules_Faults_FaultID1",
+                        column: x => x.FaultID1,
+                        principalTable: "Faults",
+                        principalColumn: "FaultID");
+                    table.ForeignKey(
+                        name: "FK_RepairSchedules_Fridge_FridgeId",
+                        column: x => x.FridgeId,
+                        principalTable: "Fridge",
+                        principalColumn: "FridgeId");
                 });
 
             migrationBuilder.CreateTable(
@@ -1073,26 +1087,26 @@ namespace FridgeManagementSystem.Migrations
 
             migrationBuilder.InsertData(
                 table: "Suppliers",
-                columns: new[] { "SupplierID", "Address", "ContactPerson", "Email", "FridgeId", "IsActive", "Name", "Phone", "PurchaseOrderID", "QuotationID" },
-                values: new object[] { 1, "123 Main Street", null, "supplier@example.com", 0, true, "Default Supplier", "0123456789", 0, 0 });
+                columns: new[] { "SupplierID", "Address", "ContactPerson", "Email", "IsActive", "Name", "Phone" },
+                values: new object[] { 1, "123 Main Street", null, "supplier@example.com", true, "Default Supplier", "0123456789" });
 
             migrationBuilder.InsertData(
                 table: "Fridge",
-                columns: new[] { "FridgeId", "Brand", "Condition", "CustomerID", "DateAdded", "DeliveryDate", "FaultID", "FridgeType", "ImageUrl", "IsActive", "LocationId", "Model", "Price", "PurchaseDate", "Quantity", "SerialNumber", "Status", "SupplierID", "UpdatedDate", "WarrantyExpiry" },
+                columns: new[] { "FridgeId", "Brand", "Condition", "CustomerID", "DateAdded", "DeliveryDate", "FaultReportId", "FridgeType", "ImageUrl", "IsActive", "LocationId", "Model", "Notes", "Price", "PurchaseDate", "Quantity", "SerialNumber", "Status", "SupplierID", "UpdatedDate", "WarrantyExpiry" },
                 values: new object[,]
                 {
-                    { 1, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1368), 0, "Single Door", "/images/fridges/fridge1.jpg", true, null, "Model-1", 7692m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(918), null },
-                    { 2, "Samsung", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1444), 0, "Single Door", "/images/fridges/fridge2.jpg", true, null, "Model-2", 8579m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1394), null },
-                    { 3, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1498), 0, "Double Door", "/images/fridges/fridge3.jpg", true, null, "Model-3", 7687m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1448), null },
-                    { 4, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1933), 0, "Single Door", "/images/fridges/fridge4.jpg", true, null, "Model-4", 7378m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1881), null },
-                    { 5, "Bosch", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1965), 0, "Single Door", "/images/fridges/fridge5.jpg", true, null, "Model-5", 5826m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1936), null },
-                    { 6, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2007), 0, "Double Door", "/images/fridges/fridge6.jpg", true, null, "Model-6", 10428m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 8, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(1976), null },
-                    { 7, "Samsung", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2041), 0, "Single Door", "/images/fridges/fridge7.jpg", true, null, "Model-7", 7550m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 7, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2009), null },
-                    { 8, "LG", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2072), 0, "Mini Fridge", "/images/fridges/fridge8.jpg", true, null, "Model-8", 3848m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2043), null },
-                    { 9, "Samsung", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2102), 0, "Double Door", "/images/fridges/fridge9.jpg", true, null, "Model-9", 8928m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 7, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2074), null },
-                    { 10, "Defy", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2154), 0, "Single Door", "/images/fridges/fridge10.jpg", true, null, "Model-10", 6910m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2106), null },
-                    { 11, "Hisense", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2212), 0, "Mini Fridge", "/images/fridges/fridge11.jpg", true, null, "Model-11", 7766m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2181), null },
-                    { 12, "Bosch", "Working", null, new DateOnly(2025, 10, 17), new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2240), 0, "Double Door", "/images/fridges/fridge12.jpg", true, null, "Model-12", 8323m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, null, "Available", 1, new DateTime(2025, 10, 17, 13, 19, 32, 949, DateTimeKind.Local).AddTicks(2214), null }
+                    { 1, "Samsung", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1847), 0, "Mini Fridge", "/images/fridges/fridge1.jpg", true, null, "Model-1", null, 11834m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1493), null },
+                    { 2, "Defy", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1910), 0, "Single Door", "/images/fridges/fridge2.jpg", true, null, "Model-2", null, 6335m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1853), null },
+                    { 3, "LG", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1944), 0, "Double Door", "/images/fridges/fridge3.jpg", true, null, "Model-3", null, 6400m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1912), null },
+                    { 4, "Samsung", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1968), 0, "Single Door", "/images/fridges/fridge4.jpg", true, null, "Model-4", null, 6810m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 7, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1946), null },
+                    { 5, "Defy", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1991), 0, "Single Door", "/images/fridges/fridge5.jpg", true, null, "Model-5", null, 10476m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1970), null },
+                    { 6, "Defy", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2019), 0, "Single Door", "/images/fridges/fridge6.jpg", true, null, "Model-6", null, 6450m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(1999), null },
+                    { 7, "Bosch", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2041), 0, "Double Door", "/images/fridges/fridge7.jpg", true, null, "Model-7", null, 5093m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 6, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2021), null },
+                    { 8, "Defy", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2062), 0, "Single Door", "/images/fridges/fridge8.jpg", true, null, "Model-8", null, 6581m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2042), null },
+                    { 9, "Bosch", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2083), 0, "Mini Fridge", "/images/fridges/fridge9.jpg", true, null, "Model-9", null, 11707m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2063), null },
+                    { 10, "Defy", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2118), 0, "Single Door", "/images/fridges/fridge10.jpg", true, null, "Model-10", null, 3644m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2087), null },
+                    { 11, "Bosch", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2248), 0, "Double Door", "/images/fridges/fridge11.jpg", true, null, "Model-11", null, 9576m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 7, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2224), null },
+                    { 12, "Bosch", "Working", null, new DateOnly(2025, 10, 24), new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2270), 0, "Single Door", "/images/fridges/fridge12.jpg", true, null, "Model-12", null, 7122m, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 9, null, "Available", 1, new DateTime(2025, 10, 24, 18, 41, 20, 868, DateTimeKind.Local).AddTicks(2250), null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1324,11 +1338,6 @@ namespace FridgeManagementSystem.Migrations
                 column: "CustomerID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_CustomersCustomerID",
-                table: "Orders",
-                column: "CustomersCustomerID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Payments_OrderId",
                 table: "Payments",
                 column: "OrderId",
@@ -1365,6 +1374,11 @@ namespace FridgeManagementSystem.Migrations
                 column: "InventoryID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PurchaseRequests_InventoryID1",
+                table: "PurchaseRequests",
+                column: "InventoryID1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Quotations_RequestForQuotationId",
                 table: "Quotations",
                 column: "RequestForQuotationId");
@@ -1383,6 +1397,11 @@ namespace FridgeManagementSystem.Migrations
                 name: "IX_RepairSchedules_FaultID",
                 table: "RepairSchedules",
                 column: "FaultID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RepairSchedules_FaultID1",
+                table: "RepairSchedules",
+                column: "FaultID1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RepairSchedules_FridgeId",
@@ -1445,9 +1464,6 @@ namespace FridgeManagementSystem.Migrations
                 name: "DeliveryNotes");
 
             migrationBuilder.DropTable(
-                name: "FaultReport");
-
-            migrationBuilder.DropTable(
                 name: "FridgeAllocation");
 
             migrationBuilder.DropTable(
@@ -1484,10 +1500,7 @@ namespace FridgeManagementSystem.Migrations
                 name: "OrderItems");
 
             migrationBuilder.DropTable(
-                name: "MaintenanceVisit");
-
-            migrationBuilder.DropTable(
-                name: "Faults");
+                name: "FaultReport");
 
             migrationBuilder.DropTable(
                 name: "Quotations");
@@ -1496,13 +1509,19 @@ namespace FridgeManagementSystem.Migrations
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "MaintenanceRequest");
+                name: "Faults");
+
+            migrationBuilder.DropTable(
+                name: "MaintenanceVisit");
+
+            migrationBuilder.DropTable(
+                name: "RequestsForQuotation");
 
             migrationBuilder.DropTable(
                 name: "Employees");
 
             migrationBuilder.DropTable(
-                name: "RequestsForQuotation");
+                name: "MaintenanceRequest");
 
             migrationBuilder.DropTable(
                 name: "PurchaseRequests");
