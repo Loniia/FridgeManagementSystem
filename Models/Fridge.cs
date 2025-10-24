@@ -37,7 +37,7 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("Location")]
         public int? LocationId { get; set; }
         public Location Location { get; set; }  
-        public int FaultID { get; set; }
+        public int FaultReportId { get; set; }
         public int Quantity { get; set; }
         public DateTime DeliveryDate { get; set; }
         public string Status { get; set; } // e.g., Received, In Transit, Delivered

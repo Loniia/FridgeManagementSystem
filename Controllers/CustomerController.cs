@@ -619,6 +619,7 @@ namespace FridgeManagementSystem.Controllers
                 return View(new List<FaultReport>());
             }
         }
+
         public async Task<IActionResult> FaultDetails(int? id)
         {
             if (id == null) return NotFound();
@@ -646,13 +647,46 @@ namespace FridgeManagementSystem.Controllers
             }
         }
 
-        public async Task<IActionResult> CreateFault()
+        // MODIFIED: Added orderId parameter to pre-select fridges from specific order
+        public async Task<IActionResult> CreateFault(int? fridgeId, int? orderId)
         {
+            var customerId = GetLoggedInCustomerId();
             var viewModel = new CreateFaultViewModel
             {
                 FridgeOptions = await GetCustomerFridgesAsync(),
                 PriorityOptions = GetPriorityOptions()
             };
+
+            // If fridgeId is provided AND belongs to customer
+            if (fridgeId.HasValue)
+            {
+                var selectedFridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == fridgeId.Value && f.CustomerID == customerId);
+
+                if (selectedFridge != null)
+                {
+                    viewModel.FridgeId = fridgeId.Value;
+                    ViewBag.HasPreselectedFridge = true;
+                    ViewBag.SelectedFridgeInfo = $"{selectedFridge.Brand} {selectedFridge.Model} - {selectedFridge.FridgeType}";
+
+                    // Optional: Add order context if orderId is provided
+                    if (orderId.HasValue)
+                    {
+                        ViewBag.OrderContext = $" (from Order #{orderId.Value})";
+                    }
+                }
+                else
+                {
+                    // Fridge doesn't belong to customer or doesn't exist
+                    ViewBag.HasPreselectedFridge = false;
+                    TempData["WarningMessage"] = "The selected fridge was not found in your account.";
+                }
+            }
+            else
+            {
+                ViewBag.HasPreselectedFridge = false;
+            }
+
             return View(viewModel);
         }
 
@@ -669,15 +703,26 @@ namespace FridgeManagementSystem.Controllers
 
             try
             {
-                // ✅ CHANGED: Create FaultReport instead of Fault
+                var customerId = GetLoggedInCustomerId();
+                var fridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == viewModel.FridgeId && f.CustomerID == customerId);
+
+                if (fridge == null)
+                {
+                    ModelState.AddModelError("FridgeId", "Selected fridge not found or doesn't belong to you.");
+                    viewModel.FridgeOptions = await GetCustomerFridgesAsync();
+                    viewModel.PriorityOptions = GetPriorityOptions();
+                    return View(viewModel);
+                }
+
                 var faultReport = new FaultReport
                 {
                     FridgeId = viewModel.FridgeId,
                     FaultDescription = viewModel.FaultDescription,
+                    FaultType = viewModel.FaultType,  // ✅ Now correctly mapped from ViewModel
                     ReportDate = DateTime.Now,
                     UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
-                    FaultType = FaultType.Electrical, // Indicates customer-reported
-                    StatusFilter = "Pending" // Initial status
+                    StatusFilter = "Pending"
                 };
 
                 _context.FaultReport.Add(faultReport);
@@ -686,13 +731,31 @@ namespace FridgeManagementSystem.Controllers
                 TempData["SuccessMessage"] = "Fault reported successfully! Our technicians will review it shortly.";
                 return RedirectToAction(nameof(FaultDetails), new { id = faultReport.FaultReportId });
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error creating fault report");
                 viewModel.FridgeOptions = await GetCustomerFridgesAsync();
                 viewModel.PriorityOptions = GetPriorityOptions();
-                TempData["ErrorMessage"] = "Error reporting fault.";
+                TempData["ErrorMessage"] = "Error reporting fault. Please try again.";
                 return View(viewModel);
             }
+        }
+
+        // NEW HELPER METHOD: Get fridges from a specific order
+        private async Task<List<SelectListItem>> GetFridgesFromOrderAsync(int orderId, int customerId)
+        {
+            return await _context.Orders
+                .Where(o => o.OrderId == orderId && o.CustomerID == customerId)
+                .SelectMany(o => o.OrderItems)
+                .Select(oi => oi.Fridge)
+                .Where(f => f.Status == "Active")
+                .Select(f => new SelectListItem
+                {
+                    Value = f.FridgeId.ToString(),
+                    Text = $"{f.Brand} {f.Model} - {f.SerialNumber} (Order #{orderId})"
+                })
+                .Distinct()
+                .ToListAsync();
         }
 
         // Helper method
@@ -712,12 +775,15 @@ namespace FridgeManagementSystem.Controllers
         private async Task<List<SelectListItem>> GetCustomerFridgesAsync()
         {
             var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return new List<SelectListItem>();
+
             return await _context.Fridge
-                .Where(f => f.CustomerID == customerId && f.Status == "Active")
+                .Where(f => f.CustomerID == customerId &&
+                           (f.Status == "Active" || f.Status == "Allocated")) // Include Allocated fridges
                 .Select(f => new SelectListItem
                 {
                     Value = f.FridgeId.ToString(),
-                    Text = $"{f.Brand} {f.Model} - {f.SerialNumber}"
+                    Text = $"{f.Brand} {f.Model} - {f.FridgeType}"
                 })
                 .ToListAsync();
         }
@@ -732,6 +798,7 @@ namespace FridgeManagementSystem.Controllers
         new SelectListItem { Value = "Critical", Text = "Critical" }
     };
         }
+
         // Cancel Fault (if allowed)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -910,13 +977,28 @@ namespace FridgeManagementSystem.Controllers
         private int GetLoggedInCustomerId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return 0;
+            if (userIdClaim == null)
+            {
+                _logger.LogWarning("No user ID claim found");
+                return 0;
+            }
 
-            if (!int.TryParse(userIdClaim.Value, out var appUserId)) return 0;
+            if (!int.TryParse(userIdClaim.Value, out var appUserId))
+            {
+                _logger.LogWarning($"Failed to parse user ID: {userIdClaim.Value}");
+                return 0;
+            }
 
             var customer = _context.Customers.FirstOrDefault(c => c.ApplicationUserId == appUserId);
 
-            return customer?.CustomerID ?? 0;
+            if (customer == null)
+            {
+                _logger.LogWarning($"No customer found for application user ID: {appUserId}");
+                return 0;
+            }
+
+            _logger.LogInformation($"Found customer ID: {customer.CustomerID}");
+            return customer.CustomerID;
         }
 
         private string MaskCardNumber(string cardNumber)
