@@ -27,10 +27,11 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             var fridges = await _context.Fridge
                 .Include(f => f.FridgeAllocation)
                     .ThenInclude(a => a.Customer)
+                // ✅ Show all fridges that are already in your subsystem (Received or Available)
+                .Where(f => f.Status == "Received" || f.Status == "Available" || f.Status == "Damaged" || f.Status == "Scrapped")
                 .Select(f => new FridgeViewModel
                 {
                     FridgeId = f.FridgeId,
-                   
                     FridgeType = f.FridgeType,
                     Brand = f.Brand,
                     Model = f.Model,

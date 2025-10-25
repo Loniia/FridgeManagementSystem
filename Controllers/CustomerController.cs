@@ -41,51 +41,41 @@ namespace FridgeManagementSystem.Controllers
             _notificationService = notificationService;
         }
 
-        // ==========================
-        // 1. DASHBOARD
-        // ==========================
+        //=================
+        //DASHBOARD
+        //=================
         public async Task<IActionResult> Dashboard(string search)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0)
                 return RedirectToAction("Login", "Account");
 
-            if (!int.TryParse(userIdClaim.Value, out int userId))
-                return RedirectToAction("Login", "Account");
+            // Fetch all fridges from DB
+            var fridgesQuery = _context.Fridge.AsQueryable();
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
-
-            if (customer == null)
-                return RedirectToAction("Login", "Account");
-
-            var fridgesQuery = _context.Fridge
-                .Include(f => f.FridgeAllocation)
-                .AsQueryable();
-
+            // Optional search
             if (!string.IsNullOrEmpty(search))
             {
                 fridgesQuery = fridgesQuery.Where(f =>
-                    f.Brand.Contains(search) || f.Model.Contains(search));
+                    (f.Brand != null && f.Brand.Contains(search)) ||
+                    (f.Model != null && f.Model.Contains(search)));
             }
-
-            ViewData["Search"] = search;
 
             var fridges = await fridgesQuery.ToListAsync();
 
+            // Map to ViewModel
             var fridgeViewModels = fridges.Select(f => new FridgeViewModel
             {
                 FridgeId = f.FridgeId,
-                FridgeType = f.FridgeType,
                 Brand = f.Brand,
                 Model = f.Model,
+                FridgeType = f.FridgeType,
                 Price = f.Price,
                 Quantity = f.Quantity,
-                ImageUrl = string.IsNullOrEmpty(f.ImageUrl) ? "/images/fridges/default.jpg" : f.ImageUrl,
-                AvailableStock = f.Quantity - f.FridgeAllocation
-                    .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
-                    .Count(),
-                Status = (!f.IsActive || f.Quantity <= 0) ? "Out of Stock" : "In Stock"
+                Status = f.Status == "Available" ? "In Stock" : "Out of Stock",
+                ImageUrl = string.IsNullOrEmpty(f.ImageUrl)
+                    ? $"/images/fridges/fridge{f.FridgeId}.jpg"  // default naming based on ID
+                    : f.ImageUrl
             }).ToList();
 
             var model = new CustomerViewModel
@@ -94,8 +84,64 @@ namespace FridgeManagementSystem.Controllers
                 Fridges = fridgeViewModels
             };
 
+            ViewData["Search"] = search;
             return View(model);
         }
+
+
+        //public async Task<IActionResult> Dashboard(string search)
+        //{
+        //    var customerId = GetLoggedInCustomerId();
+        //    if (customerId == 0)
+        //        return RedirectToAction("Login", "Account");
+
+        //    // ✅ Get all fridges (don’t filter anything)
+        //    var fridgesQuery = _context.Fridge.AsQueryable();
+
+        //    // Optional search by brand or model
+        //    if (!string.IsNullOrEmpty(search))
+        //    {
+        //        fridgesQuery = fridgesQuery.Where(f =>
+        //            (f.Brand != null && f.Brand.Contains(search)) ||
+        //            (f.Model != null && f.Model.Contains(search)));
+        //    }
+
+        //    var fridges = await fridgesQuery.ToListAsync();
+
+        //    // ✅ Always show 30 pictures no matter what
+        //    var fridgeViewModels = new List<FridgeViewModel>();
+
+        //    for (int i = 0; i < 30; i++)
+        //    {
+        //        // Try to get fridge from DB (if less than 30 seeded)
+        //        var fridge = i < fridges.Count ? fridges[i] : null;
+
+        //        fridgeViewModels.Add(new FridgeViewModel
+        //        {
+        //            FridgeId = fridge?.FridgeId ?? 0,
+        //            Brand = fridge?.Brand ?? "Brand " + (i + 1),
+        //            Model = fridge?.Model ?? "Model " + (i + 1),
+        //            FridgeType = fridge?.FridgeType ?? "Type " + (i + 1),
+        //            Price = fridge?.Price ?? 0,
+        //            Quantity = fridge?.Quantity ?? 0,
+        //            Status = (fridge != null && fridge.Status == "Available")
+        //                ? "In Stock"
+        //                : "Out of Stock",
+        //            ImageUrl = $"/images/fridges/fridge{i + 1}.jpg"
+        //        });
+        //    }
+
+        //    var model = new CustomerViewModel
+        //    {
+        //        FullNames = User.Identity?.Name ?? "Guest",
+        //        Fridges = fridgeViewModels
+        //    };
+
+        //    ViewData["Search"] = search;
+        //    return View(model);
+        //}
+
+
 
         // ==========================
         // 2. ADD TO CART
@@ -690,7 +736,6 @@ namespace FridgeManagementSystem.Controllers
 
             return View(viewModel);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
@@ -716,20 +761,49 @@ namespace FridgeManagementSystem.Controllers
                     return View(viewModel);
                 }
 
+                // ✅ STEP 1: Create MaintenanceRequest
+                var maintenanceRequest = new MaintenanceRequest
+                {
+                    FridgeId = fridge.FridgeId,
+                    RequestDate = DateTime.Now,
+                    TaskStatus = TaskStatus.Pending,
+                    IsActive = true
+                };
+
+                _context.MaintenanceRequest.Add(maintenanceRequest);
+                await _context.SaveChangesAsync(); // Save to get ID
+
+                // ✅ STEP 2: Create MaintenanceVisit with all required fields
+                var maintenanceVisit = new MaintenanceVisit
+                {
+                    FridgeId = fridge.FridgeId,
+                    MaintenanceRequestId = maintenanceRequest.MaintenanceRequestId,
+                    EmployeeID = await GetAvailableTechnicianId(), // Assign available technician
+                    ScheduledDate = DateTime.Now.AddDays(1), // Schedule for tomorrow
+                    ScheduledTime = new TimeSpan(9, 0, 0), // 9:00 AM
+                    Status = TaskStatus.Scheduled,
+                    VisitNotes = $"Fault Type: {viewModel.FaultType}. Priority: {viewModel.Priority}. Description: {viewModel.FaultDescription?.Substring(0, Math.Min(200, viewModel.FaultDescription.Length))}"
+                };
+
+                _context.MaintenanceVisit.Add(maintenanceVisit);
+                await _context.SaveChangesAsync(); // Save to get ID
+
+                // ✅ STEP 3: Now create FaultReport with valid MaintenanceVisitId
                 var faultReport = new FaultReport
                 {
                     FridgeId = viewModel.FridgeId,
                     FaultDescription = viewModel.FaultDescription,
-                    FaultType = viewModel.FaultType,  // ✅ Now correctly mapped from ViewModel
+                    FaultType = viewModel.FaultType,
                     ReportDate = DateTime.Now,
                     UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
-                    StatusFilter = "Pending"
+                    Status = TaskStatus.Pending,
+                    MaintenanceVisitId = maintenanceVisit.MaintenanceVisitId // ✅ Valid foreign key
                 };
 
                 _context.FaultReport.Add(faultReport);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Fault reported successfully! Our technicians will review it shortly.";
+                TempData["SuccessMessage"] = "Fault reported successfully! A maintenance visit has been scheduled for tomorrow at 9:00 AM.";
                 return RedirectToAction(nameof(FaultDetails), new { id = faultReport.FaultReportId });
             }
             catch (Exception ex)
@@ -739,6 +813,52 @@ namespace FridgeManagementSystem.Controllers
                 viewModel.PriorityOptions = GetPriorityOptions();
                 TempData["ErrorMessage"] = "Error reporting fault. Please try again.";
                 return View(viewModel);
+            }
+        }
+
+        // Helper method to get an available technician
+        private async Task<int> GetAvailableTechnicianId()
+        {
+            try
+            {
+                // Try to find any active technician
+                var technician = await _context.Employees
+                    .Where(e => (e.Role == "Technician" || e.Role == "FaultTechnician"))
+                    .FirstOrDefaultAsync();
+
+                if (technician != null)
+                {
+                    return technician.EmployeeID;
+                }
+
+                // If no technicians exist, use the first employee as fallback
+                var anyEmployee = await _context.Employees
+                    .FirstOrDefaultAsync();
+
+                if (anyEmployee != null)
+                {
+                    return anyEmployee.EmployeeID;
+                }
+
+                // If no employees exist at all, create a default technician
+                var defaultTechnician = new Employee
+                {
+                    FullName = "Technical",
+                    Email = "technicians@fridgesystem.com",
+                    PhoneNumber = "000-000-0000",
+                    Role = "Technician",
+                };
+
+                _context.Employees.Add(defaultTechnician);
+                await _context.SaveChangesAsync();
+
+                return defaultTechnician.EmployeeID;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting available technician");
+                // Return a safe default (you might need to create this employee in your database)
+                return 1; // Make sure employee with ID 1 exists
             }
         }
 
