@@ -30,6 +30,8 @@ namespace FridgeManagementSystem.Models
         public int FridgeId { get; set; }
         public string StatusFilter { get; set; }
 
+        public TaskStatus Status { get; set; }
+
         public virtual Fridge Fridge { get; set; }
        
         [ForeignKey("MaintenanceVisit")]

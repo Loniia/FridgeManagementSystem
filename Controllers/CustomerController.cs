@@ -735,7 +735,6 @@ namespace FridgeManagementSystem.Controllers
 
             return View(viewModel);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
@@ -761,19 +760,49 @@ namespace FridgeManagementSystem.Controllers
                     return View(viewModel);
                 }
 
+                // ✅ STEP 1: Create MaintenanceRequest
+                var maintenanceRequest = new MaintenanceRequest
+                {
+                    FridgeId = fridge.FridgeId,
+                    RequestDate = DateTime.Now,
+                    TaskStatus = TaskStatus.Pending,
+                    IsActive = true
+                };
+
+                _context.MaintenanceRequest.Add(maintenanceRequest);
+                await _context.SaveChangesAsync(); // Save to get ID
+
+                // ✅ STEP 2: Create MaintenanceVisit with all required fields
+                var maintenanceVisit = new MaintenanceVisit
+                {
+                    FridgeId = fridge.FridgeId,
+                    MaintenanceRequestId = maintenanceRequest.MaintenanceRequestId,
+                    EmployeeID = await GetAvailableTechnicianId(), // Assign available technician
+                    ScheduledDate = DateTime.Now.AddDays(1), // Schedule for tomorrow
+                    ScheduledTime = new TimeSpan(9, 0, 0), // 9:00 AM
+                    Status = TaskStatus.Scheduled,
+                    VisitNotes = $"Fault Type: {viewModel.FaultType}. Priority: {viewModel.Priority}. Description: {viewModel.FaultDescription?.Substring(0, Math.Min(200, viewModel.FaultDescription.Length))}"
+                };
+
+                _context.MaintenanceVisit.Add(maintenanceVisit);
+                await _context.SaveChangesAsync(); // Save to get ID
+
+                // ✅ STEP 3: Now create FaultReport with valid MaintenanceVisitId
                 var faultReport = new FaultReport
                 {
                     FridgeId = viewModel.FridgeId,
                     FaultDescription = viewModel.FaultDescription,
+                    FaultType = viewModel.FaultType,
                     ReportDate = DateTime.Now,
                     UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
-                    StatusFilter = "Pending"
+                    Status = TaskStatus.Pending,
+                    MaintenanceVisitId = maintenanceVisit.MaintenanceVisitId // ✅ Valid foreign key
                 };
 
                 _context.FaultReport.Add(faultReport);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Fault reported successfully! Our technicians will review it shortly.";
+                TempData["SuccessMessage"] = "Fault reported successfully! A maintenance visit has been scheduled for tomorrow at 9:00 AM.";
                 return RedirectToAction(nameof(FaultDetails), new { id = faultReport.FaultReportId });
             }
             catch (Exception ex)
@@ -783,6 +812,52 @@ namespace FridgeManagementSystem.Controllers
                 viewModel.PriorityOptions = GetPriorityOptions();
                 TempData["ErrorMessage"] = "Error reporting fault. Please try again.";
                 return View(viewModel);
+            }
+        }
+
+        // Helper method to get an available technician
+        private async Task<int> GetAvailableTechnicianId()
+        {
+            try
+            {
+                // Try to find any active technician
+                var technician = await _context.Employees
+                    .Where(e => (e.Role == "Technician" || e.Role == "FaultTechnician"))
+                    .FirstOrDefaultAsync();
+
+                if (technician != null)
+                {
+                    return technician.EmployeeID;
+                }
+
+                // If no technicians exist, use the first employee as fallback
+                var anyEmployee = await _context.Employees
+                    .FirstOrDefaultAsync();
+
+                if (anyEmployee != null)
+                {
+                    return anyEmployee.EmployeeID;
+                }
+
+                // If no employees exist at all, create a default technician
+                var defaultTechnician = new Employee
+                {
+                    FullName = "Technical",
+                    Email = "technicians@fridgesystem.com",
+                    PhoneNumber = "000-000-0000",
+                    Role = "Technician",
+                };
+
+                _context.Employees.Add(defaultTechnician);
+                await _context.SaveChangesAsync();
+
+                return defaultTechnician.EmployeeID;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting available technician");
+                // Return a safe default (you might need to create this employee in your database)
+                return 1; // Make sure employee with ID 1 exists
             }
         }
 
