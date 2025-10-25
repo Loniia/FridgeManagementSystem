@@ -534,41 +534,38 @@
                 </div>
             </form>
       </div>
-
-        <!-- Products Section -->
         <div class="products-section">
-            <h3 class="section-title">Available Fridges</h3>
-            
+            <h3 class="section-title">Fridges</h3>
+
             <div class="products-grid">
                 @foreach (var fridgeVm in Model.Fridges)
                 {
-                    <div class="product-card">
-                        @if (fridgeVm.AvailableStock <= 0)
-                        {
-                            <span class="badge-stock badge-out-of-stock">Out of Stock</span>
-                        }
-                        else
-                        {
-                            <span class="badge-stock badge-in-stock">In Stock</span>
-                        }
+                    <div class="product-card @(fridgeVm.Status == "Out of Stock" ? "dimmed" : "")">
+                        <!-- Status Badge -->
+                        <span class="badge-stock @(fridgeVm.Status == "In Stock" ? "badge-in-stock" : "badge-out-of-stock")">
+                            @fridgeVm.Status
+                        </span>
 
-                        <img src="@fridgeVm.ImageUrl" class="product-image" alt="@fridgeVm.Brand @fridgeVm.Model" />
+                        <!-- Fridge Image -->
+                        <img src="@Url.Content(fridgeVm.ImageUrl)" class="product-image" alt="@fridgeVm.Brand @fridgeVm.Model" />
 
                         <div class="card-body">
-                            <h5 class="product-title">@fridgeVm.Brand @fridgeVm.Model</h5>
-                            <p class="product-price">R@(fridgeVm.Price.ToString("0.00"))</p>
-                            <p class="product-stock">
-                                <i class="fas fa-box"></i> Available: @fridgeVm.AvailableStock units
-                            </p>
+                            <p class="product-title">@fridgeVm.Brand @fridgeVm.Model (@fridgeVm.FridgeType)</p>
+
+                            @if (fridgeVm.Status == "In Stock")
+                            {
+                                <p class="product-quantity">Available: @fridgeVm.Quantity</p>
+                            }
+
+                            <p class="product-price">@($"R{fridgeVm.Price:0.00}")</p>
 
                             <form asp-action="AddToCart" asp-controller="Customer" method="post" class="add-to-cart-form">
                                 <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
                                 <input type="hidden" name="quantity" value="1" />
-                                <button type="submit" class="btn-add-to-cart" 
-                                        @(fridgeVm.AvailableStock <= 0 ? "disabled" : "")>
-                                    <i class="fas fa-cart-plus"></i> 
+                                <button type="submit" class="btn-add-to-cart" @(fridgeVm.Status != "In Stock" ? "disabled" : "")>
+                                    <i class="fas fa-cart-plus"></i>
                                     <span class="btn-text">
-                                        @(fridgeVm.AvailableStock <= 0 ? "Out of Stock" : "Add to Cart")
+                                        @(fridgeVm.Status != "In Stock" ? "Out of Stock" : "Add to Cart")
                                     </span>
                                 </button>
                             </form>
@@ -577,7 +574,41 @@
                 }
             </div>
         </div>
-    </div>
+       @*  <div class="products-section">
+            <h3 class="section-title">Fridges</h3>
+
+            <div class="products-grid">
+                @foreach (var fridgeVm in Model.Fridges)
+                {
+                    <div class="product-card">
+                        <!-- Stock badge -->
+                        <span class="badge-stock @(fridgeVm.Status == "In Stock" ? "badge-in-stock" : "badge-out-of-stock")">
+                            @fridgeVm.Status
+                        </span>
+
+                        <!-- Image -->
+                        <img src="@Url.Content(fridgeVm.ImageUrl)" class="product-image" alt="Fridge Image" />
+
+                        <div class="card-body">
+                            <p class="product-title">@fridgeVm.Brand @fridgeVm.Model (@fridgeVm.FridgeType)</p>
+                            <p class="product-price">R@(fridgeVm.Price.ToString("0.00"))</p>
+
+                            <form asp-action="AddToCart" asp-controller="Customer" method="post" class="add-to-cart-form">
+                                <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="btn-add-to-cart"
+                                @(fridgeVm.Status != "In Stock" ? "disabled" : "")>
+                                    <i class="fas fa-cart-plus"></i>
+                                    <span class="btn-text">
+                                        @(fridgeVm.Status != "In Stock" ? "Out of Stock" : "Add to Cart")
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div> *@
 </div>
 
 @section Scripts {

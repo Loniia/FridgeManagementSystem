@@ -40,51 +40,41 @@ namespace FridgeManagementSystem.Controllers
             _notificationService = notificationService;
         }
 
-        // ==========================
-        // 1. DASHBOARD
-        // ==========================
+        //=================
+        //DASHBOARD
+        //=================
         public async Task<IActionResult> Dashboard(string search)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0)
                 return RedirectToAction("Login", "Account");
 
-            if (!int.TryParse(userIdClaim.Value, out int userId))
-                return RedirectToAction("Login", "Account");
+            // Fetch all fridges from DB
+            var fridgesQuery = _context.Fridge.AsQueryable();
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
-
-            if (customer == null)
-                return RedirectToAction("Login", "Account");
-
-            var fridgesQuery = _context.Fridge
-                .Include(f => f.FridgeAllocation)
-                .AsQueryable();
-
+            // Optional search
             if (!string.IsNullOrEmpty(search))
             {
                 fridgesQuery = fridgesQuery.Where(f =>
-                    f.Brand.Contains(search) || f.Model.Contains(search));
+                    (f.Brand != null && f.Brand.Contains(search)) ||
+                    (f.Model != null && f.Model.Contains(search)));
             }
-
-            ViewData["Search"] = search;
 
             var fridges = await fridgesQuery.ToListAsync();
 
+            // Map to ViewModel
             var fridgeViewModels = fridges.Select(f => new FridgeViewModel
             {
                 FridgeId = f.FridgeId,
-                FridgeType = f.FridgeType,
                 Brand = f.Brand,
                 Model = f.Model,
+                FridgeType = f.FridgeType,
                 Price = f.Price,
                 Quantity = f.Quantity,
-                ImageUrl = string.IsNullOrEmpty(f.ImageUrl) ? "/images/fridges/default.jpg" : f.ImageUrl,
-                AvailableStock = f.Quantity - f.FridgeAllocation
-                    .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
-                    .Count(),
-                Status = (!f.IsActive || f.Quantity <= 0) ? "Out of Stock" : "In Stock"
+                Status = f.Status == "Available" ? "In Stock" : "Out of Stock",
+                ImageUrl = string.IsNullOrEmpty(f.ImageUrl)
+                    ? $"/images/fridges/fridge{f.FridgeId}.jpg"  // default naming based on ID
+                    : f.ImageUrl
             }).ToList();
 
             var model = new CustomerViewModel
@@ -93,8 +83,64 @@ namespace FridgeManagementSystem.Controllers
                 Fridges = fridgeViewModels
             };
 
+            ViewData["Search"] = search;
             return View(model);
         }
+
+
+        //public async Task<IActionResult> Dashboard(string search)
+        //{
+        //    var customerId = GetLoggedInCustomerId();
+        //    if (customerId == 0)
+        //        return RedirectToAction("Login", "Account");
+
+        //    // ✅ Get all fridges (don’t filter anything)
+        //    var fridgesQuery = _context.Fridge.AsQueryable();
+
+        //    // Optional search by brand or model
+        //    if (!string.IsNullOrEmpty(search))
+        //    {
+        //        fridgesQuery = fridgesQuery.Where(f =>
+        //            (f.Brand != null && f.Brand.Contains(search)) ||
+        //            (f.Model != null && f.Model.Contains(search)));
+        //    }
+
+        //    var fridges = await fridgesQuery.ToListAsync();
+
+        //    // ✅ Always show 30 pictures no matter what
+        //    var fridgeViewModels = new List<FridgeViewModel>();
+
+        //    for (int i = 0; i < 30; i++)
+        //    {
+        //        // Try to get fridge from DB (if less than 30 seeded)
+        //        var fridge = i < fridges.Count ? fridges[i] : null;
+
+        //        fridgeViewModels.Add(new FridgeViewModel
+        //        {
+        //            FridgeId = fridge?.FridgeId ?? 0,
+        //            Brand = fridge?.Brand ?? "Brand " + (i + 1),
+        //            Model = fridge?.Model ?? "Model " + (i + 1),
+        //            FridgeType = fridge?.FridgeType ?? "Type " + (i + 1),
+        //            Price = fridge?.Price ?? 0,
+        //            Quantity = fridge?.Quantity ?? 0,
+        //            Status = (fridge != null && fridge.Status == "Available")
+        //                ? "In Stock"
+        //                : "Out of Stock",
+        //            ImageUrl = $"/images/fridges/fridge{i + 1}.jpg"
+        //        });
+        //    }
+
+        //    var model = new CustomerViewModel
+        //    {
+        //        FullNames = User.Identity?.Name ?? "Guest",
+        //        Fridges = fridgeViewModels
+        //    };
+
+        //    ViewData["Search"] = search;
+        //    return View(model);
+        //}
+
+
 
         // ==========================
         // 2. ADD TO CART
@@ -719,7 +765,6 @@ namespace FridgeManagementSystem.Controllers
                 {
                     FridgeId = viewModel.FridgeId,
                     FaultDescription = viewModel.FaultDescription,
-                    FaultType = viewModel.FaultType,  // ✅ Now correctly mapped from ViewModel
                     ReportDate = DateTime.Now,
                     UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
                     StatusFilter = "Pending"

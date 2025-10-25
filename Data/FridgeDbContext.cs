@@ -139,12 +139,12 @@ namespace FridgeManagementSystem.Data
                  .OnDelete(DeleteBehavior.NoAction)
                  .IsRequired(false);
 
-            // RepairSchedule relationships
-            builder.Entity<RepairSchedule>()
-                .HasOne(r => r.FaultReport)
-                .WithMany(f => f.RepairSchedules)
-                .HasForeignKey(r => r.FaultID)
-                .OnDelete(DeleteBehavior.NoAction);
+            //// RepairSchedule relationships
+            //builder.Entity<RepairSchedule>()
+            //    .HasOne(r => r.FaultReport)
+            //    .WithMany(f => f.RepairSchedules)
+            //    .HasForeignKey(r => r.FaultID)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<RepairSchedule>()
                 .HasOne(rs => rs.Fridge)
@@ -236,12 +236,14 @@ namespace FridgeManagementSystem.Data
                 }
                 
             );
-            // Seed fridges
+
+            // --- 🌟 Seed Fridges 🌟 ---
             var fridges = new List<Fridge>();
-            int id = 1;
+            var brands = new[] { "LG", "Samsung", "Bosch", "Hisense", "Defy" };
+            var types = new[] { "Single Door", "Double Door", "Side-by-Side", "Mini Fridge" };
+            var id = 1;
             var rnd = new Random();
-            string[] brands = { "Samsung", "LG", "Hisense", "Defy", "Bosch" };
-            string[] types = { "Single Door", "Double Door", "Mini Fridge" };
+
             for (int i = 1; i <= 30; i++)
             {
                 fridges.Add(new Fridge
@@ -255,16 +257,15 @@ namespace FridgeManagementSystem.Data
                     Price = rnd.Next(3500, 12000),
                     ImageUrl = $"/images/fridges/fridge{i}.jpg",
                     IsActive = true,
-                    Quantity = rnd.Next(1, 10),
-                    Status = "Available",
+                    Quantity = 0,          // Start with 0 → out of stock
+                    Status = "Received",   // Start as Received → out of stock
                     DeliveryDate = DateTime.Now
                 });
             }
 
-            builder.Entity<Fridge>().HasData(fridges);
-        
-        // --- Soft Delete / Query Filters ---
-        builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
+
+            // --- Soft Delete / Query Filters ---
+            builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
             builder.Entity<Customer>().HasQueryFilter(c => c.IsActive);
             builder.Entity<Fridge>().HasQueryFilter(f => f.IsActive);
             builder.Entity<FridgeAllocation>().HasQueryFilter(a => a.Fridge.IsActive);

@@ -56,11 +56,23 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
 
     var context = services.GetRequiredService<FridgeDbContext>();
-   // context.Database.Migrate();
+    context.Database.Migrate(); // ✅ uncomment this to apply migrations automatically
 
-    // Call SeedData to ensure roles + admin user exist
+    // ✅ Seed roles, admin, and fridges
     await SeedData.InitializeAsync(services);
 }
+
+//// ✅ 6. Run migrations + seed data at startup
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+
+//    var context = services.GetRequiredService<FridgeDbContext>();
+//   // context.Database.Migrate();
+
+//    // Call SeedData to ensure roles + admin user exist
+//    await SeedData.InitializeAsync(services);
+//}
 
 // ✅ 7. Configure Middleware
 if (!app.Environment.IsDevelopment())
