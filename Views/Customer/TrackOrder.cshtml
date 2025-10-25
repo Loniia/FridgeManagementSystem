@@ -12,12 +12,9 @@
         <!-- Order Status Badge -->
         <div class="mb-3">
             <strong>Status:</strong>
-            <span class="badge
-                @(Model.Status == "Pending" ? "bg-warning text-dark" :
-                  Model.Status == "Paid" ? "bg-success" :
-                  Model.Status == "Fridge Allocated" ? "bg-info text-dark" :
-                  Model.Status == "Shipped" ? "bg-primary" :
-                  Model.Status == "Delivered" ? "bg-success" : "bg-secondary")">
+            <span class="badge @(Model.Status == "Pending" ? "bg-warning text-dark" :
+                     Model.Status == "Paid" ? "bg-success" :
+                     Model.Status == "Fridge Allocated" ? "bg-info text-dark" : "bg-secondary")">
                 @Model.Status
             </span>
         </div>
@@ -38,12 +35,6 @@
                 </li>
                 <li class="list-group-item @(Model.OrderProgress >= FridgeManagementSystem.Models.OrderStatus.FridgeAllocated ? "bg-success text-white" : "")">
                     Fridge Allocated
-                </li>
-                <li class="list-group-item @(Model.OrderProgress >= FridgeManagementSystem.Models.OrderStatus.Shipped ? "bg-success text-white" : "")">
-                    Shipped
-                </li>
-                <li class="list-group-item @(Model.OrderProgress >= FridgeManagementSystem.Models.OrderStatus.Delivered ? "bg-success text-white" : "")">
-                    Delivered
                 </li>
             </ul>
         </div>
