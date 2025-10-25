@@ -50,29 +50,18 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
+
 // ✅ 6. Run migrations + seed data at startup
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
 
     var context = services.GetRequiredService<FridgeDbContext>();
-    context.Database.Migrate(); // ✅ uncomment this to apply migrations automatically
+    // context.Database.Migrate();
 
-    // ✅ Seed roles, admin, and fridges
+    // Call SeedData to ensure roles + admin user exist
     await SeedData.InitializeAsync(services);
 }
-
-//// ✅ 6. Run migrations + seed data at startup
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-
-//    var context = services.GetRequiredService<FridgeDbContext>();
-//   // context.Database.Migrate();
-
-//    // Call SeedData to ensure roles + admin user exist
-//    await SeedData.InitializeAsync(services);
-//}
 
 // ✅ 7. Configure Middleware
 if (!app.Environment.IsDevelopment())
