@@ -35,7 +35,7 @@ namespace FridgeManagementSystem.Models
         public virtual Fridge Fridge { get; set; }
        
         [ForeignKey("MaintenanceVisit")]
-        public int MaintenanceVisitId { get; set; }
+        public int? MaintenanceVisitId { get; set; }
        
         public virtual MaintenanceVisit? MaintenanceVisit{ get; set; }
 
