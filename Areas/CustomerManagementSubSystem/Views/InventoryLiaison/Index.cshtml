@@ -56,11 +56,17 @@
                 </td>
 
                 <!-- Quantity with Low Stock alert -->
-                <td class="@(fridge.Quantity < 5 ? "table-danger fw-bold" : "")">
+               <td class="@(fridge.Quantity < 5 ? "table-danger fw-bold" : "")">
                     @fridge.Quantity
                     @if (fridge.Quantity < 5)
                     {
-                        <span class="text-danger ms-2">⚠ Low Stock</span>
+                        <a asp-area="CustomerManagementSubSystem"
+                           asp-controller="InventoryLiaison"
+                           asp-action="CreatePurchaseRequest"
+                           asp-route-fridgeId="@fridge.FridgeId"
+                           class="text-danger fw-bold text-decoration-none ms-2">
+                            ⚠ Low Stock
+                        </a>
                     }
                 </td>
 

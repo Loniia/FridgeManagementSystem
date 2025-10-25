@@ -255,10 +255,14 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 CustomerID = customerId,
                 OrderItemId = orderItemId,
                 AllocationDate = DateOnly.FromDateTime(DateTime.Now),
+                ReturnDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30)),// default 30 days
                 Status = "Allocated",
                 QuantityAllocated = 1
             };
             _context.FridgeAllocation.Add(allocation);
+            _context.SaveChanges();
+
+            TempData["ReturnDate"] = allocation.ReturnDate?.ToString("yyyy-MM-dd");
 
             // Update fridge and order
             fridge.Status = "Allocated";
