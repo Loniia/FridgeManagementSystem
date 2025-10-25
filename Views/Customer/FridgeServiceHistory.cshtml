@@ -4,15 +4,16 @@
     ViewData["Title"] = "Fridge Service History";
 }
 
-<h2>Service History for @Model.FirstOrDefault()?.MaintenanceRequest.Fridge.Brand</h2>
+<h2>Fridge Service History</h2>
 
-<div class="mb-3">
+
+@* <div class="mb-3">
     <a asp-action="DownloadFridgeServiceHistory"
        asp-route-fridgeId="@Model.FirstOrDefault()?.MaintenanceRequest.FridgeId"
        class="btn btn-secondary">
         <i class="fas fa-file-pdf"></i> Download PDF
     </a>
-</div>
+</div> *@
 
 @if (!Model.Any())
 {

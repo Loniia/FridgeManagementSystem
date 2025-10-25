@@ -25,7 +25,7 @@ else
                     <strong>Technician:</strong> @visit.Employee?.FullName <br />
                     <strong>Status:</strong> @visit.Status
                 </p>
-                <a asp-action="FridgeServiceHistory" asp-route-fridgeId="@visit.MaintenanceRequest.FridgeId"
+                <a asp-action="FridgeServiceHistory" asp-route-fridgeId="@visit.FridgeId"
                    class="btn btn-primary btn-sm">
                     View Service History
                 </a>

@@ -282,30 +282,82 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             TempData["Message"] = "Maintenance task started successfully!";
             return RedirectToAction("PerformMaintenance", new { visitId });
         }
-
         [HttpPost]
-        public async Task< IActionResult> CompleteMaintenance(int visitId)
+        public async Task<IActionResult> CompleteMaintenance(int visitId)
         {
-            var visit = _context.MaintenanceVisit
+            // 1) Load the visit including its request and fridge
+            var visit = await _context.MaintenanceVisit
                 .Include(v => v.MaintenanceRequest)
-                .FirstOrDefault(v => v.MaintenanceVisitId == visitId);
+                    .ThenInclude(r => r.Fridge)
+                .Include(v => v.Employee)
+                .FirstOrDefaultAsync(v => v.MaintenanceVisitId == visitId);
 
             if (visit == null) return NotFound();
-            visit.MaintenanceRequest.CompletedDate = DateTime.Now;
-            UpdateVisitAndRequestStatus(visit, Models.TaskStatus.Complete);
-            // Create the next month's maintenance request (if none exists)
-            var created = await _mrService.CreateNextMonthlyRequestAsync(visit.FridgeId);
 
-            if (created != null)
+            // 2) Mark the visit as complete
+            visit.Status = Models.TaskStatus.Complete;
+
+            // 3) Update the linked MaintenanceRequest (if present)
+            if (visit.MaintenanceRequest != null)
             {
-                TempData["Message"] = $"Maintenance completed — next maintenance request created for {created.RequestDate:yyyy-MM-dd}.";
+                visit.MaintenanceRequest.TaskStatus = Models.TaskStatus.Complete;
+                visit.MaintenanceRequest.CompletedDate = DateTime.Now;
+                visit.MaintenanceRequest.IsActive = false;
             }
             else
             {
-                TempData["Message"] = "Maintenance completed. No new request created because a pending/scheduled request already exists.";
+                // If no navigation property loaded, load and update
+                var req = await _context.MaintenanceRequest
+                    .FirstOrDefaultAsync(r => r.MaintenanceRequestId == visit.MaintenanceRequestId);
+                if (req != null)
+                {
+                    req.TaskStatus = Models.TaskStatus.Complete;
+                    req.CompletedDate = DateTime.Now;
+                    req.IsActive = false;
+                }
             }
 
-            return RedirectToAction("PerformMaintenance", new { visitId });
+            await _context.SaveChangesAsync();
+
+            // 4) Create the next monthly MaintenanceRequest (service already prevents duplicates)
+            var nextRequest = await _mrService.CreateNextMonthlyRequestAsync(visit.FridgeId);
+
+            // 5) If a next request was created, optionally create a corresponding MaintenanceVisit
+            MaintenanceVisit nextVisit = null;
+            if (nextRequest != null)
+            {
+                nextVisit = new MaintenanceVisit
+                {
+                    MaintenanceRequestId = nextRequest.MaintenanceRequestId,
+                    FridgeId = visit.FridgeId,
+                    // schedule the visit for the request date and keep the same time as previous visit if sensible
+                    ScheduledDate = nextRequest.RequestDate,
+                    ScheduledTime = visit.ScheduledTime,
+                    Status = Models.TaskStatus.Scheduled,
+                    // optional: assign same tech or leave unassigned (0 or null depending on your model)
+                    EmployeeID = visit.EmployeeID
+                };
+
+                _context.MaintenanceVisit.Add(nextVisit);
+                await _context.SaveChangesAsync();
+            }
+
+            // 6) Feedback to technician (and later, you can create notifications)
+            if (nextVisit != null)
+            {
+                TempData["Message"] = $"Maintenance completed. Next visit scheduled for {nextVisit.ScheduledDate:yyyy-MM-dd}.";
+            }
+            else if (nextRequest != null)
+            {
+                // corner-case: request created but visit not created (shouldn't happen with above)
+                TempData["Message"] = $"Maintenance completed. Next request created for {nextRequest.RequestDate:yyyy-MM-dd}.";
+            }
+            else
+            {
+                TempData["Message"] = "Maintenance completed. No new request created (there is already a pending/scheduled request).";
+            }
+
+            return RedirectToAction("PerformMaintenance", new { visitId = visitId });
         }
 
         // ✅ Checklist

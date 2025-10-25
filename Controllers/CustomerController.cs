@@ -17,6 +17,7 @@ using FridgeManagementSystem.Services;
 
 namespace FridgeManagementSystem.Controllers
 {
+    [Authorize(Roles = Roles.Customer)]
     public class CustomerController : Controller
     {
 
@@ -916,7 +917,7 @@ namespace FridgeManagementSystem.Controllers
                 .ThenInclude(r => r.Fridge)
                 .Include(v => v.Employee)
                 .Where(v => v.MaintenanceRequest.Fridge.CustomerID == customerId &&
-                            (v.Status == TaskStatus.Scheduled || v.Status == TaskStatus.Rescheduled))
+                            (v.Status == TaskStatus.Scheduled || v.Status == TaskStatus.Rescheduled || v.MaintenanceRequest.TaskStatus == TaskStatus.Scheduled || v.MaintenanceRequest.TaskStatus == TaskStatus.Rescheduled))
                 .OrderBy(v => v.ScheduledDate)
                 .ThenBy(v => v.ScheduledTime)
                 .ToListAsync();
@@ -924,23 +925,25 @@ namespace FridgeManagementSystem.Controllers
             return View(visits);
         }
 
-        public async Task<IActionResult> FridgeServiceHistory(int fridgeId)
+        public async Task<IActionResult> FridgeServiceHistory()
         {
-            var customerId = GetLoggedInCustomerId();
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            // ✅ Load completed visits for all fridges owned by customer
             var visits = await _context.MaintenanceVisit
                 .Include(v => v.MaintenanceRequest)
-                .ThenInclude(r => r.Fridge)
-                .Include(v => v.Employee)
+                    .ThenInclude(m => m.Fridge)
                 .Include(v => v.MaintenanceChecklist)
                 .Include(v => v.ComponentUsed)
                 .Include(v => v.FaultReport)
-                .Where(v => v.MaintenanceRequest.FridgeId == fridgeId &&
-                            v.MaintenanceRequest.Fridge.CustomerID == customerId)
+                .Where(v => v.Status == TaskStatus.Complete &&
+                            v.MaintenanceRequest.Fridge.CustomerID == userId)
                 .OrderByDescending(v => v.ScheduledDate)
                 .ToListAsync();
 
             return View(visits);
         }
+
 
         [HttpGet]
         public IActionResult DownloadFridgeServiceHistory(int fridgeId)
