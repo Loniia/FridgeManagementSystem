@@ -237,33 +237,6 @@ namespace FridgeManagementSystem.Data
                 
             );
 
-            // --- 🌟 Seed Fridges 🌟 ---
-            var fridges = new List<Fridge>();
-            var brands = new[] { "LG", "Samsung", "Bosch", "Hisense", "Defy" };
-            var types = new[] { "Single Door", "Double Door", "Side-by-Side", "Mini Fridge" };
-            var id = 1;
-            var rnd = new Random();
-
-            for (int i = 1; i <= 30; i++)
-            {
-                fridges.Add(new Fridge
-                {
-                    FridgeId = id++,
-                    FridgeType = types[rnd.Next(types.Length)],
-                    Brand = brands[rnd.Next(brands.Length)],
-                    Model = $"Model-{i}",
-                    Condition = "Working",
-                    SupplierID = 1,
-                    Price = rnd.Next(3500, 12000),
-                    ImageUrl = $"/images/fridges/fridge{i}.jpg",
-                    IsActive = true,
-                    Quantity = 0,          // Start with 0 → out of stock
-                    Status = "Received",   // Start as Received → out of stock
-                    DeliveryDate = DateTime.Now
-                });
-            }
-
-
             // --- Soft Delete / Query Filters ---
             builder.Entity<Supplier>().HasQueryFilter(s => s.IsActive);
             builder.Entity<Customer>().HasQueryFilter(c => c.IsActive);

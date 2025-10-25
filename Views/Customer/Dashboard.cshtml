@@ -545,8 +545,12 @@
                 {
                     <div class="product-card @(fridgeVm.Status == "Out of Stock" ? "dimmed" : "")">
                         <!-- Status Badge -->
-                        <span class="badge-stock @(fridgeVm.Status == "In Stock" ? "badge-in-stock" : "badge-out-of-stock")">
-                            @fridgeVm.Status
+                        @{
+                            var isInStock = fridgeVm.Status == "Available";
+                            var displayStatus = isInStock ? "In Stock" : "Out of Stock";
+                        }
+                        <span class="badge-stock @(isInStock ? "badge-in-stock" : "badge-out-of-stock")">
+                            @displayStatus
                         </span>
 
                         <!-- Fridge Image -->
@@ -555,7 +559,7 @@
                         <div class="card-body">
                             <p class="product-title">@fridgeVm.Brand @fridgeVm.Model (@fridgeVm.FridgeType)</p>
 
-                            @if (fridgeVm.Status == "In Stock")
+                            @if (isInStock)
                             {
                                 <p class="product-quantity">Available: @fridgeVm.Quantity</p>
                             }
@@ -565,10 +569,10 @@
                             <form asp-action="AddToCart" asp-controller="Customer" method="post" class="add-to-cart-form">
                                 <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
                                 <input type="hidden" name="quantity" value="1" />
-                                <button type="submit" class="btn-add-to-cart" @(fridgeVm.Status != "In Stock" ? "disabled" : "")>
+                                <button type="submit" class="btn-add-to-cart" @(isInStock ? "" : "disabled")>
                                     <i class="fas fa-cart-plus"></i>
                                     <span class="btn-text">
-                                        @(fridgeVm.Status != "In Stock" ? "Out of Stock" : "Add to Cart")
+                                        @(isInStock ? "Add to Cart" : "Out of Stock")
                                     </span>
                                 </button>
                             </form>
@@ -577,41 +581,6 @@
                 }
             </div>
         </div>
-       @*  <div class="products-section">
-            <h3 class="section-title">Fridges</h3>
-
-            <div class="products-grid">
-                @foreach (var fridgeVm in Model.Fridges)
-                {
-                    <div class="product-card">
-                        <!-- Stock badge -->
-                        <span class="badge-stock @(fridgeVm.Status == "In Stock" ? "badge-in-stock" : "badge-out-of-stock")">
-                            @fridgeVm.Status
-                        </span>
-
-                        <!-- Image -->
-                        <img src="@Url.Content(fridgeVm.ImageUrl)" class="product-image" alt="Fridge Image" />
-
-                        <div class="card-body">
-                            <p class="product-title">@fridgeVm.Brand @fridgeVm.Model (@fridgeVm.FridgeType)</p>
-                            <p class="product-price">R@(fridgeVm.Price.ToString("0.00"))</p>
-
-                            <form asp-action="AddToCart" asp-controller="Customer" method="post" class="add-to-cart-form">
-                                <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
-                                <input type="hidden" name="quantity" value="1" />
-                                <button type="submit" class="btn-add-to-cart"
-                                @(fridgeVm.Status != "In Stock" ? "disabled" : "")>
-                                    <i class="fas fa-cart-plus"></i>
-                                    <span class="btn-text">
-                                        @(fridgeVm.Status != "In Stock" ? "Out of Stock" : "Add to Cart")
-                                    </span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div> *@
 </div>
 
 @section Scripts {

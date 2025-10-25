@@ -58,6 +58,8 @@ namespace FridgeManagementSystem.Data
 
                 for (int i = 1; i <= 30; i++)
                 {
+                    bool isAvailable = i % 2 == 0; // half available, half received
+
                     fridges.Add(new Fridge
                     {
                         FridgeType = types[rnd.Next(types.Length)],
@@ -65,11 +67,11 @@ namespace FridgeManagementSystem.Data
                         Model = $"Model-{i}",
                         Condition = "Working",
                         SupplierID = 1,
-                        Price = rnd.Next(3500, 12000),  // ✅ Random price between R3500 and R12000
+                        Price = rnd.Next(3500, 12000),  // Random realistic price
                         ImageUrl = $"/images/fridges/fridge{i}.jpg",
                         IsActive = true,
-                        Quantity = 0,          // Start as out of stock
-                        Status = "Pending",   // Default status
+                        Quantity = isAvailable ? rnd.Next(3, 15) : 0, // only available ones have quantity
+                        Status = isAvailable ? "Available" : "Received", // Available = in stock, Received = out of stock
                         DeliveryDate = DateTime.Now
                     });
                 }
