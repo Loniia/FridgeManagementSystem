@@ -16,7 +16,7 @@ namespace FridgeManagementSystem.Models
         [StringLength(500)]
         public string Message { get; set; }
 
-        public string Url { get; set; } // optional link the notification points to
+        public string? Url { get; set; } // optional link the notification points to
 
         public bool IsRead { get; set; } = false;
 

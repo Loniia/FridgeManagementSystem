@@ -25,7 +25,23 @@ namespace FridgeManagementSystem.Controllers
         public async Task<IActionResult> MarkAsRead(int id)
         {
             await _notificationService.MarkAsReadAsync(id);
-            return Ok();
+            return RedirectToAction("All");
         }
+        [HttpGet]
+        public async Task<IActionResult> Unread()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var notifications = await _notificationService.GetUnreadAsync(userId, 5);
+            return Json(notifications.Select(n => new { n.NotificationId, n.Message, n.Url }));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UnreadCount()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var count = (await _notificationService.GetUnreadAsync(userId)).Count();
+            return Json(count);
+        }
+
     }
 }
