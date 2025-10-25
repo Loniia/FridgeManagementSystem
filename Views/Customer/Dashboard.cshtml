@@ -35,19 +35,19 @@
         padding: 0 25px;
     }
 
-    .sidebar-header h2 {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-        color: #ecf0f1;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
+        .sidebar-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ecf0f1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-    .sidebar-header .subtitle {
-        font-size: 0.9rem;
-        color: #bdc3c7;
-        opacity: 0.8;
-    }
+        .sidebar-header .subtitle {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            opacity: 0.8;
+        }
 
     .sidebar-menu {
         list-style: none;
@@ -55,51 +55,51 @@
         margin: 0;
     }
 
-    .sidebar-menu li {
-        margin: 8px 20px;
-        border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-left: 4px solid transparent;
-    }
+        .sidebar-menu li {
+            margin: 8px 20px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent;
+        }
 
-    .sidebar-menu li a {
-        display: flex;
-        align-items: center;
-        padding: 15px 20px;
-        text-decoration: none;
-        color: #ecf0f1;
-        font-weight: 500;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
+            .sidebar-menu li a {
+                display: flex;
+                align-items: center;
+                padding: 15px 20px;
+                text-decoration: none;
+                color: #ecf0f1;
+                font-weight: 500;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
 
-    .sidebar-menu li a i {
-        margin-right: 12px;
-        font-size: 1.1rem;
-        width: 20px;
-        text-align: center;
-    }
+                .sidebar-menu li a i {
+                    margin-right: 12px;
+                    font-size: 1.1rem;
+                    width: 20px;
+                    text-align: center;
+                }
 
-    .sidebar-menu li:hover {
-        background: rgba(52, 152, 219, 0.1);
-        border-left-color: #3498db;
-        transform: translateX(5px);
-    }
+            .sidebar-menu li:hover {
+                background: rgba(52, 152, 219, 0.1);
+                border-left-color: #3498db;
+                transform: translateX(5px);
+            }
 
-    .sidebar-menu li:hover a {
-        color: #3498db;
-    }
+                .sidebar-menu li:hover a {
+                    color: #3498db;
+                }
 
-    .sidebar-menu li.active {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        border-left-color: #1abc9c;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-    }
+            .sidebar-menu li.active {
+                background: linear-gradient(135deg, #3498db, #2980b9);
+                border-left-color: #1abc9c;
+                box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            }
 
-    .sidebar-menu li.active a {
-        color: white;
-        font-weight: 600;
-    }
+                .sidebar-menu li.active a {
+                    color: white;
+                    font-weight: 600;
+                }
 
     .sidebar-footer {
         margin-top: auto;
@@ -122,11 +122,11 @@
         transition: all 0.3s ease;
     }
 
-    .logout-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-        color: white;
-    }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+            color: white;
+        }
 
     /* 🌟 Main Content Styles */
     .main-content {
@@ -147,33 +147,112 @@
         overflow: hidden;
     }
 
-    .dashboard-welcome::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
+        .dashboard-welcome::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .dashboard-welcome h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .dashboard-welcome p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 300;
+            margin-bottom: 0;
+            position: relative;
+        }
+
+    /* 🌟 Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 20px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .filter-select {
         width: 100%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-        background-size: 20px 20px;
-        animation: float 6s ease-in-out infinite;
+        padding: 12px 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        background: white;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
     }
 
-    .dashboard-welcome h2 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 15px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        position: relative;
+        .filter-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+    .search-btn {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        white-space: nowrap;
     }
 
-    .dashboard-welcome p {
-        font-size: 1.2rem;
-        opacity: 0.95;
-        font-weight: 300;
-        margin-bottom: 0;
-        position: relative;
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+    .reset-btn {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
     }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+            color: white;
+        }
 
     /* 🌟 Products Grid */
     .products-section {
@@ -192,17 +271,17 @@
         position: relative;
     }
 
-    .section-title::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background: linear-gradient(135deg, #3498db, #1abc9c);
-        border-radius: 2px;
-    }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #3498db, #1abc9c);
+            border-radius: 2px;
+        }
 
     .products-grid {
         display: grid;
@@ -222,10 +301,10 @@
         border: none;
     }
 
-    .product-card:hover {
-        transform: translateY(-12px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    }
+        .product-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
 
     .product-image {
         height: 220px;
@@ -300,28 +379,33 @@
         letter-spacing: 0.5px;
     }
 
-    .btn-add-to-cart:hover:not(:disabled) {
-        background: linear-gradient(135deg, #2980b9, #1f618d);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
-    }
+        .btn-add-to-cart:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2980b9, #1f618d);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
 
-    .btn-add-to-cart:disabled {
-        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
+        .btn-add-to-cart:disabled {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
 
-    .btn-add-to-cart.loading {
-        background: linear-gradient(135deg, #f39c12, #e67e22);
-        pointer-events: none;
-    }
+        .btn-add-to-cart.loading {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            pointer-events: none;
+        }
 
     /* 🌟 Animations */
     @@keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-10px) rotate(1deg); }
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-10px) rotate(1deg);
+        }
     }
 
     .product-card {
@@ -333,6 +417,7 @@
             opacity: 0;
             transform: translateY(30px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -350,43 +435,52 @@
         .dashboard-container {
             flex-direction: column;
         }
-        
+
         .sidebar {
             width: 100%;
             height: auto;
             order: 2;
             padding: 20px 0;
         }
-        
+
         .sidebar-menu {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
         }
-        
-        .sidebar-menu li {
-            flex: 1;
-            min-width: 150px;
-            margin: 5px;
-        }
-        
+
+            .sidebar-menu li {
+                flex: 1;
+                min-width: 150px;
+                margin: 5px;
+            }
+
         .main-content {
             order: 1;
             padding: 25px;
         }
-        
+
         .dashboard-welcome {
             padding: 30px;
             margin-bottom: 30px;
         }
-        
-        .dashboard-welcome h2 {
-            font-size: 2rem;
-        }
-        
+
+            .dashboard-welcome h2 {
+                font-size: 2rem;
+            }
+
         .products-section {
             padding: 25px;
+        }
+
+        .filter-row {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .filter-group {
+            min-width: 100%;
         }
     }
 
@@ -395,22 +489,26 @@
             grid-template-columns: 1fr;
             gap: 20px;
         }
-        
+
         .main-content {
             padding: 20px;
         }
-        
+
         .dashboard-welcome {
             padding: 25px;
             text-align: center;
         }
-        
-        .dashboard-welcome h2 {
-            font-size: 1.8rem;
-        }
-        
+
+            .dashboard-welcome h2 {
+                font-size: 1.8rem;
+            }
+
         .section-title {
             font-size: 1.6rem;
+        }
+
+        .filter-section {
+            padding: 20px;
         }
     }
 
@@ -418,15 +516,15 @@
         .sidebar-menu {
             flex-direction: column;
         }
-        
-        .sidebar-menu li {
-            min-width: auto;
-        }
-        
+
+            .sidebar-menu li {
+                min-width: auto;
+            }
+
         .main-content {
             padding: 15px;
         }
-        
+
         .products-section {
             padding: 20px;
         }
@@ -448,8 +546,12 @@
         transition: transform 0.3s ease;
     }
 
-    .hover-lift:hover {
-        transform: translateY(-5px);
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+
+    .dimmed {
+        opacity: 0.7;
     }
 </style>
 
@@ -462,61 +564,57 @@
             <div class="subtitle">Manage Your Fridge Experience</div>
         </div>
         <ul class="sidebar-menu" id="sidebar-menu">
-    <li class="active">
-        <a asp-action="Dashboard" asp-controller="Customer">
-            <i class="fas fa-home"></i> Home
-        </a>
-    </li>
-    <li>
-        <a asp-action="ViewCart" asp-controller="Customer">
-            <i class="fas fa-shopping-cart"></i> My Cart
-        </a>
-    </li>
-    <li>
-        <a asp-action="Checkout" asp-controller="Customer">
-            <i class="fas fa-credit-card"></i> Checkout
-        </a>
-    </li>
-    <li>
-        <a asp-action="MyAccount" asp-controller="Customer">
-            <i class="fas fa-box"></i> My Orders
-        </a>
-    </li>
-    <li>
-        <a asp-action="OrderHistory" asp-controller="Customer">
-            <i class="fas fa-history"></i> Order History
-        </a>
-    </li>
-    <li>
-        <a asp-action="TrackOrder" asp-controller="Customer">
-            <i class="fas fa-map-marker-alt"></i> Track Order
-        </a>
-    </li>
-    <li>
-        <a asp-action="UpcomingVisits" asp-controller="Customer">
-            <i class="fas fa-tools"></i> Maintenance Visits
-        </a>
-    </li>
-    <li>
+            <li class="active">
+                <a asp-action="Dashboard" asp-controller="Customer">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </li>
+            <li>
+                <a asp-action="ViewCart" asp-controller="Customer">
+                    <i class="fas fa-shopping-cart"></i> My Cart
+                </a>
+            </li>
+            <li>
+                <a asp-action="Checkout" asp-controller="Customer">
+                    <i class="fas fa-credit-card"></i> Checkout
+                </a>
+            </li>
+            <li>
+                <a asp-action="MyAccount" asp-controller="Customer">
+                    <i class="fas fa-box"></i> My Orders
+                </a>
+            </li>
+            <li>
+                <a asp-action="OrderHistory" asp-controller="Customer">
+                    <i class="fas fa-history"></i> Order History
+                </a>
+            </li>
+            <li>
+                <a asp-action="TrackOrder" asp-controller="Customer">
+                    <i class="fas fa-map-marker-alt"></i> Track Order
+                </a>
+            </li>
+            <li>
+                <a asp-action="UpcomingVisits" asp-controller="Customer">
+                    <i class="fas fa-tools"></i> Maintenance Visits
+                </a>
+            </li>
+            <li>
                 <a asp-action="FridgeServiceHistory" asp-controller="Customer">
                     <i class="fas fa-history"></i> Service History
                 </a>
-    </li>
-
-
-
-    <li>
-        <a asp-action="MyFaults" asp-controller="Customer">
-            <i class="fas fa-exclamation-triangle"></i> My Faults
-        </a>
-    </li>
-    <li>
-        <a asp-action="CreateFault" asp-controller="Customer">
-            <i class="fas fa-plus-circle"></i> Report Fault
-        </a>
-    </li>
-</ul>
-
+            </li>
+            <li>
+                <a asp-action="MyFaults" asp-controller="Customer">
+                    <i class="fas fa-exclamation-triangle"></i> My Faults
+                </a>
+            </li>
+            <li>
+                <a asp-action="CreateFault" asp-controller="Customer">
+                    <i class="fas fa-plus-circle"></i> Report Fault
+                </a>
+            </li>
+        </ul>
         <div class="sidebar-footer">
             <a asp-controller="Account" asp-action="Logout" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Sign Out
@@ -527,65 +625,122 @@
     <!-- Main Content -->
     <div class="main-content">
         <!-- Welcome Section -->
-        <div class="container mt-3">
-    <h2>Welcome, @User.Identity.Name!</h2>
+        <div class="dashboard-welcome">
+            <h2>Welcome, @User.Identity?.Name!</h2>
+            <p>Browse our collection of premium fridges and find the perfect one for your needs.</p>
+        </div>
 
-            <form asp-action="Dashboard" method="get" class="my-3">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search by brand or model..." value="@ViewData["Search"]" />
-                    <button type="submit" class="btn btn-primary">Search</button>
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get" class="filter-form">
+                <div class="filter-row">
+                    <!-- Search Input -->
+                    <div class="filter-group">
+                        <div class="filter-label">Search Fridges</div>
+                        <input type="text" name="search" class="form-control" placeholder="Search by brand or model..." value="@ViewData["Search"]" />
+                    </div>
+
+                    <!-- Stock Filter -->
+                    <div class="filter-group">
+                        <div class="filter-label">Stock Status</div>
+                        <select name="stockFilter" class="filter-select" onchange="this.form.submit()">
+                            <option value="all" selected="@(ViewData["StockFilter"]?.ToString() == "all")">All Stock</option>
+                            <option value="in-stock" selected="@(ViewData["StockFilter"]?.ToString() == "in-stock")">In Stock Only</option>
+                            <option value="out-of-stock" selected="@(ViewData["StockFilter"]?.ToString() == "out-of-stock")">Out of Stock Only</option>
+                        </select>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="filter-group">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i> Apply Filters
+                        </button>
+                    </div>
+
+                    <!-- Reset Button -->
+                    <div class="filter-group">
+                        <a asp-action="Dashboard" class="reset-btn">
+                            <i class="fas fa-refresh"></i> Reset
+                        </a>
+                    </div>
                 </div>
             </form>
-      </div>
-        <div class="products-section">
-            <h3 class="section-title">Fridges</h3>
-
-            <div class="products-grid">
-                @foreach (var fridgeVm in Model.Fridges)
-                {
-                    <div class="product-card @(fridgeVm.Status == "Out of Stock" ? "dimmed" : "")">
-                        <!-- Status Badge -->
-                        @{
-                            var isInStock = fridgeVm.Status == "Available";
-                            var displayStatus = isInStock ? "In Stock" : "Out of Stock";
-                        }
-                        <span class="badge-stock @(isInStock ? "badge-in-stock" : "badge-out-of-stock")">
-                            @displayStatus
-                        </span>
-
-                        <!-- Fridge Image -->
-                        <img src="@Url.Content(fridgeVm.ImageUrl)" class="product-image" alt="@fridgeVm.Brand @fridgeVm.Model" />
-
-                        <div class="card-body">
-                            <p class="product-title">@fridgeVm.Brand @fridgeVm.Model (@fridgeVm.FridgeType)</p>
-
-                            @if (isInStock)
-                            {
-                                <p class="product-quantity">Available: @fridgeVm.Quantity</p>
-                            }
-
-                            <p class="product-price">@($"R{fridgeVm.Price:0.00}")</p>
-
-                            <form asp-action="AddToCart" asp-controller="Customer" method="post" class="add-to-cart-form">
-                                <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
-                                <input type="hidden" name="quantity" value="1" />
-                                <button type="submit" class="btn-add-to-cart" @(isInStock ? "" : "disabled")>
-                                    <i class="fas fa-cart-plus"></i>
-                                    <span class="btn-text">
-                                        @(isInStock ? "Add to Cart" : "Out of Stock")
-                                    </span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                }
-            </div>
         </div>
+
+        <!-- Products Section -->
+        <div class="products-section">
+            <h3 class="section-title">Available Fridges</h3>
+
+            @if (!Model.Fridges.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No fridges found</h4>
+                    <p class="text-muted">Try adjusting your search criteria or stock filter.</p>
+                    <a asp-action="Dashboard" class="btn btn-primary mt-3">
+                        <i class="fas fa-refresh"></i> Show All Fridges
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="products-grid">
+                    @foreach (var fridgeVm in Model.Fridges)
+                    {
+                        var isInStock = fridgeVm.Status == "In Stock";
+
+                        <div class="product-card @(!isInStock ? "dimmed" : "")">
+                            <!-- Status Badge -->
+                            <span class="badge-stock @(isInStock ? "badge-in-stock" : "badge-out-of-stock")">
+                                @fridgeVm.Status
+                            </span>
+
+                            <!-- Fridge Image -->
+                            <img src="@Url.Content(fridgeVm.ImageUrl)" class="product-image" alt="@fridgeVm.Brand @fridgeVm.Model" />
+
+                            <div class="card-body">
+                                <h5 class="product-title">@fridgeVm.Brand @fridgeVm.Model</h5>
+                                <p class="text-muted mb-2">@fridgeVm.FridgeType</p>
+
+                                @if (isInStock)
+                                {
+                                    <p class="product-stock">
+                                        <i class="fas fa-box text-success"></i>
+                                        Available: @fridgeVm.Quantity units
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="product-stock">
+                                        <i class="fas fa-box text-danger"></i>
+                                        Currently unavailable
+                                    </p>
+                                }
+
+                                <p class="product-price">@($"R{fridgeVm.Price:0.00}")</p>
+
+                                <form asp-action="AddToCart" asp-controller="Customer" method="post" class="add-to-cart-form">
+                                    <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="btn-add-to-cart" @(!isInStock ? "disabled" : "")>
+                                        <i class="fas fa-cart-plus"></i>
+                                        <span class="btn-text">
+                                            @(isInStock ? "Add to Cart" : "Out of Stock")
+                                        </span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Sidebar active state management
             const sidebarItems = document.querySelectorAll(".sidebar-menu li");
             const currentUrl = window.location.href;
@@ -597,7 +752,7 @@
                     item.classList.add("active");
                 }
 
-                item.addEventListener("click", function() {
+                item.addEventListener("click", function () {
                     sidebarItems.forEach(i => i.classList.remove("active"));
                     this.classList.add("active");
                 });
@@ -606,14 +761,14 @@
             // Add to Cart loading states
             const addToCartForms = document.querySelectorAll('.add-to-cart-form');
             addToCartForms.forEach(form => {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     const button = this.querySelector('.btn-add-to-cart');
                     const btnText = this.querySelector('.btn-text');
-                    
+
                     if (button && !button.disabled) {
                         button.classList.add('loading');
                         btnText.textContent = 'Adding...';
-                        
+
                         // Revert after 3 seconds if still on page (fallback)
                         setTimeout(() => {
                             if (button.classList.contains('loading')) {
@@ -631,32 +786,29 @@
                 card.style.animationDelay = `${index * 0.1}s`;
             });
 
-            // Smooth scrolling for better UX
-            const smoothScroll = (target) => {
-                const element = document.querySelector(target);
-                if (element) {
-                    element.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            };
+            // Auto-submit filter form when stock filter changes
+            const stockFilter = document.querySelector('select[name="stockFilter"]');
+            if (stockFilter) {
+                stockFilter.addEventListener('change', function () {
+                    this.form.submit();
+                });
+            }
         });
 
         // Add some interactive effects
-        document.addEventListener('mousemove', function(e) {
+        document.addEventListener('mousemove', function (e) {
             const cards = document.querySelectorAll('.product-card');
             cards.forEach(card => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
+
                 if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
                     const angleY = (x - centerX) / 25;
                     const angleX = (centerY - y) / 25;
-                    
+
                     card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale3d(1.02, 1.02, 1.02)`;
                 } else {
                     card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';

@@ -41,10 +41,65 @@ namespace FridgeManagementSystem.Controllers
             _notificationService = notificationService;
         }
 
+        ////=================
+        ////DASHBOARD
+        ////=================
+        //public async Task<IActionResult> Dashboard(string search)
+        //{
+        //    var customerId = GetLoggedInCustomerId();
+        //    if (customerId == 0)
+        //        return RedirectToAction("Login", "Account");
+
+        //    // Fetch all fridges from DB
+        //    var fridgesQuery = _context.Fridge.AsQueryable();
+
+        //    // Optional search
+        //    if (!string.IsNullOrEmpty(search))
+        //    {
+        //        fridgesQuery = fridgesQuery.Where(f =>
+        //            (f.Brand != null && f.Brand.Contains(search)) ||
+        //            (f.Model != null && f.Model.Contains(search)));
+        //    }
+
+        //    var fridges = await fridgesQuery.ToListAsync();
+
+        //    foreach (var f in fridges)
+        //    {
+        //        _logger.LogInformation($"Fridge {f.Brand} {f.Model} - Status in DB: '{f.Status}'");
+        //    }
+
+        //    // Map to ViewModel
+        //    // Map to ViewModel
+        //    var fridgeViewModels = fridges.Select(f => new FridgeViewModel
+        //    {
+        //        FridgeId = f.FridgeId,
+        //        Brand = f.Brand,
+        //        Model = f.Model,
+        //        FridgeType = f.FridgeType,
+        //        Price = f.Price,
+        //        Quantity = f.Quantity,
+        //        // ✅ Updated logic for stock status
+        //        Status = (f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity > 0)
+        //            ? "In Stock"
+        //            : "Out of Stock",
+        //        ImageUrl = string.IsNullOrEmpty(f.ImageUrl)
+        //            ? $"/images/fridges/fridge{f.FridgeId}.jpg"  // default naming based on ID
+        //            : f.ImageUrl
+        //    }).ToList();
+
+        //    var model = new CustomerViewModel
+        //    {
+        //        FullNames = User.Identity?.Name ?? "Guest",
+        //        Fridges = fridgeViewModels
+        //    };
+
+        //    ViewData["Search"] = search;
+        //    return View(model);
+        //}
         //=================
-        //DASHBOARD
+        //DASHBOARD - FIXED
         //=================
-        public async Task<IActionResult> Dashboard(string search)
+        public async Task<IActionResult> Dashboard(string search, string stockFilter = "all")
         {
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0)
@@ -61,9 +116,29 @@ namespace FridgeManagementSystem.Controllers
                     (f.Model != null && f.Model.Contains(search)));
             }
 
+            // Apply stock filter
+            if (!string.IsNullOrEmpty(stockFilter) && stockFilter != "all")
+            {
+                if (stockFilter == "in-stock")
+                {
+                    fridgesQuery = fridgesQuery.Where(f =>
+                        f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity > 0);
+                }
+                else if (stockFilter == "out-of-stock")
+                {
+                    fridgesQuery = fridgesQuery.Where(f =>
+                        f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity == 0);
+                }
+            }
+
             var fridges = await fridgesQuery.ToListAsync();
 
-            // Map to ViewModel
+            foreach (var f in fridges)
+            {
+                _logger.LogInformation($"Fridge {f.Brand} {f.Model} - Status in DB: '{f.Status}', Quantity: {f.Quantity}");
+            }
+
+            // Map to ViewModel with CORRECTED stock status logic
             var fridgeViewModels = fridges.Select(f => new FridgeViewModel
             {
                 FridgeId = f.FridgeId,
@@ -72,7 +147,11 @@ namespace FridgeManagementSystem.Controllers
                 FridgeType = f.FridgeType,
                 Price = f.Price,
                 Quantity = f.Quantity,
-                Status = f.Status == "Available" ? "In Stock" : "Out of Stock",
+                // ✅ FIXED LOGIC: Only show "In Stock" for Available fridges with quantity > 0
+                // For "Received" status or Available with 0 quantity, show "Out of Stock"
+                Status = (f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity > 0)
+                    ? "In Stock"
+                    : "Out of Stock",
                 ImageUrl = string.IsNullOrEmpty(f.ImageUrl)
                     ? $"/images/fridges/fridge{f.FridgeId}.jpg"  // default naming based on ID
                     : f.ImageUrl
@@ -85,63 +164,10 @@ namespace FridgeManagementSystem.Controllers
             };
 
             ViewData["Search"] = search;
+            ViewData["StockFilter"] = stockFilter; // Pass filter to view
+
             return View(model);
         }
-
-
-        //public async Task<IActionResult> Dashboard(string search)
-        //{
-        //    var customerId = GetLoggedInCustomerId();
-        //    if (customerId == 0)
-        //        return RedirectToAction("Login", "Account");
-
-        //    // ✅ Get all fridges (don’t filter anything)
-        //    var fridgesQuery = _context.Fridge.AsQueryable();
-
-        //    // Optional search by brand or model
-        //    if (!string.IsNullOrEmpty(search))
-        //    {
-        //        fridgesQuery = fridgesQuery.Where(f =>
-        //            (f.Brand != null && f.Brand.Contains(search)) ||
-        //            (f.Model != null && f.Model.Contains(search)));
-        //    }
-
-        //    var fridges = await fridgesQuery.ToListAsync();
-
-        //    // ✅ Always show 30 pictures no matter what
-        //    var fridgeViewModels = new List<FridgeViewModel>();
-
-        //    for (int i = 0; i < 30; i++)
-        //    {
-        //        // Try to get fridge from DB (if less than 30 seeded)
-        //        var fridge = i < fridges.Count ? fridges[i] : null;
-
-        //        fridgeViewModels.Add(new FridgeViewModel
-        //        {
-        //            FridgeId = fridge?.FridgeId ?? 0,
-        //            Brand = fridge?.Brand ?? "Brand " + (i + 1),
-        //            Model = fridge?.Model ?? "Model " + (i + 1),
-        //            FridgeType = fridge?.FridgeType ?? "Type " + (i + 1),
-        //            Price = fridge?.Price ?? 0,
-        //            Quantity = fridge?.Quantity ?? 0,
-        //            Status = (fridge != null && fridge.Status == "Available")
-        //                ? "In Stock"
-        //                : "Out of Stock",
-        //            ImageUrl = $"/images/fridges/fridge{i + 1}.jpg"
-        //        });
-        //    }
-
-        //    var model = new CustomerViewModel
-        //    {
-        //        FullNames = User.Identity?.Name ?? "Guest",
-        //        Fridges = fridgeViewModels
-        //    };
-
-        //    ViewData["Search"] = search;
-        //    return View(model);
-        //}
-
-
 
         // ==========================
         // 2. ADD TO CART
