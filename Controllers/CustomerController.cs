@@ -1071,24 +1071,28 @@ namespace FridgeManagementSystem.Controllers
             return View(visits);
         }
 
-        public async Task<IActionResult> FridgeServiceHistory()
+        public async Task<IActionResult> FridgeServiceHistory(int fridgeId)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            
 
-            // ✅ Load completed visits for all fridges owned by customer
             var visits = await _context.MaintenanceVisit
                 .Include(v => v.MaintenanceRequest)
                     .ThenInclude(m => m.Fridge)
                 .Include(v => v.MaintenanceChecklist)
                 .Include(v => v.ComponentUsed)
                 .Include(v => v.FaultReport)
-                .Where(v => v.Status == TaskStatus.Complete &&
-                            v.MaintenanceRequest.Fridge.CustomerID == userId)
+                .Where(v =>
+    v.MaintenanceRequest.FridgeId == fridgeId &&
+    v.Status == TaskStatus.Complete &&
+    v.MaintenanceRequest.CompletedDate != null
+)
+
                 .OrderByDescending(v => v.ScheduledDate)
                 .ToListAsync();
 
             return View(visits);
         }
+
 
 
         [HttpGet]

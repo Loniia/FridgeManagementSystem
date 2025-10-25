@@ -4,90 +4,573 @@
     ViewData["Title"] = "Fridge Service History";
 }
 
-<h2>Fridge Service History</h2>
+<div class="service-history-container">
+    <div class="page-header">
+        <h2 class="page-title">Fridge Service History</h2>
+        <div class="header-actions">
+            @if (Model.Any())
+            {
+                <a asp-action="DownloadFridgeServiceHistory"
+                   asp-route-fridgeId="@Model.FirstOrDefault()?.MaintenanceRequest.FridgeId"
+                   class="btn btn-primary download-btn">
+                    <i class="fas fa-file-pdf"></i> Download PDF Report
+                </a>
+            }
+        </div>
+    </div>
 
-
-@* <div class="mb-3">
-    <a asp-action="DownloadFridgeServiceHistory"
-       asp-route-fridgeId="@Model.FirstOrDefault()?.MaintenanceRequest.FridgeId"
-       class="btn btn-secondary">
-        <i class="fas fa-file-pdf"></i> Download PDF
-    </a>
-</div> *@
-
-@if (!Model.Any())
-{
-    <div class="alert alert-info">No service history available.</div>
-}
-else
-{
-    @foreach (var visit in Model)
+    @if (!Model.Any())
     {
-        <div class="card mb-3">
-            <div class="card-header">
-                Visit on @visit.ScheduledDate.ToShortDateString() at @visit.ScheduledTime.ToString(@"hh\:mm")
-                <span class="badge @(visit.Status == FridgeManagementSystem.Models.TaskStatus.Complete ? "bg-success" : "bg-warning")">
-                    @visit.Status
-                </span>
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-clipboard-list"></i>
             </div>
-            <div class="card-body">
-                <h6>Checklist</h6>
-                @if (visit.MaintenanceChecklist != null)
-                {
-                    <ul>
-                        <li>Temperature Status: @visit.MaintenanceChecklist.TemperatureStatus</li>
-                        <li>Condenser Coils Cleaned: @(visit.MaintenanceChecklist.CondenserCoilsCleaned ? "Yes" : "No")</li>
-                        <li>Coolant Level: @visit.MaintenanceChecklist.CoolantLevel</li>
-                        <li>Door Seal Condition: @visit.MaintenanceChecklist.DoorSealCondition</li>
-                        <li>Lighting Status: @visit.MaintenanceChecklist.LightingStatus</li>
-                        <li>Power Cable Condition: @visit.MaintenanceChecklist.PowerCableCondition</li>
-                    </ul>
-                }
-                else
-                {
-                    <p>No checklist completed.</p>
-                }
-
-                <h6>Components Used</h6>
-                @if (visit.ComponentUsed != null && visit.ComponentUsed.Any())
-                {
-                    <ul>
-                        @foreach (var c in visit.ComponentUsed)
-                        {
-                            <li>@c.ComponentName - Quantity: @c.Quantity - Condition: @c.Condition</li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No components recorded.</p>
-                }
-
-                <h6>Fault Reports</h6>
-                @if (visit.FaultReport != null && visit.FaultReport.Any())
-                {
-                    <ul>
-                        @foreach (var f in visit.FaultReport)
-                        {
-                            <li>@f.ReportDate.ToShortDateString() - @f.FaultType - @f.FaultDescription</li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No faults reported.</p>
-                }
-
-                <h6>Visit Notes</h6>
-                @if (!string.IsNullOrEmpty(visit.VisitNotes))
-                {
-                    <p>@visit.VisitNotes</p>
-                }
-                else
-                {
-                    <p>No notes for this visit.</p>
-                }
-            </div>
+            <h3>No Service History Available</h3>
+            <p>There are no maintenance visits recorded for this fridge yet.</p>
         </div>
     }
-}
+    else
+    {
+        <div class="service-timeline">
+            @foreach (var visit in Model)
+            {
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <div class="marker-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="timeline-line"></div>
+                    </div>
+
+                    <div class="visit-card">
+                        <div class="visit-header">
+                            <div class="visit-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>@visit.ScheduledDate.ToString("MMMM dd, yyyy")</span>
+                                <span class="visit-time">at @visit.ScheduledTime.ToString(@"hh\:mm")</span>
+                            </div>
+                            <div class="status-badge @(visit.Status == FridgeManagementSystem.Models.TaskStatus.Complete ? "status-complete" : "status-pending")">
+                                <span class="badge-dot"></span>
+                                @visit.Status
+                            </div>
+                        </div>
+
+                        <div class="visit-content">
+                            <!-- Checklist Section -->
+                            <div class="content-section">
+                                <div class="section-header">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    <h4>Maintenance Checklist</h4>
+                                </div>
+                                @if (visit.MaintenanceChecklist != null)
+                                {
+                                    <div class="checklist-grid">
+                                        <div class="checklist-item">
+                                            <span class="item-label">Temperature Status</span>
+                                            <span class="item-value">@visit.MaintenanceChecklist.TemperatureStatus</span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <span class="item-label">Condenser Coils</span>
+                                            <span class="item-value @(visit.MaintenanceChecklist.CondenserCoilsCleaned ? "status-good" : "status-poor")">
+                                                @(visit.MaintenanceChecklist.CondenserCoilsCleaned ? "Cleaned" : "Not Cleaned")
+                                            </span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <span class="item-label">Coolant Level</span>
+                                            <span class="item-value">@visit.MaintenanceChecklist.CoolantLevel</span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <span class="item-label">Door Seal</span>
+                                            <span class="item-value">@visit.MaintenanceChecklist.DoorSealCondition</span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <span class="item-label">Lighting</span>
+                                            <span class="item-value">@visit.MaintenanceChecklist.LightingStatus</span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <span class="item-label">Power Cable</span>
+                                            <span class="item-value">@visit.MaintenanceChecklist.PowerCableCondition</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-data">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>No checklist completed for this visit</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Components Section -->
+                            <div class="content-section">
+                                <div class="section-header">
+                                    <i class="fas fa-cogs"></i>
+                                    <h4>Components Used</h4>
+                                </div>
+                                @if (visit.ComponentUsed != null && visit.ComponentUsed.Any())
+                                {
+                                    <div class="components-list">
+                                        @foreach (var c in visit.ComponentUsed)
+                                        {
+                                            <div class="component-item">
+                                                <div class="component-info">
+                                                    <span class="component-name">@c.ComponentName</span>
+                                                    <span class="component-details">
+                                                        Qty: @c.Quantity • Condition: @c.Condition
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-data">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>No components recorded for this visit</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Fault Reports Section -->
+                            <div class="content-section">
+                                <div class="section-header">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <h4>Fault Reports</h4>
+                                </div>
+                                @if (visit.FaultReport != null && visit.FaultReport.Any())
+                                {
+                                    <div class="faults-list">
+                                        @foreach (var f in visit.FaultReport)
+                                        {
+                                            <div class="fault-item">
+                                                <div class="fault-header">
+                                                    <span class="fault-date">@f.ReportDate.ToString("MMM dd, yyyy")</span>
+                                                    <span class="fault-type">@f.FaultType</span>
+                                                </div>
+                                                <p class="fault-description">@f.FaultDescription</p>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-data">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>No faults reported during this visit</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Visit Notes Section -->
+                            <div class="content-section">
+                                <div class="section-header">
+                                    <i class="fas fa-sticky-note"></i>
+                                    <h4>Visit Notes</h4>
+                                </div>
+                                @if (!string.IsNullOrEmpty(visit.VisitNotes))
+                                {
+                                    <div class="notes-content">
+                                        <p>@visit.VisitNotes</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-data">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>No additional notes for this visit</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .service-history-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .download-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: #495057;
+        margin-bottom: 10px;
+    }
+
+    .service-timeline {
+        position: relative;
+    }
+
+    .timeline-item {
+        display: flex;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .timeline-marker {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-right: 20px;
+        position: relative;
+    }
+
+    .marker-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        z-index: 2;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .timeline-line {
+        width: 2px;
+        flex-grow: 1;
+        background: linear-gradient(to bottom, #667eea, #dee2e6);
+        margin-top: 10px;
+        border-radius: 2px;
+    }
+
+    .timeline-item:last-child .timeline-line {
+        background: #dee2e6;
+    }
+
+    .visit-card {
+        flex: 1;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .visit-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .visit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .visit-date {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .visit-date i {
+        color: #667eea;
+    }
+
+    .visit-time {
+        color: #6c757d;
+        font-weight: normal;
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-complete {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .status-complete .badge-dot {
+        background: #28a745;
+    }
+
+    .status-pending .badge-dot {
+        background: #ffc107;
+    }
+
+    .visit-content {
+        padding: 25px;
+    }
+
+    .content-section {
+        margin-bottom: 25px;
+    }
+
+    .content-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f8f9fa;
+    }
+
+    .section-header i {
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+
+    .section-header h4 {
+        margin: 0;
+        color: #495057;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .checklist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .checklist-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .item-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .item-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .status-good {
+        color: #28a745 !important;
+    }
+
+    .status-poor {
+        color: #dc3545 !important;
+    }
+
+    .components-list,
+    .faults-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .component-item,
+    .fault-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .component-item:hover,
+    .fault-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .component-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .component-name {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .component-details {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .fault-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .fault-date {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .fault-type {
+        background: #dc3545;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .fault-description {
+        margin: 0;
+        color: #495057;
+        line-height: 1.5;
+    }
+
+    .notes-content {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .notes-content p {
+        margin: 0;
+        color: #495057;
+        line-height: 1.6;
+    }
+
+    .no-data {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        color: #6c757d;
+        text-align: center;
+        font-style: italic;
+    }
+
+    .no-data i {
+        color: #adb5bd;
+    }
+
+    @@media (max-width: 768px) {
+        .service-history-container {
+            padding: 15px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .timeline-item {
+            flex-direction: column;
+        }
+
+        .timeline-marker {
+            flex-direction: row;
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+
+        .timeline-line {
+            width: 100%;
+            height: 2px;
+            margin-top: 0;
+            margin-left: 10px;
+        }
+
+        .visit-header {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .checklist-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .fault-header {
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-start;
+        }
+    }
+</style>

@@ -563,7 +563,10 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 .Include(v => v.MaintenanceChecklist)
                 .Include(v => v.ComponentUsed)
                 .Include(v => v.FaultReport)
-                .Where(v => v.MaintenanceRequest.FridgeId == fridgeId)
+               .Where(v =>
+    v.MaintenanceRequest.FridgeId == fridgeId &&
+    v.Status == Models.TaskStatus.Complete &&
+    v.MaintenanceRequest.CompletedDate != null)
                 .OrderByDescending(v => v.ScheduledDate)
                 .ToList();
 
