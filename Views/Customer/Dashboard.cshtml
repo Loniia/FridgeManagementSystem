@@ -645,8 +645,6 @@
                         <div class="filter-label">Stock Status</div>
                         <select name="stockFilter" class="filter-select" onchange="this.form.submit()">
                             <option value="all" selected="@(ViewData["StockFilter"]?.ToString() == "all")">All Stock</option>
-                            <option value="in-stock" selected="@(ViewData["StockFilter"]?.ToString() == "in-stock")">In Stock Only</option>
-                            <option value="out-of-stock" selected="@(ViewData["StockFilter"]?.ToString() == "out-of-stock")">Out of Stock Only</option>
                         </select>
                     </div>
 
