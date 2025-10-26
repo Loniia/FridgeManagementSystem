@@ -1,11 +1,12 @@
 ﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Helpers;
 using FridgeManagementSystem.Models;
-using FridgeManagementSystem.ViewModels;
 using FridgeManagementSystem.Services;
+using FridgeManagementSystem.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -105,8 +106,8 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
             customer.IsActive = false;
             customer.UpdatedAt = DateTime.Now; // optional if you added it
 
-           
-          
+
+
             await _context.SaveChangesAsync();
             // Notify customer
             await _notificationService.CreateAsync(
@@ -435,7 +436,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return File(pdfBytes, "application/pdf", $"Customer_{customer.CustomerID}_Allocations.pdf");
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> PendingPayments()
         {
@@ -452,39 +453,57 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyPayment(int paymentId, bool approve)
         {
+            // 1) Load payment (minimal). We'll load the order explicitly after so we don't depend on nav prop names.
             var payment = await _context.Payments
-                .Include(p => p.Orders)
                 .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
 
             if (payment == null)
                 return NotFound();
+
+            // 2) Load the order that this payment belongs to (explicit query).
+            //    This avoids problems if your nav prop is named Orders vs Order or Customer vs Customers.
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderId == payment.OrderId);
+
+            if (order == null)
+            {
+                // Optional: set a server log here
+                Console.WriteLine($"VerifyPayment: payment {paymentId} has no associated order (OrderId={payment.OrderId}).");
+                return BadRequest("Associated order not found.");
+            }
+
+            // 3) Load the customer id (explicit)
+            var customerId = order.CustomerID; // adjust property name if different
+
+            // 4) Update statuses inside a transaction-ish pattern
             if (approve)
             {
                 payment.Status = "Paid";
+                order.Status = "Paid";
 
-                if (payment.Orders != null)
-                {
-                    payment.Orders.Status = "Paid"; // Order now updated immediately
-                }
+                // Save payment + order status to DB first
+                await _context.SaveChangesAsync();
+
+                // 5) Clear cart using the helper (uses the same DbContext)
+                //    ClearCartAsync finds the latest cart for the customer and clears it.
+                await CartHelper.ClearCartAsync(_context, customerId);
+
+                // 6) optional log
+                Console.WriteLine($"VerifyPayment: Approved payment {paymentId}; cleared cart for CustomerID={customerId}");
             }
             else
             {
                 payment.Status = "Rejected";
-                if (payment.Orders != null)
-                    payment.Orders.Status = "Awaiting Payment";
-                
-            }
-           
-          
-            await _context.SaveChangesAsync();
-            // Reload the payments collection to ensure EF has latest data
-            if (payment.Orders != null)
-                await _context.Entry(payment.Orders).Collection(o => o.Payments).LoadAsync();
+                order.Status = "AwaitingPayment";
+                await _context.SaveChangesAsync();
 
+                Console.WriteLine($"VerifyPayment: Rejected payment {paymentId} for Order {order.OrderId}");
+            }
+
+            // 7) Reload order.payments if required (safe)
+            await _context.Entry(order).Collection(o => o.Payments).LoadAsync();
 
             return RedirectToAction("PendingPayments");
         }
-
-
     }
 }

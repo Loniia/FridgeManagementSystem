@@ -1,19 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
-using FridgeManagementSystem.Data;
+﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Helpers;
 using FridgeManagementSystem.Models;
-using FridgeManagementSystem.ViewModels;
-using TaskStatus = FridgeManagementSystem.Models.TaskStatus;
-using QuestPDF.Fluent;
 using FridgeManagementSystem.Services;
+using FridgeManagementSystem.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using TaskStatus = FridgeManagementSystem.Models.TaskStatus;
 
 namespace FridgeManagementSystem.Controllers
 {
@@ -487,8 +488,8 @@ namespace FridgeManagementSystem.Controllers
                 payment.Status = "Paid";
                 order.Status = "Paid";
 
-                // ✅ ONLY CLEAR CART WHEN PAYMENT IS SUCCESSFUL
-                await ClearCartAfterSuccessfulPayment(customerId);
+                await CartHelper.ClearCartAsync(_context, customerId);
+
             }
             else if (model.Method == Method.EFT)
             {
