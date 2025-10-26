@@ -504,8 +504,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         [Route("/CustomerManagementSubSystem/CustomerLiaison/ProcessPendingAllocations")]
         public async Task<IActionResult> ProcessPendingAllocations()
         {
+            // Include Paid and partially/fully allocated orders
             var paidOrders = await _context.Orders
-                .Where(o => o.Status == "Paid" || o.Status == "Fridge Allocated") // include partially allocated
+                .Where(o => o.Status == "Paid" || o.Status == "Fridge Allocated")
                 .Include(o => o.Customers)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Fridge)
@@ -523,31 +524,78 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
                     var remaining = item.Quantity - totalAllocated;
 
-                    if (remaining > 0) // only show pending allocations
+                    // Always add to view model, status changes based on remaining
+                    viewModel.Add(new PendingAllocationViewModel
                     {
-                        viewModel.Add(new PendingAllocationViewModel
-                        {
-                            OrderId = order.OrderId,
-                            OrderItemId = item.OrderItemId,
-                            CustomerId = order.CustomerID,
-                            CustomerName = order.Customers?.FullName ?? "Unknown",
-                            FridgeId = item.FridgeId,
-                            FridgeBrand = item.Fridge?.Brand ?? "N/A",
-                            FridgeModel = item.Fridge?.Model ?? "N/A",
-                            QuantityOrdered = item.Quantity,
-                            QuantityAllocated = totalAllocated,
-                            QuantityPending = remaining,
-                            Status = "Pending"
-                        });
-                    }
+                        OrderId = order.OrderId,
+                        OrderItemId = item.OrderItemId,
+                        CustomerId = order.CustomerID,
+                        CustomerName = order.Customers?.FullName ?? "Unknown",
+                        FridgeId = item.FridgeId,
+                        FridgeBrand = item.Fridge?.Brand ?? "N/A",
+                        FridgeModel = item.Fridge?.Model ?? "N/A",
+                        QuantityOrdered = item.Quantity,
+                        QuantityAllocated = totalAllocated,
+                        QuantityPending = remaining,
+                        Status = remaining > 0 ? "Pending" : "Allocated" // <-- status updates
+                    });
                 }
             }
 
             if (!viewModel.Any())
-                TempData["InfoMessage"] = "No pending allocations. All fridges allocated.";
+                TempData["InfoMessage"] = "No pending allocations found.";
 
             return View(viewModel);
         }
+
+        //[HttpGet]
+        //[Route("/CustomerManagementSubSystem/CustomerLiaison/ProcessPendingAllocations")]
+        //public async Task<IActionResult> ProcessPendingAllocations()
+        //{
+        //    var paidOrders = await _context.Orders
+        //        .Where(o => o.Status == "Paid" || o.Status == "Fridge Allocated") // include partially allocated
+        //        .Include(o => o.Customers)
+        //        .Include(o => o.OrderItems)
+        //            .ThenInclude(oi => oi.Fridge)
+        //        .ToListAsync();
+
+        //    var viewModel = new List<PendingAllocationViewModel>();
+
+        //    foreach (var order in paidOrders)
+        //    {
+        //        foreach (var item in order.OrderItems)
+        //        {
+        //            var totalAllocated = await _context.FridgeAllocation
+        //                .Where(fa => fa.OrderItemId == item.OrderItemId && fa.CustomerID == order.CustomerID)
+        //                .SumAsync(fa => (int?)fa.QuantityAllocated) ?? 0;
+
+        //            var remaining = item.Quantity - totalAllocated;
+
+        //            if (remaining > 0) // only show pending allocations
+        //            {
+        //                viewModel.Add(new PendingAllocationViewModel
+        //                {
+        //                    OrderId = order.OrderId,
+        //                    OrderItemId = item.OrderItemId,
+        //                    CustomerId = order.CustomerID,
+        //                    CustomerName = order.Customers?.FullName ?? "Unknown",
+        //                    FridgeId = item.FridgeId,
+        //                    FridgeBrand = item.Fridge?.Brand ?? "N/A",
+        //                    FridgeModel = item.Fridge?.Model ?? "N/A",
+        //                    QuantityOrdered = item.Quantity,
+        //                    QuantityAllocated = totalAllocated,
+        //                    QuantityPending = remaining,
+        //                    Status = "Pending"
+        //                });
+        //            }
+        //        }
+        //    }
+
+        //    if (!viewModel.Any())
+        //        TempData["InfoMessage"] = "No pending allocations. All fridges allocated.";
+
+        //    return View(viewModel);
+        //}
 
 
         // --------------------------
