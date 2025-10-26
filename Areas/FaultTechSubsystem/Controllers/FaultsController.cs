@@ -1,5 +1,6 @@
-﻿using FridgeManagementSystem.Models;
-using FridgeManagementSystem.Data;
+﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,22 +13,24 @@ namespace FridgeManagementSystem.Controllers
     {
         private readonly FridgeDbContext _context;
         private readonly ILogger<FaultsController> _logger;
-
-        public FaultsController(FridgeDbContext context, ILogger<FaultsController> logger)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public FaultsController(FridgeDbContext context, ILogger<FaultsController> logger, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _logger = logger;
+            _userManager = userManager;
         }
 
         // GET: Faults - View Fault Reports
         public async Task<IActionResult> Index()
         {
             ViewData["Sidebar"] = "FaultTechSubsystem";
-
+            
+           
             var faultReports = await _context.FaultReport
                 .Include(fr => fr.Fridge)
                 .Include(fr => fr.Fridge.Customer)
-                .Include(fr => fr.MaintenanceVisit)
+               // .Include(fr => fr.MaintenanceVisit)
                 .Include(fr => fr.RepairSchedules) // Direct repair schedules
                 .Where(fr => fr.StatusFilter != "Resolved" && fr.StatusFilter != "Cancelled")
                 .OrderByDescending(fr => fr.UrgencyLevel)

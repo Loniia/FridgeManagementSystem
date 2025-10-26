@@ -530,7 +530,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
 
                 return View("CreateFaultReport", report);
             }
-
+            report.StatusFilter = "Pending";
             _context.FaultReport.Add(report);
             _context.SaveChanges();
 
