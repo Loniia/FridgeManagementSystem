@@ -96,39 +96,37 @@
             </div>
 
             <!-- Address Information -->
-            <div class="card mb-4">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-geo-alt"></i> Address Information
-                    </h5>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-secondary text-white d-flex align-items-center">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    <h5 class="card-title mb-0">Address Information</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Address</label>
-                                <p class="form-control-plaintext">@Model.Address</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Postal Code</label>
-                                <p class="form-control-plaintext">@Model.PostalCode</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">City</label>
-                                <p class="form-control-plaintext">@Model.City</p>
-                            </div>
+                            <label class="form-label fw-bold">Employee Address</label>
+                            <p class="form-control-plaintext">@Model.Address</p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Location</label>
-                                <p class="form-control-plaintext">@Model.Location?.Address</p>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">City</label>
+                            <p class="form-control-plaintext">@Model.City</p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Postal Code</label>
+                            <p class="form-control-plaintext">@Model.PostalCode</p>
+                        </div>
+
+                        <hr class="my-3" />
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-secondary">
+                                Branch / Location (Linked from Manage Location)
+                            </label>
+                            <p class="form-control-plaintext">
+                                @(Model.Location != null
+                                    ? $"{Model.Location.Address}, {Model.Location.City}, {Model.Location.Province} {Model.Location.PostalCode}"
+                                    : "No location assigned")
+                            </p>
                         </div>
                     </div>
                 </div>

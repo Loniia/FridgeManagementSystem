@@ -13,6 +13,14 @@
                 <div class="card-header bg-primary text-white text-center fs-5 fw-bold">
                     <i class="bi bi-person-plus-fill me-2"></i> Register New Employee
                 </div>
+                <!-- Employee Status -->
+                <div class="col-md-6">
+                    <label asp-for="Status" class="form-label fw-semibold"></label>
+                    <select asp-for="Status" class="form-select form-select-lg" asp-items="ViewBag.StatusOptions">
+                        <option value="">-- Select Status --</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger small"></span>
+                </div>
                 <div class="card-body p-4">
                     <form asp-action="Create" asp-controller="ManageEmployee" asp-area="Administrator" method="post">
                         @Html.AntiForgeryToken()

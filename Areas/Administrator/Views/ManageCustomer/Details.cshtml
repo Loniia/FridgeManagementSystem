@@ -1,73 +1,170 @@
 ﻿@model FridgeManagementSystem.Models.CustomerViewModel
+
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Customer Details";
 }
 
-<h2>Customer Details</h2>
+<h2 class="mb-4 text-center text-dark fw-bold">Customer Details</h2>
 
-<div class="card mb-3">
+<!-- Customer Information -->
+<div class="card customer-card mb-4 shadow-lg">
+    <div class="card-header customer-card-header">
+        <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i> Customer Information</h5>
+    </div>
     <div class="card-body">
-        <h5 class="card-title">@Model.FullNames</h5>
-        <p class="card-text"><strong>Phone:</strong> @Model.PhoneNumber</p>
-        <p class="card-text"><strong>Email:</strong> @Model.Email</p>
-        <p class="card-text"><strong>Location:</strong> @Model.LocationId</p>
-        <p class="card-text"><strong>Status:</strong> @(Model.IsActive ? "Active" : "Inactive")</p>
-        <p class="card-text"><strong>Registration Date:</strong> @Model.RegistrationDate.ToString("yyyy/MM/dd")</p>
-        <p class="card-text"><strong>Total Fridges Allocated:</strong> @Model.TotalFridgesAllocated</p> <!-- Total added here -->
+        <div class="row mb-2">
+            <div class="col-md-6 mb-3">
+                <p class="mb-1"><strong>Full Name:</strong> @Model.FullNames</p>
+                <p class="mb-1"><strong>Phone:</strong> @Model.PhoneNumber</p>
+                <p class="mb-1"><strong>Email:</strong> @(string.IsNullOrWhiteSpace(Model.Email) ? "N/A" : Model.Email)</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <p class="mb-1">
+                    <strong>Location:</strong>
+                    @(Model.Location != null
+                        ? $"{Model.Location.Address}, {Model.Location.City}, {Model.Location.Province}"
+                        : "No location assigned")
+                </p>
+                <p>
+                    <strong>Status:</strong>
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success shadow-sm">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning shadow-sm">Inactive</span>
+                    }
+                </p>
+                <p class="mb-1"><strong>Registration Date:</strong> @Model.RegistrationDate.ToString("yyyy/MM/dd")</p>
+                <p class="mb-0"><strong>Total Fridges Allocated:</strong> @Model.TotalFridgesAllocated</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<h3>Fridge Allocations</h3>
+<!-- Fridge Allocations -->
+<h3 class="text-secondary mb-3"><i class="bi bi-box-seam me-2"></i> Fridge Allocations</h3>
 
 @if (Model.FridgeAllocations != null && Model.FridgeAllocations.Any())
 {
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Fridge Brand & Model</th>
-                <th>Quantity Allocated</th>
-                <th>Allocation Date</th>
-                <th>Return Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var allocation in Model.FridgeAllocations.OrderByDescending(a => a.AllocationDate))
-            {
+    <div class="table-responsive shadow-sm rounded-3 mb-4">
+        <table class="table table-hover table-bordered align-middle text-center mb-0">
+            <thead class="table-light">
                 <tr>
-                    <td>@($"{allocation.Fridge?.Brand} - {allocation.Fridge?.Model}")</td>
-                    <td>@allocation.QuantityAllocated</td>
-                    <td>@allocation.AllocationDate.ToString()</td>
-                    <td>@(allocation.ReturnDate.HasValue ? allocation.ReturnDate.Value.ToString("yyyy/MM/dd") : "N/A")</td>
-                    <td>@allocation.Status</td>
-                    <td>
-                        @* Only show Return/Scrap buttons for Allocated fridges *@
-                        @if (allocation.Status == "Allocated")
-                        {
-                            <a asp-action="ReturnFridge" asp-route-allocationId="@allocation.AllocationID" class="btn btn-warning btn-sm">Return</a>
-                            <a asp-action="ScrapFridge" asp-route-allocationId="@allocation.AllocationID" class="btn btn-danger btn-sm">Scrap</a>
-                        }
-                        else
-                        {
-                            <span class="text-muted">No Actions</span>
-                        }
-                    </td>
+                    <th>Fridge Brand & Model</th>
+                    <th>Quantity Allocated</th>
+                    <th>Allocation Date</th>
+                    <th>Return Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var allocation in Model.FridgeAllocations.OrderByDescending(a => a.AllocationDate))
+                {
+                    <tr class="align-middle">
+                        <td>@($"{allocation.Fridge?.Brand} - {allocation.Fridge?.Model}")</td>
+                        <td>@allocation.QuantityAllocated</td>
+                        <td>@allocation.AllocationDate.ToString()</td>
+                        <td>@(allocation.ReturnDate.HasValue ? allocation.ReturnDate.Value.ToString("yyyy/MM/dd") : "N/A")</td>
+                        <td>
+                            @if (allocation.Status == "Allocated")
+                            {
+                                <span class="badge bg-primary shadow-sm">@allocation.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary shadow-sm">@allocation.Status</span>
+                            }
+                        </td>
+                        <td>
+                            @if (allocation.Status == "Allocated")
+                            {
+                                <a asp-action="ReturnFridge" asp-route-allocationId="@allocation.AllocationID" class="btn btn-warning btn-sm shadow-sm">
+                                    Return
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No Actions</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 else
 {
-    <p>No fridges have been allocated to this customer yet.</p>
+    <p class="text-muted">No fridges have been allocated to this customer yet.</p>
 }
 
-<p>
-    <a asp-action="Index" class="btn btn-secondary">Back to Customers</a>
-    @* Allocate a new fridge from Details page *@
-    <a asp-action="Allocate" asp-route-customerId="@Model.CustomerId" class="btn btn-success @(Model.IsActive ? "" : "disabled")">Allocate New Fridge</a>
-    <a asp-action="ExportToPdf" asp-route-id="@Model.CustomerId" class="btn btn-info">Download PDF</a>
-    <a asp-action="ExportToPdf" asp-route-id="@Model.CustomerId" class="btn btn-primary">Export PDF</a>
-</p>
+<!-- Buttons -->
+<div class="mt-4 d-flex flex-wrap gap-2">
+    <a asp-action="Index" class="btn btn-secondary shadow-sm"><i class="bi bi-arrow-left"></i> Back to Customers</a>
+    <a asp-action="ExportToPdf" asp-route-id="@Model.CustomerId" class="btn btn-info shadow-sm"><i class="bi bi-file-earmark-pdf"></i> Download PDF</a>
+    <a asp-action="ExportToPdf" asp-route-id="@Model.CustomerId" class="btn btn-primary shadow-sm"><i class="bi bi-download"></i> Export PDF</a>
+</div>
+
+<style>
+    /* Card styling */
+    .customer-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .customer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+    .customer-card-header {
+        background: #e0e0e0;
+        color: #333;
+        border-bottom: 1px solid #d3d3d3;
+        border-radius: 15px 15px 0 0;
+        box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Table styling */
+    table {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    thead.table-light {
+        background: #e9ecef;
+    }
+
+    table th, table td {
+        vertical-align: middle;
+    }
+
+    /* Badges */
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.35em 0.7em;
+        border-radius: 0.6rem;
+    }
+
+    /* Buttons shadow */
+    .btn {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+    /* Headers */
+    h2, h3 {
+        font-weight: 600;
+    }
+</style>
