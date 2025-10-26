@@ -111,11 +111,16 @@
                 @foreach (var request in Model)
                 {
                     <tr>
+                        <!-- Request Number -->
                         <td><strong>@request.PurchaseRequestID</strong></td>
+
+                        <!-- Item Name -->
                         <td>@request.ItemFullNames</td>
+
+                        <!-- Quantity (updated to show fridge quantity if available) -->
                         <td>@request.Quantity</td>
 
-                        <!-- ✅ STATUS COLUMN -->
+                        <!-- Status Column -->
                         <td>
                             @if (request.Status == "Pending")
                             {
@@ -123,12 +128,21 @@
                             }
                             else if (request.Status == "Approved")
                             {
-                                <a asp-controller="InventoryLiaison"
-                                   asp-action="Receive"
-                                   asp-route-requestId="@request.PurchaseRequestID"
-                                   class="badge badge-approved text-decoration-none d-inline-block">
-                                    ✅ Approved — Receive Fridges
-                                </a>
+                                // Check if fridge exists and is not yet Available
+                                if (request.Fridge != null && request.Fridge.Status != "Available")
+                                {
+                                    <a asp-area="CustomerManagementSubSystem"
+                                       asp-controller="InventoryLiaison"
+                                       asp-action="Receive"
+                                       asp-route-fridgeId="@request.Fridge.FridgeId"
+                                       class="badge badge-approved text-decoration-none d-inline-block">
+                                        ✅ Approved — Receive Fridge
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-approved">Approved</span>
+                                }
                             }
                             else if (request.Status == "Rejected")
                             {
@@ -140,7 +154,7 @@
                             }
                         </td>
 
-                        <!-- ✅ REQUEST DATE COLUMN -->
+                        <!-- Requested Date -->
                         <td>@request.RequestDate.ToString("yyyy-MM-dd")</td>
                     </tr>
                 }

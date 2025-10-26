@@ -1,106 +1,144 @@
-﻿@model FridgeManagementSystem.Models.Fridge
+﻿@model CustomerManagementSubSystem.Models.ReceiveFridgeVm
 
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Receive New Fridge";
 }
 
-<h2>Receive New Fridge</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<form asp-area="CustomerManagementSubSystem" asp-controller="InventoryLiaison" asp-action="Receive" method="post">
-    @Html.AntiForgeryToken()
+<style>
+    body {
+        background: linear-gradient(135deg, #f4f6f8, #e3eaf1);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-    
+    .form-container {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        padding: 40px;
+        max-width: 650px;
+        margin: 40px auto;
+        transform: perspective(1000px) rotateX(2deg);
+        transition: all 0.3s ease-in-out;
+    }
 
-    <!-- Fridge Type -->
-    <div class="mb-3">
-        <label asp-for="FridgeType" class="form-label">Fridge Type</label>
-        <input asp-for="FridgeType" class="form-control" placeholder="e.g., Single Door, Double Door, French Door" />
-        <span asp-validation-for="FridgeType" class="text-danger"></span>
-    </div>
+        .form-container:hover {
+            transform: perspective(1000px) rotateX(0deg);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+        }
 
-    <!-- Brand -->
-    <div class="mb-3">
-        <label asp-for="Brand" class="form-label">Brand</label>
-        <input asp-for="Brand" class="form-control" placeholder="e.g., Samsung, LG, Whirlpool" />
-        <span asp-validation-for="Brand" class="text-danger"></span>
-    </div>
+    .form-title {
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+        color: #1a3e68;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
 
-    <!-- Model (Required) -->
-    <div class="mb-3">
-        <label asp-for="Model" class="form-label">Model</label>
-        <input asp-for="Model" class="form-control" placeholder="e.g., RT38K5932SL" />
-        <span asp-validation-for="Model" class="text-danger"></span>
-    </div>
+    .btn-primary {
+        background: linear-gradient(135deg, #1e90ff, #0057b8);
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: all 0.3s ease-in-out;
+    }
 
-    <!-- Serial Number -->
-    <div class="mb-3">
-        <label asp-for="SerialNumber" class="form-label">Serial Number</label>
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0066ff, #003d99);
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary {
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    input.form-control, select.form-control {
+        border-radius: 12px;
+        border: 1px solid #cfd6e1;
+        padding: 10px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+        input.form-control:focus, select.form-control:focus {
+            border-color: #1e90ff;
+            box-shadow: 0 0 10px rgba(30,144,255,0.2);
+        }
+
+    .alert {
+        border-radius: 10px;
+    }
+</style>
+
+<div class="form-container">
+    <h2 class="form-title">🧊 Receive New Fridge</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <form asp-area="CustomerManagementSubSystem" asp-controller="InventoryLiaison" asp-action="Receive" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <!-- Hidden FridgeId -->
+        <input type="hidden" asp-for="FridgeId" />
+
+        <!-- Fridge Type (readonly + hidden) -->
+        <div class="mb-3">
+            <label class="form-label">Fridge Type</label>
+            <input class="form-control" value="@Model.Type" readonly />
+            <input type="hidden" asp-for="Type" />
+        </div>
+
+        <!-- Brand (readonly + hidden) -->
+        <input class="form-control" value="@Model.Brand" readonly />
+        <input type="hidden" asp-for="Brand" />
+
+        <!-- Model (readonly + hidden) -->
+        <input class="form-control" value="@Model.Model" readonly />
+        <input type="hidden" asp-for="Model" />
+
+        <!-- Serial Number (editable) -->
         <input asp-for="SerialNumber" class="form-control" placeholder="Enter serial number" />
-        <span asp-validation-for="SerialNumber" class="text-danger"></span>
-    </div>
 
-    <!-- Condition (Required) -->
-    <div class="mb-3">
-        <label asp-for="Condition" class="form-label">Condition</label>
-        <select asp-for="Condition" class="form-control">
-            <option value="Working">Working</option>
-            <option value="Under Repair">Under Repair</option>
-            <option value="Faulty">Faulty</option>
-            <option value="Scrapped">Scrapped</option>
-        </select>
-        <span asp-validation-for="Condition" class="text-danger"></span>
-    </div>
+        <!-- Quantity -->
+        <div class="mb-3">
+            <label asp-for="Quantity" class="form-label">Quantity</label>
+            <input asp-for="Quantity" type="number" class="form-control" min="1" value="@Model.Quantity" />
+        </div>
 
-    <!-- Purchase Date -->
-    <div class="mb-3">
-        <label asp-for="PurchaseDate" class="form-label">Purchase Date</label>
-        <input asp-for="PurchaseDate" type="date" class="form-control" />
-        <span asp-validation-for="PurchaseDate" class="text-danger"></span>
-    </div>
+        <!-- Delivery Date -->
+        <div class="mb-3">
+            <label asp-for="DateAdded" class="form-label">Delivery Date</label>
+            <input asp-for="DateAdded" type="date" class="form-control" value="@Model.DateAdded.ToString("yyyy-MM-dd")" />
+        </div>
 
-    <!-- Warranty Expiry -->
-    <div class="mb-3">
-        <label asp-for="WarrantyExpiry" class="form-label">Warranty Expiry Date</label>
-        <input asp-for="WarrantyExpiry" type="date" class="form-control" />
-        <span asp-validation-for="WarrantyExpiry" class="text-danger"></span>
-    </div>
+        <!-- Supplier -->
+        <div class="mb-3">
+            <label asp-for="SupplierId" class="form-label">Supplier</label>
+            <select asp-for="SupplierId" asp-items="ViewBag.Suppliers" class="form-control">
+                <option value="">-- Select Supplier --</option>
+            </select>
+        </div>
 
-    <!-- Quantity (Required) -->
-    <div class="mb-3">
-        <label asp-for="Quantity" class="form-label">Quantity</label>
-        <input asp-for="Quantity" type="number" class="form-control" min="1" value="1" />
-        <span asp-validation-for="Quantity" class="text-danger"></span>
-    </div>
-
-    <!-- Delivery Date -->
-    <div class="mb-3">
-        <label asp-for="DeliveryDate" class="form-label">Delivery Date</label>
-        <input asp-for="DeliveryDate" type="date" class="form-control" />
-        <span asp-validation-for="DeliveryDate" class="text-danger"></span>
-    </div>
-
-    <!-- Supplier (Required) -->
-    <div class="mb-3">
-        <label asp-for="SupplierID" class="form-label">Supplier</label>
-        <select asp-for="SupplierID" asp-items="ViewBag.Suppliers" class="form-control">
-            <option value="">-- Select Supplier --</option>
-        </select>
-        <span asp-validation-for="SupplierID" class="text-danger"></span>
-    </div>
-
-  
-
-    <!-- Hidden fields for automatic values -->
-    <input type="hidden" asp-for="Status" value="Received" />
-    <input type="hidden" asp-for="DateAdded" value="@DateOnly.FromDateTime(DateTime.Now)" />
-    <input type="hidden" asp-for="UpdatedDate" value="@DateTime.Now" />
-    <input type="hidden" asp-for="IsActive" value="true" />
-
-    <button type="submit" class="btn btn-primary">Receive Fridge</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary px-4">Receive Fridge</button>
+            <a asp-action="Index" class="btn btn-secondary px-4 ms-2">Cancel</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
- 

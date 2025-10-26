@@ -5,10 +5,9 @@ namespace CustomerManagementSubSystem.Models
 {
     public class ReceiveFridgeVm
     {
-        //How it works:The form on the webpage binds to the ReceiveFridgeVm.
-        //When the user submits the form, ASP.NET automatically fills this class with the input values.
-        //Then, in the controller, we take this ViewModel and convert it into a Fridge object that we save to the database.
-        
+        [Required]
+        public int FridgeId { get; set; }   // 🆕 Link to the fridge
+
         [Required]
         [StringLength(50)]
         public string Brand { get; set; }
@@ -26,6 +25,9 @@ namespace CustomerManagementSubSystem.Models
 
         [Required]
         public int SupplierId { get; set; } // dropdown to select supplier
+
+        [Required]
+        public int Quantity { get; set; }  // 🆕 Number of fridges received
 
         [Required]
         public DateTime DateAdded { get; set; } = DateTime.Now;

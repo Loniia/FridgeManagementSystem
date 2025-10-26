@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using CustomerManagementSubSystem.Models; 
 
 namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 {
@@ -68,32 +69,76 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         // --------------------------
         // Receive New Fridges
         // --------------------------
-        public async Task<IActionResult> Receive()
+        // GET
+        public async Task<IActionResult> Receive(int? fridgeId)
         {
-            ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name");
-            return View();
+            if (fridgeId == null)
+                return NotFound();
+
+            var fridge = await _context.Fridge.FindAsync(fridgeId.Value);
+            if (fridge == null)
+                return NotFound();
+
+            // Find the approved purchase request for this fridge
+            var request = await _context.PurchaseRequests
+                .FirstOrDefaultAsync(r => r.FridgeId == fridgeId && r.Status == "Approved");
+
+            // Use requested quantity if fridge quantity is 0
+            int initialQuantity = fridge.Quantity > 0 ? fridge.Quantity : request?.Quantity ?? 1;
+
+            // Populate ViewModel
+            var model = new ReceiveFridgeVm
+            {
+                FridgeId = fridge.FridgeId,
+                Brand = fridge.Brand,
+                Model = fridge.Model,
+                Type = fridge.FridgeType,
+                SerialNumber = fridge.SerialNumber,
+                SupplierId = fridge.SupplierID,
+                Quantity = initialQuantity,
+                DateAdded = fridge.DateAdded.ToDateTime(TimeOnly.MinValue)
+            };
+
+            ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", fridge.SupplierID);
+            return View(model);
         }
 
+
+        // POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Receive(Fridge fridge)
+        public async Task<IActionResult> Receive(ReceiveFridgeVm model)
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", fridge.SupplierID);
-                return View(fridge);
+                // ✅ Re-populate readonly fields from database
+                var fridgeData = await _context.Fridge.FindAsync(model.FridgeId);
+                if (fridgeData != null)
+                {
+                    model.Brand = fridgeData.Brand;
+                    model.Model = fridgeData.Model;
+                    model.Type = fridgeData.FridgeType;
+                }
+
+                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+                return View(model);
             }
 
-            // Set automatic values
-            fridge.Status = "Received";
-            fridge.DateAdded = DateOnly.FromDateTime(DateTime.Now);
+            var fridge = await _context.Fridge.FindAsync(model.FridgeId);
+            if (fridge == null)
+                return NotFound();
+
+            // Update fridge details
+            fridge.Quantity = model.Quantity;
+            fridge.Status = "Available";
+            fridge.SupplierID = model.SupplierId;
+            fridge.SerialNumber = model.SerialNumber; // make sure serial number is updated
             fridge.UpdatedDate = DateTime.Now;
             fridge.IsActive = true;
 
-            _context.Fridge.Add(fridge);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Fridge received successfully!";
+            TempData["SuccessMessage"] = "Fridge received and marked as Available!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -172,9 +217,23 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         // Create Purchase Request (GET)
         // --------------------------
         [HttpGet]
-        public IActionResult CreatePurchaseRequest()
+        public async Task<IActionResult> CreatePurchaseRequest(int? fridgeId)
         {
-            return View();
+            var model = new CreatePurchaseRequestViewModel();
+
+            if (fridgeId != null)
+            {
+                var fridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == fridgeId);
+
+                if (fridge != null)
+                {
+                    model.FridgeId = fridge.FridgeId;
+                    model.ItemFullNames = $"{fridge.Brand} - {fridge.FridgeType}";
+                }
+            }
+
+            return View(model);
         }
 
         // --------------------------
@@ -187,6 +246,27 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            // --------------------------
+            // Ensure the fridge exists if fridgeId is provided
+            // --------------------------
+            Fridge? linkedFridge = null;
+            if (model.FridgeId.HasValue)
+            {
+                linkedFridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == model.FridgeId.Value);
+
+                if (linkedFridge != null)
+                {
+                    // Make sure ItemFullNames is consistent
+                    model.ItemFullNames = $"{linkedFridge.Brand} - {linkedFridge.FridgeType}";
+                }
+                else
+                {
+                    // If fridgeId was provided but not found, clear it to avoid null issues
+                    model.FridgeId = null;
+                }
+            }
+
             var newRequest = new PurchaseRequest
             {
                 ItemFullNames = model.ItemFullNames,
@@ -197,8 +277,8 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 RequestDate = DateOnly.FromDateTime(DateTime.Now),
                 Status = "Pending",
                 IsActive = true,
-                FridgeId = model.FridgeId, // optional link (nullable)
-                InventoryID = model.InventoryID != 0 ? model.InventoryID : (int?)null // only set if from stock
+                FridgeId = linkedFridge?.FridgeId, // link fridge only if it exists
+                InventoryID = model.InventoryID != 0 ? model.InventoryID : (int?)null
             };
 
             // Generate unique Request Number
@@ -215,13 +295,13 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return RedirectToAction(nameof(ProcessPurchaseRequests));
         }
 
-
         // --------------------------
         // Process Purchase Requests (List)
         // --------------------------
         public async Task<IActionResult> ProcessPurchaseRequests()
         {
             var requests = await _context.PurchaseRequests
+                .Include(r => r.Fridge)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
@@ -232,7 +312,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 Status = r.Status,
                 Quantity = r.Quantity,
                 ItemFullNames = r.ItemFullNames,
-                RequestNumber = r.RequestNumber
+                RequestNumber = r.RequestNumber,
+                FridgeId = r.FridgeId,
+                Fridge = r.Fridge
             }).ToList();
 
             return View(viewModel);

@@ -70,5 +70,8 @@ namespace FridgeManagementSystem.Models
 
         [NotMapped]
         public int ActiveFaultsCount => Faults?.Count(f => f.Status != "Resolved") ?? 0;
+        [NotMapped]
+        public bool IsReceivedForRequest { get; set; } = false;
+
     }
 }

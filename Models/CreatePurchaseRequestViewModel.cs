@@ -22,6 +22,8 @@ namespace FridgeManagementSystem.Models
 
             [Required]
             public int CustomerID { get; set; }
-        
+            public string RequestBy { get; set; } = "Inventory Liaison";
+            public string RequestType { get; set; } = "Fridge Purchase";
+
     }
 }

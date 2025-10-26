@@ -54,5 +54,18 @@ namespace FridgeManagementSystem.Models
 
         [Display(Name = "Inventory Item")]
         public string InventoryName { get; set; }
+        public Fridge Fridge { get; set; }
+        [NotMapped]
+        public string DisplayStatus
+        {
+            get
+            {
+                if (Status == "Approved" && Fridge != null && Fridge.Status != "Available")
+                    return "Approved — Receive Fridge";
+                return Status;
+            }
+        }
+
+
     }
 }
