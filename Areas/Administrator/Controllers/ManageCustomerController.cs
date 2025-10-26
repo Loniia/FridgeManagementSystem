@@ -458,21 +458,30 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             if (payment == null)
                 return NotFound();
-
             if (approve)
             {
                 payment.Status = "Paid";
+
                 if (payment.Orders != null)
-                    payment.Orders.Status = "Paid";
+                {
+                    payment.Orders.Status = "Paid"; // Order now updated immediately
+                }
             }
             else
             {
                 payment.Status = "Rejected";
                 if (payment.Orders != null)
-                    payment.Orders.Status = "Pending";
+                    payment.Orders.Status = "Awaiting Payment";
+                
             }
-
+           
+          
             await _context.SaveChangesAsync();
+            // Reload the payments collection to ensure EF has latest data
+            if (payment.Orders != null)
+                await _context.Entry(payment.Orders).Collection(o => o.Payments).LoadAsync();
+
+
             return RedirectToAction("PendingPayments");
         }
 

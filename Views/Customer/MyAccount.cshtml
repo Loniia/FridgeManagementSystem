@@ -36,11 +36,13 @@
                     {
                         var badgeClass = o.Status switch
                         {
-                            "Pending" => "bg-warning text-dark",
-                            "Completed" => "bg-success",
-                            "Cancelled" => "bg-danger",
+                            "Awaiting Payment" => "bg-warning text-dark",
+                            "Awaiting Approval" => "bg-info text-dark",
+                            "Paid" => "bg-success",
+                            "Rejected" => "bg-danger",
                             _ => "bg-secondary"
                         };
+
                                 <tr style="transition: transform 0.2s, box-shadow 0.2s;">
                                     <td>@o.OrderId</td>
                                     <td>@o.OrderDate.ToString("yyyy-MM-dd")</td>

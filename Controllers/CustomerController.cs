@@ -457,6 +457,7 @@ namespace FridgeManagementSystem.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
+                .Include(o => o.Payments)
                 .FirstOrDefaultAsync(o => o.OrderId == model.OrderId && o.CustomerID == customerId);
 
             if (order == null) return Forbid();
@@ -493,11 +494,10 @@ namespace FridgeManagementSystem.Controllers
             {
                 payment.PaymentReference = GeneratePaymentReference();
                 payment.BankReference = model.BankReference;
-                payment.Status = "Pending";
-                order.Status = "AwaitingPayment";
 
                 if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
                 {
+                    // If proof uploaded, wait for admin approval
                     var fileName = $"{payment.PaymentReference}_{model.ProofOfPayment.FileName}";
                     var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/payments", fileName);
 
@@ -505,12 +505,28 @@ namespace FridgeManagementSystem.Controllers
                     await model.ProofOfPayment.CopyToAsync(stream);
 
                     payment.ProofFilePath = "/uploads/payments/" + fileName;
-                    payment.Status = "AwaitingAdminApproval";
+                    payment.Status = "AwaitingAdminApproval"; // Waiting admin
+                    order.Status = "AwaitingPayment";
+                }
+                else
+                {
+                    // No proof yet, just mark as pending
+                    payment.Status = "Pending";
+                    order.Status = "AwaitingPayment";
                 }
             }
 
+
             _context.Payments.Add(payment);
+           
             await _context.SaveChangesAsync();
+            // ✅ Notify admin that a payment is waiting approval
+            var adminUserId = 1; // <-- replace with your admin's user ID, or get dynamically
+            await _notificationService.CreateAsync(
+                adminUserId,
+                $"A new EFT payment (Order #{order.OrderId}) is awaiting your approval.",
+                Url.Action("PendingPayments", "ManageCustomer", new { area = "Administrator" })
+            );
 
             return RedirectToAction("PaymentConfirmation", new { orderId = order.OrderId });
         }
@@ -538,7 +554,6 @@ namespace FridgeManagementSystem.Controllers
         }
 
 
-        // ✅ PAYMENT CONFIRMATION
         public async Task<IActionResult> PaymentConfirmation(int orderId)
         {
             var customerId = GetLoggedInCustomerId();
@@ -546,19 +561,25 @@ namespace FridgeManagementSystem.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(i => i.Fridge)
+                    .ThenInclude(i => i.Fridge)
+                .Include(o => o.Payments)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerID == customerId);
 
             if (order == null) return NotFound();
 
-            // Optionally include latest payment
-            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
+            await _context.Entry(order).Collection(o => o.Payments).LoadAsync();
 
-            ViewBag.Payment = payment;
+            var payment = order.Payments
+                .OrderByDescending(p => p.PaymentDate)
+                .FirstOrDefault();
+
+            ViewBag.Payment = payment ?? new Payment { Status = order.Status };
+
             return View(order);
         }
 
-       [Authorize]
+
+        [Authorize]
         public async Task<IActionResult> OrderHistory()
         {
             var appUser = await _userManager.GetUserAsync(User);
@@ -572,11 +593,15 @@ namespace FridgeManagementSystem.Controllers
                 .Where(o => o.CustomerID == customer.CustomerID)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Fridge)
+                .Include(o => o.Payments)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
+            
+
             return View(orders);
         }
+
 
         [Authorize]
         public async Task<IActionResult> ViewOrder(int id)
@@ -602,12 +627,37 @@ namespace FridgeManagementSystem.Controllers
         // ==========================
         public async Task<IActionResult> MyAccount()
         {
+            
             var customerId = GetLoggedInCustomerId();
             var orders = await _context.Orders
                 .Where(o => o.CustomerID == customerId)
                 .Include(o => o.OrderItems)
-                .ThenInclude(i => i.Fridge)
+                    .ThenInclude(i => i.Fridge)
+                .Include(o => o.Payments)
+                .AsNoTracking()// ✅ include payments
                 .ToListAsync();
+
+            // Update order.Status based on latest payment
+            foreach (var order in orders)
+            {
+                var latestPayment = await _context.Payments
+             .Where(p => p.OrderId == order.OrderId)
+             .OrderByDescending(p => p.PaymentDate)
+             .FirstOrDefaultAsync();
+
+                if (latestPayment != null)
+                {
+                    order.Status = latestPayment.Status switch
+                    {
+                        "Paid" => "Paid", // ✅ show "Paid" instead of "Completed"
+                        "AwaitingAdminApproval" => "Awaiting Approval",
+                        "Pending" => "Awaiting Payment",
+                        "Rejected" => "Rejected",
+                        _ => order.Status
+                    };
+
+                }
+            }
 
             return View(orders);
         }
