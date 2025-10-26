@@ -103,6 +103,10 @@ namespace FridgeManagementSystem.Controllers
         public async Task<IActionResult> Dashboard(string search, string stockFilter = "all")
         {
             var customerId = GetLoggedInCustomerId();
+            var unreadNotifications = await _notificationService.GetUnreadAsync(customerId);
+            ViewBag.UnreadCount = unreadNotifications.Count();
+
+
             if (customerId == 0)
                 return RedirectToAction("Login", "Account");
 
@@ -1195,7 +1199,6 @@ namespace FridgeManagementSystem.Controllers
             }
 
             var customer = _context.Customers.FirstOrDefault(c => c.ApplicationUserId == appUserId);
-
             if (customer == null)
             {
                 _logger.LogWarning($"No customer found for application user ID: {appUserId}");
@@ -1221,6 +1224,51 @@ namespace FridgeManagementSystem.Controllers
         private string GeneratePaymentReference()
         {
             return "PAY-" + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+        }
+        public async Task<IActionResult> Notifications()
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var notifications = await _notificationService.GetAllAsync(customerId);
+            return View(notifications);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Unread()
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return Json(new { });
+
+            var notifications = await _notificationService.GetUnreadAsync(customerId, 5);
+            return Json(notifications.Select(n => new { n.NotificationId, n.Message, n.Url }));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UnreadCount()
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return Json(0);
+
+            var count = (await _notificationService.GetUnreadAsync(customerId)).Count();
+            return Json(count);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsRead(int id)
+        {
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return RedirectToAction("Login", "Account");
+
+            var notification = await _context.Notifications.FindAsync(id);
+            if (notification == null || notification.UserId != customerId)
+            {
+                // Ignore or return error if notification doesn't belong to this customer
+                return Forbid();
+            }
+
+            await _notificationService.MarkAsReadAsync(id);
+            return RedirectToAction("Notifications");
         }
 
     }
