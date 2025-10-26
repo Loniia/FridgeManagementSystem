@@ -122,9 +122,9 @@
         <!-- Return Date -->
         <p>
             <strong>Return Date:</strong>
-            @if (Model.ReturnDate.HasValue)
+            @if (TempData["ReturnDate"] != null)
             {
-                @Model.ReturnDate.Value.ToString("yyyy-MM-dd")
+                @TempData["ReturnDate"]
             }
             else
             {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Models;
+using FridgeManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -239,6 +240,35 @@ namespace FridgeManagementSystem.Controllers
                 .ToListAsync();
 
             return Json(data);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AllCustomersSpendingReport()
+        {
+            var customers = await _context.Customers
+                .Include(c => c.Orders)
+                    .ThenInclude(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Fridge)
+                .ToListAsync();
+
+            var reportModel = new AdminCustomerSpendingReportViewModel();
+
+            foreach (var cust in customers)
+            {
+                var orders = (cust.Orders ?? new List<Order>()).ToList(); 
+                var totalSpent = orders.Sum(o => o.TotalAmount);
+                var totalFridges = orders.Sum(o => o.OrderItems.Sum(oi => oi.Quantity));
+
+                reportModel.Customers.Add(new CustomerSpendingReportViewModel
+                {
+                    CustomerName = cust.FullName,
+                    Orders = orders,
+                    TotalSpent = totalSpent,
+                    TotalFridges = totalFridges
+                });
+            }
+
+            return View(reportModel);
         }
 
     }
