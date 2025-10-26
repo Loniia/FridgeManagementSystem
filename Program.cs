@@ -39,6 +39,8 @@ builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService
 
 builder.Services.AddScoped<ICustomerManagementSubSystem, CustomerManagementService>();
 builder.Services.AddScoped<InventoryLiaisonController>();
+// In ConfigureServices method
+builder.Services.AddScoped<IReportService, ReportService>();
 
 
 // ✅ 5. Configure role-based authorization
