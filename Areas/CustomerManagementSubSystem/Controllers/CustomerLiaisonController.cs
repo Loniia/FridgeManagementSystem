@@ -447,6 +447,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 FullNames = customer.FullName,
                 LocationId = customer.LocationId,
                 PhoneNumber = customer.PhoneNumber,
+                Email = customer.Email,
                 IsActive = customer.IsActive,
                 RegistrationDate = customer.RegistrationDate,
                 FridgeAllocations = fridgeAllocationsVM
