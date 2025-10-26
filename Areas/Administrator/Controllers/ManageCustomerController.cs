@@ -488,17 +488,15 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
                 // 5) Clear cart using the helper (uses the same DbContext)
                 //    ClearCartAsync finds the latest cart for the customer and clears it.
                 await CartHelper.ClearCartAsync(_context, customerId);
-
-                // 6) optional log
-                Console.WriteLine($"VerifyPayment: Approved payment {paymentId}; cleared cart for CustomerID={customerId}");
+                await _notificationService.CreateAsync(customerId, $"Your payment for Order #{order.OrderId} has been approved.");
             }
             else
             {
                 payment.Status = "Rejected";
                 order.Status = "AwaitingPayment";
                 await _context.SaveChangesAsync();
+                await _notificationService.CreateAsync(customerId, $"Your payment for Order #{order.OrderId} has been rejected. Please retry.");
 
-                Console.WriteLine($"VerifyPayment: Rejected payment {paymentId} for Order {order.OrderId}");
             }
 
             // 7) Reload order.payments if required (safe)
