@@ -28,18 +28,41 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
         // ✅ Utility: keep request + visit statuses in sync
         private void UpdateVisitAndRequestStatus(MaintenanceVisit visit, Models.TaskStatus status)
         {
-            visit.Status = status;
+            if (visit == null) return;
 
-            if (visit.MaintenanceRequest != null)
+            // Update visit status
+            visit.Status = status;
+            if (_context.Entry(visit).State == Microsoft.EntityFrameworkCore.EntityState.Detached)
+                _context.MaintenanceVisit.Attach(visit);
+
+            _context.Entry(visit).Property(v => v.Status).IsModified = true;
+
+            // Update linked request
+            var request = visit.MaintenanceRequest ?? _context.MaintenanceRequest
+                            .FirstOrDefault(r => r.MaintenanceRequestId == visit.MaintenanceRequestId);
+
+            if (request != null)
             {
-                visit.MaintenanceRequest.TaskStatus = status;
-            }
-            else
-            {
-                var request = _context.MaintenanceRequest
-                    .FirstOrDefault(r => r.MaintenanceRequestId == visit.MaintenanceRequestId);
-                if (request != null)
-                    request.TaskStatus = status;
+                request.TaskStatus = status;
+
+                if (status == Models.TaskStatus.Complete)
+                {
+                    request.CompletedDate = DateTime.Now;
+                    request.IsActive = false;
+                }
+                else
+                {
+                    request.IsActive = true; // for scheduled/in-progress requests
+                }
+
+                if (_context.Entry(request).State == Microsoft.EntityFrameworkCore.EntityState.Detached)
+                    _context.MaintenanceRequest.Attach(request);
+
+                _context.Entry(request).Property(r => r.TaskStatus).IsModified = true;
+                _context.Entry(request).Property(r => r.IsActive).IsModified = true;
+
+                if (status == Models.TaskStatus.Complete)
+                    _context.Entry(request).Property(r => r.CompletedDate).IsModified = true;
             }
 
             _context.SaveChanges();
@@ -52,7 +75,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 .Include(r => r.Fridge)
                     .ThenInclude(f => f.Customer)
                        .ThenInclude(c=>c.Location)
-                .Where(r => r.IsActive )
+                .Where(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Pending)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
@@ -90,21 +113,20 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             });
         }
 
-        // POST: Schedule Visit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ScheduleVisit(MaintenanceVisit model)
         {
             PopulateRequestsViewBag();
 
-            // Server-side validation
+            // 1) Server-side validation
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Please provide all required fields.";
                 return View(model);
             }
 
-            // Ensure selected request exists
+            // 2) Load the request with related fridge/customer/location
             var request = _context.MaintenanceRequest
                 .Include(r => r.Fridge).ThenInclude(f => f.Customer).ThenInclude(c => c.Location)
                 .FirstOrDefault(r => r.MaintenanceRequestId == model.MaintenanceRequestId && r.IsActive);
@@ -115,20 +137,24 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 return View(model);
             }
 
-            // ✅ Optional: remove this if you want multiple visits per pending request
-            // var anyVisit = _context.MaintenanceVisit
-            //     .Any(v => v.MaintenanceRequestId == request.MaintenanceRequestId);
-            // if (anyVisit)
-            // {
-            //     TempData["Error"] = "This request already has a maintenance visit.";
-            //     return View(model);
-            // }
+            // 3) Robust duplicate check: only block if an active visit already exists
+            //    (Scheduled or InProgress are considered active; Completed/Cancelled are NOT)
+            var existingActiveVisit = _context.MaintenanceVisit
+                .Any(v => v.MaintenanceRequestId == request.MaintenanceRequestId &&
+                         (v.Status == Models.TaskStatus.Scheduled ||
+                          v.Status == Models.TaskStatus.InProgress));
 
-            // Map fridge and request ID
+            if (existingActiveVisit)
+            {
+                TempData["Error"] = "A maintenance visit is already scheduled or in progress for this request.";
+                return View(model);
+            }
+
+            // 4) Map fridge/request ids
             model.FridgeId = request.FridgeId;
             model.MaintenanceRequestId = request.MaintenanceRequestId;
 
-            // Assign a technician
+            // 5) Assign technician
             var technician = MaintenanceTechnicians.FirstOrDefault();
             if (technician == null)
             {
@@ -137,20 +163,17 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             }
             model.EmployeeID = technician.EmployeeID;
 
-            // Set status
+            // 6) Set visit status and save
             model.Status = Models.TaskStatus.Scheduled;
-
-            // Save visit
             _context.MaintenanceVisit.Add(model);
             _context.SaveChanges();
 
-            // Update request status
+            // 7) Update the request to Scheduled via the helper so IsActive remains true
             UpdateVisitAndRequestStatus(model, Models.TaskStatus.Scheduled);
 
             TempData["Message"] = "Maintenance visit scheduled successfully!";
             return RedirectToAction(nameof(ScheduleVisit));
         }
-
 
         // Helper: populate dropdown & JSON safely
         private void PopulateRequestsViewBag()
@@ -282,83 +305,51 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             TempData["Message"] = "Maintenance task started successfully!";
             return RedirectToAction("PerformMaintenance", new { visitId });
         }
-        [HttpPost]
-        public async Task<IActionResult> CompleteMaintenance(int visitId)
-        {
-            // 1) Load the visit including its request and fridge
-            var visit = await _context.MaintenanceVisit
-                .Include(v => v.MaintenanceRequest)
-                    .ThenInclude(r => r.Fridge)
-                .Include(v => v.Employee)
-                .FirstOrDefaultAsync(v => v.MaintenanceVisitId == visitId);
-
-            if (visit == null) return NotFound();
-
-            // 2) Mark the visit as complete
-            visit.Status = Models.TaskStatus.Complete;
-
-            // 3) Update the linked MaintenanceRequest (if present)
-            if (visit.MaintenanceRequest != null)
+            [HttpPost]
+            public async Task<IActionResult> CompleteMaintenance(int visitId)
             {
-                visit.MaintenanceRequest.TaskStatus = Models.TaskStatus.Complete;
-                visit.MaintenanceRequest.CompletedDate = DateTime.Now;
-                visit.MaintenanceRequest.IsActive = false;
-            }
-            else
-            {
-                // If no navigation property loaded, load and update
-                var req = await _context.MaintenanceRequest
-                    .FirstOrDefaultAsync(r => r.MaintenanceRequestId == visit.MaintenanceRequestId);
-                if (req != null)
+                var visit = await _context.MaintenanceVisit
+                    .Include(v => v.MaintenanceRequest)
+                        .ThenInclude(r => r.Fridge)
+                    .Include(v => v.Employee)
+                    .FirstOrDefaultAsync(v => v.MaintenanceVisitId == visitId);
+
+                if (visit == null) return NotFound();
+
+                // ✅ Update status and linked request via helper
+                UpdateVisitAndRequestStatus(visit, Models.TaskStatus.Complete);
+
+                // 4) Create next monthly MaintenanceRequest (service prevents duplicates)
+                var nextRequest = await _mrService.CreateNextMonthlyRequestAsync(visit.FridgeId);
+
+                MaintenanceVisit nextVisit = null;
+                if (nextRequest != null)
                 {
-                    req.TaskStatus = Models.TaskStatus.Complete;
-                    req.CompletedDate = DateTime.Now;
-                    req.IsActive = false;
+                    nextVisit = new MaintenanceVisit
+                    {
+                        MaintenanceRequestId = nextRequest.MaintenanceRequestId,
+                        FridgeId = visit.FridgeId,
+                        ScheduledDate = nextRequest.RequestDate,
+                        ScheduledTime = visit.ScheduledTime,
+                        Status = Models.TaskStatus.Scheduled,
+                        EmployeeID = visit.EmployeeID
+                    };
+
+                    _context.MaintenanceVisit.Add(nextVisit);
+                    await _context.SaveChangesAsync();
                 }
+
+                // Feedback
+                if (nextVisit != null)
+                    TempData["Message"] = $"Maintenance completed. Next visit scheduled for {nextVisit.ScheduledDate:yyyy-MM-dd}.";
+                else if (nextRequest != null)
+                    TempData["Message"] = $"Maintenance completed. Next request created for {nextRequest.RequestDate:yyyy-MM-dd}.";
+                else
+                    TempData["Message"] = "Maintenance completed. No new request created (already a pending/scheduled request).";
+
+                return RedirectToAction("PerformMaintenance", new { visitId = visitId });
             }
 
-            await _context.SaveChangesAsync();
-
-            // 4) Create the next monthly MaintenanceRequest (service already prevents duplicates)
-            var nextRequest = await _mrService.CreateNextMonthlyRequestAsync(visit.FridgeId);
-
-            // 5) If a next request was created, optionally create a corresponding MaintenanceVisit
-            MaintenanceVisit nextVisit = null;
-            if (nextRequest != null)
-            {
-                nextVisit = new MaintenanceVisit
-                {
-                    MaintenanceRequestId = nextRequest.MaintenanceRequestId,
-                    FridgeId = visit.FridgeId,
-                    // schedule the visit for the request date and keep the same time as previous visit if sensible
-                    ScheduledDate = nextRequest.RequestDate,
-                    ScheduledTime = visit.ScheduledTime,
-                    Status = Models.TaskStatus.Scheduled,
-                    // optional: assign same tech or leave unassigned (0 or null depending on your model)
-                    EmployeeID = visit.EmployeeID
-                };
-
-                _context.MaintenanceVisit.Add(nextVisit);
-                await _context.SaveChangesAsync();
-            }
-
-            // 6) Feedback to technician (and later, you can create notifications)
-            if (nextVisit != null)
-            {
-                TempData["Message"] = $"Maintenance completed. Next visit scheduled for {nextVisit.ScheduledDate:yyyy-MM-dd}.";
-            }
-            else if (nextRequest != null)
-            {
-                // corner-case: request created but visit not created (shouldn't happen with above)
-                TempData["Message"] = $"Maintenance completed. Next request created for {nextRequest.RequestDate:yyyy-MM-dd}.";
-            }
-            else
-            {
-                TempData["Message"] = "Maintenance completed. No new request created (there is already a pending/scheduled request).";
-            }
-
-            return RedirectToAction("PerformMaintenance", new { visitId = visitId });
-        }
 
         // ✅ Checklist
         public IActionResult MaintenanceChecklist(int visitId)
