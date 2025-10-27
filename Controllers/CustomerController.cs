@@ -2,6 +2,7 @@
 using FridgeManagementSystem.Helpers;
 using FridgeManagementSystem.Models;
 using FridgeManagementSystem.Services;
+using FridgeManagementSystem.Utilities;
 using FridgeManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +22,6 @@ namespace FridgeManagementSystem.Controllers
     [Authorize(Roles = Roles.Customer)]
     public class CustomerController : Controller
     {
-
         private readonly INotificationService _notificationService;
         private readonly FridgeDbContext _context;
         private readonly FridgeService _fridgeService;
@@ -42,61 +42,6 @@ namespace FridgeManagementSystem.Controllers
             _notificationService = notificationService;
         }
 
-        ////=================
-        ////DASHBOARD
-        ////=================
-        //public async Task<IActionResult> Dashboard(string search)
-        //{
-        //    var customerId = GetLoggedInCustomerId();
-        //    if (customerId == 0)
-        //        return RedirectToAction("Login", "Account");
-
-        //    // Fetch all fridges from DB
-        //    var fridgesQuery = _context.Fridge.AsQueryable();
-
-        //    // Optional search
-        //    if (!string.IsNullOrEmpty(search))
-        //    {
-        //        fridgesQuery = fridgesQuery.Where(f =>
-        //            (f.Brand != null && f.Brand.Contains(search)) ||
-        //            (f.Model != null && f.Model.Contains(search)));
-        //    }
-
-        //    var fridges = await fridgesQuery.ToListAsync();
-
-        //    foreach (var f in fridges)
-        //    {
-        //        _logger.LogInformation($"Fridge {f.Brand} {f.Model} - Status in DB: '{f.Status}'");
-        //    }
-
-        //    // Map to ViewModel
-        //    // Map to ViewModel
-        //    var fridgeViewModels = fridges.Select(f => new FridgeViewModel
-        //    {
-        //        FridgeId = f.FridgeId,
-        //        Brand = f.Brand,
-        //        Model = f.Model,
-        //        FridgeType = f.FridgeType,
-        //        Price = f.Price,
-        //        Quantity = f.Quantity,
-        //        // ✅ Updated logic for stock status
-        //        Status = (f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity > 0)
-        //            ? "In Stock"
-        //            : "Out of Stock",
-        //        ImageUrl = string.IsNullOrEmpty(f.ImageUrl)
-        //            ? $"/images/fridges/fridge{f.FridgeId}.jpg"  // default naming based on ID
-        //            : f.ImageUrl
-        //    }).ToList();
-
-        //    var model = new CustomerViewModel
-        //    {
-        //        FullNames = User.Identity?.Name ?? "Guest",
-        //        Fridges = fridgeViewModels
-        //    };
-
-        //    ViewData["Search"] = search;
-        //    return View(model);
-        //}
         //=================
         //DASHBOARD - FIXED
         //=================
@@ -107,7 +52,6 @@ namespace FridgeManagementSystem.Controllers
             var appUserId = await GetCurrentApplicationUserIdAsync();
             var unreadNotifications = await _notificationService.GetUnreadAsync(appUserId);
             ViewBag.UnreadCount = unreadNotifications.Count();
-
 
             if (customerId == 0)
                 return RedirectToAction("Login", "Account");
@@ -187,7 +131,7 @@ namespace FridgeManagementSystem.Controllers
 
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.CustomerID == customerId); // Remove the IsActive filter
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
             if (cart == null)
             {
@@ -280,7 +224,7 @@ namespace FridgeManagementSystem.Controllers
             var cart = await _context.Carts
                 .Include(c => c.CartItems.Where(ci => !ci.IsDeleted))
                 .ThenInclude(ci => ci.Fridge)
-                .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive); // Keep IsActive here
+                .FirstOrDefaultAsync(c => c.CustomerID == customerId && c.IsActive);
 
             if (cart == null || !cart.CartItems.Any())
             {
@@ -451,7 +395,6 @@ namespace FridgeManagementSystem.Controllers
                 Orders = order
             };
 
-
             return View(vm);
         }
 
@@ -495,11 +438,11 @@ namespace FridgeManagementSystem.Controllers
                 order.Status = "Paid";
 
                 await CartHelper.ClearCartAsync(_context, customerId);
-
             }
             else if (model.Method == Method.EFT)
             {
-                payment.PaymentReference = GeneratePaymentReference();
+                // ✅ USING UTILITY CLASS FOR PAYMENT REFERENCE
+                payment.PaymentReference = SerialNumberGenerator.GeneratePaymentReference();
                 payment.BankReference = model.BankReference;
 
                 if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
@@ -523,10 +466,10 @@ namespace FridgeManagementSystem.Controllers
                 }
             }
 
-
             _context.Payments.Add(payment);
-           
+
             await _context.SaveChangesAsync();
+
             // ✅ Notify admin that a payment is waiting approval
             var admins = await _userManager.GetUsersInRoleAsync(Roles.Admin);
             var admin = admins.FirstOrDefault();
@@ -562,7 +505,6 @@ namespace FridgeManagementSystem.Controllers
             }
         }
 
-
         public async Task<IActionResult> PaymentConfirmation(int orderId)
         {
             var customerId = GetLoggedInCustomerId();
@@ -587,7 +529,6 @@ namespace FridgeManagementSystem.Controllers
             return View(order);
         }
 
-
         [Authorize]
         public async Task<IActionResult> OrderHistory()
         {
@@ -606,11 +547,8 @@ namespace FridgeManagementSystem.Controllers
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
-            
-
             return View(orders);
         }
-
 
         [Authorize]
         public async Task<IActionResult> ViewOrder(int id)
@@ -636,7 +574,6 @@ namespace FridgeManagementSystem.Controllers
         // ==========================
         public async Task<IActionResult> MyAccount()
         {
-            
             var customerId = GetLoggedInCustomerId();
             var orders = await _context.Orders
                 .Where(o => o.CustomerID == customerId)
@@ -664,22 +601,21 @@ namespace FridgeManagementSystem.Controllers
                         "Rejected" => "Rejected",
                         _ => order.Status
                     };
-
                 }
             }
 
             return View(orders);
         }
 
-        public IActionResult TrackOrder(int? orderId)
+        public async Task<IActionResult> TrackOrder(int? orderId)
         {
-            var order = _context.Orders
+            var order = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Fridge) // ✅ Load the Fridge for each order item
                         .ThenInclude(f => f.FridgeAllocation) // ✅ Also load the FridgeAllocation
                 .Include(o => o.Payments)
                 .OrderByDescending(o => o.OrderDate)
-                .FirstOrDefault(o => !orderId.HasValue || o.OrderId == orderId);
+                .FirstOrDefaultAsync(o => !orderId.HasValue || o.OrderId == orderId);
 
             if (order == null)
                 return NotFound();
@@ -704,7 +640,7 @@ namespace FridgeManagementSystem.Controllers
                     break;
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return View(order);
         }
@@ -725,307 +661,306 @@ namespace FridgeManagementSystem.Controllers
             return View(order);
         }
 
-
-     // ==========================
-// 8. FAULT MANAGEMENT (SIMPLIFIED)
-// ==========================
-public async Task<IActionResult> MyFaults()
-{
-    try
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var faultReports = await _context.FaultReport
-            .Include(fr => fr.Fridge)
-            .Where(fr => fr.Fridge.CustomerID == customerId)
-            .OrderByDescending(fr => fr.ReportDate)
-            .ToListAsync();
-
-        return View(faultReports);
-    }
-    catch
-    {
-        TempData["ErrorMessage"] = "Error loading faults.";
-        return View(new List<FaultReport>());
-    }
-}
-
-public async Task<IActionResult> FaultDetails(int? id)
-{
-    if (id == null) return NotFound();
-
-    try
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var faultReport = await _context.FaultReport
-            .Include(fr => fr.Fridge)
-            .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
-                                     fr.Fridge.CustomerID == customerId);
-
-        return faultReport == null ? NotFound() : View(faultReport);
-    }
-    catch
-    {
-        TempData["ErrorMessage"] = "Error loading fault details.";
-        return RedirectToAction(nameof(MyFaults));
-    }
-}
-
-// MODIFIED: Added orderId parameter to pre-select fridges from specific order
-[HttpGet]
-public async Task<IActionResult> CreateFault(int? fridgeId, int? orderId)
-{
-    var customerId = GetLoggedInCustomerId();
-    var viewModel = new CreateFaultViewModel
-    {
-        FridgeOptions = await GetCustomerFridgesAsync(),
-        PriorityOptions = GetPriorityOptions()
-    };
-
-    // If fridgeId is provided AND belongs to customer
-    if (fridgeId.HasValue)
-    {
-        var selectedFridge = await _context.Fridge
-            .FirstOrDefaultAsync(f => f.FridgeId == fridgeId.Value && f.CustomerID == customerId);
-
-        if (selectedFridge != null)
+        // ==========================
+        // 8. FAULT MANAGEMENT (SIMPLIFIED)
+        // ==========================
+        public async Task<IActionResult> MyFaults()
         {
-            viewModel.FridgeId = fridgeId.Value;
-            ViewBag.HasPreselectedFridge = true;
-            ViewBag.SelectedFridgeInfo = $"{selectedFridge.Brand} {selectedFridge.Model} - {selectedFridge.FridgeType}";
-
-            // Optional: Add order context if orderId is provided
-            if (orderId.HasValue)
+            try
             {
-                ViewBag.OrderContext = $" (from Order #{orderId.Value})";
+                var customerId = GetLoggedInCustomerId();
+
+                var faultReports = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .Where(fr => fr.Fridge.CustomerID == customerId)
+                    .OrderByDescending(fr => fr.ReportDate)
+                    .ToListAsync();
+
+                return View(faultReports);
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Error loading faults.";
+                return View(new List<FaultReport>());
             }
         }
-        else
+
+        public async Task<IActionResult> FaultDetails(int? id)
         {
-            // Fridge doesn't belong to customer or doesn't exist
-            ViewBag.HasPreselectedFridge = false;
-            TempData["WarningMessage"] = "The selected fridge was not found in your account.";
+            if (id == null) return NotFound();
+
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
+
+                return faultReport == null ? NotFound() : View(faultReport);
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Error loading fault details.";
+                return RedirectToAction(nameof(MyFaults));
+            }
         }
-    }
-    else
-    {
-        ViewBag.HasPreselectedFridge = false;
-    }
 
-    return View(viewModel);
-}
-
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
-{
-    if (!ModelState.IsValid)
-    {
-        viewModel.FridgeOptions = await GetCustomerFridgesAsync();
-        viewModel.PriorityOptions = GetPriorityOptions();
-        return View(viewModel);
-    }
-
-    try
-    {
-        var customerId = GetLoggedInCustomerId();
-        var fridge = await _context.Fridge
-            .FirstOrDefaultAsync(f => f.FridgeId == viewModel.FridgeId && f.CustomerID == customerId);
-
-        if (fridge == null)
+        // MODIFIED: Added orderId parameter to pre-select fridges from specific order
+        [HttpGet]
+        public async Task<IActionResult> CreateFault(int? fridgeId, int? orderId)
         {
-            ModelState.AddModelError("FridgeId", "Selected fridge not found or doesn't belong to you.");
-            viewModel.FridgeOptions = await GetCustomerFridgesAsync();
-            viewModel.PriorityOptions = GetPriorityOptions();
+            var customerId = GetLoggedInCustomerId();
+            var viewModel = new CreateFaultViewModel
+            {
+                FridgeOptions = await GetCustomerFridgesAsync(),
+                PriorityOptions = GetPriorityOptions()
+            };
+
+            // If fridgeId is provided AND belongs to customer
+            if (fridgeId.HasValue)
+            {
+                var selectedFridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == fridgeId.Value && f.CustomerID == customerId);
+
+                if (selectedFridge != null)
+                {
+                    viewModel.FridgeId = fridgeId.Value;
+                    ViewBag.HasPreselectedFridge = true;
+                    ViewBag.SelectedFridgeInfo = $"{selectedFridge.Brand} {selectedFridge.Model} - {selectedFridge.FridgeType}";
+
+                    // Optional: Add order context if orderId is provided
+                    if (orderId.HasValue)
+                    {
+                        ViewBag.OrderContext = $" (from Order #{orderId.Value})";
+                    }
+                }
+                else
+                {
+                    // Fridge doesn't belong to customer or doesn't exist
+                    ViewBag.HasPreselectedFridge = false;
+                    TempData["WarningMessage"] = "The selected fridge was not found in your account.";
+                }
+            }
+            else
+            {
+                ViewBag.HasPreselectedFridge = false;
+            }
+
             return View(viewModel);
         }
 
-        // ✅ SIMPLIFIED: Create FaultReport WITHOUT MaintenanceVisit
-        var faultReport = new FaultReport
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
         {
-            FridgeId = viewModel.FridgeId,
-            FaultDescription = viewModel.FaultDescription,
-            FaultType = viewModel.FaultType,
-            ReportDate = DateTime.Now,
-            UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
-            Status = TaskStatus.Pending,
-            // MaintenanceVisitId is NULL - no foreign key constraint issues!
-        };
+            if (!ModelState.IsValid)
+            {
+                viewModel.FridgeOptions = await GetCustomerFridgesAsync();
+                viewModel.PriorityOptions = GetPriorityOptions();
+                return View(viewModel);
+            }
 
-        _context.FaultReport.Add(faultReport);
-        await _context.SaveChangesAsync();
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+                var fridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == viewModel.FridgeId && f.CustomerID == customerId);
 
-        TempData["SuccessMessage"] = "Fault reported successfully! Our technicians will review it shortly.";
-        return RedirectToAction(nameof(FaultDetails), new { id = faultReport.FaultReportId });
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error creating fault report");
-        viewModel.FridgeOptions = await GetCustomerFridgesAsync();
-        viewModel.PriorityOptions = GetPriorityOptions();
-        TempData["ErrorMessage"] = "Error reporting fault. Please try again.";
-        return View(viewModel);
-    }
-}
+                if (fridge == null)
+                {
+                    ModelState.AddModelError("FridgeId", "Selected fridge not found or doesn't belong to you.");
+                    viewModel.FridgeOptions = await GetCustomerFridgesAsync();
+                    viewModel.PriorityOptions = GetPriorityOptions();
+                    return View(viewModel);
+                }
 
-// NEW HELPER METHOD: Get fridges from a specific order
-private async Task<List<SelectListItem>> GetFridgesFromOrderAsync(int orderId, int customerId)
-{
-    return await _context.Orders
-        .Where(o => o.OrderId == orderId && o.CustomerID == customerId)
-        .SelectMany(o => o.OrderItems)
-        .Select(oi => oi.Fridge)
-        .Where(f => f.Status == "Active")
-        .Select(f => new SelectListItem
-        {
-            Value = f.FridgeId.ToString(),
-            Text = $"{f.Brand} {f.Model} - {f.SerialNumber} (Order #{orderId})"
-        })
-        .Distinct()
-        .ToListAsync();
-}
+                // ✅ SIMPLIFIED: Create FaultReport WITHOUT MaintenanceVisit
+                var faultReport = new FaultReport
+                {
+                    FridgeId = viewModel.FridgeId,
+                    FaultDescription = viewModel.FaultDescription,
+                    FaultType = viewModel.FaultType,
+                    ReportDate = DateTime.Now,
+                    UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
+                    Status = TaskStatus.Pending,
+                    // MaintenanceVisitId is NULL - no foreign key constraint issues!
+                };
 
-// Helper method
-private UrgencyLevel MapPriorityToUrgency(string priority)
-{
-    return priority switch
-    {
-        "Critical" => UrgencyLevel.Critical,
-        "High" => UrgencyLevel.High,
-        "Medium" => UrgencyLevel.Medium,
-        "Low" => UrgencyLevel.Low,
-        _ => UrgencyLevel.Medium
-    };
-}
+                _context.FaultReport.Add(faultReport);
+                await _context.SaveChangesAsync();
 
-// Add these small helper methods
-private async Task<List<SelectListItem>> GetCustomerFridgesAsync()
-{
-    var customerId = GetLoggedInCustomerId();
-    if (customerId == 0) return new List<SelectListItem>();
-
-    return await _context.Fridge
-        .Where(f => f.CustomerID == customerId &&
-                   (f.Status == "Active" || f.Status == "Allocated"))
-        .Select(f => new SelectListItem
-        {
-            Value = f.FridgeId.ToString(),
-            Text = $"{f.Brand} {f.Model} - {f.FridgeType}"
-        })
-        .ToListAsync();
-}
-
-private List<SelectListItem> GetPriorityOptions()
-{
-    return new List<SelectListItem>
-    {
-        new SelectListItem { Value = "Low", Text = "Low" },
-        new SelectListItem { Value = "Medium", Text = "Medium" },
-        new SelectListItem { Value = "High", Text = "High" },
-        new SelectListItem { Value = "Critical", Text = "Critical" }
-    };
-}
-
-// Cancel Fault (if allowed)
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> CancelFault(int id)
-{
-    try
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var faultReport = await _context.FaultReport
-            .Include(fr => fr.Fridge)
-            .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
-                                     fr.Fridge.CustomerID == customerId);
-
-        if (faultReport == null)
-        {
-            TempData["ErrorMessage"] = "Fault report not found.";
-            return RedirectToAction(nameof(MyFaults));
+                TempData["SuccessMessage"] = "Fault reported successfully! Our technicians will review it shortly.";
+                return RedirectToAction(nameof(FaultDetails), new { id = faultReport.FaultReportId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating fault report");
+                viewModel.FridgeOptions = await GetCustomerFridgesAsync();
+                viewModel.PriorityOptions = GetPriorityOptions();
+                TempData["ErrorMessage"] = "Error reporting fault. Please try again.";
+                return View(viewModel);
+            }
         }
 
-        // Check if it's still cancellable (only pending reports)
-        if (faultReport.Status != TaskStatus.Pending)
+        // NEW HELPER METHOD: Get fridges from a specific order
+        private async Task<List<SelectListItem>> GetFridgesFromOrderAsync(int orderId, int customerId)
         {
-            TempData["ErrorMessage"] = "Only pending fault reports can be cancelled.";
-            return RedirectToAction(nameof(FaultDetails), new { id });
+            return await _context.Orders
+                .Where(o => o.OrderId == orderId && o.CustomerID == customerId)
+                .SelectMany(o => o.OrderItems)
+                .Select(oi => oi.Fridge)
+                .Where(f => f.Status == "Active")
+                .Select(f => new SelectListItem
+                {
+                    Value = f.FridgeId.ToString(),
+                    Text = $"{f.Brand} {f.Model} - {f.SerialNumber} (Order #{orderId})"
+                })
+                .Distinct()
+                .ToListAsync();
         }
 
-        // Update status
-        faultReport.Status = TaskStatus.Cancelled;
-        _context.FaultReport.Update(faultReport);
-        await _context.SaveChangesAsync();
-
-        TempData["SuccessMessage"] = "Fault report cancelled successfully.";
-        return RedirectToAction(nameof(MyFaults));
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error cancelling fault report");
-        TempData["ErrorMessage"] = "Error cancelling fault report.";
-        return RedirectToAction(nameof(FaultDetails), new { id });
-    }
-}
-
-// Update Fault Description
-public async Task<IActionResult> UpdateFaultDescription(int id, string description)
-{
-    try
-    {
-        var customerId = GetLoggedInCustomerId();
-
-        var faultReport = await _context.FaultReport
-            .Include(fr => fr.Fridge)
-            .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
-                                     fr.Fridge.CustomerID == customerId);
-
-        if (faultReport == null)
+        // Helper method
+        private UrgencyLevel MapPriorityToUrgency(string priority)
         {
-            return Json(new { success = false, message = "Fault report not found." });
+            return priority switch
+            {
+                "Critical" => UrgencyLevel.Critical,
+                "High" => UrgencyLevel.High,
+                "Medium" => UrgencyLevel.Medium,
+                "Low" => UrgencyLevel.Low,
+                _ => UrgencyLevel.Medium
+            };
         }
 
-        if (faultReport.Status != TaskStatus.Pending)
+        // Add these small helper methods
+        private async Task<List<SelectListItem>> GetCustomerFridgesAsync()
         {
-            return Json(new { success = false, message = "Only pending fault reports can be updated." });
+            var customerId = GetLoggedInCustomerId();
+            if (customerId == 0) return new List<SelectListItem>();
+
+            return await _context.Fridge
+                .Where(f => f.CustomerID == customerId &&
+                           (f.Status == "Active" || f.Status == "Allocated"))
+                .Select(f => new SelectListItem
+                {
+                    Value = f.FridgeId.ToString(),
+                    Text = $"{f.Brand} {f.Model} - {f.FridgeType}"
+                })
+                .ToListAsync();
         }
 
-        faultReport.FaultDescription = description;
-        _context.FaultReport.Update(faultReport);
-        await _context.SaveChangesAsync();
+        private List<SelectListItem> GetPriorityOptions()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Low", Text = "Low" },
+                new SelectListItem { Value = "Medium", Text = "Medium" },
+                new SelectListItem { Value = "High", Text = "High" },
+                new SelectListItem { Value = "Critical", Text = "Critical" }
+            };
+        }
 
-        return Json(new { success = true, message = "Fault description updated successfully." });
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error updating fault description");
-        return Json(new { success = false, message = "Error updating fault description." });
-    }
-}
+        // Cancel Fault (if allowed)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelFault(int id)
+        {
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
 
-public async Task<IActionResult> FaultStatus(int? id)
-{
-    if (id == null) return NotFound();
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
 
-    try
-    {
-        var customerId = GetLoggedInCustomerId();
+                if (faultReport == null)
+                {
+                    TempData["ErrorMessage"] = "Fault report not found.";
+                    return RedirectToAction(nameof(MyFaults));
+                }
 
-        var faultReport = await _context.FaultReport
-            .Include(fr => fr.Fridge)
-            .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
-                                     fr.Fridge.CustomerID == customerId);
+                // Check if it's still cancellable (only pending reports)
+                if (faultReport.Status != TaskStatus.Pending)
+                {
+                    TempData["ErrorMessage"] = "Only pending fault reports can be cancelled.";
+                    return RedirectToAction(nameof(FaultDetails), new { id });
+                }
 
-        return faultReport == null ? NotFound() : View(faultReport);
-    }
-    catch
-    {
-        TempData["ErrorMessage"] = "Error loading fault status.";
-        return RedirectToAction(nameof(MyFaults));
-    }
-}
+                // Update status
+                faultReport.Status = TaskStatus.Cancelled;
+                _context.FaultReport.Update(faultReport);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Fault report cancelled successfully.";
+                return RedirectToAction(nameof(MyFaults));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling fault report");
+                TempData["ErrorMessage"] = "Error cancelling fault report.";
+                return RedirectToAction(nameof(FaultDetails), new { id });
+            }
+        }
+
+        // Update Fault Description
+        public async Task<IActionResult> UpdateFaultDescription(int id, string description)
+        {
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
+
+                if (faultReport == null)
+                {
+                    return Json(new { success = false, message = "Fault report not found." });
+                }
+
+                if (faultReport.Status != TaskStatus.Pending)
+                {
+                    return Json(new { success = false, message = "Only pending fault reports can be updated." });
+                }
+
+                faultReport.FaultDescription = description;
+                _context.FaultReport.Update(faultReport);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Fault description updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating fault description");
+                return Json(new { success = false, message = "Error updating fault description." });
+            }
+        }
+
+        public async Task<IActionResult> FaultStatus(int? id)
+        {
+            if (id == null) return NotFound();
+
+            try
+            {
+                var customerId = GetLoggedInCustomerId();
+
+                var faultReport = await _context.FaultReport
+                    .Include(fr => fr.Fridge)
+                    .FirstOrDefaultAsync(fr => fr.FaultReportId == id &&
+                                             fr.Fridge.CustomerID == customerId);
+
+                return faultReport == null ? NotFound() : View(faultReport);
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "Error loading fault status.";
+                return RedirectToAction(nameof(MyFaults));
+            }
+        }
 
         // ==========================
         // 9. SERVICE HISTORY
@@ -1048,8 +983,6 @@ public async Task<IActionResult> FaultStatus(int? id)
 
         public async Task<IActionResult> FridgeServiceHistory(int fridgeId)
         {
-            
-
             var visits = await _context.MaintenanceVisit
                 .Include(v => v.MaintenanceRequest)
                     .ThenInclude(m => m.Fridge)
@@ -1061,14 +994,11 @@ public async Task<IActionResult> FaultStatus(int? id)
     v.Status == TaskStatus.Complete &&
     v.MaintenanceRequest.CompletedDate != null
 )
-
                 .OrderByDescending(v => v.ScheduledDate)
                 .ToListAsync();
 
             return View(visits);
         }
-
-
 
         [HttpGet]
         public IActionResult DownloadFridgeServiceHistory(int fridgeId)
@@ -1128,6 +1058,14 @@ public async Task<IActionResult> FaultStatus(int? id)
             return customer.CustomerID;
         }
 
+        // ✅ ADD THIS MISSING METHOD
+        private async Task<int> GetCurrentApplicationUserIdAsync()
+        {
+            var appUser = await _userManager.GetUserAsync(User);
+            if (appUser == null) return 0;
+            return appUser.Id;
+        }
+
         private string MaskCardNumber(string cardNumber)
         {
             if (string.IsNullOrEmpty(cardNumber)) return null;
@@ -1135,15 +1073,7 @@ public async Task<IActionResult> FaultStatus(int? id)
             var last4 = cleaned.Length >= 4 ? cleaned[^4..] : cleaned;
             return new string('*', Math.Max(0, cleaned.Length - 4)) + last4;
         }
-        private string GenerateFaultCode()
-        {
-            return "FLT-" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
-        }
 
-        private string GeneratePaymentReference()
-        {
-            return "PAY-" + Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
-        }
         public async Task<IActionResult> Notifications()
         {
             var appUserId = await GetCurrentApplicationUserIdAsync();
@@ -1151,14 +1081,6 @@ public async Task<IActionResult> FaultStatus(int? id)
 
             var notifications = await _notificationService.GetAllAsync(appUserId);
             return View(notifications);
-        }
-
-        // CustomerController.cs (inside the controller class)
-        private async Task<int> GetCurrentApplicationUserIdAsync()
-        {
-            var appUser = await _userManager.GetUserAsync(User);
-            if (appUser == null) return 0;
-            return appUser.Id;
         }
 
         [HttpGet]
@@ -1171,7 +1093,6 @@ public async Task<IActionResult> FaultStatus(int? id)
             return Json(notifications.Select(n => new { n.NotificationId, n.Message, n.Url }));
         }
 
-
         [HttpGet]
         public async Task<IActionResult> UnreadCount()
         {
@@ -1181,6 +1102,7 @@ public async Task<IActionResult> FaultStatus(int? id)
             var count = (await _notificationService.GetUnreadAsync(appUserId)).Count();
             return Json(count);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAsRead(int id)
@@ -1197,7 +1119,5 @@ public async Task<IActionResult> FaultStatus(int? id)
             await _notificationService.MarkAsReadAsync(id);
             return RedirectToAction("Notifications");
         }
-
-
     }
 }
