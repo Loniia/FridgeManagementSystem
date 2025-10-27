@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Reports Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="chart-container">
+    <canvas id="maintenanceChart"></canvas>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadChartData();
+        });
+
+        async function loadChartData() {
+            try {
+                const response = await fetch('@Url.Action("GetMaintenanceChartData", "Reports")');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    document.getElementById('maintenanceChart').parentElement.innerHTML =
+                        '<p class="text-center">No maintenance data available for the last 6 months.</p>';
+                    return;
+                }
+
+                createChart(data);
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                document.getElementById('maintenanceChart').parentElement.innerHTML =
+                    '<p class="text-center text-danger">Error loading chart data.</p>';
+            }
+        }
+
+        function createChart(data) {
+            const ctx = document.getElementById('maintenanceChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.Month),
+                    datasets: [
+                        {
+                            label: 'Scheduled Visits',
+                            data: data.map(d => d.Scheduled),
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)'
+                        },
+                        {
+                            label: 'Completed Visits',
+                            data: data.map(d => d.Completed),
+                            backgroundColor: 'rgba(46, 204, 113, 0.8)'
+                        },
+                        {
+                            label: 'Rescheduled Visits',
+                            data: data.map(d => d.Rescheduled),
+                            backgroundColor: 'rgba(243, 156, 18, 0.8)'
+                        },
+                        {
+                            label: 'Canceled Visits',
+                            data: data.map(d => d.Canceled),
+                            backgroundColor: 'rgba(231, 76, 60, 0.8)'
+                        },
+                        {
+                            label: 'Avg Response Time (days)',
+                            data: data.map(d => d.AvgResponseTime.toFixed(1)),
+                            type: 'line',
+                            borderColor: 'rgba(155, 89, 182, 0.8)',
+                            backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            fill: true,
+                            yAxisID: 'y1',
+                            pointBackgroundColor: 'rgba(155, 89, 182, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+}
+
+<style>
+    .chart-container {
+        width: 100%;
+        height: 500px;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+</style>
+
