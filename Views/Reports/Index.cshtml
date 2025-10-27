@@ -1,54 +1,107 @@
 ﻿@{
-    ViewData["Title"] = "Customer Management Reports";
+    ViewData["Title"] = "Reports Dashboard";
+    Layout = "_Layout";
 }
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12 text-center">
-            <h1 class="display-4 mb-4">🏪 Customer Management Reports</h1>
-            <p class="lead mb-5">Comprehensive reports for customer management subsystem</p>
-
-            <!-- Report Cards -->
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-lg h-100">
-                        <div class="card-body text-center">
-                            <div class="mb-3" style="font-size: 3rem;">📊</div>
-                            <h3>Dashboard</h3>
-                            <p class="text-muted">Overview of customers, allocations, and inventory</p>
-                            <a href="@Url.Action("Dashboard")" class="btn btn-success btn-lg">
-                                Open Dashboard
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-lg h-100">
-                        <div class="card-body text-center">
-                            <div class="mb-3" style="font-size: 3rem;">🚚</div>
-                            <h3>Allocations</h3>
-                            <p class="text-muted">Fridge allocation history and tracking</p>
-                            <a href="@Url.Action("Allocations")" class="btn btn-primary btn-lg">
-                                View Allocations
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-lg h-100">
-                        <div class="card-body text-center">
-                            <div class="mb-3" style="font-size: 3rem;">👥</div>
-                            <h3>Customers</h3>
-                            <p class="text-muted">Customer database and details</p>
-                            <a href="@Url.Action("Customers")" class="btn btn-info btn-lg">
-                                View Customers
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="chart-container">
+    <canvas id="maintenanceChart"></canvas>
 </div>
+                    </div>
+                </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadChartData();
+        });
+
+        async function loadChartData() {
+            try {
+                const response = await fetch('@Url.Action("GetMaintenanceChartData", "Reports")');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    document.getElementById('maintenanceChart').parentElement.innerHTML =
+                        '<p class="text-center">No maintenance data available for the last 6 months.</p>';
+                    return;
+                }
+
+                createChart(data);
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                document.getElementById('maintenanceChart').parentElement.innerHTML =
+                    '<p class="text-center text-danger">Error loading chart data.</p>';
+            }
+        }
+
+        function createChart(data) {
+            const ctx = document.getElementById('maintenanceChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.Month),
+                    datasets: [
+                        {
+                            label: 'Scheduled Visits',
+                            data: data.map(d => d.Scheduled),
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)'
+                        },
+                        {
+                            label: 'Completed Visits',
+                            data: data.map(d => d.Completed),
+                            backgroundColor: 'rgba(46, 204, 113, 0.8)'
+                        },
+                        {
+                            label: 'Rescheduled Visits',
+                            data: data.map(d => d.Rescheduled),
+                            backgroundColor: 'rgba(243, 156, 18, 0.8)'
+                        },
+                        {
+                            label: 'Canceled Visits',
+                            data: data.map(d => d.Canceled),
+                            backgroundColor: 'rgba(231, 76, 60, 0.8)'
+                        },
+                        {
+                            label: 'Avg Response Time (days)',
+                            data: data.map(d => d.AvgResponseTime.toFixed(1)),
+                            type: 'line',
+                            borderColor: 'rgba(155, 89, 182, 0.8)',
+                            backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            fill: true,
+                            yAxisID: 'y1',
+                            pointBackgroundColor: 'rgba(155, 89, 182, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+}
+
+<style>
+    .chart-container {
+        width: 100%;
+        height: 500px;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+</style>
+
