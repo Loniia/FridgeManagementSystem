@@ -1,11 +1,12 @@
 ﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using FridgeManagementSystem.Models;
-#nullable disable
-namespace FridgeManagementSystem.Controllers
+
+namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
 {
+    [Area("PurchasingSubsystem")]
     public class DeliveryNotesController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -15,79 +16,124 @@ namespace FridgeManagementSystem.Controllers
             _context = context;
         }
 
-        // GET: DeliveryNotes
+        // GET: PurchasingSubsystem/DeliveryNotes
         public async Task<IActionResult> Index()
         {
-            return View(await _context.DeliveryNotes.ToListAsync());
+            var deliveryNotes = await _context.DeliveryNotes
+                .Include(dn => dn.purchaseOrder)
+                .ThenInclude(po => po.Supplier)
+                .OrderByDescending(dn => dn.DeliveryDate)
+                .ToListAsync();
+
+            return View(deliveryNotes);
         }
 
-        // GET: DeliveryNotes/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: PurchasingSubsystem/DeliveryNotes/Create
+        public async Task<IActionResult> Create(int? purchaseOrderId)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            // If purchaseOrderId is provided, pre-select that PO
+            var purchaseOrders = await _context.PurchaseOrders
+                .Where(po => po.IsActive && (po.Status == "Ordered" || po.Status == "Shipped"))
+                .Include(po => po.Supplier)
+                .ToListAsync();
 
-            var deliveryNote = await _context.DeliveryNotes
-                .FirstOrDefaultAsync(m => m.DeliveryNoteID == id);
-            if (deliveryNote == null)
-            {
-                return NotFound();
-            }
+            ViewBag.PurchaseOrders = new SelectList(
+                purchaseOrders,
+                "PurchaseOrderID",
+                "PONumber",
+                purchaseOrderId
+            );
 
-            return View(deliveryNote);
-        }
-
-        // GET: DeliveryNotes/Create
-        public IActionResult Create()
-        {
-            ViewBag.Suppliers = new SelectList(_context.Suppliers, "SupplierID", "Name");
-            ViewBag.PurchaseOrders = new SelectList(_context.PurchaseOrders, "PurchaseOrderID", "PurchaseOrderID");
             return View();
         }
 
-        // POST: DeliveryNotes/Create
+        // POST: PurchasingSubsystem/DeliveryNotes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DeliveryNoteID,PurchaseOrderId,SupplierId,DeliveryDate")] DeliveryNote deliveryNote)
+        public async Task<IActionResult> Create(DeliveryNote deliveryNote)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(deliveryNote);
+                deliveryNote.DeliveryNumber = GenerateDeliveryNoteNumber();
+                deliveryNote.DeliveryDate = DateTime.Today;
+                deliveryNote.IsActive = true;
+
+                // Auto-set supplier from purchase order
+                var purchaseOrder = await _context.PurchaseOrders
+                    .Include(po => po.Supplier)
+                    .FirstOrDefaultAsync(po => po.PurchaseOrderID == deliveryNote.PurchaseOrderId);
+
+                if (purchaseOrder != null)
+                {
+                    deliveryNote.SupplierId = purchaseOrder.SupplierID;
+                }
+
+                _context.DeliveryNotes.Add(deliveryNote);
+
+                // Update Purchase Order status to Delivered
+                if (purchaseOrder != null)
+                {
+                    purchaseOrder.Status = "Delivered";
+                    _context.PurchaseOrders.Update(purchaseOrder);
+                }
+
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Delivery Note {deliveryNote.DeliveryNumber} created successfully!";
                 return RedirectToAction(nameof(Index));
             }
+
+            // Reload dropdown if validation fails
+            var purchaseOrders = await _context.PurchaseOrders
+                .Where(po => po.IsActive && (po.Status == "Ordered" || po.Status == "Shipped"))
+                .Include(po => po.Supplier)
+                .ToListAsync();
+
+            ViewBag.PurchaseOrders = new SelectList(
+                purchaseOrders,
+                "PurchaseOrderID",
+                "PONumber",
+                deliveryNote.PurchaseOrderId
+            );
+
             return View(deliveryNote);
         }
 
-        // GET: DeliveryNotes/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: PurchasingSubsystem/DeliveryNotes/Details/5
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var deliveryNote = await _context.DeliveryNotes
+                .Include(dn => dn.purchaseOrder)
+                .ThenInclude(po => po.Supplier)
+                .Include(dn => dn.Supplier)
+                .FirstOrDefaultAsync(dn => dn.DeliveryNoteID == id);
 
-            var deliveryNote = await _context.DeliveryNotes.FindAsync(id);
             if (deliveryNote == null)
-            {
                 return NotFound();
-            }
-            ViewBag.Suppliers = new SelectList(_context.Suppliers, "SupplierID", "Name");
-            ViewBag.PurchaseOrders = new SelectList(_context.PurchaseOrders, "PurchaseOrderID", "PurchaseOrderID");
+
             return View(deliveryNote);
         }
 
-        // POST: DeliveryNotes/Edit/5
+        // GET: PurchasingSubsystem/DeliveryNotes/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
+            var deliveryNote = await _context.DeliveryNotes
+                .Include(dn => dn.purchaseOrder)
+                .FirstOrDefaultAsync(dn => dn.DeliveryNoteID == id);
+
+            if (deliveryNote == null)
+                return NotFound();
+
+            return View(deliveryNote);
+        }
+
+        // POST: PurchasingSubsystem/DeliveryNotes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DeliveryNoteID,PurchaseOrderId,SupplierId,DeliveryDate")] DeliveryNote deliveryNote)
+        public async Task<IActionResult> Edit(int id, DeliveryNote deliveryNote)
         {
             if (id != deliveryNote.DeliveryNoteID)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -95,55 +141,63 @@ namespace FridgeManagementSystem.Controllers
                 {
                     _context.Update(deliveryNote);
                     await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Delivery note updated successfully!";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DeliveryNoteExists(deliveryNote.DeliveryNoteID))
-                    {
+                    if (!DeliveryNoteExists(id))
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(deliveryNote);
         }
 
-        // GET: DeliveryNotes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var deliveryNote = await _context.DeliveryNotes
-                .FirstOrDefaultAsync(m => m.DeliveryNoteID == id);
-            if (deliveryNote == null)
-            {
-                return NotFound();
-            }
-
-            return View(deliveryNote);
-        }
-
-        // POST: DeliveryNotes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // POST: PurchasingSubsystem/DeliveryNotes/Verify/5
+        [HttpPost]
+        public async Task<IActionResult> Verify(int id)
         {
             var deliveryNote = await _context.DeliveryNotes.FindAsync(id);
-            _context.DeliveryNotes.Remove(deliveryNote);
+            if (deliveryNote == null)
+                return NotFound();
+
+            deliveryNote.IsVerified = true;
+            deliveryNote.VerificationDate = DateTime.Now;
+            _context.DeliveryNotes.Update(deliveryNote);
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Delivery note verified successfully!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: PurchasingSubsystem/DeliveryNotes/MarkAsReceived/5
+        [HttpPost]
+        public async Task<IActionResult> MarkAsReceived(int id)
+        {
+            var deliveryNote = await _context.DeliveryNotes.FindAsync(id);
+            if (deliveryNote == null)
+                return NotFound();
+
+            deliveryNote.IsReceivedInInventory = true;
+            deliveryNote.InventoryReceiptDate = DateTime.Now;
+            _context.DeliveryNotes.Update(deliveryNote);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Delivery marked as received in inventory!";
             return RedirectToAction(nameof(Index));
         }
 
         private bool DeliveryNoteExists(int id)
         {
             return _context.DeliveryNotes.Any(e => e.DeliveryNoteID == id);
+        }
+
+        private string GenerateDeliveryNoteNumber()
+        {
+            var count = _context.DeliveryNotes.Count(dn => dn.DeliveryDate.Year == DateTime.Now.Year) + 1;
+            return $"DN-{DateTime.Now:yyyy}-{count:D3}";
         }
     }
 }

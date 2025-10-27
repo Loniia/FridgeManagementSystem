@@ -7,13 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
     <Compile Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
-    <Content Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
     <Content Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
-    <EmbeddedResource Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
     <EmbeddedResource Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
-    <None Remove="Areas\PurchasingSubsystem\Views\NewFolder\**" />
     <None Remove="Areas\PurchasingSubsystem\Views\Quotation\**" />
   </ItemGroup>
 

@@ -43,6 +43,11 @@ namespace FridgeManagementSystem.Models
         [Display(Name ="Required Quantity")]
         public int RequiredQuantity { get; set; }
 
+        [Required]
+        [ForeignKey("Supplier")]
+        public int SupplierID { get; set; }
+        public virtual Supplier Supplier { get; set; }
+
         // Navigation Properties 
         public virtual ICollection<Quotation> Quotations { get; set; }
     }

@@ -15,7 +15,7 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
             _context = context;
         }
 
-        // GET: Administrator/ManageSupplier
+        // GET: Administrator/ManageSuppliercus
         public async Task<IActionResult> Index()
         {
             var suppliers = await _context.Suppliers
@@ -46,16 +46,16 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
         // POST: Administrator/ManageSupplier/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Supplier supplier)
+        public async Task<IActionResult> Create(Supplier suppliers)
         {
             if (ModelState.IsValid)
             {
-                supplier.IsActive = true;
-                _context.Add(supplier);
+                suppliers.IsActive = true;
+                _context.Add(suppliers);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(supplier);
+            return View(suppliers);
         }
 
         // Other actions (Edit, Delete) would go here...
@@ -64,10 +64,10 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
         {
             if (id == null) return NotFound();
 
-            var supplier = await _context.Suppliers.FindAsync(id);
-            if (supplier == null) return NotFound();
+            var suppliers = await _context.Suppliers.FindAsync(id);
+            if (suppliers == null) return NotFound();
 
-            return View(supplier);
+            return View(suppliers);
         }
 
         // POST: Administrator/ManageSupplier/Edit/5
