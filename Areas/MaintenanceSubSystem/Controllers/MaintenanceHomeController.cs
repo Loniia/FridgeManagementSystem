@@ -32,7 +32,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             model.ScheduledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Scheduled && r.IsActive);
             model.RescheduledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Rescheduled && r.IsActive);
             model.InProgressVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.InProgress && r.IsActive);
-            model.CompletedTasks = requests.Count(r => r.TaskStatus == Models.TaskStatus.Complete && r.IsActive);
+            model.CompletedTasks = requests.Count(r => r.TaskStatus == Models.TaskStatus.Complete);
             model.CancelledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Cancelled && r.IsActive);
 
             // Completion %
@@ -57,13 +57,12 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             var start = today.AddDays(-days + 1);
 
             var completedInRange = _context.MaintenanceRequest
-                .Where(r => r.TaskStatus == Models.TaskStatus.Complete &&
-                            r.RequestDate >= start &&
-                            r.RequestDate < today.AddDays(1) && // include today
-                            r.IsActive)
-                .Select(r => r.RequestDate)
-                .ToList();
-
+        .Where(r => r.TaskStatus == Models.TaskStatus.Complete &&
+                    r.CompletedDate != null &&
+                    r.CompletedDate.Value.Date >= start &&
+                    r.CompletedDate.Value.Date <= today)
+        .Select(r => r.CompletedDate.Value.Date)
+        .ToList();
             model.TrendLabels = new List<string>();
             model.TrendCompletedCounts = new List<int>();
             for (int i = 0; i < days; i++)
