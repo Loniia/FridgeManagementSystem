@@ -1,0 +1,160 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Supplier Management";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+<style>
+    body {
+        background-color: #f6f8fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    h2 {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+    .dashboard-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .dashboard-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+
+    .table {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+        .table thead {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+    .badge {
+        font-size: 0.9rem;
+    }
+
+    .search-bar {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-custom {
+        border-radius: 30px;
+        padding: 5px 15px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-snowflake me-2"></i> Supplier Management Dashboard</h2>
+    </div>
+
+    <!-- Dashboard Summary -->
+    <div class="row text-center mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card bg-primary text-white">
+                <div class="card-body">
+                    <i class="fa-solid fa-warehouse dashboard-icon mb-2"></i>
+                    <h5>Total Suppliers</h5>
+                    <h2>@Model.Total</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card bg-success text-white">
+                <div class="card-body">
+                    <i class="fa-solid fa-toggle-on dashboard-icon mb-2"></i>
+                    <h5>Active Suppliers</h5>
+                    <h2>@Model.Active</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card bg-secondary text-white">
+                <div class="card-body">
+                    <i class="fa-solid fa-toggle-off dashboard-icon mb-2"></i>
+                    <h5>Inactive Suppliers</h5>
+                    <h2>@Model.Inactive</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-10">
+                <input type="text" name="search" class="form-control form-control-lg" placeholder="🔍 Search suppliers by name, email, or contact...">
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="submit" class="btn btn-primary btn-lg w-100 btn-custom"><i class="fa-solid fa-magnifying-glass me-1"></i> Search</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Supplier Table -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th><i class="fa-solid fa-building me-1"></i> Name</th>
+                    <th><i class="fa-solid fa-user-tie me-1"></i> Contact Person</th>
+                    <th><i class="fa-solid fa-envelope me-1"></i> Email</th>
+                    <th><i class="fa-solid fa-phone me-1"></i> Phone</th>
+                    <th><i class="fa-solid fa-circle-info me-1"></i> Status</th>
+                    <th style="width: 180px;"><i class="fa-solid fa-gears me-1"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var supplier in Model.Suppliers)
+                {
+                    <tr>
+                        <td>@supplier.Name</td>
+                        <td>@supplier.ContactPerson</td>
+                        <td>@supplier.Email</td>
+                        <td>@supplier.Phone</td>
+                        <td>
+                            @if (supplier.IsActive)
+                            {
+                                <span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i> Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary"><i class="fa-solid fa-circle-xmark me-1"></i> Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@supplier.SupplierID" class="btn btn-sm btn-outline-info btn-custom me-1">
+                                <i class="fa-solid fa-eye"></i> View
+                            </a>
+
+                            <form asp-action="ToggleStatus" asp-route-id="@supplier.SupplierID" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-custom @(supplier.IsActive ? "btn-outline-warning" : "btn-outline-success")">
+                                    <i class="fa-solid @(supplier.IsActive ? "fa-ban" : "fa-check")"></i>
+                                    @(supplier.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FridgeManagementSystem.Data;
+using FridgeManagementSystem.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using FridgeManagementSystem.Data;
-using FridgeManagementSystem.Models;
-#nullable disable
-namespace FridgeManagementSystem.Controllers
+
+namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
 {
+    [Area("PurchasingSubsystem")]
     public class QuotationsController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -15,136 +16,161 @@ namespace FridgeManagementSystem.Controllers
             _context = context;
         }
 
-        // GET: Quotations
+        private string GeneratePONumber()
+        {
+            var count = _context.PurchaseOrders.Count(po => po.OrderDate.Year == DateTime.Now.Year) + 1;
+            return $"PO-{DateTime.Now:yyyy}-{count:D3}";
+        }
+
+        // GET: PurchasingSubsystem/Quotation
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Quotations.ToListAsync());
+            var quotations = await _context.Quotations
+                .Include(q => q.Supplier)
+                .Include(q => q.RequestForQuotation)
+                .OrderByDescending(q => q.ReceivedDate)
+                .ToListAsync();
+
+            return View(quotations);
         }
 
-        // GET: Quotations/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: PurchasingSubsystem/Quotations/Create
+        public async Task<IActionResult> Create()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            // Load only active or open RFQs
+            ViewBag.RFQs = await _context.RequestsForQuotation
+                .Where(r => r.Status == "Sent" || r.Status == "Open")
+                .Select(r => new SelectListItem
+                {
+                    Value = r.RFQID.ToString(),
+                    Text = $"{r.RFQNumber} - {r.Description}"
+                })
+                .ToListAsync();
 
-            var quotation = await _context.Quotations
-                .FirstOrDefaultAsync(m => m.QuotationID == id);
-            if (quotation == null)
-            {
-                return NotFound();
-            }
+            // Load active suppliers
+            ViewBag.Suppliers = await _context.Suppliers
+                .Where(s => s.IsActive)
+                .Select(s => new SelectListItem
+                {
+                    Value = s.SupplierID.ToString(),
+                    Text = $"{s.Name} ({s.Email})"
+                })
+                .ToListAsync();
 
-            return View(quotation);
-        }
-
-        // GET: Quotations/Create
-        public IActionResult Create()
-        {
-            ViewBag.Suppliers = new SelectList(_context.Suppliers, "SupplierID", "Name");
-            ViewBag.RequestForQuotations = new SelectList(_context.RequestsForQuotation, "RFQID", "RFQID");
             return View();
         }
 
-        // POST: Quotations/Create
+
+        // POST: PurchasingSubsystem/Quotations/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("QuotationID,RequestForQuotationId,SupplierId,ReceivedDate,QuotationAmount")] Quotation quotation)
+        public async Task<IActionResult> Create(Quotation quotation)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(quotation);
+                quotation.ReceivedDate = DateTime.Now;
+                quotation.Status = "Pending";
+
+                _context.Quotations.Add(quotation);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Quotation created successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            return View(quotation);
-        }
 
-        // GET: Quotations/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var quotation = await _context.Quotations.FindAsync(id);
-            if (quotation == null)
-            {
-
-                return NotFound();
-            }
-            ViewBag.Suppliers = new SelectList(_context.Suppliers, "SupplierID", "Name");
-            ViewBag.RequestForQuotations = new SelectList(_context.RequestsForQuotation, "RFQID", "RFQID");
-            return View(quotation);
-        }
-
-        // POST: Quotations/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("QuotationID,RequestForQuotationId,SupplierId,ReceivedDate,QuotationAmount")] Quotation quotation)
-        {
-            if (id != quotation.QuotationID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+            // Reload dropdowns in case of validation error
+            ViewBag.RFQs = await _context.RequestsForQuotation
+                .Where(r => r.Status == "Sent" || r.Status == "Open")
+                .Select(r => new SelectListItem
                 {
-                    _context.Update(quotation);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
+                    Value = r.RFQID.ToString(),
+                    Text = $"{r.RFQNumber} - {r.Description}"
+                })
+                .ToListAsync();
+
+            ViewBag.Suppliers = await _context.Suppliers
+                .Where(s => s.IsActive)
+                .Select(s => new SelectListItem
                 {
-                    if (!QuotationExists(quotation.QuotationID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
+                    Value = s.SupplierID.ToString(),
+                    Text = $"{s.Name} ({s.Email})"
+                })
+                .ToListAsync();
+
             return View(quotation);
         }
 
-        // GET: Quotations/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
+        // GET: PurchasingSubsystem/Quotation/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
             var quotation = await _context.Quotations
-                .FirstOrDefaultAsync(m => m.QuotationID == id);
+                .Include(q => q.Supplier)
+                .Include(q => q.RequestForQuotation)
+                .FirstOrDefaultAsync(q => q.QuotationID == id);
+
             if (quotation == null)
-            {
                 return NotFound();
-            }
 
             return View(quotation);
         }
 
-        // POST: Quotations/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // POST: PurchasingSubsystem/Quotation/Approve/5
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var quotation = await _context.Quotations
+                .Include(q => q.Supplier)
+                .Include(q => q.RequestForQuotation)
+                .FirstOrDefaultAsync(q => q.QuotationID == id);
+
+            if (quotation == null)
+                return NotFound();
+
+            quotation.Status = "Approved";
+            await _context.SaveChangesAsync();
+
+            // Automatically generate Purchase Order - FIXED: Remove DeliveryTimeframe reference
+            var purchaseOrder = new PurchaseOrder
+            {
+                PONumber = GeneratePONumber(),
+                QuotationID = quotation.QuotationID,
+                SupplierID = quotation.SupplierId,
+                TotalAmount = quotation.QuotationAmount,
+                OrderDate = DateTime.Now,
+                Status = "Ordered",
+                ExpectedDeliveryDate = DateTime.Now.AddDays(14), // Use fixed value instead of DeliveryTimeframe
+                DeliveryAddress = "Main Warehouse - Johannesburg",
+                SpecialInstructions = $"Generated from quotation #{quotation.QuotationID}",
+                IsActive = true
+            };
+
+            _context.PurchaseOrders.Add(purchaseOrder);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Quotation approved and Purchase Order {purchaseOrder.PONumber} created!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: PurchasingSubsystem/Quotation/Reject/5
+        [HttpPost]
+        public async Task<IActionResult> Reject(int id)
         {
             var quotation = await _context.Quotations.FindAsync(id);
-            _context.Quotations.Remove(quotation);
+            if (quotation == null)
+                return NotFound();
+
+            quotation.Status = "Rejected";
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Quotation rejected successfully.";
             return RedirectToAction(nameof(Index));
         }
 
         private bool QuotationExists(int id)
         {
-            return _context.Quotations.Any(e => e.QuotationID == id);
+            return _context.Quotations.Any(q => q.QuotationID == id);
         }
     }
 }
+
