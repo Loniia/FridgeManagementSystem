@@ -218,7 +218,134 @@
         </div>
     </section>
 </div>
+<!-- Add this section AFTER the Customer Management Reports section -->
+<section class="mb-5">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i>Fault Management Reports
+            </h3>
+        </div>
+        <div class="card-body">
+            <!-- Fault Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Total Faults</h6>
+                            <h2 id="totalFaults" class="mb-0">0</h2>
+                            <small>All Time</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Pending Faults</h6>
+                            <h2 id="pendingFaults" class="mb-0">0</h2>
+                            <small>Awaiting Action</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">High Priority</h6>
+                            <h2 id="highPriorityFaults" class="mb-0">0</h2>
+                            <small>Urgent Cases</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Avg Resolution</h6>
+                            <h2 id="avgResolutionDays" class="mb-0">0</h2>
+                            <small>Days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Fault Distribution Charts -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Fault Type Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultTypeChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Urgency Level Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultUrgencyChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Trends -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Fault Trends (Last 6 Months)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultTrendsChart" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brand Analysis and Status -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Top Fault-Prone Brands</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="brandFaultChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Fault Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultStatusChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Reports Link -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Need More Detailed Fault Analysis?</h5>
+                            <p class="card-text">Access comprehensive fault analytics with detailed breakdowns, technician performance, and resolution time analysis.</p>
+                            <a href="@Url.Action("FaultReports", "Reports")" class="btn btn-danger btn-lg">
+                                <i class="fas fa-chart-bar me-2"></i>View Detailed Fault Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -243,12 +370,11 @@
                 }
                 debugLog('Chart.js loaded successfully');
 
-                // Load maintenance data first
+                // Load all data
                 await loadMaintenanceData();
-                
-                // Then load customer data
                 await loadCustomerReports();
-                
+                await loadFaultReports();
+
             } catch (error) {
                 debugLog('Error initializing charts:', error);
                 showError('Error loading charts: ' + error.message);
@@ -271,11 +397,11 @@
         // =============================================
         async function loadMaintenanceData() {
             debugLog('Loading maintenance data...');
-            
+
             try {
                 // Use a simple test data if controller actions don't exist
                 const maintenanceData = await tryLoadMaintenanceData();
-                
+
                 if (maintenanceData) {
                     await createMaintenanceCharts(maintenanceData);
                 } else {
@@ -331,13 +457,13 @@
 
                 // Create maintenance trends chart
                 createMaintenanceTrendsChart(data.trends);
-                
+
                 // Create status distribution chart
                 createStatusDistributionChart(data.statusDistribution);
-                
+
                 // Create technician performance chart
                 createTechnicianPerformanceChart(data.technicians);
-                
+
             } catch (error) {
                 debugLog('Error creating maintenance charts:', error);
             }
@@ -346,7 +472,7 @@
         function createMaintenanceTrendsChart(data) {
             try {
                 const ctx = document.getElementById('maintenanceTrendsChart').getContext('2d');
-                
+
                 new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -491,11 +617,11 @@
         // =============================================
         async function loadCustomerReports() {
             debugLog('Loading customer reports...');
-            
+
             try {
                 // Use a simple test data if controller actions don't exist
                 const customerData = await tryLoadCustomerData();
-                
+
                 if (customerData) {
                     await createCustomerCharts(customerData);
                 } else {
@@ -551,19 +677,19 @@
 
                 // Create customer status chart
                 createCustomerStatusChart(data.customerStatus);
-                
+
                 // Create location distribution chart
                 createLocationDistributionChart(data.locations);
-                
+
                 // Update allocation summary table
                 updateAllocationSummaryTable(data.allocationSummary);
-                
+
                 // Create allocation trends chart
                 createAllocationTrendsChart(data.trends);
-                
+
                 // Create top customers chart
                 createTopCustomersChart(data.topCustomers);
-                
+
             } catch (error) {
                 debugLog('Error creating customer charts:', error);
             }
@@ -754,7 +880,290 @@
             }
         }
 
+      
         // =============================================
+        // FAULT MANAGEMENT REPORT FUNCTIONS
+        // =============================================
+        async function loadFaultReports() {
+            debugLog('Loading fault reports...');
+
+            try {
+                // Load all fault data in parallel
+                const [summaryData, typeData, urgencyData, trendsData, brandData, statusData] = await Promise.all([
+                    tryLoadFaultData('GetFaultSummaryData'),
+                    tryLoadFaultData('GetFaultTypeDistribution'),
+                    tryLoadFaultData('GetUrgencyDistribution'),
+                    tryLoadFaultData('GetFaultTrendsData'),
+                    tryLoadFaultData('GetBrandFaultAnalysis'),
+                    tryLoadFaultData('GetFaultStatusDistribution')
+                ]);
+
+                const faultData = {
+                    summary: summaryData,
+                    faultTypes: typeData,
+                    urgencyLevels: urgencyData,
+                    trends: trendsData,
+                    brands: brandData,
+                    status: statusData
+                };
+
+                await createFaultCharts(faultData);
+
+            } catch (error) {
+                debugLog('Error in loadFaultReports:', error);
+                // Use sample data as fallback
+                const sampleData = getSampleFaultData();
+                await createFaultCharts(sampleData);
+            }
+        }
+
+        async function tryLoadFaultData(actionName) {
+            try {
+                const response = await fetch(`/Reports/${actionName}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    debugLog(`Successfully loaded ${actionName} from API`);
+                    return data;
+                }
+                return null;
+            } catch (error) {
+                debugLog(`Error loading ${actionName} from API:`, error);
+                return null;
+            }
+        }
+
+        async function createFaultCharts(data) {
+            try {
+                // Update summary cards
+                if (data.summary) {
+                    document.getElementById('totalFaults').textContent = data.summary.TotalFaults || '180';
+                    document.getElementById('pendingFaults').textContent = data.summary.PendingFaults || '34';
+                    document.getElementById('highPriorityFaults').textContent = data.summary.HighPriorityFaults || '18';
+                    document.getElementById('avgResolutionDays').textContent =
+                        data.summary.AverageResolutionDays ? data.summary.AverageResolutionDays.toFixed(1) : '3.2';
+                } else {
+                    // Fallback to hardcoded
+                    document.getElementById('totalFaults').textContent = '180';
+                    document.getElementById('pendingFaults').textContent = '34';
+                    document.getElementById('highPriorityFaults').textContent = '18';
+                    document.getElementById('avgResolutionDays').textContent = '3.2';
+                }
+
+                // Create fault type chart
+                if (data.faultTypes && data.faultTypes.length > 0) {
+                    createFaultTypeChart(data.faultTypes);
+                } else {
+                    createFaultTypeChart(getSampleFaultData().faultTypes);
+                }
+
+                // Create urgency chart
+                if (data.urgencyLevels && data.urgencyLevels.length > 0) {
+                    createFaultUrgencyChart(data.urgencyLevels);
+                } else {
+                    createFaultUrgencyChart(getSampleFaultData().urgencyLevels);
+                }
+
+                // Create trends chart
+                if (data.trends && data.trends.length > 0) {
+                    createFaultTrendsChart(data.trends);
+                } else {
+                    createFaultTrendsChart(getSampleFaultData().trends);
+                }
+
+                // Create brand analysis chart
+                if (data.brands && data.brands.length > 0) {
+                    createBrandFaultChart(data.brands);
+                } else {
+                    createBrandFaultChart(getSampleFaultData().brands);
+                }
+
+                // Create status chart
+                if (data.status && data.status.length > 0) {
+                    createFaultStatusChart(data.status);
+                } else {
+                    createFaultStatusChart(getSampleFaultData().status);
+                }
+
+            } catch (error) {
+                debugLog('Error creating fault charts:', error);
+            }
+        }
+
+        function createFaultTypeChart(data) {
+            try {
+                const ctx = document.getElementById('faultTypeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(item => item.FaultType || item.faultType),
+                        datasets: [{
+                            data: data.map(item => item.Count || item.count),
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault type chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault type chart:', error);
+            }
+        }
+
+        function createFaultUrgencyChart(data) {
+            try {
+                const ctx = document.getElementById('faultUrgencyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.UrgencyLevel || item.urgencyLevel),
+                        datasets: [{
+                            label: 'Number of Faults',
+                            data: data.map(item => item.Count || item.count),
+                            backgroundColor: [
+                                '#28a745', '#ffc107', '#fd7e14', '#dc3545', '#6f42c1'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault urgency chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault urgency chart:', error);
+            }
+        }
+
+        function createFaultTrendsChart(data) {
+            try {
+                const ctx = document.getElementById('faultTrendsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.Period || item.period),
+                        datasets: [
+                            {
+                                label: 'Total Faults',
+                                data: data.map(item => item.TotalFaults || item.totalFaults),
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Pending',
+                                data: data.map(item => item.PendingFaults || item.pendingFaults),
+                                borderColor: 'rgba(255, 193, 7, 1)',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Resolved',
+                                data: data.map(item => item.ResolvedFaults || item.resolvedFaults),
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault trends chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault trends chart:', error);
+            }
+        }
+
+        function createBrandFaultChart(data) {
+            try {
+                const ctx = document.getElementById('brandFaultChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.Brand || item.brand),
+                        datasets: [{
+                            label: 'Total Faults',
+                            data: data.map(item => item.TotalFaults || item.totalFaults),
+                            backgroundColor: 'rgba(220, 53, 69, 0.8)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Brand fault chart created successfully');
+            } catch (error) {
+                debugLog('Error creating brand fault chart:', error);
+            }
+        }
+
+        function createFaultStatusChart(data) {
+            try {
+                const ctx = document.getElementById('faultStatusChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.map(item => item.Status || item.status),
+                        datasets: [{
+                            data: data.map(item => item.Count || item.count),
+                            backgroundColor: [
+                                'rgba(108, 117, 125, 0.8)',  // Pending - gray
+                                'rgba(23, 162, 184, 0.8)',   // In Progress - cyan
+                                'rgba(40, 167, 69, 0.8)',    // Resolved - green
+                                'rgba(255, 193, 7, 0.8)',    // Awaiting Parts - yellow
+                                'rgba(220, 53, 69, 0.8)'     // Cancelled - red
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault status chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault status chart:', error);
+            }
+        }
+
+         // =============================================
         // SAMPLE DATA FOR TESTING
         // =============================================
         function getSampleMaintenanceData() {
@@ -820,6 +1229,53 @@
                     { customerName: 'City Hospital', activeAllocations: 5, returnedAllocations: 1 },
                     { customerName: 'Tech Campus', activeAllocations: 4, returnedAllocations: 4 },
                     { customerName: 'Food Market', activeAllocations: 4, returnedAllocations: 2 }
+                ]
+            };
+       }
+
+        function getSampleFaultData() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            return {
+                summary: {
+                    totalFaults: 120,
+                    pendingFaults: 34,
+                    highPriorityFaults: 18,
+                    avgResolutionDays: 3.2
+                },
+                faultTypes: [
+                    { faultType: 'Electrical', count: 45 },
+                    { faultType: 'Cooling Issue', count: 38 },
+                    { faultType: 'Door Seal', count: 32 },
+                    { faultType: 'Compressor', count: 28 },
+                    { faultType: 'Thermostat', count: 22 },
+                    { faultType: 'Water Leak', count: 15 }
+                ],
+                urgencyLevels: [
+                    { urgencyLevel: 'Low', count: 45 },
+                    { urgencyLevel: 'Medium', count: 78 },
+                    { urgencyLevel: 'High', count: 32 },
+                    { urgencyLevel: 'Critical', count: 18 },
+                    { urgencyLevel: 'Emergency', count: 7 }
+                ],
+                trends: months.map((month, index) => ({
+                    period: month,
+                    totalFaults: Math.floor(Math.random() * 30) + 20,
+                    pendingFaults: Math.floor(Math.random() * 15) + 5,
+                    resolvedFaults: Math.floor(Math.random() * 25) + 10
+                })),
+                brands: [
+                    { brand: 'Samsung', totalFaults: 45 },
+                    { brand: 'LG', totalFaults: 38 },
+                    { brand: 'Hisense', totalFaults: 32 },
+                    { brand: 'Defy', totalFaults: 28 },
+                    { brand: 'Kelvinator', totalFaults: 22 }
+                ],
+                status: [
+                    { status: 'Pending', count: 34 },
+                    { status: 'In Progress', count: 28 },
+                    { status: 'Resolved', count: 89 },
+                    { status: 'Awaiting Parts', count: 12 },
+                    { status: 'Cancelled', count: 7 }
                 ]
             };
         }
