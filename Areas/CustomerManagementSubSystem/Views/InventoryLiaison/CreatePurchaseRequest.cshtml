@@ -1,4 +1,4 @@
-﻿@model FridgeManagementSystem.Models.PurchaseRequest
+﻿@model FridgeManagementSystem.Models.CreatePurchaseRequestViewModel
 
 @{
     Layout = "_Layout";
@@ -24,10 +24,10 @@
         transition: all 0.3s ease-in-out;
     }
 
-    .form-container:hover {
-        transform: perspective(1000px) rotateX(0deg);
-        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
-    }
+        .form-container:hover {
+            transform: perspective(1000px) rotateX(0deg);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+        }
 
     .form-title {
         text-align: center;
@@ -46,10 +46,10 @@
         transition: all 0.3s ease-in-out;
     }
 
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #0066ff, #003d99);
-        transform: translateY(-2px);
-    }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0066ff, #003d99);
+            transform: translateY(-2px);
+        }
 
     .btn-secondary {
         border-radius: 10px;
@@ -68,10 +68,10 @@
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    input.form-control:focus {
-        border-color: #1e90ff;
-        box-shadow: 0 0 10px rgba(30,144,255,0.2);
-    }
+        input.form-control:focus {
+            border-color: #1e90ff;
+            box-shadow: 0 0 10px rgba(30,144,255,0.2);
+        }
 
     .alert {
         border-radius: 10px;
@@ -91,27 +91,34 @@
 
         <div asp-validation-summary="All" class="text-danger"></div>
 
+        <!-- 🔒 Fridge Info (Read-Only) -->
         <div class="mb-3">
-            <label asp-for="ItemFullNames" class="form-label"></label>
-            <input asp-for="ItemFullNames" class="form-control" placeholder="Enter item name(s)" />
-            <span asp-validation-for="ItemFullNames" class="text-danger"></span>
+            <label class="form-label">Fridge</label>
+            <input asp-for="ItemFullNames" class="form-control" readonly />
         </div>
 
+        <!-- 🔢 Quantity -->
         <div class="mb-3">
             <label asp-for="Quantity" class="form-label"></label>
             <input asp-for="Quantity" type="number" class="form-control" min="1" placeholder="Enter quantity" />
             <span asp-validation-for="Quantity" class="text-danger"></span>
         </div>
 
+        <!-- 👤 Requested By -->
         <div class="mb-3">
             <label asp-for="RequestBy" class="form-label"></label>
             <input asp-for="RequestBy" class="form-control" value="Inventory Liaison" readonly />
         </div>
 
+        <!-- 📦 Request Type -->
         <div class="mb-3">
             <label asp-for="RequestType" class="form-label"></label>
             <input asp-for="RequestType" class="form-control" value="Fridge Purchase" readonly />
         </div>
+
+        <!-- Hidden IDs so POST links to correct fridge -->
+        <input type="hidden" asp-for="FridgeId" />
+        <input type="hidden" asp-for="InventoryID" />
 
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-primary px-4">Submit Request</button>

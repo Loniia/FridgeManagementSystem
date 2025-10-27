@@ -1,0 +1,461 @@
+﻿@{
+    ViewData["Title"] = "Fault Management Reports";
+    Layout = "_Layout"; // Use your main layout
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header mb-4">
+                <h1 class="h2">
+                    <i class="fas fa-chart-bar text-primary me-2"></i>Fault Management Reports
+                </h1>
+                <p class="text-muted">Comprehensive analytics and insights for fault management</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Faults
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalFaults">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Faults
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingFaults">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                High Priority
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="highPriorityFaults">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Avg Resolution (Days)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="avgResolutionDays">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Type Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter me-2"></i>Report Type
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <select class="form-select" id="reportTypeSelect">
+                                <option value="overview">Overview Dashboard</option>
+                                <option value="faulttypes">Fault Type Analysis</option>
+                                <option value="trends">Monthly Trends</option>
+                                <option value="brandanalysis">Brand Analysis</option>
+                                <option value="seasonal">Seasonal Patterns</option>
+                                <option value="technician">Technician Performance</option>
+                                <option value="resolution">Resolution Time Analysis</option>
+                                <option value="faultprone">Fault-Prone Fridges</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="timeRangeSelect">
+                                <option value="6">Last 6 Months</option>
+                                <option value="3">Last 3 Months</option>
+                                <option value="12">Last 12 Months</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="loadReport()">
+                                <i class="fas fa-sync-alt me-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Content Area -->
+    <div class="row">
+        <div class="col-12">
+            <div id="reportContent">
+                <!-- Report content will be loaded here dynamically -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading report data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSummaryData();
+            loadReport();
+        });
+
+        // Load summary data for cards
+        async function loadSummaryData() {
+            try {
+                const response = await fetch('/Reports/GetFaultSummaryData');
+                const data = await response.json();
+
+                document.getElementById('totalFaults').textContent = data.totalFaults.toLocaleString();
+                document.getElementById('pendingFaults').textContent = data.pendingFaults.toLocaleString();
+                document.getElementById('highPriorityFaults').textContent = data.highPriorityFaults.toLocaleString();
+                document.getElementById('avgResolutionDays').textContent = data.averageResolutionDays.toFixed(1);
+            } catch (error) {
+                console.error('Error loading summary data:', error);
+            }
+        }
+
+        // Load selected report
+        async function loadReport() {
+            const reportType = document.getElementById('reportTypeSelect').value;
+            const timeRange = document.getElementById('timeRangeSelect').value;
+
+            const reportContent = document.getElementById('reportContent');
+            reportContent.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Generating ${reportType.replace(/([A-Z])/g, ' $1')} report...</p>
+                </div>
+            `;
+
+            try {
+                let url = '';
+                let method = '';
+
+                switch (reportType) {
+                    case 'overview':
+                        await loadOverviewReport();
+                        break;
+                    case 'faulttypes':
+                        await loadFaultTypeReport();
+                        break;
+                    case 'trends':
+                        await loadTrendsReport(timeRange);
+                        break;
+                    case 'brandanalysis':
+                        await loadBrandAnalysisReport();
+                        break;
+                    case 'seasonal':
+                        await loadSeasonalReport();
+                        break;
+                    case 'technician':
+                        await loadTechnicianReport();
+                        break;
+                    case 'resolution':
+                        await loadResolutionReport();
+                        break;
+                    case 'faultprone':
+                        await loadFaultProneReport();
+                        break;
+                    default:
+                        await loadOverviewReport();
+                }
+            } catch (error) {
+                console.error('Error loading report:', error);
+                reportContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading report data. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Overview Report
+        async function loadOverviewReport() {
+            const [faultTypeData, urgencyData, statusData] = await Promise.all([
+                fetch('/Reports/GetFaultTypeDistribution').then(r => r.json()),
+                fetch('/Reports/GetUrgencyDistribution').then(r => r.json()),
+                fetch('/Reports/GetFaultStatusDistribution').then(r => r.json())
+            ]);
+
+            const reportContent = document.getElementById('reportContent');
+            reportContent.innerHTML = `
+                <div class="row">
+                    <!-- Fault Type Distribution -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-bug me-2"></i>Fault Type Distribution
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="faultTypeChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Urgency Level Distribution -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-exclamation me-2"></i>Urgency Level Distribution
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="urgencyChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Distribution -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-tasks me-2"></i>Fault Status Distribution
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="statusChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>Quick Statistics
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="quickStats">
+                                    <!-- Quick stats will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Render charts
+            renderFaultTypeChart(faultTypeData);
+            renderUrgencyChart(urgencyData);
+            renderStatusChart(statusData);
+            renderQuickStats(faultTypeData, urgencyData, statusData);
+        }
+
+        // Chart rendering functions
+        function renderFaultTypeChart(data) {
+            const ctx = document.getElementById('faultTypeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => item.faultType),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const percentage = data[context.dataIndex].percentage.toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderUrgencyChart(data) {
+            const ctx = document.getElementById('urgencyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.urgencyLevel),
+                    datasets: [{
+                        label: 'Number of Faults',
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#28a745', '#ffc107', '#fd7e14', '#dc3545', '#6f42c1'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderStatusChart(data) {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(item => item.status),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: [
+                            '#6c757d', '#17a2b8', '#28a745', '#ffc107', '#dc3545'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderQuickStats(faultTypeData, urgencyData, statusData) {
+            const mostCommonFault = faultTypeData[0];
+            const highestUrgency = urgencyData.reduce((prev, current) =>
+                (prev.count > current.count) ? prev : current
+            );
+            const pendingStatus = statusData.find(s => s.status === 'Pending');
+
+            document.getElementById('quickStats').innerHTML = `
+                <div class="mb-3">
+                    <strong>Most Common Fault Type:</strong><br>
+                    <span class="text-primary">${mostCommonFault.faultType}</span>
+                    (${mostCommonFault.count} cases, ${mostCommonFault.percentage.toFixed(1)}%)
+                </div>
+                <div class="mb-3">
+                    <strong>Highest Urgency Level:</strong><br>
+                    <span class="text-warning">${highestUrgency.urgencyLevel}</span>
+                    (${highestUrgency.count} cases)
+                </div>
+                <div class="mb-3">
+                    <strong>Pending Faults Age:</strong><br>
+                    <span class="text-info">${pendingStatus ? pendingStatus.averageAgeDays.toFixed(1) : '0'} days average</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Total Fault Types:</strong><br>
+                    <span class="text-success">${faultTypeData.length} different types</span>
+                </div>
+            `;
+        }
+
+        // Other report loading functions will be implemented similarly
+        async function loadFaultTypeReport() {
+            const data = await fetch('/Reports/GetFaultTypeDistribution').then(r => r.json());
+            // Implement fault type report view
+        }
+
+        async function loadTrendsReport(months) {
+            const data = await fetch(`/Reports/GetFaultTrendsData?months=${months}`).then(r => r.json());
+            // Implement trends report view
+        }
+
+        async function loadBrandAnalysisReport() {
+            const data = await fetch('/Reports/GetBrandFaultAnalysis').then(r => r.json());
+            // Implement brand analysis report view
+        }
+
+        async function loadSeasonalReport() {
+            const data = await fetch('/Reports/GetSeasonalFaultPatterns').then(r => r.json());
+            // Implement seasonal report view
+        }
+
+        async function loadTechnicianReport() {
+            const data = await fetch('/Reports/GetTechnicianPerformance').then(r => r.json());
+            // Implement technician report view
+        }
+
+        async function loadResolutionReport() {
+            const data = await fetch('/Reports/GetResolutionTimeAnalysis').then(r => r.json());
+            // Implement resolution report view
+        }
+
+        async function loadFaultProneReport() {
+            const data = await fetch('/Reports/GetFaultProneFridges').then(r => r.json());
+            // Implement fault-prone report view
+        }
+    </script>
+}

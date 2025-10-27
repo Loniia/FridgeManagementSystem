@@ -3,1094 +3,1322 @@
     Layout = "_Layout";
 }
 
-<!-- ✅ Inline AdminKit Styles -->
-<style>
-    :root {
-        --primary: #3b7ddd;
-        --secondary: #6c757d;
-        --success: #1cbb8c;
-        --info: #17a2b8;
-        --warning: #fcb92c;
-        --danger: #dc3545;
-        --light: #f8f9fa;
-        --dark: #343a40;
-        --background: #f4f6f9;
-        --card-bg: #ffffff;
-        --text-color: #212529;
-        --muted-text: #6c757d;
-        --border-radius: 12px;
-        --transition: all 0.3s ease;
-        --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
-        --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.08);
-    }
+<div class="container-fluid">
+    <h1 class="mb-4">Reports Dashboard</h1>
 
-    body {
-        background-color: var(--background);
-        color: var(--text-color);
-        font-family: "Inter", "Segoe UI", Roboto, sans-serif;
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-
-    h1, h5 {
-        font-weight: 600;
-    }
-
-    .card {
-        border: none;
-        border-radius: var(--border-radius);
-        background-color: var(--card-bg);
-        box-shadow: var(--shadow-sm);
-        transition: var(--transition);
-    }
-
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-        }
-
-    .card-header {
-        background-color: transparent !important;
-        border-bottom: 1px solid #e9ecef;
-        font-weight: 600;
-    }
-
-    .card-title {
-        color: var(--text-color);
-        margin-bottom: 0;
-    }
-
-    .shadow-sm {
-        box-shadow: var(--shadow-sm) !important;
-    }
-
-    .btn {
-        border-radius: var(--border-radius);
-        font-weight: 500;
-        transition: var(--transition);
-        padding: 0.45rem 1.1rem;
-    }
-
-    .btn-primary {
-        background-color: var(--primary);
-        border-color: var(--primary);
-    }
-
-        .btn-primary:hover {
-            background-color: #2f6ad9;
-            border-color: #2f6ad9;
-        }
-
-    .btn-success {
-        background-color: var(--success);
-        border-color: var(--success);
-    }
-
-        .btn-success:hover {
-            background-color: #17a97e;
-            border-color: #17a97e;
-        }
-
-    .text-muted {
-        color: var(--muted-text) !important;
-    }
-
-    .feather-32 {
-        width: 32px;
-        height: 32px;
-    }
-
-    .container-fluid {
-        padding: 2rem;
-    }
-
-    /* Table styling (for Top Customers, etc.) */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    thead {
-        background-color: #f8f9fa;
-        font-weight: 600;
-    }
-
-    tr:hover {
-        background-color: #f1f3f5;
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background-color: #adb5bd;
-        border-radius: 4px;
-    }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #868e96;
-        }
-
-    /* Map Styles */
-    .province-area {
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-        .province-area:hover {
-            filter: brightness(1.1);
-            transform: scale(1.02);
-        }
-
-    .location-marker {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        animation: pulse 2s infinite;
-    }
-
-        .location-marker:hover {
-            transform: scale(1.3);
-            animation: none;
-        }
-
-    @@keyframes pulse {
-        0% {
-            opacity: 0.8;
-        }
-
-        50% {
-            opacity: 1;
-        }
-
-        100% {
-            opacity: 0.8;
-        }
-    }
-
-    .map-tooltip {
-        position: absolute;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-        pointer-events: none;
-        z-index: 1000;
-        max-width: 200px;
-        display: none;
-    }
-
-    .map-legend {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    #southAfricaMap {
-        position: relative;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    #mapLoading {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10;
-    }
-</style>
-
-<div class="container-fluid p-0">
-
-    <!-- PAGE HEADER -->
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-6">
-            <h1 class="h3 mb-1">Fridge Management Reports</h1>
-            <p class="text-muted mb-0">AdminKit-style dashboard: summary cards, charts, and insights.</p>
-        </div>
-
-        <div class="col-md-6 d-flex gap-2 justify-content-md-end">
-            <input type="date" id="fromDate" class="form-control w-auto" value="@ViewBag.FromDate" />
-            <input type="date" id="toDate" class="form-control w-auto" value="@ViewBag.ToDate" />
-            <button id="filterBtn" class="btn btn-primary px-3">Apply</button>
-            <button id="exportPdfBtn" class="btn btn-success px-3">Export All to PDF</button>
-        </div>
-    </div>
-
-    <!-- SUMMARY CARDS -->
-    <div class="row mb-4">
-        <div class="col-sm-6 col-xl-3 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Total Customers</h6>
-                            <h2 class="mb-0">@ViewBag.TotalCustomers</h2>
-                        </div>
-                        <div class="ms-3 text-primary">
-                            <i data-feather="users" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
+    <!-- Maintenance Reports Section -->
+    <section class="mb-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-tools me-2"></i>Maintenance Reports
+                </h3>
             </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Total Fridges</h6>
-                            <h2 class="mb-0">@ViewBag.TotalFridges</h2>
-                        </div>
-                        <div class="ms-3 text-info">
-                            <i data-feather="box" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Active Faults</h6>
-                            <h2 class="mb-0">@ViewBag.ActiveFaults</h2>
-                        </div>
-                        <div class="ms-3 text-warning">
-                            <i data-feather="alert-triangle" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Sales (Orders)</h6>
-                            <h2 class="mb-0">R @String.Format("{0:N2}", ViewBag.TotalSales)</h2>
-                            <small class="text-muted d-block">Purchases: R @String.Format("{0:N2}", ViewBag.TotalPurchases)</small>
-                            <small class="text-muted d-block">Net Profit: R @String.Format("{0:N2}", ViewBag.NetProfit)</small>
-                        </div>
-                        <div class="ms-3 text-success">
-                            <i data-feather="trending-up" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- REAL-TIME MAP SECTION -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Fridge Distribution Map</h5>
-                    <div class="text-muted small" id="mapLastUpdated">
-                        <i class="fas fa-sync-alt me-1"></i> Real-time
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-center mb-3">
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-primary" id="toggleFridges">Fridges</button>
-                            <button class="btn btn-outline-success" id="toggleCustomers">Customers</button>
-                            <button class="btn btn-outline-warning" id="toggleEmployees">Employees</button>
-                        </div>
-                    </div>
-
-                    <div id="southAfricaMap" style="height: 400px; position: relative;">
-                        <!-- SVG Map will be rendered here -->
-                        <div class="text-center py-5" id="mapLoading">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading map...</span>
+            <div class="card-body">
+                <!-- Maintenance KPIs -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h6 class="card-title">Completed This Month</h6>
+                                <h3 id="completedCount" class="mb-0">0</h3>
+                                <small>Maintenance Visits</small>
                             </div>
-                            <p class="mt-2 text-muted">Loading fridge distribution map...</p>
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <h6 class="card-title">Scheduled</h6>
+                                <h3 id="scheduledCount" class="mb-0">0</h3>
+                                <small>Pending Visits</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h6 class="card-title">Avg Response Time</h6>
+                                <h3 id="avgResponseTime" class="mb-0">0</h3>
+                                <small>Days</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-danger">
+                            <div class="card-body">
+                                <h6 class="card-title">Completion Rate</h6>
+                                <h3 id="completionRate" class="mb-0">0%</h3>
+                                <small>This Month</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Map Legend -->
-                    <div class="mt-3">
-                        <div class="row text-center">
-                            <div class="col"><span class="badge bg-success">●</span> 1-5 Fridges</div>
-                            <div class="col"><span class="badge bg-warning">●</span> 6-15 Fridges</div>
-                            <div class="col"><span class="badge bg-danger">●</span> 16+ Fridges</div>
-                            <div class="col"><span class="badge bg-secondary">●</span> Hotspot (Heatmap)</div>
+                <!-- Maintenance Trends Line Graph -->
+                <div class="chart-container">
+                    <canvas id="maintenanceTrendsChart"></canvas>
+                </div>
+
+                <!-- Status Distribution -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Visit Status Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="statusDistributionChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Top Technicians</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="technicianPerformanceChart" height="250"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- CHARTS SECTION -->
-    <div class="row mb-4">
-        <div class="col-lg-8 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Monthly Sales (Last 12 months)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="salesChart" height="140"></canvas>
-                </div>
+    <!-- Customer Management Reports Section -->
+    <section class="mb-5">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>Customer Management Reports
+                </h3>
             </div>
-        </div>
+            <div class="card-body">
+                <!-- Customer Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Total Customers</h6>
+                                <h2 id="totalCustomers" class="mb-0">0</h2>
+                                <small>Active & Inactive</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Active Customers</h6>
+                                <h2 id="activeCustomers" class="mb-0">0</h2>
+                                <small>With Allocations</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Total Fridges Allocated</h6>
+                                <h2 id="totalAllocated" class="mb-0">0</h2>
+                                <small>Currently Active</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Available Fridges</h6>
+                                <h2 id="availableFridges" class="mb-0">0</h2>
+                                <small>In Stock</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-3 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Top Faults</h5>
+                <!-- Customer Distribution Overview -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="card-title">Customer Distribution by Location</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="locationDistributionChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="card-title">Customer Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="customerStatusChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="faultsChart" height="140"></canvas>
-                </div>
-            </div>
 
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Maintenance Summary</h5>
+                <!-- Fridge Allocation Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Fridge Allocation Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Status</th>
+                                                <th class="text-end">Count</th>
+                                                <th class="text-end">Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="fridgeAllocationSummary">
+                                            <tr><td colspan="3" class="text-center">Loading data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="maintenanceChart" height="140"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- ADDITIONAL STATS -->
-    <div class="row mb-4">
-        <div class="col-lg-6 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Top Customers</h5>
+                <!-- Allocation Trends -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Allocation Trends (Last 6 Months)</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="allocationTrendsChart" height="120"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="topCustomersTable">
-                        <p class="text-muted">Loading...</p>
+
+                <!-- Top Customers by Fridge Count -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Top Customers by Fridge Allocations</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="topCustomersChart" height="150"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-6 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Inventory by Model</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="inventoryChart" height="140"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- DISTRIBUTION + SUPPLIER -->
-    <div class="row mb-4">
-        <div class="col-lg-6 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Distribution by Province</h5>
-                </div>
-                <div class="card-body">
-                    <div id="distributionTable">
-                        <p class="text-muted">Loading...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6 mb-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Supplier Performance</h5>
-                </div>
-                <div class="card-body">
-                    <div id="supplierTable">
-                        <p class="text-muted">Loading...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ✅ Buttons Row -->
-    <div class="row mb-4">
-        <div class="col-12 d-flex justify-content-end gap-2">
-            <!-- View All Customers Spending -->
-            <a asp-controller="Reports" asp-action="AllCustomersSpendingReport"
-               class="btn btn-info px-3">
-                View All Customers Spending
-            </a>
-
-            <!-- Go Back to Dashboard -->
-            <a asp-area="Administrator" asp-controller="ManageEmployee" asp-action="Dashboard"
-               class="btn btn-secondary px-3">
-                Go Back to Dashboard
-            </a>
-        </div>
-    </div>
-
+    </section>
 </div>
+<!-- Add this section AFTER the Customer Management Reports section -->
+<section class="mb-5">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i>Fault Management Reports
+            </h3>
+        </div>
+        <div class="card-body">
+            <!-- Fault Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Total Faults</h6>
+                            <h2 id="totalFaults" class="mb-0">0</h2>
+                            <small>All Time</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Pending Faults</h6>
+                            <h2 id="pendingFaults" class="mb-0">0</h2>
+                            <small>Awaiting Action</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">High Priority</h6>
+                            <h2 id="highPriorityFaults" class="mb-0">0</h2>
+                            <small>Urgent Cases</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Avg Resolution</h6>
+                            <h2 id="avgResolutionDays" class="mb-0">0</h2>
+                            <small>Days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Fault Distribution Charts -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Fault Type Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultTypeChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Urgency Level Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultUrgencyChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Trends -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Fault Trends (Last 6 Months)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultTrendsChart" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brand Analysis and Status -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Top Fault-Prone Brands</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="brandFaultChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Fault Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="faultStatusChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Reports Link -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Need More Detailed Fault Analysis?</h5>
+                            <p class="card-text">Access comprehensive fault analytics with detailed breakdowns, technician performance, and resolution time analysis.</p>
+                            <a href="@Url.Action("FaultReports", "Reports")" class="btn btn-danger btn-lg">
+                                <i class="fas fa-chart-bar me-2"></i>View Detailed Fault Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-    <script src="~/js/reports-dashboard.js"></script>
     <script>
-        feather.replace();
-    </script>
-    <!-- Leaflet and Heatmap -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", async function () {
-            const mapContainer = document.getElementById("southAfricaMap");
-            const loading = document.getElementById("mapLoading");
-            loading.style.display = "block";
+        // Debug function to check what's happening
+        function debugLog(message, data = null) {
+            console.log(`[DEBUG] ${message}`, data || '');
+        }
 
-            // Initialize Leaflet Map (South Africa center)
-            const map = L.map('southAfricaMap').setView([-28.4793, 24.6727], 7);
+        // Main initialization function
+        document.addEventListener('DOMContentLoaded', function () {
+            debugLog('DOM loaded, starting chart initialization');
+            initializeCharts();
+        });
 
-            // Add tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
-
-            // Fetch data from controller
-            const response = await fetch('/Reports/LocationMapData');
-            const locations = await response.json();
-            loading.style.display = "none";
-
-            // Layer groups for toggling
-            const fridgeLayer = L.layerGroup().addTo(map);
-            const customerLayer = L.layerGroup().addTo(map);
-            const employeeLayer = L.layerGroup().addTo(map);
-
-            const heatPoints = [];
-
-            locations.forEach(loc => {
-                // Ensure coordinates are numbers
-                const lat = parseFloat(loc.Latitude);
-                const lng = parseFloat(loc.Longitude);
-
-                if (isNaN(lat) || isNaN(lng)) {
-                    console.warn("Invalid coordinates for", loc.City, loc.Province);
+        async function initializeCharts() {
+            try {
+                // Test if Chart.js is loaded
+                if (typeof Chart === 'undefined') {
+                    debugLog('Chart.js not loaded');
+                    showError('Chart library not loaded. Please check your internet connection.');
                     return;
                 }
+                debugLog('Chart.js loaded successfully');
 
-                const popupHtml = `
-                            <strong>${loc.City}, ${loc.Province}</strong><br>
-                            <small>Fridges: ${loc.FridgeCount}</small><br>
-                            <small>Customers: ${loc.CustomerCount}</small><br>
-                            <small>Employees: ${loc.EmployeeCount}</small>
-                        `;
+                // Load all data
+                await loadMaintenanceData();
+                await loadCustomerReports();
+                await loadFaultReports();
 
-                // --- FRIDGES MARKERS ---
-                let fridgeColor = 'green';
-                if (loc.FridgeCount > 15) fridgeColor = 'red';
-                else if (loc.FridgeCount > 5) fridgeColor = 'orange';
+            } catch (error) {
+                debugLog('Error initializing charts:', error);
+                showError('Error loading charts: ' + error.message);
+            }
+        }
 
-                const fridgeMarker = L.circleMarker([lat, lng], {
-                    radius: 8,
-                    color: fridgeColor,
-                    fillColor: fridgeColor,
-                    fillOpacity: 0.8
-                }).bindPopup(popupHtml);
-                fridgeMarker.addTo(fridgeLayer);
+        function showError(message) {
+            // Create a visible error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+            errorDiv.innerHTML = `
+                <strong>Error!</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container-fluid').prepend(errorDiv);
+        }
 
-                // --- CUSTOMERS MARKERS ---
-                const customerMarker = L.circleMarker([lat, lng], {
-                    radius: 6,
-                    color: 'blue',
-                    fillColor: 'blue',
-                    fillOpacity: 0.7
-                }).bindPopup(popupHtml);
-                customerMarker.addTo(customerLayer);
+        // =============================================
+        // MAINTENANCE REPORT FUNCTIONS
+        // =============================================
+        async function loadMaintenanceData() {
+            debugLog('Loading maintenance data...');
 
-                // --- EMPLOYEES MARKERS ---
-                const employeeMarker = L.circleMarker([lat, lng], {
-                    radius: 6,
-                    color: 'yellow',
-                    fillColor: 'yellow',
-                    fillOpacity: 0.7
-                }).bindPopup(popupHtml);
-                employeeMarker.addTo(employeeLayer);
+            try {
+                // Use a simple test data if controller actions don't exist
+                const maintenanceData = await tryLoadMaintenanceData();
 
-                // --- HEATMAP POINT ---
-                const intensity = loc.FridgeCount + loc.CustomerCount + loc.EmployeeCount;
-                heatPoints.push([lat, lng, Math.min(intensity / 10, 1)]);
-            });
+                if (maintenanceData) {
+                    await createMaintenanceCharts(maintenanceData);
+                } else {
+                    // Use sample data for testing
+                    debugLog('Using sample maintenance data');
+                    const sampleData = getSampleMaintenanceData();
+                    await createMaintenanceCharts(sampleData);
+                }
+            } catch (error) {
+                debugLog('Error in loadMaintenanceData:', error);
+                // Use sample data as fallback
+                const sampleData = getSampleMaintenanceData();
+                await createMaintenanceCharts(sampleData);
+            }
+        }
 
-            // Heatmap Layer
-            const heatLayer = L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 10 }).addTo(map);
+        async function tryLoadMaintenanceData() {
+            try {
+                // Try different possible controller names and routes
+                const urls = [
+                    '@Url.Action("GetMaintenanceTrends", "Maintenance")',
+                    '/MaintenanceSubSystem/Maintenance/GetMaintenanceTrends',
+                    '/Maintenance/GetMaintenanceTrends'
+                ];
 
-            // --- TOGGLE BUTTONS ---
-            document.getElementById("toggleFridges").addEventListener("click", () => {
-                if (map.hasLayer(fridgeLayer)) map.removeLayer(fridgeLayer);
-                else map.addLayer(fridgeLayer);
-            });
+                for (const url of urls) {
+                    try {
+                        debugLog(`Trying URL: ${url}`);
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const data = await response.json();
+                            debugLog('Successfully loaded maintenance data from:', url);
+                            return data;
+                        }
+                    } catch (e) {
+                        debugLog(`Failed to load from ${url}:`, e.message);
+                    }
+                }
+                return null;
+            } catch (error) {
+                debugLog('Error in tryLoadMaintenanceData:', error);
+                return null;
+            }
+        }
 
-            document.getElementById("toggleCustomers").addEventListener("click", () => {
-                if (map.hasLayer(customerLayer)) map.removeLayer(customerLayer);
-                else map.addLayer(customerLayer);
-            });
+        async function createMaintenanceCharts(data) {
+            try {
+                // Update KPI cards with sample data
+                document.getElementById('completedCount').textContent = '12';
+                document.getElementById('scheduledCount').textContent = '8';
+                document.getElementById('avgResponseTime').textContent = '2.5';
+                document.getElementById('completionRate').textContent = '85%';
 
-            document.getElementById("toggleEmployees").addEventListener("click", () => {
-                if (map.hasLayer(employeeLayer)) map.removeLayer(employeeLayer);
-                else map.addLayer(employeeLayer);
-            });
-        });
+                // Create maintenance trends chart
+                createMaintenanceTrendsChart(data.trends);
+
+                // Create status distribution chart
+                createStatusDistributionChart(data.statusDistribution);
+
+                // Create technician performance chart
+                createTechnicianPerformanceChart(data.technicians);
+
+            } catch (error) {
+                debugLog('Error creating maintenance charts:', error);
+            }
+        }
+
+        function createMaintenanceTrendsChart(data) {
+            try {
+                const ctx = document.getElementById('maintenanceTrendsChart').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(d => d.Month),
+                        datasets: [
+                            {
+                                label: 'Completed Visits',
+                                data: data.map(d => d.Completed),
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Scheduled Visits',
+                                data: data.map(d => d.Scheduled),
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'In Progress',
+                                data: data.map(d => d.InProgress),
+                                borderColor: 'rgba(243, 156, 18, 1)',
+                                backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Maintenance Trends - Last 6 Months',
+                                font: { size: 16 }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Visits'
+                                }
+                            }
+                        }
+                    }
+                });
+                debugLog('Maintenance trends chart created successfully');
+            } catch (error) {
+                debugLog('Error creating maintenance trends chart:', error);
+            }
+        }
+
+        function createStatusDistributionChart(data) {
+            try {
+                const ctx = document.getElementById('statusDistributionChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(d => d.Status),
+                        datasets: [{
+                            data: data.map(d => d.Count),
+                            backgroundColor: [
+                                'rgba(46, 204, 113, 0.8)',
+                                'rgba(52, 152, 219, 0.8)',
+                                'rgba(243, 156, 18, 0.8)',
+                                'rgba(155, 89, 182, 0.8)',
+                                'rgba(231, 76, 60, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                debugLog('Status distribution chart created successfully');
+            } catch (error) {
+                debugLog('Error creating status distribution chart:', error);
+            }
+        }
+
+        function createTechnicianPerformanceChart(data) {
+            try {
+                const ctx = document.getElementById('technicianPerformanceChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(p => p.Technician),
+                        datasets: [
+                            {
+                                label: 'Completed',
+                                data: data.map(p => p.Completed),
+                                backgroundColor: 'rgba(46, 204, 113, 0.8)'
+                            },
+                            {
+                                label: 'Scheduled',
+                                data: data.map(p => p.Scheduled),
+                                backgroundColor: 'rgba(52, 152, 219, 0.8)'
+                            },
+                            {
+                                label: 'In Progress',
+                                data: data.map(p => p.InProgress),
+                                backgroundColor: 'rgba(243, 156, 18, 0.8)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Technician performance chart created successfully');
+            } catch (error) {
+                debugLog('Error creating technician performance chart:', error);
+            }
+        }
+
+        // =============================================
+        // CUSTOMER MANAGEMENT REPORT FUNCTIONS
+        // =============================================
+        async function loadCustomerReports() {
+            debugLog('Loading customer reports...');
+
+            try {
+                // Use a simple test data if controller actions don't exist
+                const customerData = await tryLoadCustomerData();
+
+                if (customerData) {
+                    await createCustomerCharts(customerData);
+                } else {
+                    // Use sample data for testing
+                    debugLog('Using sample customer data');
+                    const sampleData = getSampleCustomerData();
+                    await createCustomerCharts(sampleData);
+                }
+            } catch (error) {
+                debugLog('Error in loadCustomerReports:', error);
+                // Use sample data as fallback
+                const sampleData = getSampleCustomerData();
+                await createCustomerCharts(sampleData);
+            }
+        }
+
+        async function tryLoadCustomerData() {
+            try {
+                // Try different possible controller names and routes
+                const urls = [
+                    '@Url.Action("GetCustomerSummaryData", "CustomerLiaison")',
+                    '/CustomerManagementSubSystem/CustomerLiaison/GetCustomerSummaryData',
+                    '/CustomerLiaison/GetCustomerSummaryData'
+                ];
+
+                for (const url of urls) {
+                    try {
+                        debugLog(`Trying customer URL: ${url}`);
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const data = await response.json();
+                            debugLog('Successfully loaded customer data from:', url);
+                            return data;
+                        }
+                    } catch (e) {
+                        debugLog(`Failed to load customer data from ${url}:`, e.message);
+                    }
+                }
+                return null;
+            } catch (error) {
+                debugLog('Error in tryLoadCustomerData:', error);
+                return null;
+            }
+        }
+
+        async function createCustomerCharts(data) {
+            try {
+                // Update summary cards
+                document.getElementById('totalCustomers').textContent = data.summary?.totalCustomers || '45';
+                document.getElementById('activeCustomers').textContent = data.summary?.activeCustomers || '38';
+                document.getElementById('totalAllocated').textContent = data.summary?.totalAllocated || '67';
+                document.getElementById('availableFridges').textContent = data.summary?.availableFridges || '23';
+
+                // Create customer status chart
+                createCustomerStatusChart(data.customerStatus);
+
+                // Create location distribution chart
+                createLocationDistributionChart(data.locations);
+
+                // Update allocation summary table
+                updateAllocationSummaryTable(data.allocationSummary);
+
+                // Create allocation trends chart
+                createAllocationTrendsChart(data.trends);
+
+                // Create top customers chart
+                createTopCustomersChart(data.topCustomers);
+
+            } catch (error) {
+                debugLog('Error creating customer charts:', error);
+            }
+        }
+
+        function createCustomerStatusChart(data) {
+            try {
+                const ctx = document.getElementById('customerStatusChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(s => s.status),
+                        datasets: [{
+                            data: data.map(s => s.count),
+                            backgroundColor: [
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(108, 117, 125, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                debugLog('Customer status chart created successfully');
+            } catch (error) {
+                debugLog('Error creating customer status chart:', error);
+            }
+        }
+
+        function createLocationDistributionChart(data) {
+            try {
+                const ctx = document.getElementById('locationDistributionChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(l => l.location),
+                        datasets: [
+                            {
+                                label: 'Customers',
+                                data: data.map(l => l.customerCount),
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Active Allocations',
+                                data: data.map(l => l.activeAllocations),
+                                backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Location distribution chart created successfully');
+            } catch (error) {
+                debugLog('Error creating location distribution chart:', error);
+            }
+        }
+
+        function updateAllocationSummaryTable(data) {
+            try {
+                const tableBody = document.getElementById('fridgeAllocationSummary');
+                if (data && data.length > 0) {
+                    tableBody.innerHTML = data.map(item => `
+                        <tr>
+                            <td>${item.status}</td>
+                            <td class="text-end">${item.count}</td>
+                            <td class="text-end">${item.percentage}%</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableBody.innerHTML = `
+                        <tr><td>Allocated</td><td class="text-end">67</td><td class="text-end">65%</td></tr>
+                        <tr><td>Returned</td><td class="text-end">25</td><td class="text-end">24%</td></tr>
+                        <tr><td>Scrapped</td><td class="text-end">11</td><td class="text-end">11%</td></tr>
+                    `;
+                }
+                debugLog('Allocation summary table updated successfully');
+            } catch (error) {
+                debugLog('Error updating allocation summary table:', error);
+            }
+        }
+
+        function createAllocationTrendsChart(data) {
+            try {
+                const ctx = document.getElementById('allocationTrendsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(t => t.month),
+                        datasets: [
+                            {
+                                label: 'New Allocations',
+                                data: data.map(t => t.allocations),
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Returns',
+                                data: data.map(t => t.returns),
+                                borderColor: 'rgba(255, 193, 7, 1)',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Scrapped',
+                                data: data.map(t => t.scrapped),
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Allocation trends chart created successfully');
+            } catch (error) {
+                debugLog('Error creating allocation trends chart:', error);
+            }
+        }
+
+        function createTopCustomersChart(data) {
+            try {
+                const ctx = document.getElementById('topCustomersChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(c => c.customerName),
+                        datasets: [
+                            {
+                                label: 'Active Allocations',
+                                data: data.map(c => c.activeAllocations),
+                                backgroundColor: 'rgba(40, 167, 69, 0.8)'
+                            },
+                            {
+                                label: 'Returned',
+                                data: data.map(c => c.returnedAllocations),
+                                backgroundColor: 'rgba(255, 193, 7, 0.8)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Top customers chart created successfully');
+            } catch (error) {
+                debugLog('Error creating top customers chart:', error);
+            }
+        }
+
+      
+        // =============================================
+        // FAULT MANAGEMENT REPORT FUNCTIONS
+        // =============================================
+        async function loadFaultReports() {
+            debugLog('Loading fault reports...');
+
+            try {
+                // Load all fault data in parallel
+                const [summaryData, typeData, urgencyData, trendsData, brandData, statusData] = await Promise.all([
+                    tryLoadFaultData('GetFaultSummaryData'),
+                    tryLoadFaultData('GetFaultTypeDistribution'),
+                    tryLoadFaultData('GetUrgencyDistribution'),
+                    tryLoadFaultData('GetFaultTrendsData'),
+                    tryLoadFaultData('GetBrandFaultAnalysis'),
+                    tryLoadFaultData('GetFaultStatusDistribution')
+                ]);
+
+                const faultData = {
+                    summary: summaryData,
+                    faultTypes: typeData,
+                    urgencyLevels: urgencyData,
+                    trends: trendsData,
+                    brands: brandData,
+                    status: statusData
+                };
+
+                await createFaultCharts(faultData);
+
+            } catch (error) {
+                debugLog('Error in loadFaultReports:', error);
+                // Use sample data as fallback
+                const sampleData = getSampleFaultData();
+                await createFaultCharts(sampleData);
+            }
+        }
+
+        async function tryLoadFaultData(actionName) {
+            try {
+                const response = await fetch(`/Reports/${actionName}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    debugLog(`Successfully loaded ${actionName} from API`);
+                    return data;
+                }
+                return null;
+            } catch (error) {
+                debugLog(`Error loading ${actionName} from API:`, error);
+                return null;
+            }
+        }
+
+        async function createFaultCharts(data) {
+            try {
+                // Update summary cards
+                if (data.summary) {
+                    document.getElementById('totalFaults').textContent = data.summary.TotalFaults || '180';
+                    document.getElementById('pendingFaults').textContent = data.summary.PendingFaults || '34';
+                    document.getElementById('highPriorityFaults').textContent = data.summary.HighPriorityFaults || '18';
+                    document.getElementById('avgResolutionDays').textContent =
+                        data.summary.AverageResolutionDays ? data.summary.AverageResolutionDays.toFixed(1) : '3.2';
+                } else {
+                    // Fallback to hardcoded
+                    document.getElementById('totalFaults').textContent = '180';
+                    document.getElementById('pendingFaults').textContent = '34';
+                    document.getElementById('highPriorityFaults').textContent = '18';
+                    document.getElementById('avgResolutionDays').textContent = '3.2';
+                }
+
+                // Create fault type chart
+                if (data.faultTypes && data.faultTypes.length > 0) {
+                    createFaultTypeChart(data.faultTypes);
+                } else {
+                    createFaultTypeChart(getSampleFaultData().faultTypes);
+                }
+
+                // Create urgency chart
+                if (data.urgencyLevels && data.urgencyLevels.length > 0) {
+                    createFaultUrgencyChart(data.urgencyLevels);
+                } else {
+                    createFaultUrgencyChart(getSampleFaultData().urgencyLevels);
+                }
+
+                // Create trends chart
+                if (data.trends && data.trends.length > 0) {
+                    createFaultTrendsChart(data.trends);
+                } else {
+                    createFaultTrendsChart(getSampleFaultData().trends);
+                }
+
+                // Create brand analysis chart
+                if (data.brands && data.brands.length > 0) {
+                    createBrandFaultChart(data.brands);
+                } else {
+                    createBrandFaultChart(getSampleFaultData().brands);
+                }
+
+                // Create status chart
+                if (data.status && data.status.length > 0) {
+                    createFaultStatusChart(data.status);
+                } else {
+                    createFaultStatusChart(getSampleFaultData().status);
+                }
+
+            } catch (error) {
+                debugLog('Error creating fault charts:', error);
+            }
+        }
+
+        function createFaultTypeChart(data) {
+            try {
+                const ctx = document.getElementById('faultTypeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(item => item.FaultType || item.faultType),
+                        datasets: [{
+                            data: data.map(item => item.Count || item.count),
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault type chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault type chart:', error);
+            }
+        }
+
+        function createFaultUrgencyChart(data) {
+            try {
+                const ctx = document.getElementById('faultUrgencyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.UrgencyLevel || item.urgencyLevel),
+                        datasets: [{
+                            label: 'Number of Faults',
+                            data: data.map(item => item.Count || item.count),
+                            backgroundColor: [
+                                '#28a745', '#ffc107', '#fd7e14', '#dc3545', '#6f42c1'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault urgency chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault urgency chart:', error);
+            }
+        }
+
+        function createFaultTrendsChart(data) {
+            try {
+                const ctx = document.getElementById('faultTrendsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.Period || item.period),
+                        datasets: [
+                            {
+                                label: 'Total Faults',
+                                data: data.map(item => item.TotalFaults || item.totalFaults),
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Pending',
+                                data: data.map(item => item.PendingFaults || item.pendingFaults),
+                                borderColor: 'rgba(255, 193, 7, 1)',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Resolved',
+                                data: data.map(item => item.ResolvedFaults || item.resolvedFaults),
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault trends chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault trends chart:', error);
+            }
+        }
+
+        function createBrandFaultChart(data) {
+            try {
+                const ctx = document.getElementById('brandFaultChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.Brand || item.brand),
+                        datasets: [{
+                            label: 'Total Faults',
+                            data: data.map(item => item.TotalFaults || item.totalFaults),
+                            backgroundColor: 'rgba(220, 53, 69, 0.8)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Brand fault chart created successfully');
+            } catch (error) {
+                debugLog('Error creating brand fault chart:', error);
+            }
+        }
+
+        function createFaultStatusChart(data) {
+            try {
+                const ctx = document.getElementById('faultStatusChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.map(item => item.Status || item.status),
+                        datasets: [{
+                            data: data.map(item => item.Count || item.count),
+                            backgroundColor: [
+                                'rgba(108, 117, 125, 0.8)',  // Pending - gray
+                                'rgba(23, 162, 184, 0.8)',   // In Progress - cyan
+                                'rgba(40, 167, 69, 0.8)',    // Resolved - green
+                                'rgba(255, 193, 7, 0.8)',    // Awaiting Parts - yellow
+                                'rgba(220, 53, 69, 0.8)'     // Cancelled - red
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                debugLog('Fault status chart created successfully');
+            } catch (error) {
+                debugLog('Error creating fault status chart:', error);
+            }
+        }
+
+         // =============================================
+        // SAMPLE DATA FOR TESTING
+        // =============================================
+        function getSampleMaintenanceData() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            return {
+                trends: months.map((month, index) => ({
+                    Month: month,
+                    Completed: Math.floor(Math.random() * 20) + 10,
+                    Scheduled: Math.floor(Math.random() * 15) + 5,
+                    InProgress: Math.floor(Math.random() * 8) + 2
+                })),
+                statusDistribution: [
+                    { Status: 'Complete', Count: 45 },
+                    { Status: 'Scheduled', Count: 22 },
+                    { Status: 'In Progress', Count: 8 },
+                    { Status: 'Rescheduled', Count: 5 },
+                    { Status: 'Cancelled', Count: 3 }
+                ],
+                technicians: [
+                    { Technician: 'John Smith', Completed: 18, Scheduled: 5, InProgress: 2 },
+                    { Technician: 'Sarah Johnson', Completed: 15, Scheduled: 8, InProgress: 1 },
+                    { Technician: 'Mike Wilson', Completed: 12, Scheduled: 3, InProgress: 4 },
+                    { Technician: 'Emily Davis', Completed: 10, Scheduled: 6, InProgress: 2 }
+                ]
+            };
+        }
+
+        function getSampleCustomerData() {
+            return {
+                summary: {
+                    totalCustomers: 45,
+                    activeCustomers: 38,
+                    totalAllocated: 67,
+                    availableFridges: 23
+                },
+                customerStatus: [
+                    { status: 'Active', count: 38 },
+                    { status: 'Inactive', count: 7 }
+                ],
+                locations: [
+                    { location: 'Downtown', customerCount: 15, activeAllocations: 22 },
+                    { location: 'Northside', customerCount: 12, activeAllocations: 18 },
+                    { location: 'Southside', customerCount: 8, activeAllocations: 12 },
+                    { location: 'East End', customerCount: 6, activeAllocations: 9 },
+                    { location: 'Westside', customerCount: 4, activeAllocations: 6 }
+                ],
+                allocationSummary: [
+                    { status: 'Allocated', count: 67, percentage: 65 },
+                    { status: 'Returned', count: 25, percentage: 24 },
+                    { status: 'Scrapped', count: 11, percentage: 11 }
+                ],
+                trends: [
+                    { month: 'Jan', allocations: 12, returns: 4, scrapped: 1 },
+                    { month: 'Feb', allocations: 15, returns: 3, scrapped: 2 },
+                    { month: 'Mar', allocations: 18, returns: 5, scrapped: 1 },
+                    { month: 'Apr', allocations: 14, returns: 6, scrapped: 3 },
+                    { month: 'May', allocations: 16, returns: 4, scrapped: 2 },
+                    { month: 'Jun', allocations: 13, returns: 3, scrapped: 2 }
+                ],
+                topCustomers: [
+                    { customerName: 'ABC Restaurant', activeAllocations: 8, returnedAllocations: 3 },
+                    { customerName: 'XYZ Hotel', activeAllocations: 6, returnedAllocations: 2 },
+                    { customerName: 'City Hospital', activeAllocations: 5, returnedAllocations: 1 },
+                    { customerName: 'Tech Campus', activeAllocations: 4, returnedAllocations: 4 },
+                    { customerName: 'Food Market', activeAllocations: 4, returnedAllocations: 2 }
+                ]
+            };
+       }
+
+        function getSampleFaultData() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            return {
+                summary: {
+                    totalFaults: 120,
+                    pendingFaults: 34,
+                    highPriorityFaults: 18,
+                    avgResolutionDays: 3.2
+                },
+                faultTypes: [
+                    { faultType: 'Electrical', count: 45 },
+                    { faultType: 'Cooling Issue', count: 38 },
+                    { faultType: 'Door Seal', count: 32 },
+                    { faultType: 'Compressor', count: 28 },
+                    { faultType: 'Thermostat', count: 22 },
+                    { faultType: 'Water Leak', count: 15 }
+                ],
+                urgencyLevels: [
+                    { urgencyLevel: 'Low', count: 45 },
+                    { urgencyLevel: 'Medium', count: 78 },
+                    { urgencyLevel: 'High', count: 32 },
+                    { urgencyLevel: 'Critical', count: 18 },
+                    { urgencyLevel: 'Emergency', count: 7 }
+                ],
+                trends: months.map((month, index) => ({
+                    period: month,
+                    totalFaults: Math.floor(Math.random() * 30) + 20,
+                    pendingFaults: Math.floor(Math.random() * 15) + 5,
+                    resolvedFaults: Math.floor(Math.random() * 25) + 10
+                })),
+                brands: [
+                    { brand: 'Samsung', totalFaults: 45 },
+                    { brand: 'LG', totalFaults: 38 },
+                    { brand: 'Hisense', totalFaults: 32 },
+                    { brand: 'Defy', totalFaults: 28 },
+                    { brand: 'Kelvinator', totalFaults: 22 }
+                ],
+                status: [
+                    { status: 'Pending', count: 34 },
+                    { status: 'In Progress', count: 28 },
+                    { status: 'Resolved', count: 89 },
+                    { status: 'Awaiting Parts', count: 12 },
+                    { status: 'Cancelled', count: 7 }
+                ]
+            };
+        }
     </script>
 }
 
-
-@* @{
-    ViewData["Title"] = "Reports Dashboard";
-    Layout = "_Layout";
-}
-
-<!-- ✅ Inline AdminKit Styles -->
 <style>
-    :root {
-        --primary: #3b7ddd;
-        --secondary: #6c757d;
-        --success: #1cbb8c;
-        --info: #17a2b8;
-        --warning: #fcb92c;
-        --danger: #dc3545;
-        --light: #f8f9fa;
-        --dark: #343a40;
-        --background: #f4f6f9;
-        --card-bg: #ffffff;
-        --text-color: #212529;
-        --muted-text: #6c757d;
-        --border-radius: 12px;
-        --transition: all 0.3s ease;
-        --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
-        --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.08);
-    }
-
-    body {
-        background-color: var(--background);
-        color: var(--text-color);
-        font-family: "Inter", "Segoe UI", Roboto, sans-serif;
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-
-    h1, h5 {
-        font-weight: 600;
+    .chart-container {
+        width: 100%;
+        height: 500px;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        position: relative;
     }
 
     .card {
-        border: none;
-        border-radius: var(--border-radius);
-        background-color: var(--card-bg);
-        box-shadow: var(--shadow-sm);
-        transition: var(--transition);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+        margin-bottom: 1rem;
     }
-
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-        }
 
     .card-header {
-        background-color: transparent !important;
-        border-bottom: 1px solid #e9ecef;
-        font-weight: 600;
-    }
-
-    .card-title {
-        color: var(--text-color);
-        margin-bottom: 0;
-    }
-
-    .shadow-sm {
-        box-shadow: var(--shadow-sm) !important;
-    }
-
-    .btn {
-        border-radius: var(--border-radius);
-        font-weight: 500;
-        transition: var(--transition);
-        padding: 0.45rem 1.1rem;
-    }
-
-    .btn-primary {
-        background-color: var(--primary);
-        border-color: var(--primary);
-    }
-
-        .btn-primary:hover {
-            background-color: #2f6ad9;
-            border-color: #2f6ad9;
-        }
-
-    .btn-success {
-        background-color: var(--success);
-        border-color: var(--success);
-    }
-
-        .btn-success:hover {
-            background-color: #17a97e;
-            border-color: #17a97e;
-        }
-
-    .text-muted {
-        color: var(--muted-text) !important;
-    }
-
-    .feather-32 {
-        width: 32px;
-        height: 32px;
-    }
-
-    .container-fluid {
-        padding: 2rem;
-    }
-
-    /* Table styling (for Top Customers, etc.) */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    thead {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
         background-color: #f8f9fa;
+    }
+
+    .table th {
+        border-top: none;
         font-weight: 600;
+        background-color: #f8f9fa;
     }
 
-    tr:hover {
-        background-color: #f1f3f5;
+    .card .card-body {
+        padding: 1.25rem;
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
+    .text-end {
+        text-align: right !important;
     }
 
-    ::-webkit-scrollbar-thumb {
-        background-color: #adb5bd;
-        border-radius: 4px;
+    .alert {
+        margin-bottom: 1rem;
     }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #868e96;
-        }
-
-    /* Map Styles */
-    .province-area {
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .province-area:hover {
-        filter: brightness(1.1);
-        transform: scale(1.02);
-    }
-
-    .location-marker {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        animation: pulse 2s infinite;
-    }
-
-    .location-marker:hover {
-        transform: scale(1.3);
-        animation: none;
-    }
-
-    @@keyframes pulse {
-        0% { opacity: 0.8; }
-        50% { opacity: 1; }
-        100% { opacity: 0.8; }
-    }
-
-    .map-tooltip {
-        position: absolute;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-        pointer-events: none;
-        z-index: 1000;
-        max-width: 200px;
-        display: none;
-    }
-
-    .map-legend {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    #southAfricaMap {
-        position: relative;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    #mapLoading {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10;
-    }
-</style>
-
-<div class="container-fluid p-0">
-
-    <!-- PAGE HEADER -->
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-6">
-            <h1 class="h3 mb-1">Fridge Management Reports</h1>
-            <p class="text-muted mb-0">AdminKit-style dashboard: summary cards, charts, and insights.</p>
-        </div>
-
-        <div class="col-md-6 d-flex gap-2 justify-content-md-end">
-            <input type="date" id="fromDate" class="form-control w-auto" value="@ViewBag.FromDate" />
-            <input type="date" id="toDate" class="form-control w-auto" value="@ViewBag.ToDate" />
-            <button id="filterBtn" class="btn btn-primary px-3">Apply</button>
-            <button id="exportPdfBtn" class="btn btn-success px-3">Export All to PDF</button>
-        </div>
-    </div>
-
-    <!-- SUMMARY CARDS -->
-    <div class="row">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Total Customers</h6>
-                            <h2 class="mb-0">@ViewBag.TotalCustomers</h2>
-                        </div>
-                        <div class="ms-3 text-primary">
-                            <i data-feather="users" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Total Fridges</h6>
-                            <h2 class="mb-0">@ViewBag.TotalFridges</h2>
-                        </div>
-                        <div class="ms-3 text-info">
-                            <i data-feather="box" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Active Faults</h6>
-                            <h2 class="mb-0">@ViewBag.ActiveFaults</h2>
-                        </div>
-                        <div class="ms-3 text-warning">
-                            <i data-feather="alert-triangle" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted mb-1">Sales (Orders)</h6>
-                            <h2 class="mb-0">R @String.Format("{0:N2}", ViewBag.TotalSales)</h2>
-                            <small class="text-muted d-block">Purchases: R @String.Format("{0:N2}", ViewBag.TotalPurchases)</small>
-                            <small class="text-muted d-block">Net Profit: R @String.Format("{0:N2}", ViewBag.NetProfit)</small>
-                        </div>
-                        <div class="ms-3 text-success">
-                            <i data-feather="trending-up" class="feather-32"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- REAL-TIME MAP SECTION -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Fridge Distribution Map</h5>
-                    <div class="text-muted small" id="mapLastUpdated">
-                        <i class="fas fa-sync-alt me-1"></i> Real-time
-                    </div>
-                </div>
-                <div class="btn-group mb-3" role="group">
-  <button class="btn btn-outline-primary" id="toggleFridges">Fridges</button>
-  <button class="btn btn-outline-success" id="toggleCustomers">Customers</button>
-  <button class="btn btn-outline-warning" id="toggleEmployees">Employees</button>
-</div>
-
-                <div class="card-body">
-                    <div id="southAfricaMap" style="height: 400px; position: relative;">
-                        <!-- SVG Map will be rendered here -->
-                        <div class="text-center py-5" id="mapLoading">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading map...</span>
-                            </div>
-                            <p class="mt-2 text-muted">Loading fridge distribution map...</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Map Legend -->
-                    <div class="mt-3">
-                        <div class="row text-center">
-                            <div class="col"><span class="badge bg-success">●</span> 1-5 Fridges</div>
-                            <div class="col"><span class="badge bg-warning">●</span> 6-15 Fridges</div>
-                            <div class="col"><span class="badge bg-danger">●</span> 16+ Fridges</div>
-                            <div class="col"><span class="badge bg-secondary">●</span> Hotspot (Heatmap)</div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CHARTS SECTION -->
-    <div class="row mt-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Monthly Sales (Last 12 months)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="salesChart" height="140"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-3">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Top Faults</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="faultsChart" height="140"></canvas>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Maintenance Summary</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="maintenanceChart" height="140"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADDITIONAL STATS -->
-    <div class="row mt-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Top Customers</h5>
-                </div>
-                <div class="card-body">
-                    <div id="topCustomersTable">
-                        <p class="text-muted">Loading...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Inventory by Model</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="inventoryChart" height="140"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- DISTRIBUTION + SUPPLIER -->
-
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title mb-0">Supplier Performance</h5>
-                </div>
-                <div class="card-body">
-                    <div id="supplierTable">
-                        <p class="text-muted">Loading...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ✅ New Button for All Customers Spending Report -->
-    <a asp-controller="Reports" asp-action="AllCustomersSpendingReport" 
-       class="btn btn-info px-3">
-       View All Customers Spending
-    </a>
-</div>
-  
-
-
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-    <script src="~/js/reports-dashboard.js"></script>
-    <script>
-        feather.replace();
-    </script>
-    <!-- Leaflet and Heatmap -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <script>
-                        document.addEventListener("DOMContentLoaded", async function () {
-            const mapContainer = document.getElementById("southAfricaMap");
-            const loading = document.getElementById("mapLoading");
-            loading.style.display = "block";
-
-            // Initialize Leaflet Map (South Africa center)
-            const map = L.map('southAfricaMap').setView([-28.4793, 24.6727], 7);
-
-            // Add tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
-
-            // Fetch data from controller
-            const response = await fetch('/Reports/LocationMapData');
-            const locations = await response.json();
-            loading.style.display = "none";
-
-            // Layer groups for toggling
-            const fridgeLayer = L.layerGroup().addTo(map);
-            const customerLayer = L.layerGroup().addTo(map);
-            const employeeLayer = L.layerGroup().addTo(map);
-
-            const heatPoints = [];
-
-            locations.forEach(loc => {
-                // Ensure coordinates are numbers
-                const lat = parseFloat(loc.Latitude);
-                const lng = parseFloat(loc.Longitude);
-
-                if (isNaN(lat) || isNaN(lng)) {
-                    console.warn("Invalid coordinates for", loc.City, loc.Province);
-                    return;
-                }
-
-                const popupHtml = `
-                    <strong>${loc.City}, ${loc.Province}</strong><br>
-                    <small>Fridges: ${loc.FridgeCount}</small><br>
-                    <small>Customers: ${loc.CustomerCount}</small><br>
-                    <small>Employees: ${loc.EmployeeCount}</small>
-                `;
-
-                // --- FRIDGES MARKERS ---
-                let fridgeColor = 'green';
-                if (loc.FridgeCount > 15) fridgeColor = 'red';
-                else if (loc.FridgeCount > 5) fridgeColor = 'orange';
-
-                const fridgeMarker = L.circleMarker([lat, lng], {
-                    radius: 8,
-                    color: fridgeColor,
-                    fillColor: fridgeColor,
-                    fillOpacity: 0.8
-                }).bindPopup(popupHtml);
-                fridgeMarker.addTo(fridgeLayer);
-
-                // --- CUSTOMERS MARKERS ---
-                const customerMarker = L.circleMarker([lat, lng], {
-                    radius: 6,
-                    color: 'blue',
-                    fillColor: 'blue',
-                    fillOpacity: 0.7
-                }).bindPopup(popupHtml);
-                customerMarker.addTo(customerLayer);
-
-                // --- EMPLOYEES MARKERS ---
-                const employeeMarker = L.circleMarker([lat, lng], {
-                    radius: 6,
-                    color: 'yellow',
-                    fillColor: 'yellow',
-                    fillOpacity: 0.7
-                }).bindPopup(popupHtml);
-                employeeMarker.addTo(employeeLayer);
-
-                // --- HEATMAP POINT ---
-                const intensity = loc.FridgeCount + loc.CustomerCount + loc.EmployeeCount;
-                heatPoints.push([lat, lng, Math.min(intensity / 10, 1)]);
-            });
-
-            // Heatmap Layer
-            const heatLayer = L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 10 }).addTo(map);
-
-            // --- TOGGLE BUTTONS ---
-            document.getElementById("toggleFridges").addEventListener("click", () => {
-                if (map.hasLayer(fridgeLayer)) map.removeLayer(fridgeLayer);
-                else map.addLayer(fridgeLayer);
-            });
-
-            document.getElementById("toggleCustomers").addEventListener("click", () => {
-                if (map.hasLayer(customerLayer)) map.removeLayer(customerLayer);
-                else map.addLayer(customerLayer);
-            });
-
-            document.getElementById("toggleEmployees").addEventListener("click", () => {
-                if (map.hasLayer(employeeLayer)) map.removeLayer(employeeLayer);
-                else map.addLayer(employeeLayer);
-            });
-        });
-
-    </script>
-
-} *@
+</style> 

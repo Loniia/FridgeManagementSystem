@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using CustomerManagementSubSystem.Models; 
 
 namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 {
@@ -68,34 +69,299 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         // --------------------------
         // Receive New Fridges
         // --------------------------
-        public async Task<IActionResult> Receive()
+
+        // GET - Modified to handle both direct fridge receiving AND purchase request flow
+        // GET - Fixed version
+        public async Task<IActionResult> Receive(int? fridgeId, int? purchaseRequestId)
         {
-            ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name");
-            return View();
+            ReceiveFridgeVm model;
+
+            // If coming from approved purchase request
+            if (purchaseRequestId.HasValue)
+            {
+                var purchaseRequest = await _context.PurchaseRequests
+                    .Include(pr => pr.Fridge) // Include fridge details
+                    .FirstOrDefaultAsync(pr => pr.PurchaseRequestID == purchaseRequestId && pr.Status == "Approved");
+
+                if (purchaseRequest == null)
+                {
+                    TempData["ErrorMessage"] = "Approved purchase request not found!";
+                    return RedirectToAction(nameof(ProcessPurchaseRequests));
+                }
+
+                // DEBUG: Check what we're getting
+                System.Diagnostics.Debug.WriteLine($"Purchase Request: {purchaseRequest.PurchaseRequestID}, Fridge: {purchaseRequest.FridgeId}");
+
+                // If there's a linked fridge, use its details
+                if (purchaseRequest.Fridge != null)
+                {
+                    model = new ReceiveFridgeVm
+                    {
+                        PurchaseRequestID = purchaseRequest.PurchaseRequestID,
+                        FridgeId = purchaseRequest.Fridge.FridgeId,
+                        Brand = purchaseRequest.Fridge.Brand,
+                        Model = purchaseRequest.Fridge.Model,
+                        Type = purchaseRequest.Fridge.FridgeType,
+                        SerialNumber = purchaseRequest.Fridge.SerialNumber,
+                        SupplierId = purchaseRequest.Fridge.SupplierID,
+                        Quantity = purchaseRequest.Quantity,
+                        DateAdded = DateTime.Now,
+                        Status = "Received"
+                    };
+                }
+                else
+                {
+                    // If no fridge linked, extract details from ItemFullNames
+                    string brand = "Standard Brand";
+                    string modelName = "Standard Model";
+                    string type = "Standard Type";
+
+                    if (!string.IsNullOrEmpty(purchaseRequest.ItemFullNames))
+                    {
+                        var parts = purchaseRequest.ItemFullNames.Split('-');
+                        if (parts.Length >= 2)
+                        {
+                            brand = parts[0].Trim();
+                            type = parts[1].Trim();
+                        }
+                        else
+                        {
+                            type = purchaseRequest.ItemFullNames.Trim();
+                        }
+                    }
+
+                    model = new ReceiveFridgeVm
+                    {
+                        PurchaseRequestID = purchaseRequest.PurchaseRequestID,
+                        FridgeId = 0, // Will create new fridge
+                        Brand = brand,
+                        Model = modelName,
+                        Type = type,
+                        SerialNumber = $"SN-{DateTime.Now:yyyyMMdd-HHmmss}",
+                        SupplierId = 1, // Default supplier
+                        Quantity = purchaseRequest.Quantity,
+                        DateAdded = DateTime.Now,
+                        Status = "Received"
+                    };
+                }
+            }
+            // If coming directly with fridgeId (existing flow)
+            else if (fridgeId.HasValue && fridgeId > 0)
+            {
+                var fridge = await _context.Fridge.FindAsync(fridgeId.Value);
+                if (fridge == null)
+                    return NotFound();
+
+                model = new ReceiveFridgeVm
+                {
+                    FridgeId = fridge.FridgeId,
+                    Brand = fridge.Brand,
+                    Model = fridge.Model,
+                    Type = fridge.FridgeType,
+                    SerialNumber = fridge.SerialNumber,
+                    SupplierId = fridge.SupplierID,
+                    Quantity = fridge.Quantity,
+                    DateAdded = DateTime.Now,
+                    Status = "Received"
+                };
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "No valid fridge or purchase request specified!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Ensure we have valid data
+            if (string.IsNullOrEmpty(model.Brand)) model.Brand = "Standard Brand";
+            if (string.IsNullOrEmpty(model.Model)) model.Model = "Standard Model";
+            if (string.IsNullOrEmpty(model.Type)) model.Type = "Standard Type";
+            if (string.IsNullOrEmpty(model.SerialNumber)) model.SerialNumber = $"SN-{DateTime.Now:yyyyMMdd-HHmmss}";
+
+            ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+            ViewBag.StatusOptions = new SelectList(new List<string> { "Received", "Available" }, model.Status);
+
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Receive(Fridge fridge)
+        public async Task<IActionResult> Receive(ReceiveFridgeVm model)
         {
-            if (!ModelState.IsValid)
+            // 🔥 CRITICAL FIX: If Brand/Model/Type are empty but we have FridgeId, get them from database
+            if (model.FridgeId > 0 && (string.IsNullOrEmpty(model.Brand) || string.IsNullOrEmpty(model.Model) || string.IsNullOrEmpty(model.Type)))
             {
-                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", fridge.SupplierID);
-                return View(fridge);
+                var existingFridge = await _context.Fridge.FindAsync(model.FridgeId);
+                if (existingFridge != null)
+                {
+                    model.Brand = existingFridge.Brand;
+                    model.Model = existingFridge.Model;
+                    model.Type = existingFridge.FridgeType;
+                }
             }
 
-            // Set automatic values
-            fridge.Status = "Received";
-            fridge.DateAdded = DateOnly.FromDateTime(DateTime.Now);
-            fridge.UpdatedDate = DateTime.Now;
-            fridge.IsActive = true;
+            // 🔥 ALSO: If we have PurchaseRequestID but empty fields, try to get from purchase request
+            if (model.PurchaseRequestID.HasValue && (string.IsNullOrEmpty(model.Brand) || string.IsNullOrEmpty(model.Model)))
+            {
+                var purchaseRequest = await _context.PurchaseRequests
+                    .Include(pr => pr.Fridge)
+                    .FirstOrDefaultAsync(pr => pr.PurchaseRequestID == model.PurchaseRequestID.Value);
 
-            _context.Fridge.Add(fridge);
-            await _context.SaveChangesAsync();
+                if (purchaseRequest?.Fridge != null)
+                {
+                    model.Brand = purchaseRequest.Fridge.Brand;
+                    model.Model = purchaseRequest.Fridge.Model;
+                    model.Type = purchaseRequest.Fridge.FridgeType;
+                    model.FridgeId = purchaseRequest.Fridge.FridgeId; // Ensure FridgeId is set
+                }
+                else if (!string.IsNullOrEmpty(purchaseRequest?.ItemFullNames))
+                {
+                    // Extract from ItemFullNames as fallback
+                    var parts = purchaseRequest.ItemFullNames.Split('-');
+                    if (parts.Length >= 2)
+                    {
+                        model.Brand = parts[0].Trim();
+                        model.Type = parts[1].Trim();
+                        model.Model = "Standard Model";
+                    }
+                }
+            }
 
-            TempData["SuccessMessage"] = "Fridge received successfully!";
-            return RedirectToAction(nameof(Index));
+            // Set default values if still empty (safety net)
+            if (string.IsNullOrEmpty(model.Brand)) model.Brand = "Standard Brand";
+            if (string.IsNullOrEmpty(model.Model)) model.Model = "Standard Model";
+            if (string.IsNullOrEmpty(model.Type)) model.Type = "Standard Type";
+            if (string.IsNullOrEmpty(model.SerialNumber)) model.SerialNumber = $"SN-{DateTime.Now:yyyyMMdd-HHmmss}";
+
+            // Now validate the model
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+                ViewBag.StatusOptions = new SelectList(new List<string> { "Received", "Available" }, model.Status);
+                return View(model);
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Find or create fridge
+                var fridge = await _context.Fridge.FindAsync(model.FridgeId);
+
+                if (fridge == null && model.FridgeId > 0)
+                {
+                    // Try to find by other criteria if FridgeId doesn't exist
+                    fridge = await _context.Fridge
+                        .FirstOrDefaultAsync(f => f.Brand == model.Brand && f.Model == model.Model && f.FridgeType == model.Type);
+                }
+
+                if (fridge == null)
+                {
+                    // Create new fridge if doesn't exist
+                    fridge = new Fridge
+                    {
+                        FridgeType = model.Type,
+                        Brand = model.Brand,
+                        Model = model.Model,
+                        SerialNumber = model.SerialNumber,
+                        Quantity = model.Quantity,
+                        SupplierID = model.SupplierId,
+                        Status = model.Status, // This is key - sets to Available
+                        DateAdded = DateOnly.FromDateTime(model.DateAdded),
+                        UpdatedDate = DateTime.Now,
+                        IsActive = true,
+                        Condition = "New" // Add default condition
+                    };
+                    _context.Fridge.Add(fridge);
+                }
+                else
+                {
+                    // Update existing fridge - INCREASE quantity, don't replace it
+                    fridge.Quantity += model.Quantity; // Add to existing quantity
+                    fridge.Status = model.Status; // This is key - sets to Available
+                    fridge.SupplierID = model.SupplierId;
+
+                    // Only update serial number if provided
+                    if (!string.IsNullOrEmpty(model.SerialNumber) && model.SerialNumber != fridge.SerialNumber)
+                    {
+                        fridge.SerialNumber = model.SerialNumber;
+                    }
+
+                    fridge.UpdatedDate = DateTime.Now;
+                    fridge.IsActive = true;
+                }
+
+                await _context.SaveChangesAsync();
+
+                // If this came from a purchase request, update its status
+                if (model.PurchaseRequestID.HasValue)
+                {
+                    var purchaseRequest = await _context.PurchaseRequests
+                        .FindAsync(model.PurchaseRequestID.Value);
+
+                    if (purchaseRequest != null)
+                    {
+                        purchaseRequest.Status = "Completed";
+                        // Link the fridge to the purchase request if not already linked
+                        if (purchaseRequest.FridgeId == null)
+                        {
+                            purchaseRequest.FridgeId = fridge.FridgeId;
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = $"Fridge received and marked as {model.Status}! Stock updated successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                TempData["ErrorMessage"] = "Error receiving fridge: " + ex.Message;
+                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+                ViewBag.StatusOptions = new SelectList(new List<string> { "Received", "Available" }, model.Status);
+                return View(model);
+            }
         }
+
+        //// POST
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Receive(ReceiveFridgeVm model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        // ✅ Re-populate readonly fields from database
+        //        var fridgeData = await _context.Fridge.FindAsync(model.FridgeId);
+        //        if (fridgeData != null)
+        //        {
+        //            model.Brand = fridgeData.Brand;
+        //            model.Model = fridgeData.Model;
+        //            model.Type = fridgeData.FridgeType;
+        //        }
+
+        //        ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+        //        return View(model);
+        //    }
+
+        //    var fridge = await _context.Fridge.FindAsync(model.FridgeId);
+        //    if (fridge == null)
+        //        return NotFound();
+
+        //    // Update fridge details
+        //    fridge.Quantity = model.Quantity;
+        //    fridge.Status = "Available";
+        //    fridge.SupplierID = model.SupplierId;
+        //    fridge.SerialNumber = model.SerialNumber; // make sure serial number is updated
+        //    fridge.UpdatedDate = DateTime.Now;
+        //    fridge.IsActive = true;
+
+        //    await _context.SaveChangesAsync();
+
+        //    TempData["SuccessMessage"] = "Fridge received and marked as Available!";
+        //    return RedirectToAction(nameof(Index));
+        //}
 
         // --------------------------
         // Update Fridge Status
@@ -172,9 +438,23 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         // Create Purchase Request (GET)
         // --------------------------
         [HttpGet]
-        public IActionResult CreatePurchaseRequest()
+        public async Task<IActionResult> CreatePurchaseRequest(int? fridgeId)
         {
-            return View();
+            var model = new CreatePurchaseRequestViewModel();
+
+            if (fridgeId != null)
+            {
+                var fridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == fridgeId);
+
+                if (fridge != null)
+                {
+                    model.FridgeId = fridge.FridgeId;
+                    model.ItemFullNames = $"{fridge.Brand} - {fridge.FridgeType}";
+                }
+            }
+
+            return View(model);
         }
 
         // --------------------------
@@ -187,6 +467,27 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            // --------------------------
+            // Ensure the fridge exists if fridgeId is provided
+            // --------------------------
+            Fridge? linkedFridge = null;
+            if (model.FridgeId.HasValue)
+            {
+                linkedFridge = await _context.Fridge
+                    .FirstOrDefaultAsync(f => f.FridgeId == model.FridgeId.Value);
+
+                if (linkedFridge != null)
+                {
+                    // Make sure ItemFullNames is consistent
+                    model.ItemFullNames = $"{linkedFridge.Brand} - {linkedFridge.FridgeType}";
+                }
+                else
+                {
+                    // If fridgeId was provided but not found, clear it to avoid null issues
+                    model.FridgeId = null;
+                }
+            }
+
             var newRequest = new PurchaseRequest
             {
                 ItemFullNames = model.ItemFullNames,
@@ -197,8 +498,8 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 RequestDate = DateOnly.FromDateTime(DateTime.Now),
                 Status = "Pending",
                 IsActive = true,
-                FridgeId = model.FridgeId, // optional link (nullable)
-                InventoryID = model.InventoryID != 0 ? model.InventoryID : (int?)null // only set if from stock
+                FridgeId = linkedFridge?.FridgeId, // link fridge only if it exists
+                InventoryID = model.InventoryID != 0 ? model.InventoryID : (int?)null
             };
 
             // Generate unique Request Number
@@ -215,13 +516,13 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return RedirectToAction(nameof(ProcessPurchaseRequests));
         }
 
-
         // --------------------------
         // Process Purchase Requests (List)
         // --------------------------
         public async Task<IActionResult> ProcessPurchaseRequests()
         {
             var requests = await _context.PurchaseRequests
+                .Include(r => r.Fridge)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
@@ -232,7 +533,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 Status = r.Status,
                 Quantity = r.Quantity,
                 ItemFullNames = r.ItemFullNames,
-                RequestNumber = r.RequestNumber
+                RequestNumber = r.RequestNumber,
+                FridgeId = r.FridgeId,
+                Fridge = r.Fridge
             }).ToList();
 
             return View(viewModel);

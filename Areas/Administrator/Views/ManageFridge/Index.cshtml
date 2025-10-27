@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FridgeManagementSystem.Models.Fridge>
+﻿@model FridgeManagementSystem.Models.ManageFridgeViewModel
 
 @{
     ViewData["Title"] = "Manage Fridges";
@@ -7,11 +7,6 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold text-primary mb-0">🧊 Manage Fridges</h2>
-
-    <!-- ✅ Single Request button (outside the table) -->
-    <a asp-action="RequestFridge" class="btn btn-primary px-4 py-2 shadow rounded-pill">
-        ➕ Request New Fridge
-    </a>
 </div>
 
 @if (TempData["Success"] != null)
@@ -21,8 +16,17 @@
     </div>
 }
 
-<div class="card shadow-lg border-0 rounded-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a asp-area="Administrator" asp-controller="ManageEmployee" asp-action="Dashboard"
+       class="btn btn-secondary shadow-sm rounded-3 px-4 fw-semibold">
+        ← Go Back to Dashboard
+    </a>
+</div>
+
+<!-- ✅ All Fridges -->
+<div class="card shadow-lg border-0 rounded-4 mb-5">
     <div class="card-body p-4">
+        <h4 class="fw-semibold text-secondary mb-3">All Fridges</h4>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-primary text-center">
@@ -33,13 +37,16 @@
                     </tr>
                 </thead>
                 <tbody class="text-center">
-                    @foreach (var fridge in Model)
+                    @foreach (var fridge in Model.AllFridges)
                     {
-                        <tr class="shadow-sm" style="transition: all 0.3s ease;">
+                        <tr>
                             <td class="fw-semibold">@fridge.FridgeType</td>
                             <td>@fridge.Brand</td>
                             <td>
-                                <span class="badge @(fridge.Status == "Available" ? "bg-success" : fridge.Status == "Requested" ? "bg-warning text-dark" : "bg-secondary")">
+                                <span class="badge @(fridge.Status == "Available" ? "bg-success" :
+                                                    fridge.Status == "Requested" ? "bg-warning text-dark" :
+                                                    fridge.Status == "Scrapped" ? "bg-danger" :
+                                                    fridge.Status == "Returned" ? "bg-info text-dark" : "bg-secondary")">
                                     @fridge.Status
                                 </span>
                             </td>
@@ -49,6 +56,77 @@
             </table>
         </div>
     </div>
+</div>
+
+<!-- 🗑️ Scrapped Fridges -->
+<div class="card shadow-lg border-0 rounded-4 mb-5">
+    <div class="card-body p-4">
+        <h4 class="fw-semibold text-danger mb-3">Scrapped Fridges</h4>
+        @if (!Model.ScrappedFridges.Any())
+        {
+            <p class="text-muted text-center">No scrapped fridges found.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-danger text-center">
+                        <tr>
+                            <th>Fridge</th>
+                            <th>Brand</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @foreach (var fridge in Model.ScrappedFridges)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@fridge.FridgeType</td>
+                                <td>@fridge.Brand</td>
+                                <td><span class="badge bg-danger">@fridge.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- 🔁 Returned Fridges -->
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-4">
+        <h4 class="fw-semibold text-info mb-3">Returned Fridges</h4>
+        @if (!Model.ReturnedFridges.Any())
+        {
+            <p class="text-muted text-center">No returned fridges found.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-info text-center">
+                        <tr>
+                            <th>Fridge</th>
+                            <th>Brand</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @foreach (var fridge in Model.ReturnedFridges)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@fridge.FridgeType</td>
+                                <td>@fridge.Brand</td>
+                                <td><span class="badge bg-info text-dark">@fridge.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
 </div>
 
 <style>
@@ -62,6 +140,7 @@
             background: #fff;
             border-radius: 1rem;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
 
             .table tbody tr:hover {
@@ -77,190 +156,3 @@
             vertical-align: middle;
         }
 </style>
-
-
-
-
-
-@* @model IEnumerable<FridgeManagementSystem.Models.FridgeViewModel>
-@{
-    ViewData["Title"] = "Fridge Inventory";
-    Layout = "_Layout";
-}
-
-<style>
-    body {
-        background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    h1 {
-        font-weight: bold;
-        color: #1a1a1a;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .btn-back {
-        background: linear-gradient(90deg, #005bea, #00c6fb);
-        color: #fff !important;
-        font-weight: 600;
-        border: none;
-        border-radius: 8px;
-        padding: 8px 20px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease-in-out;
-        text-decoration: none;
-    }
-
-        .btn-back:hover {
-            background: linear-gradient(90deg, #00c6fb, #005bea);
-            transform: scale(1.05);
-        }
-
-    .card {
-        border-radius: 15px;
-        box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
-    }
-
-    .card-header {
-        background: linear-gradient(90deg, #00c6fb, #005bea);
-        color: #fff;
-        border-top-left-radius: 15px;
-        border-top-right-radius: 15px;
-    }
-
-    table {
-        border-radius: 10px;
-        overflow: hidden;
-        background: #fff;
-        box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-    }
-
-    thead th {
-        background: #007bff;
-        color: white;
-        font-weight: bold;
-    }
-
-    tbody tr:hover {
-        background: rgba(0, 123, 255, 0.05);
-        transition: 0.3s;
-    }
-
-    .btn-primary, .btn-info, .btn-success {
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-</style>
-
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <a asp-controller="ManageEmployee" asp-action="Dashboard" class="btn btn-back">
-                ← Go Back to Dashboard
-            </a>
-        </div>
-        <h1 class="h3 mb-0 text-gray-800">Fridge Inventory</h1>
-        <div>
-            <a href="@Url.Action("Create", "ManageFridge", new { area = "Administrator" })" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Add New Fridge
-            </a>
-        </div>
-    </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold">All Fridges</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-sm" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Type</th>
-                            <th>Brand</th>
-                            <th>Model</th>
-                            <th>Serial Number</th>
-                            <th>Condition</th>
-                            <th>Quantity</th>
-                            <th>Status</th>
-                            <th>Under Warranty</th>
-                            <th>Low Stock</th>
-                            <th>Purchase Date</th>
-                            <th>Warranty Expiry</th>
-                            <th>Delivery Date</th>
-                            <th>Supplier</th>
-                            <th>Customer</th>
-                            <th>Location</th>
-                            <th>Allocation Date</th>
-                            <th>Return Date</th>
-                            <th>Last Updated</th>
-                            <th>Active?</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var fridge in Model)
-                        {
-                            <tr>
-                                <td>@fridge.FridgeId</td>
-                                <td>@fridge.FridgeType</td>
-                                <td>@fridge.Brand</td>
-                                <td>@fridge.Model</td>
-                                <td>@fridge.SerialNumber</td>
-                                <td>@fridge.Condition</td>
-                                <td>@fridge.Quantity</td>
-                                <td>@fridge.Status</td>
-                                <td>@(fridge.IsUnderWarranty ? "Yes" : "No")</td>
-                                <td>@(fridge.IsLowStock ? "Yes" : "No")</td>
-                                <td>@fridge.PurchaseDate?.ToString("MM/dd/yyyy")</td>
-                                <td>@fridge.WarrantyExpiry?.ToString("MM/dd/yyyy")</td>
-                                <td>@fridge.DeliveryDate?.ToString("MM/dd/yyyy")</td>
-                                <td>@fridge.SupplierID</td>
-                                <td>@fridge.CustomerName</td>
-                                <td>@(fridge.LocationId ?? 0)</td>
-                                <td>@fridge.AllocationDate?.ToString("MM/dd/yyyy")</td>
-                                <td>@fridge.ReturnDate?.ToString("MM/dd/yyyy")</td>
-                                <td>@fridge.UpdatedDate.ToString("MM/dd/yyyy")</td>
-                                <td>@(fridge.IsActive ? "Yes" : "No")</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a asp-action="Edit" asp-route-id="@fridge.FridgeId" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@fridge.FridgeId"
-                                           class="btn btn-danger btn-sm"
-                                           onclick="return confirm('Are you sure you want to delete this fridge?')">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-6">
-            <a asp-action="InventoryReport" class="btn btn-info btn-icon-split">
-                <span class="icon text-white-50">
-                    <i class="fas fa-chart-bar"></i>
-                </span>
-                <span class="text">View Inventory Report</span>
-            </a>
-        </div>
-        <div class="col-lg-6 text-end">
-            <a asp-action="SupplierReport" class="btn btn-success btn-icon-split">
-                <span class="icon text-white-50">
-                    <i class="fas fa-truck"></i>
-                </span>
-                <span class="text">View Supplier Report</span>
-            </a>
-        </div>
-    </div>
-</div>
- *@

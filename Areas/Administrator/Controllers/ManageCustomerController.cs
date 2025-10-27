@@ -4,6 +4,7 @@ using FridgeManagementSystem.Models;
 using FridgeManagementSystem.Services;
 using FridgeManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -24,16 +25,17 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
         private readonly FridgeDbContext _context;
         private readonly IMaintenanceRequestService _mrService;
         private readonly CustomerService _customerService;   // ✅ use shared service
-
+        private readonly UserManager<ApplicationUser> _userManager;
         public ManageCustomerController(
             FridgeDbContext context,
             IMaintenanceRequestService mrService,
-            CustomerService customerService, INotificationService notificationService)
+            CustomerService customerService, INotificationService notificationService, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _mrService = mrService;
             _customerService = customerService;
             _notificationService = notificationService;
+            _userManager = userManager;
         }
 
         // --------------------------
@@ -449,60 +451,102 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return View(pendingPayments);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyPayment(int paymentId, bool approve)
         {
-            // 1) Load payment (minimal). We'll load the order explicitly after so we don't depend on nav prop names.
+            // 1) Load payment (minimal).
             var payment = await _context.Payments
                 .FirstOrDefaultAsync(p => p.PaymentId == paymentId);
 
             if (payment == null)
                 return NotFound();
 
-            // 2) Load the order that this payment belongs to (explicit query).
-            //    This avoids problems if your nav prop is named Orders vs Order or Customer vs Customers.
+            // 2) Load the order
             var order = await _context.Orders
                 .FirstOrDefaultAsync(o => o.OrderId == payment.OrderId);
 
             if (order == null)
-            {
-                // Optional: set a server log here
-                Console.WriteLine($"VerifyPayment: payment {paymentId} has no associated order (OrderId={payment.OrderId}).");
                 return BadRequest("Associated order not found.");
-            }
 
-            // 3) Load the customer id (explicit)
-            var customerId = order.CustomerID; // adjust property name if different
+            // 3) Get CustomerID (from Orders table)
+            var customerId = order.CustomerID;
 
-            // 4) Update statuses inside a transaction-ish pattern
+            // ✅ NEW: Find the Identity User ID for notifications
+            var customerAppUserIdNullable = await _context.Customers
+    .Where(c => c.CustomerID == customerId)
+    .Select(c => c.ApplicationUserId)
+    .FirstOrDefaultAsync();
+
+            // ✅ Check for null
+            if (!customerAppUserIdNullable.HasValue)
+                return BadRequest("Customer Identity user not found.");
+
+            int customerAppUserId = customerAppUserIdNullable.Value;
+
+
+
             if (approve)
             {
                 payment.Status = "Paid";
                 order.Status = "Paid";
 
-                // Save payment + order status to DB first
                 await _context.SaveChangesAsync();
 
-                // 5) Clear cart using the helper (uses the same DbContext)
-                //    ClearCartAsync finds the latest cart for the customer and clears it.
+                // Clear cart after successful payment
                 await CartHelper.ClearCartAsync(_context, customerId);
-                await _notificationService.CreateAsync(customerId, $"Your payment for Order #{order.OrderId} has been approved.");
+
+                // ✅ Send notification to the *customer’s Identity account*
+                if (customerAppUserId != 0)
+                {
+                    await _notificationService.CreateAsync(
+                        customerAppUserId,
+                        $"Your payment for Order #{order.OrderId} has been approved ✅"
+                    );
+                }
+
+                // ✅ Notify Admins
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                foreach (var admin in admins)
+                {
+                    await _notificationService.CreateAsync(
+                        admin.Id,
+                        $"Payment approved for Order #{order.OrderId} ✅"
+                    );
+                }
             }
             else
             {
                 payment.Status = "Rejected";
                 order.Status = "AwaitingPayment";
-                await _context.SaveChangesAsync();
-                await _notificationService.CreateAsync(customerId, $"Your payment for Order #{order.OrderId} has been rejected. Please retry.");
 
+                await _context.SaveChangesAsync();
+
+                // ✅ Send rejection notification to Customer (Identity)
+                if (customerAppUserId != 0)
+                {
+                    await _notificationService.CreateAsync(
+                        customerAppUserId,
+                        $"Your payment for Order #{order.OrderId} has been rejected ❌ Please retry."
+                    );
+                }
+
+                // ✅ Notify Admins a payment was rejected (optional but useful)
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                foreach (var admin in admins)
+                {
+                    await _notificationService.CreateAsync(
+                        admin.Id,
+                        $"Payment rejected for Order #{order.OrderId} ❌"
+                    );
+                }
             }
 
-            // 7) Reload order.payments if required (safe)
+            // Reload payments safely
             await _context.Entry(order).Collection(o => o.Payments).LoadAsync();
 
             return RedirectToAction("PendingPayments");
         }
+
     }
 }
