@@ -4,153 +4,472 @@
 }
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+    :root {
+        --primary-blue: #2c5aa0;
+        --secondary-blue: #3a7bd5;
+        --accent-teal: #00d2ff;
+        --light-bg: #f8fafc;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
     body {
-        background-color: #f6f8fa;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
         font-family: 'Poppins', sans-serif;
+        min-height: 100vh;
     }
 
-    h2 {
-        color: #0d6efd;
-        font-weight: 600;
+    .supplier-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        padding: 1.5rem 0;
+        border-radius: 0 0 20px 20px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(44, 90, 160, 0.3);
     }
 
-    .dashboard-card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease-in-out;
+    .dashboard-title {
+        font-weight: 700;
+        font-size: 1.8rem;
+        margin: 0;
     }
 
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-        }
-
-    .dashboard-icon {
-        font-size: 2.5rem;
-        opacity: 0.8;
-    }
-
-    .table {
-        background-color: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-        .table thead {
-            background-color: #0d6efd;
-            color: white;
-        }
-
-    .badge {
+    .dashboard-subtitle {
+        opacity: 0.9;
+        font-weight: 300;
         font-size: 0.9rem;
     }
 
-    .search-bar {
-        background-color: white;
-        border-radius: 10px;
-        padding: 15px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    .btn-go-back {
+        background: white;
+        color: var(--primary-blue);
+        border: 2px solid var(--primary-blue);
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .btn-custom {
-        border-radius: 30px;
-        padding: 5px 15px;
+        .btn-go-back:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(44, 90, 160, 0.3);
+        }
+
+    /* Compact Summary Cards */
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
     }
+
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.2rem;
+        box-shadow: var(--card-shadow);
+        border-left: 4px solid;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+
+    .card-total {
+        border-left-color: #667eea;
+    }
+
+    .card-active {
+        border-left-color: #11998e;
+    }
+
+    .card-inactive {
+        border-left-color: #757f9a;
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .icon-total {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .icon-active {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    .icon-inactive {
+        background: linear-gradient(135deg, #757f9a, #d7dde8);
+    }
+
+    .card-content {
+        flex: 1;
+    }
+
+    .card-count {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .card-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .search-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.2rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--accent-teal);
+    }
+
+    .search-input {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+        .search-input:focus {
+            background: white;
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.1);
+        }
+
+    .btn-search {
+        background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-search:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(58, 123, 213, 0.3);
+        }
+
+    /* Improved Table */
+    .supplier-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        border: 1px solid #e2e8f0;
+    }
+
+        .supplier-table thead {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+        }
+
+            .supplier-table thead th {
+                border: none;
+                padding: 1rem 0.8rem;
+                font-weight: 600;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+                white-space: nowrap;
+            }
+
+        .supplier-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+            .supplier-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .supplier-table tbody tr:hover {
+                background-color: #f8fafc;
+            }
+
+        .supplier-table tbody td {
+            padding: 0.9rem 0.8rem;
+            vertical-align: middle;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-weight: 500;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    .badge-active {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .badge-inactive {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-action {
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        border: 1px solid;
+        margin: 1px;
+        white-space: nowrap;
+    }
+
+    .btn-view {
+        background: white;
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+        .btn-view:hover {
+            background: #3b82f6;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    .btn-activate {
+        background: white;
+        border-color: #10b981;
+        color: #10b981;
+    }
+
+        .btn-activate:hover {
+            background: #10b981;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    .btn-deactivate {
+        background: white;
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+        .btn-deactivate:hover {
+            background: #ef4444;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+    .action-buttons {
+        display: flex;
+        gap: 6px;
+        flex-wrap: nowrap;
+    }
+
+    .table-icon {
+        margin-right: 6px;
+        opacity: 0.8;
+        width: 16px;
+        text-align: center;
+    }
+
+    .contact-link {
+        color: #475569;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        .contact-link:hover {
+            color: var(--primary-blue);
+        }
 </style>
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fa-solid fa-snowflake me-2"></i> Supplier Management Dashboard</h2>
-    </div>
-
-    <!-- Dashboard Summary -->
-    <div class="row text-center mb-5">
-        <div class="col-md-4 mb-3">
-            <div class="card dashboard-card bg-primary text-white">
-                <div class="card-body">
-                    <i class="fa-solid fa-warehouse dashboard-icon mb-2"></i>
-                    <h5>Total Suppliers</h5>
-                    <h2>@Model.Total</h2>
-                </div>
+<div class="supplier-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="dashboard-title">
+                    <i class="fa-solid fa-warehouse me-2"></i>Supplier Management
+                </h1>
+                <p class="dashboard-subtitle mb-0">Manage your supplier network and partnerships</p>
             </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card dashboard-card bg-success text-white">
-                <div class="card-body">
-                    <i class="fa-solid fa-toggle-on dashboard-icon mb-2"></i>
-                    <h5>Active Suppliers</h5>
-                    <h2>@Model.Active</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card dashboard-card bg-secondary text-white">
-                <div class="card-body">
-                    <i class="fa-solid fa-toggle-off dashboard-icon mb-2"></i>
-                    <h5>Inactive Suppliers</h5>
-                    <h2>@Model.Inactive</h2>
-                </div>
+            <div class="col-md-4 text-end">
+                <a asp-controller="ManageEmployee" asp-action="Dashboard" class="btn btn-go-back">
+                    <i class="fa-solid fa-arrow-left"></i> Go Back to Dashboard
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Search Bar -->
-    <div class="search-bar mb-4">
-        <form method="get" class="row g-2 align-items-center">
+<div class="container">
+    <!-- Compact Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card card-total">
+            <div class="card-icon icon-total">
+                <i class="fa-solid fa-warehouse"></i>
+            </div>
+            <div class="card-content">
+                <div class="card-count">@Model.Total</div>
+                <div class="card-label">Total Suppliers</div>
+            </div>
+        </div>
+        <div class="summary-card card-active">
+            <div class="card-icon icon-active">
+                <i class="fa-solid fa-toggle-on"></i>
+            </div>
+            <div class="card-content">
+                <div class="card-count">@Model.Active</div>
+                <div class="card-label">Active Suppliers</div>
+            </div>
+        </div>
+        <div class="summary-card card-inactive">
+            <div class="card-icon icon-inactive">
+                <i class="fa-solid fa-toggle-off"></i>
+            </div>
+            <div class="card-content">
+                <div class="card-count">@Model.Inactive</div>
+                <div class="card-label">Inactive Suppliers</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="row align-items-center">
             <div class="col-md-10">
-                <input type="text" name="search" class="form-control form-control-lg" placeholder="🔍 Search suppliers by name, email, or contact...">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0">
+                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                    </span>
+                    <input type="text" name="search" class="form-control search-input" placeholder="Search suppliers by name, email, contact person, or phone...">
+                </div>
             </div>
-            <div class="col-md-2 text-end">
-                <button type="submit" class="btn btn-primary btn-lg w-100 btn-custom"><i class="fa-solid fa-magnifying-glass me-1"></i> Search</button>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-search w-100">
+                    <i class="fa-solid fa-search me-1"></i>Search
+                </button>
             </div>
-        </form>
+        </div>
     </div>
 
-    <!-- Supplier Table -->
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
+    <!-- Improved Supplier Table -->
+    <div class="supplier-table">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
-                    <th><i class="fa-solid fa-building me-1"></i> Name</th>
-                    <th><i class="fa-solid fa-user-tie me-1"></i> Contact Person</th>
-                    <th><i class="fa-solid fa-envelope me-1"></i> Email</th>
-                    <th><i class="fa-solid fa-phone me-1"></i> Phone</th>
-                    <th><i class="fa-solid fa-circle-info me-1"></i> Status</th>
-                    <th style="width: 180px;"><i class="fa-solid fa-gears me-1"></i> Actions</th>
+                    <th><i class="fa-solid fa-building table-icon"></i>Supplier</th>
+                    <th><i class="fa-solid fa-user-tie table-icon"></i>Contact</th>
+                    <th><i class="fa-solid fa-envelope table-icon"></i>Email</th>
+                    <th><i class="fa-solid fa-phone table-icon"></i>Phone</th>
+                    <th><i class="fa-solid fa-circle-info table-icon"></i>Status</th>
+                    <th style="width: 180px;"><i class="fa-solid fa-gears table-icon"></i>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var supplier in Model.Suppliers)
+                @if (Model.Suppliers != null && Model.Suppliers.Count > 0)
+                {
+                    @foreach (var supplier in Model.Suppliers)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@supplier.Name</td>
+                            <td>@supplier.ContactPerson</td>
+                            <td>
+                                <a href="mailto:@supplier.Email" class="contact-link">
+                                    @supplier.Email
+                                </a>
+                            </td>
+                            <td>
+                                <a href="tel:@supplier.Phone" class="contact-link">
+                                    @supplier.Phone
+                                </a>
+                            </td>
+                            <td>
+                                @if (supplier.IsActive)
+                                {
+                                    <span class="status-badge badge-active">
+                                        <i class="fa-solid fa-circle-check me-1"></i>Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge badge-inactive">
+                                        <i class="fa-solid fa-circle-xmark me-1"></i>Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="Details" asp-route-id="@supplier.SupplierID" class="btn btn-action btn-view">
+                                        <i class="fa-solid fa-eye me-1"></i>View
+                                    </a>
+                                    <form asp-action="ToggleStatus" asp-route-id="@supplier.SupplierID" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-action @(supplier.IsActive ? "btn-deactivate" : "btn-activate")">
+                                            <i class="fa-solid @(supplier.IsActive ? "fa-ban" : "fa-check") me-1"></i>
+                                            @(supplier.IsActive ? "Deactivate" : "Activate")
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td>@supplier.Name</td>
-                        <td>@supplier.ContactPerson</td>
-                        <td>@supplier.Email</td>
-                        <td>@supplier.Phone</td>
-                        <td>
-                            @if (supplier.IsActive)
-                            {
-                                <span class="badge bg-success"><i class="fa-solid fa-circle-check me-1"></i> Active</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary"><i class="fa-solid fa-circle-xmark me-1"></i> Inactive</span>
-                            }
-                        </td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@supplier.SupplierID" class="btn btn-sm btn-outline-info btn-custom me-1">
-                                <i class="fa-solid fa-eye"></i> View
-                            </a>
-
-                            <form asp-action="ToggleStatus" asp-route-id="@supplier.SupplierID" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-custom @(supplier.IsActive ? "btn-outline-warning" : "btn-outline-success")">
-                                    <i class="fa-solid @(supplier.IsActive ? "fa-ban" : "fa-check")"></i>
-                                    @(supplier.IsActive ? "Deactivate" : "Activate")
-                                </button>
-                            </form>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-warehouse"></i>
+                                <h5>No Suppliers Found</h5>
+                                <p class="mb-0">Start by adding your first supplier to the system.</p>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -158,3 +477,5 @@
         </table>
     </div>
 </div>
+
+
