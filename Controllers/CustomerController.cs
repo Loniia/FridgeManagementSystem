@@ -121,7 +121,7 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // ==========================
-        // 2. ADD TO CART
+        // 2. ADD TO CART (Updated - No Stock Deduction)
         // ==========================
         [HttpPost]
         public async Task<IActionResult> AddToCart(int fridgeId, int quantity = 1)
@@ -129,13 +129,13 @@ namespace FridgeManagementSystem.Controllers
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0) return RedirectToAction("Login", "Account");
 
+            // Find or create the customer's cart
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
                 .FirstOrDefaultAsync(c => c.CustomerID == customerId);
 
             if (cart == null)
             {
-                // Create new cart if none exists
                 cart = new Cart
                 {
                     CustomerID = customerId,
@@ -146,15 +146,23 @@ namespace FridgeManagementSystem.Controllers
             }
             else if (!cart.IsActive)
             {
-                // Reactivate existing inactive cart instead of creating new one
                 cart.IsActive = true;
                 _context.Carts.Update(cart);
                 await _context.SaveChangesAsync();
             }
 
+            // Find the fridge
             var fridge = await _context.Fridge.FindAsync(fridgeId);
             if (fridge == null) return NotFound();
 
+            // ✅ Check if there is enough stock
+            if (fridge.Quantity < quantity)
+            {
+                TempData["Error"] = $"Not enough stock for {fridge.Brand} {fridge.Model}. Only {fridge.Quantity} left.";
+                return RedirectToAction("Index", "Fridge");
+            }
+
+            // ✅ Add or update cart item
             var existingItem = cart.CartItems.FirstOrDefault(i => i.FridgeId == fridgeId && !i.IsDeleted);
             if (existingItem != null)
             {
@@ -175,11 +183,13 @@ namespace FridgeManagementSystem.Controllers
                 _context.CartItems.Add(newCartItem);
             }
 
+            // ✅ No fridge quantity deduction here (only check stock)
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Item added to cart successfully!";
+            TempData["Success"] = $"{fridge.Brand} {fridge.Model} added to cart successfully!";
             return RedirectToAction("ViewCart");
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -205,13 +215,32 @@ namespace FridgeManagementSystem.Controllers
                 return RedirectToAction("ViewCart");
             }
 
+            // ✅ Get the fridge linked to this cart item
+            var fridge = await _context.Fridge.FindAsync(item.FridgeId);
+            if (fridge != null)
+            {
+                // ✅ Add the quantity back to the fridge stock
+                fridge.Quantity += item.Quantity;
+
+                // ✅ If fridge was out of stock and now has stock, update its status
+                if (fridge.Quantity > 0 && fridge.Status == "Out of Stock")
+                {
+                    fridge.Status = "In Stock";
+                }
+
+                _context.Fridge.Update(fridge);
+            }
+
+            // ✅ Soft delete the cart item (keeps cart history)
             item.IsDeleted = true;
             _context.CartItems.Update(item);
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Item removed from cart.";
 
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Item removed from cart and stock updated.";
             return RedirectToAction("ViewCart");
         }
+
 
         // ==========================
         // 3. VIEW CART
@@ -236,7 +265,7 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // ==========================
-        // 4. CHECKOUT
+        // 4. CHECKOUT (View)
         // ==========================
         public async Task<IActionResult> Checkout()
         {
@@ -258,7 +287,7 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // ==========================
-        // 4. CHECKOUT - POST
+        // 4. CHECKOUT - POST (Confirm Checkout & Reduce Stock)
         // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -278,6 +307,7 @@ namespace FridgeManagementSystem.Controllers
                 return RedirectToAction("ViewCart");
             }
 
+            // ✅ Create new order
             var order = new Order
             {
                 CustomerID = customerId,
@@ -286,11 +316,31 @@ namespace FridgeManagementSystem.Controllers
                 DeliveryAddress = deliveryAddress,
                 ContactName = fullName,
                 ContactPhone = phoneNumber,
-                TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity)
+                TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity),
+                OrderItems = new List<OrderItem>()
             };
 
+            // ✅ Reduce stock and add order items
             foreach (var ci in cart.CartItems)
             {
+                var fridge = ci.Fridge;
+
+                if (fridge.Quantity >= ci.Quantity)
+                {
+                    fridge.Quantity -= ci.Quantity;
+
+                    if (fridge.Quantity <= 0)
+                        fridge.Status = "Out of Stock";
+
+                    _context.Fridge.Update(fridge);
+                }
+                else
+                {
+                    TempData["Error"] = $"Not enough stock for {fridge.Brand} {fridge.Model}.";
+                    return RedirectToAction("ViewCart");
+                }
+
+                // ✅ Add each cart item to order items
                 order.OrderItems.Add(new OrderItem
                 {
                     FridgeId = ci.FridgeId,
@@ -299,11 +349,19 @@ namespace FridgeManagementSystem.Controllers
                 });
             }
 
+            // ✅ Save order and update cart
             _context.Orders.Add(order);
+
+            // Mark cart as inactive after checkout
+            cart.IsActive = false;
+            _context.Carts.Update(cart);
+
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Checkout completed successfully! Your order has been placed.";
             return RedirectToAction("AddCard", new { orderId = order.OrderId });
         }
+
 
         // ✅ DEBUG VERSION: Check for pending orders and resume checkout
         public async Task<IActionResult> ResumeCheckout()
