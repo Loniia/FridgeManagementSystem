@@ -14,7 +14,7 @@ namespace CustomerManagementSubSystem.Models
 
         [Required]
         [StringLength(50)]
-        public string Model { get; set; }
+        public string ModelName { get; set; }
 
       
         public string Type { get; set; }

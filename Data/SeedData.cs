@@ -1,5 +1,6 @@
 ﻿using FridgeManagementSystem.Models;
 using Microsoft.AspNetCore.Identity;
+using FridgeManagementSystem.Utilities;
 
 namespace FridgeManagementSystem.Data
 {
@@ -59,12 +60,18 @@ namespace FridgeManagementSystem.Data
                 for (int i = 1; i <= 30; i++)
                 {
                     bool isAvailable = i % 2 == 0; // half available, half received
+                    string brand = brands[rnd.Next(brands.Length)];
+                    string type = types[rnd.Next(types.Length)];
+
+                    // Generate serial number
+                    string serialNumber = SerialNumberGenerator.GenerateFridgeSerialNumber(brand, type, i);
 
                     fridges.Add(new Fridge
                     {
-                        FridgeType = types[rnd.Next(types.Length)],
-                        Brand = brands[rnd.Next(brands.Length)],
+                        FridgeType = type,
+                        Brand = brand,
                         Model = $"Model-{i}",
+                        SerialNumber = serialNumber, // ✅ Add serial number
                         Condition = "Working",
                         SupplierID = 1,
                         Price = rnd.Next(3500, 12000),  // Random realistic price
@@ -72,13 +79,49 @@ namespace FridgeManagementSystem.Data
                         IsActive = true,
                         Quantity = isAvailable ? rnd.Next(3, 15) : 0, // only available ones have quantity
                         Status = isAvailable ? "Available" : "Received", // Available = in stock, Received = out of stock
-                        DeliveryDate = DateTime.Now
+                        DateAdded = DateOnly.FromDateTime(DateTime.Now.AddDays(-rnd.Next(1, 30))), // Random dates
+                        UpdatedDate = DateTime.Now
                     });
                 }
 
                 context.Fridge.AddRange(fridges);
                 await context.SaveChangesAsync();
             }
+
+            //// ---------------------------
+            //// 🌟 Seed Fridges if not exist
+            //// ---------------------------
+            //if (!context.Fridge.Any())
+            //{
+            //    var rnd = new Random();
+            //    var brands = new[] { "LG", "Samsung", "Bosch", "Hisense", "Defy" };
+            //    var types = new[] { "Single Door", "Double Door", "Side-by-Side", "Mini Fridge" };
+
+            //    var fridges = new List<Fridge>();
+
+            //    for (int i = 1; i <= 30; i++)
+            //    {
+            //        bool isAvailable = i % 2 == 0; // half available, half received
+
+            //        fridges.Add(new Fridge
+            //        {
+            //            FridgeType = types[rnd.Next(types.Length)],
+            //            Brand = brands[rnd.Next(brands.Length)],
+            //            Model = $"Model-{i}",
+            //            Condition = "Working",
+            //            SupplierID = 1,
+            //            Price = rnd.Next(3500, 12000),  // Random realistic price
+            //            ImageUrl = $"/images/fridges/fridge{i}.jpg",
+            //            IsActive = true,
+            //            Quantity = isAvailable ? rnd.Next(3, 15) : 0, // only available ones have quantity
+            //            Status = isAvailable ? "Available" : "Received", // Available = in stock, Received = out of stock
+            //            DeliveryDate = DateTime.Now
+            //        });
+            //    }
+
+            //    context.Fridge.AddRange(fridges);
+            //    await context.SaveChangesAsync();
+            //}
         }
     }
 }

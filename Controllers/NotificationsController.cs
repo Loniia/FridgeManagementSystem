@@ -1,4 +1,4 @@
-﻿using FridgeManagementSystem.Models;
+﻿ using FridgeManagementSystem.Models;
 using FridgeManagementSystem.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

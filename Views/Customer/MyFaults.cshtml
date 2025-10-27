@@ -4,6 +4,10 @@
     ViewData["Title"] = "My Reported Faults";
 }
 
+<a asp-action="Dashboard" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+</a>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -122,9 +126,6 @@
                 <div class="card-footer">
                     <a asp-action="CreateFault" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Report New Fault
-                    </a>
-                    <a asp-action="Dashboard" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Dashboard
                     </a>
                 </div>
             </div>
