@@ -91,7 +91,7 @@
         <strong>Debug Info:</strong><br />
         FridgeId: @Model.FridgeId<br />
         Brand: @Model.Brand<br />
-        Model: @Model.Model<br />
+        Model: @Model.ModelName<br />
         Type: @Model.Type<br />
         PurchaseRequestID: @Model.PurchaseRequestID<br />
     </div>
@@ -105,7 +105,7 @@
         <input type="hidden" asp-for="FridgeId" />
         <input type="hidden" asp-for="PurchaseRequestID" />
         <input type="hidden" asp-for="Brand" />
-        <input type="hidden" asp-for="Model" />
+        <input type="hidden" asp-for="ModelName" />
         <input type="hidden" asp-for="Type" />
 
         <!-- Display Fields (readonly for show) -->
@@ -121,7 +121,7 @@
 
         <div class="mb-3">
             <label class="form-label">Model</label>
-            <input class="form-control" value="@Model.Model" readonly />
+            <input class="form-control" value="@Model.ModelName" readonly />
         </div>
 
         <!-- Serial Number (editable) -->

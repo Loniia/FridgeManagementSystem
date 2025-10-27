@@ -1,28 +1,192 @@
-﻿@model FridgeManagementSystem.Models.DeliveryNote
+﻿@model IEnumerable<FridgeManagementSystem.Models.DeliveryNote>
 
 @{
-    ViewData["Title"] = "Delivery Note Details";
+    ViewData["Title"] = "Delivery Notes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    var totalCount = Model.Count();
+    var verifiedCount = Model.Count(dn => dn.IsVerified);
+    var receivedInInventoryCount = Model.Count(dn => dn.IsReceivedInInventory);
+    var activeCount = Model.Count(dn => dn.IsActive);
 }
 
-<h2>Delivery Note Details</h2>
+<style>
+    .delivery-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .delivery-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-verified { background: #e8f5e8; color: #2e7d32; }
+    .status-pending { background: #fff3e0; color: #ef6c00; }
+    .status-received { background: #e3f2fd; color: #1565c0; }
+</style>
 
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">Delivery Note ID</dt>
-        <dd class="col-sm-10">@Model.DeliveryNoteID</dd>
-        
-        <dt class="col-sm-2">Purchase Order</dt>
-        <dd class="col-sm-10">@Model.PurchaseOrderId</dd>
-        
-        <dt class="col-sm-2">Supplier</dt>
-        <dd class="col-sm-10">@Model.Supplier?.Name</dd>
-        
-        <dt class="col-sm-2">Delivery Date</dt>
-        <dd class="col-sm-10">@Model.DeliveryDate.ToString("yyyy-MM-dd")</dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.DeliveryNoteID" class="btn btn-warning">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary">
+                <i class="fas fa-truck-loading me-2"></i>Delivery Notes
+            </h2>
+            <p class="text-muted mb-0">All delivery notes for received fridge shipments</p>
+        </div>
+        <div>
+            <a asp-controller="PurchaseOrders" asp-action="Index" class="btn btn-outline-primary me-2">
+                <i class="fas fa-arrow-left me-1"></i>Back to POs
+            </a>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>New Delivery Note
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                    <h4>@totalCount</h4>
+                    <p class="mb-0">Total Deliveries</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4>@verifiedCount</h4>
+                    <p class="mb-0">Verified</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-warehouse fa-2x mb-2"></i>
+                    <h4>@receivedInInventoryCount</h4>
+                    <p class="mb-0">In Inventory</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-toggle-on fa-2x mb-2"></i>
+                    <h4>@activeCount</h4>
+                    <p class="mb-0">Active</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery Notes Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Delivery Notes</h5>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-truck fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Delivery Notes Yet</h5>
+                    <p class="text-muted">Delivery notes will appear here once shipments are received.</p>
+                    <a asp-action="Create" class="btn btn-primary">Create First Delivery Note</a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>DN Number</th>
+                                <th>Purchase Order</th>
+                                <th>Supplier</th>
+                                <th>Delivery Date</th>
+                                <th>Quantity</th>
+                                <th>Received By</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dn in Model.OrderByDescending(dn => dn.DeliveryDate))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">@dn.DeliveryNumber</strong>
+                                    </td>
+                                    <td>@dn.purchaseOrder?.PONumber</td>
+                                    <td>@dn.Supplier?.Name</td>
+                                    <td>@dn.DeliveryDate.ToString("dd MMM yyyy")</td>
+                                    <td>@dn.QuantityDelivered</td>
+                                    <td>@dn.ReceivedBy</td>
+                                    <td>
+                                        <div class="d-flex flex-column gap-1">
+                                            @if (dn.IsVerified)
+                                            {
+                                                <span class="badge bg-success">Verified</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Pending</span>
+                                            }
+                                            @if (dn.IsReceivedInInventory)
+                                            {
+                                                <span class="badge bg-info">In Inventory</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <a asp-action="Details" asp-route-id="@dn.DeliveryNoteID" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@dn.DeliveryNoteID" 
+                                               class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            @if (!dn.IsVerified)
+                                            {
+                                                <form asp-action="Verify" asp-route-id="@dn.DeliveryNoteID" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-outline-success btn-sm" title="Verify Delivery">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            @if (!dn.IsReceivedInInventory && dn.IsVerified)
+                                            {
+                                                <form asp-action="MarkAsReceived" asp-route-id="@dn.DeliveryNoteID" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-outline-info btn-sm" title="Mark as Received in Inventory">
+                                                        <i class="fas fa-warehouse"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
 </div>

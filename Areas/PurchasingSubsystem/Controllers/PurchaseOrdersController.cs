@@ -19,7 +19,13 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
         // GET: PurchaseOrders
         public async Task<IActionResult> Index()
         {
-            return View(await _context.PurchaseOrders.ToListAsync());
+            var purchaseOrders = await _context.PurchaseOrders
+                .Include(po => po.Supplier)
+                .Include(po => po.Quotation)
+                .OrderByDescending(po => po.OrderDate)
+                .ToListAsync();
+
+            return View(purchaseOrders);
         }
 
 

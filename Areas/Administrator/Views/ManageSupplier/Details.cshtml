@@ -1,0 +1,71 @@
+﻿@model FridgeManagementSystem.Models.Supplier
+@{
+    ViewData["Title"] = "Supplier Details";
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4><i class="fa-solid fa-building me-2"></i>@Model.Name</h4>
+            <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary") p-2">
+                @(Model.IsActive ? "Active" : "Inactive")
+            </span>
+        </div>
+        <div class="card-body">
+            <p><i class="fa-solid fa-user-tie me-2 text-primary"></i><strong>Contact Person:</strong> @Model.ContactPerson</p>
+            <p><i class="fa-solid fa-envelope me-2 text-primary"></i><strong>Email:</strong> @Model.Email</p>
+            <p><i class="fa-solid fa-phone me-2 text-primary"></i><strong>Phone:</strong> @Model.Phone</p>
+            <p><i class="fa-solid fa-location-dot me-2 text-primary"></i><strong>Address:</strong> @Model.Address</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-info text-white">
+            <i class="fa-solid fa-file-invoice-dollar me-2"></i>Linked Quotations
+        </div>
+        <div class="card-body">
+            @if (Model.Quotations.Any())
+            {
+                <ul class="list-group">
+                    @foreach (var q in Model.Quotations)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Quotation #@q.QuotationID
+                            <span class="badge bg-primary">@q.QuotationAmount.ToString("C")</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">No quotations linked yet.</p>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">
+            <i class="fa-solid fa-cart-shopping me-2"></i>Linked Purchase Orders
+        </div>
+        <div class="card-body">
+            @if (Model.PurchaseOrders.Any())
+            {
+                <ul class="list-group">
+                    @foreach (var po in Model.PurchaseOrders)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Order #: @po.PONumber
+                            <span class="badge bg-secondary">@po.Status</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">No purchase orders linked yet.</p>
+            }
+        </div>
+    </div>
+</div>
+}

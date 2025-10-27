@@ -215,6 +215,8 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
             return RedirectToAction(nameof(Pending));
         }
 
+
+
         // GET: PurchasingSubsystem/ProcessPurchaseRequests/Stats
         public async Task<IActionResult> Stats()
         {
