@@ -245,10 +245,10 @@
 
                 // Load maintenance data first
                 await loadMaintenanceData();
-
+                
                 // Then load customer data
                 await loadCustomerReports();
-
+                
             } catch (error) {
                 debugLog('Error initializing charts:', error);
                 showError('Error loading charts: ' + error.message);
@@ -260,9 +260,9 @@
             const errorDiv = document.createElement('div');
             errorDiv.className = 'alert alert-danger alert-dismissible fade show';
             errorDiv.innerHTML = `
-                        <strong>Error!</strong> ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
+                <strong>Error!</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
             document.querySelector('.container-fluid').prepend(errorDiv);
         }
 
@@ -271,11 +271,11 @@
         // =============================================
         async function loadMaintenanceData() {
             debugLog('Loading maintenance data...');
-
+            
             try {
                 // Use a simple test data if controller actions don't exist
                 const maintenanceData = await tryLoadMaintenanceData();
-
+                
                 if (maintenanceData) {
                     await createMaintenanceCharts(maintenanceData);
                 } else {
@@ -331,13 +331,13 @@
 
                 // Create maintenance trends chart
                 createMaintenanceTrendsChart(data.trends);
-
+                
                 // Create status distribution chart
                 createStatusDistributionChart(data.statusDistribution);
-
+                
                 // Create technician performance chart
                 createTechnicianPerformanceChart(data.technicians);
-
+                
             } catch (error) {
                 debugLog('Error creating maintenance charts:', error);
             }
@@ -346,7 +346,7 @@
         function createMaintenanceTrendsChart(data) {
             try {
                 const ctx = document.getElementById('maintenanceTrendsChart').getContext('2d');
-
+                
                 new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -491,11 +491,11 @@
         // =============================================
         async function loadCustomerReports() {
             debugLog('Loading customer reports...');
-
+            
             try {
                 // Use a simple test data if controller actions don't exist
                 const customerData = await tryLoadCustomerData();
-
+                
                 if (customerData) {
                     await createCustomerCharts(customerData);
                 } else {
@@ -551,19 +551,19 @@
 
                 // Create customer status chart
                 createCustomerStatusChart(data.customerStatus);
-
+                
                 // Create location distribution chart
                 createLocationDistributionChart(data.locations);
-
+                
                 // Update allocation summary table
                 updateAllocationSummaryTable(data.allocationSummary);
-
+                
                 // Create allocation trends chart
                 createAllocationTrendsChart(data.trends);
-
+                
                 // Create top customers chart
                 createTopCustomersChart(data.topCustomers);
-
+                
             } catch (error) {
                 debugLog('Error creating customer charts:', error);
             }
@@ -644,18 +644,18 @@
                 const tableBody = document.getElementById('fridgeAllocationSummary');
                 if (data && data.length > 0) {
                     tableBody.innerHTML = data.map(item => `
-                                <tr>
-                                    <td>${item.status}</td>
-                                    <td class="text-end">${item.count}</td>
-                                    <td class="text-end">${item.percentage}%</td>
-                                </tr>
-                            `).join('');
+                        <tr>
+                            <td>${item.status}</td>
+                            <td class="text-end">${item.count}</td>
+                            <td class="text-end">${item.percentage}%</td>
+                        </tr>
+                    `).join('');
                 } else {
                     tableBody.innerHTML = `
-                                <tr><td>Allocated</td><td class="text-end">67</td><td class="text-end">65%</td></tr>
-                                <tr><td>Returned</td><td class="text-end">25</td><td class="text-end">24%</td></tr>
-                                <tr><td>Scrapped</td><td class="text-end">11</td><td class="text-end">11%</td></tr>
-                            `;
+                        <tr><td>Allocated</td><td class="text-end">67</td><td class="text-end">65%</td></tr>
+                        <tr><td>Returned</td><td class="text-end">25</td><td class="text-end">24%</td></tr>
+                        <tr><td>Scrapped</td><td class="text-end">11</td><td class="text-end">11%</td></tr>
+                    `;
                 }
                 debugLog('Allocation summary table updated successfully');
             } catch (error) {
@@ -865,4 +865,4 @@
     .alert {
         margin-bottom: 1rem;
     }
-</style>
+</style> 
