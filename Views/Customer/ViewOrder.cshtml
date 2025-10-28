@@ -15,7 +15,7 @@
 </div>
 
 <h2 class="mb-3">Order #@Model.OrderId</h2>
-<p><strong>Date:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+<p><strong>Date:</strong> @(Model.OrderDate.HasValue ? Model.OrderDate.Value.ToString("dd/MM/yyyy") : "")</p>
 
 <!-- Order Summary -->
 <div class="card mb-4">

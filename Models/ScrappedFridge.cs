@@ -12,7 +12,7 @@ namespace FridgeManagementSystem.Models
         public string Reason { get; set; }
         [Required]
         [DataType(DataType.Date)]
-        public DateOnly ScrapDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateOnly? ScrapDate { get; set; }
 
         //Navigation Property
         public virtual Fridge Fridge { get; set; }

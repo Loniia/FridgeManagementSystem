@@ -227,11 +227,12 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
                 ApprovedRequests = await _context.PurchaseRequests.CountAsync(pr => pr.Status == "Approved" && pr.IsActive),
                 RejectedRequests = await _context.PurchaseRequests.CountAsync(pr => pr.Status == "Rejected" && pr.IsActive),
                 ThisMonthRequests = await _context.PurchaseRequests.CountAsync(pr =>
-                    pr.RequestDate.Year == DateTime.Now.Year &&
-                    pr.RequestDate.Month == DateTime.Now.Month &&
-                    pr.IsActive)
+                    pr.IsActive &&
+                    pr.RequestDate.HasValue &&
+                    pr.RequestDate.Value.Year == DateTime.Now.Year &&
+                    pr.RequestDate.Value.Month == DateTime.Now.Month
+                )
             };
-
             return View(stats);
         }
 

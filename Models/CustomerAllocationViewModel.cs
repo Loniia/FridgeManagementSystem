@@ -15,8 +15,8 @@ namespace FridgeManagementSystem.Models
 
         [Required(ErrorMessage = "Return date is required")]
         [DataType(DataType.Date)]
-        [FutureDate(ErrorMessage = "Return date cannot be in the past")]
-        public DateOnly? ReturnDate { get; set; } 
+        [ValidAllocationDate(ErrorMessage = "Return date cannot be older than 6 months.")]
+        public DateOnly? ReturnDate { get; set; }
 
         public string Status { get; set; } = "Pending";
 
@@ -31,14 +31,15 @@ namespace FridgeManagementSystem.Models
         public List<CustomerOrderItemViewModel> OrderItems { get; set; } = new List<CustomerOrderItemViewModel>();
     }
 
-    // Optional: Add custom validation attribute for future dates
-    public class FutureDateAttribute : ValidationAttribute
+    // ✅ Custom validation to allow only past 6 months and future dates
+    public class ValidAllocationDateAttribute : ValidationAttribute
     {
         public override bool IsValid(object value)
         {
-            if (value is DateTime date)
+            if (value is DateOnly date)
             {
-                return date >= DateTime.Today;
+                DateOnly sixMonthsAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-6));
+                return date >= sixMonthsAgo; // allows past 6 months, present, and future
             }
             return false;
         }

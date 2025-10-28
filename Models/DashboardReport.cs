@@ -10,8 +10,5 @@
         public int CompletedFaults { get; set; }
         public int ScheduledMaintenance { get; set; }
         public int PendingPurchaseRequests { get; set; }
-        //public List<FridgeStatusSummary> FridgeStatusSummary { get; set; }
-        //public List<FaultStatusSummary> FaultStatusSummary { get; set; }
-        //public List<MonthlyAllocation> MonthlyAllocations { get; set; }
     }
 }

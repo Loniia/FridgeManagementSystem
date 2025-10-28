@@ -16,7 +16,7 @@ namespace FridgeManagementSystem.Models
         [HiddenInput(DisplayValue = false)]
         public int? InventoryID { get; set; }
 
-        public DateOnly RequestDate { get; set; }
+        public DateOnly? RequestDate { get; set; }
 
         [Required]
         [StringLength(100)]

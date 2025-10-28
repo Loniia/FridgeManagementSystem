@@ -47,7 +47,11 @@
     <!-- Registration Date -->
     <div class="form-group mb-2">
         <label asp-for="RegistrationDate" class="form-label"></label>
-        <input asp-for="RegistrationDate" type="date" class="form-control" />
+        <input asp-for="RegistrationDate"
+               type="date"
+               class="form-control"
+               min="@DateTime.Now.AddMonths(-6).ToString("yyyy-MM-dd")"
+               max="@DateTime.Now.ToString("yyyy-MM-dd")" />
         <span asp-validation-for="RegistrationDate" class="text-danger"></span>
     </div>
 

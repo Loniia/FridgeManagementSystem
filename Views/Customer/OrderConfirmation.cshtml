@@ -10,7 +10,7 @@
     <!-- Order Info Card -->
     <div class="card shadow-sm p-4 mb-4 border-0 rounded-4" style="background: #f8f9fa;">
         <p><strong>Status:</strong> <span class="badge bg-info text-dark">@Model.Status</span></p>
-        <p><strong>Order Date:</strong> @Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</p>
+        <p><strong>Order Date:</strong> @(Model.OrderDate.HasValue ? Model.OrderDate.Value.ToString("yyyy-MM-dd") : "")</p>
         <p><strong>Delivery Address:</strong> @Model.DeliveryAddress</p>
         <p><strong>Total:</strong> <span class="fs-5 fw-bold text-success">@($"R{Model.TotalAmount:0.00}")</span></p>
     </div>

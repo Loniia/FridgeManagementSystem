@@ -7,19 +7,17 @@ namespace FridgeManagementSystem.Models
 {
     public class Customer
     {
-
         [Key]
-        public int CustomerID { get; set; } 
+        public int CustomerID { get; set; }
 
         [Required(ErrorMessage = "Full name is required")]
         [StringLength(100, MinimumLength = 2)]
         public string FullName { get; set; }
 
         [Required(ErrorMessage = "Contact info is required")]
-        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-         ErrorMessage = "Provide valid email address")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Provide valid email address")]
         public string Email { get; set; }
- 
+
         [ForeignKey("Location")]
         public int LocationId { get; set; }
 
@@ -28,36 +26,40 @@ namespace FridgeManagementSystem.Models
         [Phone(ErrorMessage = "Invalid Phone Number")]
         public string PhoneNumber { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime? UpdatedAt { get; set; } //for the notification
+        // ✅ Allow manual or past entry of date
+        [DataType(DataType.Date)]
+        [Display(Name = "Created At")]
+        public DateTime CreatedAt { get; set; }
 
+        public DateTime? UpdatedAt { get; set; } // for notifications
+
+        // ✅ Allow choosing a past registration date
         [Required]
         [DataType(DataType.Date)]
-        public DateOnly RegistrationDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        
+        [Display(Name = "Registration Date")]
+        public DateOnly RegistrationDate { get; set; }
+
         public ApplicationUser UserAccount { get; set; }
-        public bool IsVerified { get; set; } = false;     // Admin must verify
+        public bool IsVerified { get; set; } = false;
         public bool IsActive { get; set; } = true;
 
-        //Added by Idah
-        //shebeen,Spaza,Restaurant,Supermarket 
         [Required(ErrorMessage = "ShopType is required")]
         [EnumDataType(typeof(ShopType))]
         public ShopType ShopType { get; set; }
 
-        //When you delete a user, their Customer profile is also deleted.
         public int? ApplicationUserId { get; set; }
+
         [Required]
         [StringLength(200)]
         public string SecurityQuestion { get; set; }
 
         [Required]
         public string SecurityAnswerHash { get; set; }
+
         public ICollection<FaultReport> FaultReports { get; set; }
-       
         public ICollection<CustomerNote> CustomerNote { get; set; }
 
-        //Navigation Property
+        // Navigation properties
         public virtual Cart Cart { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<FridgeAllocation> FridgeAllocation { get; set; }
@@ -65,12 +67,9 @@ namespace FridgeManagementSystem.Models
         public virtual Location Location { get; set; }
         public virtual ICollection<Fault> Faults { get; set; } = new List<Fault>();
         public virtual ICollection<Fridge> Fridge { get; set; }
-        //For being rejected 
         public ICollection<CustomerNotification> CustomerNotifications { get; set; }
-        //public virtual ICollection<BussinessInfo> BussinessInfo { get; set; }
 
-        // Add computed property for display
-        [NotMapped] // This won't be stored in database
+        [NotMapped]
         public string StatusDisplay => IsActive ? "Active" : "Inactive";
 
         [NotMapped]

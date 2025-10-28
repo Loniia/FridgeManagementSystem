@@ -16,7 +16,7 @@ namespace FridgeManagementSystem.Models
 
         [Required]
         [DataType(DataType.Date)]
-        public DateOnly RequestDate { get; set; } 
+        public DateOnly? RequestDate { get; set; } 
        
         [Required]
         [StringLength(100)]
