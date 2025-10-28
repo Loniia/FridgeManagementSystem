@@ -62,12 +62,12 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             model.PendingRequestsNeedingScheduling = pendingRequests.Select(r => new MaintenanceRequestSummary
             {
                 MaintenanceRequestId = r.MaintenanceRequestId,
-                RequestDate = r.RequestDate,
+                RequestDate = r.RequestDate ?? DateTime.MinValue, // handle null safely
                 FridgeBrand = r.Fridge?.Brand ?? "Unknown",
                 FridgeModel = r.Fridge?.Model ?? "Unknown",
                 CustomerName = r.Fridge?.Customer?.FullName ?? "Unknown",
                 CustomerAddress = r.Fridge?.Customer?.Location?.Address ?? "Address not available",
-                DaysPending = (DateTime.Now - r.RequestDate).Days
+                DaysPending = (int)((DateTime.Now - (r.RequestDate ?? DateTime.Now)).TotalDays) // handle null safely
             }).ToList();
 
             return View(model);
