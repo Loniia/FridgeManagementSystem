@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+#nullable disable
 
 namespace FridgeManagementSystem.Models
 {
@@ -10,7 +11,7 @@ namespace FridgeManagementSystem.Models
 
         [DataType(DataType.Date)]
 
-        public DateTime RequestDate { get; set; } = DateTime.Now;
+        public DateTime? RequestDate { get; set; } = DateTime.Now;
 
         [EnumDataType(typeof(TaskStatus))]
         public TaskStatus TaskStatus { get; set; } = TaskStatus.Pending;

@@ -30,7 +30,7 @@ namespace CustomerManagementSubSystem.Models
         public int Quantity { get; set; }  // 🆕 Number of fridges received
 
         [Required]
-        public DateTime DateAdded { get; set; } = DateTime.Now;
+        public DateOnly? DateAdded { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         //  Status field for Received/Available
         [Required(ErrorMessage = "Please select a status")]
         [StringLength(20)]

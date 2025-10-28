@@ -96,16 +96,21 @@ namespace FridgeManagementSystem.Controllers
         public async Task<JsonResult> MonthlySales(int months = 12)
         {
             var startDate = DateTime.UtcNow.AddMonths(-months + 1);
+
             var data = await _context.Orders
-                .Where(o => o.OrderDate >= startDate)
-                .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .Where(o => o.OrderDate.HasValue && o.OrderDate.Value >= startDate)
+                .GroupBy(o => new {
+                    Year = o.OrderDate.Value.Year,
+                    Month = o.OrderDate.Value.Month
+                })
                 .Select(g => new
                 {
                     g.Key.Year,
                     g.Key.Month,
                     TotalAmount = g.Sum(x => x.TotalAmount)
                 })
-                .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                .OrderBy(x => x.Year)
+                .ThenBy(x => x.Month)
                 .ToListAsync();
 
             return Json(data);

@@ -164,7 +164,11 @@
                         </td>
 
                         <!-- Requested Date -->
-                        <td>@request.RequestDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @request.RequestDate.HasValue
+                            ? request.RequestDate.Value.ToString("yyyy-MM-dd")
+                            : "-"
+                        </td>
 
                         <!-- ACTION COLUMN - Receive New Fridge Button -->
                         <td>

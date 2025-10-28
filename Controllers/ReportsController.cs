@@ -159,15 +159,18 @@ namespace FridgeManagementSystem.Controllers
             return Json(result);
         }
 
-        // ✅ Allocation Trends
         [HttpGet]
         public async Task<IActionResult> GetAllocationTrendsData()
         {
             var sixMonthsAgo = DateTime.Today.AddMonths(-6);
 
             var trends = await _context.FridgeAllocation
-                .Where(a => a.AllocationDate >= DateOnly.FromDateTime(sixMonthsAgo))
-                .GroupBy(a => new { Year = a.AllocationDate.Year, Month = a.AllocationDate.Month })
+                .Where(a => a.AllocationDate.HasValue && a.AllocationDate.Value >= DateOnly.FromDateTime(sixMonthsAgo))
+                .GroupBy(a => new
+                {
+                    Year = a.AllocationDate.Value.Year,
+                    Month = a.AllocationDate.Value.Month
+                })
                 .Select(g => new
                 {
                     Year = g.Key.Year,

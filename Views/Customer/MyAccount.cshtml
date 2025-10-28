@@ -45,7 +45,7 @@
 
                                 <tr style="transition: transform 0.2s, box-shadow 0.2s;">
                                     <td>@o.OrderId</td>
-                                    <td>@o.OrderDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@(o.OrderDate.HasValue ? o.OrderDate.Value.ToString("yyyy-MM-dd") : "")</td>
                                     <td>@($"R{o.TotalAmount:0.00}")</td>
                                     <td><span class="badge @badgeClass">@o.Status</span></td>
                                     <td>

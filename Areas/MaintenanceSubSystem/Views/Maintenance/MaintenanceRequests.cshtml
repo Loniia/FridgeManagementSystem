@@ -342,7 +342,7 @@
                         <td>@requests.Fridge?.Customer?.Location.Address</td>
                         <td>@requests.Fridge?.Brand</td>
                         <td>@requests.Fridge?.Model</td>
-                        <td>@requests.RequestDate.ToString("yyyy-MM-dd")</td>
+                        <td>@(requests.RequestDate.HasValue ? requests.RequestDate.Value.ToString("yyyy-MM-dd") : "")</td>
                         <td>
                             @if (requests.TaskStatus.ToString() == "Pending")
                             {

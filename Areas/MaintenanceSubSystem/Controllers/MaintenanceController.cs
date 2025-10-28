@@ -389,17 +389,17 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 MaintenanceVisit nextVisit = null;
                 if (nextRequest != null)
                 {
-                    nextVisit = new MaintenanceVisit
-                    {
-                        MaintenanceRequestId = nextRequest.MaintenanceRequestId,
-                        FridgeId = visit.FridgeId,
-                        ScheduledDate = nextRequest.RequestDate,
-                        ScheduledTime = visit.ScheduledTime,
-                        Status = Models.TaskStatus.Scheduled,
-                        EmployeeID = visit.EmployeeID
-                    };
+                nextVisit = new MaintenanceVisit
+                {
+                    MaintenanceRequestId = nextRequest.MaintenanceRequestId,
+                    FridgeId = visit.FridgeId,
+                    ScheduledDate = nextRequest.RequestDate ?? DateTime.Today, // fallback to today
+                    ScheduledTime = visit.ScheduledTime,
+                    Status = Models.TaskStatus.Scheduled,
+                    EmployeeID = visit.EmployeeID
+                };
 
-                    _context.MaintenanceVisit.Add(nextVisit);
+                _context.MaintenanceVisit.Add(nextVisit);
                     await _context.SaveChangesAsync();
                 }
 
