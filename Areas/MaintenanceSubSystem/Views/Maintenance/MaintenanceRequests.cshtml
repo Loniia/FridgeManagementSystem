@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<FridgeManagementSystem.Models.MaintenanceRequest>
 @{
-    ViewData["Title"] = "MaintenanceRequests";
+    ViewData["Title"] = "Request Tracking";
 }
 
 <style>
@@ -295,12 +295,31 @@
         </div>
     }
 
-    <h1>Maintenance Requests</h1>
+    <h1>Request Tracking</h1>
+    <form method="get" asp-action="MaintenanceRequests" class="d-flex mb-2" style="margin-bottom:10px;">
+        <select name="statusFilter" class="form-control me-2" onchange="this.form.submit()">
+            <text>
+            <option value="" selected="@(string.IsNullOrEmpty(ViewBag.SelectedStatus) ? "selected" : null)">All</option>
+            <option value="Pending" selected="@(ViewBag.SelectedStatus == "Pending" ? "selected" : null)">Pending</option>
+            <option value="Scheduled" selected="@(ViewBag.SelectedStatus == "Scheduled" ? "selected" : null)">Scheduled</option>
+            <option value="InProgress" selected="@(ViewBag.SelectedStatus == "InProgress" ? "selected" : null)">In Progress</option>
+            <option value="Complete" selected="@(ViewBag.SelectedStatus == "Complete" ? "selected" : null)">Complete</option>
+            <option value="Cancelled" selected="@(ViewBag.SelectedStatus == "Cancelled" ? "selected" : null)">Cancelled</option>
+            </text>
+        </select>
+        <button type="submit" class="btn btn-secondary">Apply</button>
+    </form>
 
-    <form asp-action="Search" method="get" class="d-flex">
+
+
+
+
+
+
+   @*  <form asp-action="Search" method="get" class="d-flex">
         <input class="form-control me-2" type="text" name="query" placeholder="Search by fridge, customer, address, or fridge model..." />
         <button type="submit" class="btn btn-primary">Search</button>
-    </form>
+    </form> *@
 
     <div class="table-container">
         <table class="table table-striped">

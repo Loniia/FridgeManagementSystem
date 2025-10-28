@@ -18,78 +18,60 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             _logger = logger;
             _context = context;
         }
-
-
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var model = new MaintenanceDashboardViewModel();
-            var requests = _context.MaintenanceRequest
-                .Include(r => r.Fridge) // include fridge for customer info
-                .AsQueryable();
 
-            // Counts by status
-            model.PendingRequests = requests.Count(r => r.TaskStatus == Models.TaskStatus.Pending && r.IsActive);
-            model.ScheduledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Scheduled && r.IsActive);
-            model.RescheduledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Rescheduled && r.IsActive);
-            model.InProgressVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.InProgress && r.IsActive);
-            model.CompletedTasks = requests.Count(r => r.TaskStatus == Models.TaskStatus.Complete);
-            model.CancelledVisits = requests.Count(r => r.TaskStatus == Models.TaskStatus.Cancelled && r.IsActive);
+            // ✅ Counts for category chart
+            model.PendingRequests = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Pending);
+            model.ScheduledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Scheduled);
+            model.RescheduledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Rescheduled);
+            model.InProgressVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.InProgress);
+            model.CompletedTasks = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Complete);
+            model.CancelledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Cancelled);
 
-            // Completion %
-            var total = (double)(model.PendingRequests + model.ScheduledVisits + model.RescheduledVisits +
-                                 model.InProgressVisits + model.CompletedTasks + model.CancelledVisits);
-            model.CompletionPercent = total > 0 ? (int)Math.Round(100.0 * model.CompletedTasks / total) : 0;
-
-            // Category chart
+            // ✅ Labels + values for chart
             model.CategoryLabels = new List<string> { "Pending", "Scheduled", "Rescheduled", "InProgress", "Completed", "Cancelled" };
-            model.CategoryValues = new List<int> {
-        model.PendingRequests,
-        model.ScheduledVisits,
-        model.RescheduledVisits,
-        model.InProgressVisits,
-        model.CompletedTasks,
-        model.CancelledVisits
-    };
+            model.CategoryValues = new List<int> { model.PendingRequests, model.ScheduledVisits, model.RescheduledVisits, model.InProgressVisits, model.CompletedTasks, model.CancelledVisits };
 
-            // 30-day trend
-            int days = 30;
-            var today = DateTime.Today;
-            var start = today.AddDays(-days + 1);
+            // ✅ Last 6 months chart
+            model.MonthLabels = Enumerable.Range(0, 6).Select(i => DateTime.Now.AddMonths(-i).ToString("MMM")).Reverse().ToList();
+            model.CompletedValues = Enumerable.Range(0, 6)
+                .Select(i =>
+                {
+                    var month = DateTime.Now.AddMonths(-i);
+                    return _context.MaintenanceVisit.Count(v =>
+                        v.Status == Models.TaskStatus.Complete &&
+                        v.MaintenanceRequest.CompletedDate.HasValue &&
+                        v.MaintenanceRequest.CompletedDate.Value.Month == month.Month &&
+                        v.MaintenanceRequest.CompletedDate.Value.Year == month.Year);
+                })
+                .Reverse()
+                .ToList();
 
-            var completedInRange = _context.MaintenanceRequest
-        .Where(r => r.TaskStatus == Models.TaskStatus.Complete &&
-                    r.CompletedDate != null &&
-                    r.CompletedDate.Value.Date >= start &&
-                    r.CompletedDate.Value.Date <= today)
-        .Select(r => r.CompletedDate.Value.Date)
-        .ToList();
-            model.TrendLabels = new List<string>();
-            model.TrendCompletedCounts = new List<int>();
-            for (int i = 0; i < days; i++)
+            // ✅ Populate table
+            var pendingRequests = await _context.MaintenanceRequest
+                .Include(r => r.Fridge)
+                    .ThenInclude(f => f.Customer)
+                        .ThenInclude(c => c.Location)
+                .Where(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Pending)
+                .OrderByDescending(r => r.RequestDate)
+                .Take(15)
+                .ToListAsync();
+
+            model.PendingRequestsNeedingScheduling = pendingRequests.Select(r => new MaintenanceRequestSummary
             {
-                var day = start.AddDays(i);
-                model.TrendLabels.Add(day.ToString("MMM d"));
-                model.TrendCompletedCounts.Add(completedInRange.Count(d => d.Date == day));
-            }
-
-            // Today’s completed visits
-            var startOfToday = today;
-            var endOfToday = today.AddDays(1);
-
-            model.TodayVisits = _context.MaintenanceRequest
-    .Include(r => r.Fridge)
-    .Where(r => r.TaskStatus == Models.TaskStatus.Complete &&
-                r.CompletedDate >= startOfToday &&
-                r.CompletedDate < endOfToday &&
-                r.IsActive)
-    .OrderBy(r => r.CompletedDate)
-    .ToList();
-
+                MaintenanceRequestId = r.MaintenanceRequestId,
+                RequestDate = r.RequestDate,
+                FridgeBrand = r.Fridge?.Brand ?? "Unknown",
+                FridgeModel = r.Fridge?.Model ?? "Unknown",
+                CustomerName = r.Fridge?.Customer?.FullName ?? "Unknown",
+                CustomerAddress = r.Fridge?.Customer?.Location?.Address ?? "Address not available",
+                DaysPending = (DateTime.Now - r.RequestDate).Days
+            }).ToList();
 
             return View(model);
         }
-
-
 
 
 
