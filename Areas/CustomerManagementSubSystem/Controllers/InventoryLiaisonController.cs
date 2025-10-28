@@ -372,46 +372,69 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         {
             int selectedYear = year ?? DateTime.Now.Year;
 
-            // Get received, allocated, and returned grouped by month
-            var receivedData = await _context.Fridge
-                .Where(f => f.DateAdded.HasValue && f.DateAdded.Value.ToDateTime(TimeOnly.MinValue).Year == selectedYear)
+            // --------------------------
+            // Fetch and process data in memory
+            // --------------------------
+
+            // Received Fridges
+            var receivedData = _context.Fridge
+                .Where(f => f.IsActive && f.DateAdded.HasValue)
+                .AsEnumerable() // Switch to client-side
+                .Where(f => f.DateAdded.Value.Year == selectedYear)
                 .GroupBy(f => f.DateAdded.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToListAsync();
+                .ToList();
 
-            var allocatedData = await _context.FridgeAllocation
-                .Where(a => a.AllocationDate.HasValue &&
-                            a.AllocationDate.Value.ToDateTime(TimeOnly.MinValue).Year == selectedYear &&
-                            a.Status == "Allocated")
+            // Allocated Fridges
+            var allocatedData = _context.FridgeAllocation
+                .Where(a => a.Status == "Allocated" && a.AllocationDate.HasValue)
+                .AsEnumerable()
+                .Where(a => a.AllocationDate.Value.Year == selectedYear)
                 .GroupBy(a => a.AllocationDate.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToListAsync();
+                .ToList();
 
-            var returnedData = await _context.FridgeAllocation
-                .Where(a => a.ReturnDate.HasValue &&
-                            a.ReturnDate.Value.ToDateTime(TimeOnly.MinValue).Year == selectedYear)
+            // Returned Fridges
+            var returnedData = _context.FridgeAllocation
+                .Where(a => a.ReturnDate.HasValue)
+                .AsEnumerable()
+                .Where(a => a.ReturnDate.Value.Year == selectedYear)
                 .GroupBy(a => a.ReturnDate.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToListAsync();
+                .ToList();
 
-            // Prepare lists for chart (1–12 months)
-            var months = Enumerable.Range(1, 12).Select(m => new DateTime(selectedYear, m, 1).ToString("MMMM")).ToList();
-            var receivedCounts = months.Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-            var allocatedCounts = months.Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-            var returnedCounts = months.Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
+            // --------------------------
+            // Prepare lists for chart
+            // --------------------------
+            var months = Enumerable.Range(1, 12)
+                .Select(m => new DateTime(selectedYear, m, 1).ToString("MMMM"))
+                .ToList();
+
+            var receivedCounts = months
+                .Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
+                .ToList();
+
+            var allocatedCounts = months
+                .Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
+                .ToList();
+
+            var returnedCounts = months
+                .Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
+                .ToList();
 
             var receivedColors = receivedCounts
                 .Select(c => c < LowStockThreshold ? "rgba(255, 99, 132, 0.6)" : "rgba(54, 162, 235, 0.6)")
                 .ToList();
 
+            // --------------------------
             // Summary
+            // --------------------------
             ViewBag.TotalReceived = receivedCounts.Sum();
             ViewBag.TotalAllocated = allocatedCounts.Sum();
             ViewBag.TotalReturned = returnedCounts.Sum();
             ViewBag.LowStockMonths = receivedCounts.Count(c => c < LowStockThreshold);
             ViewBag.SelectedYear = selectedYear;
 
-            // Pass to view
             var model = new MonthlyDashboardViewModel
             {
                 Months = months,
@@ -422,56 +445,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             };
 
             return View(model);
-        }
-
-        // --------------------------
-        // AJAX Endpoint for Year Selection (Grouped)
-        // --------------------------
-        [HttpGet]
-        public async Task<IActionResult> GetMonthlyStats(int year)
-        {
-            var receivedData = await _context.Fridge
-                .Where(f => f.DateAdded.HasValue && f.DateAdded.Value.ToDateTime(TimeOnly.MinValue).Year == year)
-                .GroupBy(f => f.DateAdded.Value.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToListAsync();
-
-            var allocatedData = await _context.FridgeAllocation
-                .Where(a => a.AllocationDate.HasValue &&
-                            a.AllocationDate.Value.ToDateTime(TimeOnly.MinValue).Year == year &&
-                            a.Status == "Allocated")
-                .GroupBy(a => a.AllocationDate.Value.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToListAsync();
-
-            var returnedData = await _context.FridgeAllocation
-                .Where(a => a.ReturnDate.HasValue &&
-                            a.ReturnDate.Value.ToDateTime(TimeOnly.MinValue).Year == year)
-                .GroupBy(a => a.ReturnDate.Value.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToListAsync();
-
-            var months = Enumerable.Range(1, 12).Select(m => new DateTime(year, m, 1).ToString("MMMM")).ToList();
-            var receivedCounts = months.Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-            var allocatedCounts = months.Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-            var returnedCounts = months.Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-
-            var receivedColors = receivedCounts
-                .Select(c => c < LowStockThreshold ? "rgba(255, 99, 132, 0.6)" : "rgba(54, 162, 235, 0.6)")
-                .ToList();
-
-            return Json(new
-            {
-                months,
-                receivedCounts,
-                receivedColors,
-                allocatedCounts,
-                returnedCounts,
-                totalReceived = receivedCounts.Sum(),
-                totalAllocated = allocatedCounts.Sum(),
-                totalReturned = returnedCounts.Sum(),
-                lowStockMonths = receivedCounts.Count(c => c < LowStockThreshold)
-            });
         }
 
         [HttpPost]
