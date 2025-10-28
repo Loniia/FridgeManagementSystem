@@ -1,443 +1,260 @@
-﻿@model MaintenanceDashboardViewModel
+﻿@model FridgeManagementSystem.Models.MaintenanceDashboardViewModel
 @using System.Text.Json
 @{
     ViewData["Title"] = "Dashboard";
     var catLabelsJson = JsonSerializer.Serialize(Model.CategoryLabels);
     var catValuesJson = JsonSerializer.Serialize(Model.CategoryValues);
-    var trendLabelsJson = JsonSerializer.Serialize(Model.TrendLabels);
-    var trendValuesJson = JsonSerializer.Serialize(Model.TrendCompletedCounts);
+    var monthLabelsJson = JsonSerializer.Serialize(Model.MonthLabels);
+    var completedValuesJson = JsonSerializer.Serialize(Model.CompletedValues);
     var completionPercent = Model.CompletionPercent;
 }
 
-<!-- PRINT BUTTON -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Maintenance Dashboard</h2>
-    <div>
-        <button class="btn btn-outline-secondary me-2" onclick="window.print();">
-            <i class="fas fa-print me-1"></i> Print
-        </button>
-    </div>
-</div>
-
 <style>
-    /* --- Professional Dashboard Styling --- */
-    :root {
-        --primary-color: #3498db;
-        --success-color: #2ecc71;
-        --warning-color: #f39c12;
-        --danger-color: #e74c3c;
-        --info-color: #9b59b6;
-        --secondary-color: #95a5a6;
-        --dark-color: #2c3e50;
-        --light-color: #ecf0f1;
-        --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        --hover-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
-        color: #333;
-    }
-
-    /* NEW: 4-quadrant layout */
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
-        gap: 1.25rem;
-        align-items: start;
-    }
-
-    .quadrant-1 {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    .quadrant-2 {
-        grid-column: 2;
-        grid-row: 1;
-    }
-
-    .quadrant-3 {
-        grid-column: 1;
-        grid-row: 2;
-    }
-
-    .quadrant-4 {
-        grid-column: 2;
-        grid-row: 2;
-    }
-
-    .cards-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.9rem;
-    }
-
-    .card {
+    .dashboard-card {
         background: #fff;
-        border-radius: 8px;
-        padding: 1rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #e9ecef;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        height: fit-content;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #eef2f7;
+        transition: all 0.3s ease;
+        overflow: hidden;
     }
 
-        .card:hover {
+        .dashboard-card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
             transform: translateY(-2px);
-            box-shadow: var(--hover-shadow);
         }
 
-    .stat-number {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 0.25rem;
+    .card-header-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-bottom: none;
+        padding: 1.25rem 1.5rem;
     }
 
-    .card h5 {
-        margin: 0 0 .5rem 0;
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: #555;
-        display: flex;
-        align-items: center;
-    }
-
-        .card h5 i {
-            margin-right: 0.5rem;
-            width: 16px;
-            text-align: center;
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.1rem;
         }
 
-    .card p {
-        font-size: 0.8rem;
-        margin-bottom: 0;
+        .card-header-custom .badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+    .table-custom {
+        margin: 0;
     }
 
-    /* Charts layout */
-    .charts {
-        display: grid;
-        grid-template-rows: auto 1fr;
-        gap: 1rem;
-        height: 100%;
+        .table-custom thead th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.85rem;
+            padding: 1rem 0.75rem;
+        }
+
+        .table-custom tbody td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            border-color: #f1f3f4;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+    .priority-indicator {
+        border-left: 4px solid transparent;
+    }
+
+    .priority-high {
+        border-left-color: #e74c3c;
+    }
+
+    .priority-medium {
+        border-left-color: #f39c12;
+    }
+
+    .priority-low {
+        border-left-color: #3498db;
     }
 
     .chart-container {
         position: relative;
-        height: 220px;
-    }
-
-    .chart-container-sm {
-        position: relative;
-        height: 160px;
+        height: 300px;
     }
 
     .completion-container {
         text-align: center;
-        flex: 0 0 160px;
+        padding: 1rem;
     }
 
     .completion-percent {
-        font-size: 1.5rem;
+        font-size: 2rem;
         font-weight: 700;
-        color: var(--success-color);
-        margin-bottom: 0.25rem;
+        color: #27ae60;
+        margin-bottom: 0.5rem;
     }
 
     .completion-label {
-        font-size: 0.8rem;
-        color: #777;
+        font-size: 0.9rem;
+        color: #6c757d;
     }
 
-    /* Table styling */
-    .table-card {
-        background: #fff;
-        border-radius: 8px;
-        padding: 1.25rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #e9ecef;
-        height: fit-content;
+    .trend-chart-container {
+        height: 200px;
+        position: relative;
     }
 
-    .table-responsive {
-        max-height: 300px;
-        overflow-y: auto;
+    .btn-schedule {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.4rem 0.8rem;
+        transition: all 0.3s ease;
     }
 
-    .table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-        font-size: 0.85rem;
-        border-bottom: 2px solid #dee2e6;
-    }
-
-    .table td {
-        font-size: 0.85rem;
-        vertical-align: middle;
-    }
-
-    /* Quick stats styling */
-    .quick-stats-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .quick-stat-card {
-        background: #fff;
-        border-radius: 8px;
-        padding: 1rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #e9ecef;
-        text-align: center;
-    }
-
-    .quick-stat-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-    }
-
-    .quick-stat-label {
-        font-size: 0.75rem;
-        color: #777;
-    }
-
-    /* layout responsive */
-    @@media (max-width: 900px) {
-        .dashboard-grid {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto auto auto auto;
+        .btn-schedule:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+            color: white;
         }
-
-        .quadrant-1, .quadrant-2, .quadrant-3, .quadrant-4 {
-            grid-column: 1;
-        }
-
-        .quadrant-1 {
-            grid-row: 1;
-        }
-
-        .quadrant-2 {
-            grid-row: 2;
-        }
-
-        .quadrant-3 {
-            grid-row: 3;
-        }
-
-        .quadrant-4 {
-            grid-row: 4;
-        }
-
-        .cards-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .quick-stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @@media (max-width: 540px) {
-        .cards-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .card {
-            padding: 0.75rem;
-        }
-
-        .stat-number {
-            font-size: 1.6rem;
-        }
-    }
-
-    /* print-specific rules */
-    @@media print {
-        body {
-            -webkit-print-color-adjust: exact;
-        }
-
-        .btn, a[href] {
-            display: none !important;
-        }
-
-        .card, .table-card {
-            box-shadow: none;
-            border: 1px solid #ddd;
-        }
-
-        canvas {
-            page-break-inside: avoid;
-            max-width: 100% !important;
-        }
-
-        table {
-            border-collapse: collapse !important;
-            width: 100%;
-            font-size: 12pt;
-        }
-
-        th, td {
-            border: 1px solid #333 !important;
-            padding: 4px 8px !important;
-        }
-
-        h4 {
-            margin-top: 1rem;
-        }
-    }
 </style>
 
-<div class="dashboard-grid">
-    <!-- QUADRANT 1: Left Side - Stats Cards, Quick Stats, and Today's Visits -->
-    <div class="quadrant-1">
-        <!-- Quick Stats -->
-        <div class="quick-stats-grid">
-            <div class="quick-stat-card">
-                <div class="quick-stat-number text-primary">@Model.TodayVisits.Count</div>
-                <div class="quick-stat-label">Completed Today</div>
-            </div>
-            <div class="quick-stat-card">
-                <div class="quick-stat-number text-success">@Model.CompletionPercent%</div>
-                <div class="quick-stat-label">Completion Rate</div>
-            </div>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1" style="color: #2c3e50; font-weight: 700;">Maintenance Dashboard</h2>
+            <p class="text-muted mb-0">Real-time overview of maintenance operations</p>
         </div>
-
-        <!-- Stats Cards -->
-        <div class="cards-grid mb-3">
-            <div class="card">
-                <h5><i class="fas fa-tasks"></i> Pending Requests</h5>
-                <div class="stat-number">@Model.PendingRequests</div>
-                <p class="text-muted">Awaiting action</p>
-            </div>
-
-            <div class="card">
-                <h5><i class="fas fa-calendar-check"></i> Scheduled Visits</h5>
-                <div class="stat-number">@Model.ScheduledVisits</div>
-                <p class="text-muted">Upcoming</p>
-            </div>
-
-            <div class="card">
-                <h5><i class="fas fa-sync-alt"></i> Rescheduled</h5>
-                <div class="stat-number">@Model.RescheduledVisits</div>
-                <p class="text-muted">Rescheduled</p>
-            </div>
-
-            <div class="card">
-                <h5><i class="fas fa-spinner"></i> In Progress</h5>
-                <div class="stat-number">@Model.InProgressVisits</div>
-                <p class="text-muted">Currently active</p>
-            </div>
-
-            <div class="card">
-                <h5><i class="fas fa-check-circle"></i> Completed</h5>
-                <div class="stat-number">@Model.CompletedTasks</div>
-                <p class="text-muted">This month</p>
-            </div>
-
-            <div class="card">
-                <h5><i class="fas fa-ban"></i> Cancelled</h5>
-                <div class="stat-number">@Model.CancelledVisits</div>
-                <p class="text-muted">Cancelled requests</p>
-            </div>
-        </div>
-
-        <!-- Today's Visits Table - Now positioned right after stats -->
-        <div class="table-card">
-            <h5><i class="fas fa-calendar-day me-2"></i> Visits Completed Today (@DateTime.Today.ToString("MMMM dd, yyyy"))</h5>
-
-            @if (Model.TodayVisits.Any())
-            {
-                <div class="table-responsive mt-3">
-                    <table class="table table-bordered table-striped align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Customer</th>
-                                <th>Fridge</th>
-                                <th>Address</th>
-                                <th>Technician</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var visit in Model.TodayVisits)
-                            {
-                                <tr>
-                                    <td>@visit.Fridge.Customer?.FullName</td>
-                                    <td>@visit.Fridge?.Brand</td>
-                                    <td>@visit.Fridge.Customer?.Location?.Address</td>
-                                    <td>@visit.MaintenanceVisit?.Employee</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-info mt-3">
-                    <i class="fas fa-info-circle me-2"></i> No visits were completed today.
-                </div>
-            }
-        </div>
+        <button class="btn btn-outline-secondary" onclick="window.print();">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
     </div>
 
-    <!-- QUADRANT 2: Right Side - Charts Top -->
-    <div class="quadrant-2">
-        <div class="charts">
-            <!-- Bar chart -->
-            <div class="card">
-                <h5><i class="fas fa-chart-bar"></i> Current Requests by Status</h5>
-                <div class="chart-container">
-                    <canvas id="barChart"></canvas>
+    <!-- Table on Top -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="card-header-custom d-flex justify-content-between align-items-center">
+                    <h5>
+                        <i class="fas fa-clock me-2"></i>Requests Needing Scheduling
+                    </h5>
+                    <span class="badge">@Model.PendingRequestsNeedingScheduling.Count pending</span>
                 </div>
-            </div>
-
-            <!-- Doughnut + Line chart -->
-            <div class="card" style="display:flex; gap:1rem; align-items:center;">
-                <div class="completion-container">
-                    <canvas id="doughnutChart" width="160" height="160"></canvas>
-                    <div class="completion-percent">@Model.CompletionPercent%</div>
-                    <div class="completion-label">Overall completion</div>
-                </div>
-
-                <div style="flex:1;">
-                    <h5><i class="fas fa-line-chart"></i> Completed Tasks — last 30 days</h5>
-                    <div class="chart-container-sm">
-                        <canvas id="lineChart"></canvas>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                   
+                                    <th>Customer</th>
+                                    <th>Fridge Details</th>
+                                    <th>Request Date</th>
+                                    <th>Days Pending</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.PendingRequestsNeedingScheduling.Any())
+                                {
+                                    foreach (var request in Model.PendingRequestsNeedingScheduling)
+                                    {
+                                        <tr class="priority-indicator @(request.DaysPending > 7 ? "priority-high" : request.DaysPending > 3 ? "priority-medium" : "priority-low")">
+                                           
+                                            <td>
+                                                <div class="fw-bold">@request.CustomerName</div>
+                                                <small class="text-muted">@request.CustomerAddress</small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-medium">@request.FridgeBrand</div>
+                                                <small class="text-muted">@request.FridgeModel</small>
+                                            </td>
+                                            <td>
+                                                <span class="text-dark">@request.RequestDate.ToString("MMM dd, yyyy")</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(request.DaysPending > 7 ? "bg-danger" : request.DaysPending > 3 ? "bg-warning" : "bg-info")">
+                                                    @request.DaysPending day@(request.DaysPending != 1 ? "s" : "")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("ScheduleVisit", "Maintenance", new { area = "MaintenanceSubSystem" })"
+                                                   class="btn btn-schedule btn-sm">
+                                                    <i class="fas fa-calendar-plus me-1"></i>Schedule
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-5">
+                                            <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                                            <div class="h5">All maintenance requests are scheduled!</div>
+                                            <small>No pending requests requiring immediate attention</small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- QUADRANT 3: Left Side Bottom - Additional Info -->
-    <div class="quadrant-3">
-        <div class="card">
-            <h5><i class="fas fa-info-circle me-2"></i> Dashboard Information</h5>
-            <div class="mt-2">
-                <small class="text-muted">
-                    <i class="fas fa-clock me-1"></i> Last updated: @DateTime.Now.ToString("MMM dd, yyyy HH:mm")
-                </small>
-            </div>
-            <div class="mt-2">
-                <small class="text-muted">
-                    <i class="fas fa-chart-line me-1"></i> Data refreshes automatically
-                </small>
+    <!-- Two Charts Below -->
+    <div class="row">
+        <!-- Bar Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="dashboard-card h-100">
+                <div class="card-header-custom">
+                    <h5>
+                        <i class="fas fa-chart-bar me-2"></i>Maintenance Requests by Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- QUADRANT 4: Right Side Bottom - Empty or for future use -->
-    <div class="quadrant-4">
-        <div class="card">
-            <h5><i class="fas fa-calendar me-2"></i> Upcoming Schedule</h5>
-            <p class="text-muted mb-0">No upcoming visits scheduled for tomorrow.</p>
+        <!-- Completion Overview -->
+        <div class="col-lg-6 mb-4">
+            <div class="dashboard-card h-100">
+                <div class="card-header-custom">
+                    <h5>
+                        <i class="fas fa-chart-pie me-2"></i>Performance Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row h-100">
+                        <div class="col-md-5 d-flex flex-column justify-content-center">
+                            <div class="completion-container">
+                                <canvas id="doughnutChart" width="140" height="140"></canvas>
+                                <div class="completion-percent">@Model.CompletionPercent%</div>
+                                <div class="completion-label">Overall Completion Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <h6 class="text-muted mb-3 text-center">Completed Tasks (Last 6 Months)</h6>
+                            <div class="trend-chart-container">
+                                <canvas id="lineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -447,38 +264,24 @@
 <script>
     const catLabels = @Html.Raw(catLabelsJson);
     const catValues = @Html.Raw(catValuesJson);
-    const trendLabels = @Html.Raw(trendLabelsJson);
-    const trendValues = @Html.Raw(trendValuesJson);
+    const monthLabels = @Html.Raw(monthLabelsJson);
+    const completedValues = @Html.Raw(completedValuesJson);
     const completionPercent = @Model.CompletionPercent;
 
-    // Bar chart (status counts)
+    // Bar Chart
     const barCtx = document.getElementById('barChart').getContext('2d');
-    const barChart = new Chart(barCtx, {
+    new Chart(barCtx, {
         type: 'bar',
         data: {
             labels: catLabels,
             datasets: [{
-                label: 'Count',
                 data: catValues,
                 backgroundColor: [
-                    'rgba(243, 156, 18, 0.7)',   // Pending - orange
-                    'rgba(52, 152, 219, 0.7)',   // Scheduled - blue
-                    'rgba(155, 89, 182, 0.7)',   // Rescheduled - purple
-                    'rgba(230, 126, 34, 0.7)',   // In Progress - dark orange
-                    'rgba(46, 204, 113, 0.7)',   // Completed - green
-                    'rgba(149, 165, 166, 0.7)'   // Cancelled - gray
+                    '#f39c12', '#3498db', '#9b59b6', '#e67e22', '#27ae60', '#95a5a6'
                 ],
-                borderColor: [
-                    'rgb(243, 156, 18)',
-                    'rgb(52, 152, 219)',
-                    'rgb(155, 89, 182)',
-                    'rgb(230, 126, 34)',
-                    'rgb(46, 204, 113)',
-                    'rgb(149, 165, 166)'
-                ],
-                borderWidth: 1,
-                borderRadius: 4,
-                barPercentage: 0.6
+                borderWidth: 0,
+                borderRadius: 6,
+                barPercentage: 0.7
             }]
         },
         options: {
@@ -487,101 +290,107 @@
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    titleFont: { size: 12 },
-                    bodyFont: { size: 12 },
-                    padding: 8
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: 12,
+                    cornerRadius: 8
                 }
             },
             scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 11 } }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1, font: { size: 11 } },
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                }
-            }
-        }
-    });
-
-    // Doughnut (completion percent)
-    const doughCtx = document.getElementById('doughnutChart').getContext('2d');
-    const dough = new Chart(doughCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Complete', 'Remaining'],
-            datasets: [{
-                data: [completionPercent, Math.max(0, 100 - completionPercent)],
-                backgroundColor: ['rgba(46, 204, 113, 0.8)', 'rgba(236, 240, 241, 0.8)'],
-                borderColor: ['rgb(46, 204, 113)', 'rgb(189, 195, 199)'],
-                borderWidth: 1,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            cutout: '70%',
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    bodyFont: { size: 12 },
-                    padding: 8
-                }
-            }
-        }
-    });
-
-    // Line chart (30-day completed trend)
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    const line = new Chart(lineCtx, {
-        type: 'line',
-        data: {
-            labels: trendLabels,
-            datasets: [{
-                label: 'Completed',
-                data: trendValues,
-                borderColor: 'rgba(44, 62, 80, 0.9)',
-                backgroundColor: 'rgba(44, 62, 80, 0.05)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3,
-                pointRadius: 3,
-                pointBackgroundColor: 'rgba(44, 62, 80, 0.9)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    titleFont: { size: 12 },
-                    bodyFont: { size: 12 },
-                    padding: 8
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        maxRotation: 30,
-                        minRotation: 0,
-                        font: { size: 11 }
-                    },
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                },
                 y: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1,
                         font: { size: 11 }
                     },
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 11 }
+                    }
+                }
+            }
+        }
+    });
+
+    // Doughnut Chart
+    const doughCtx = document.getElementById('doughnutChart').getContext('2d');
+    new Chart(doughCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [completionPercent, Math.max(0, 100 - completionPercent)],
+                backgroundColor: ['#27ae60', '#ecf0f1'],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            cutout: '75%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            }
+        }
+    });
+
+    // Line Chart - Now using 6-month data with proper dates
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                data: completedValues,
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#3498db',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: 8,
+                    cornerRadius: 6,
+                    displayColors: false,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return tooltipItems[0].label + ' Completions';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        font: { size: 10 }
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: { size: 11 }
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
                 }
             }
         }

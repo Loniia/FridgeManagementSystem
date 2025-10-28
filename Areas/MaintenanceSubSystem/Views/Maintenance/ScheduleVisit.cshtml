@@ -144,6 +144,17 @@
             box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
         }
 
+    .btn-info {
+        background: #17a2b8;
+        box-shadow: 0 3px 10px rgba(23, 162, 184, 0.3);
+    }
+
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        }
+
     .btn i {
         margin-right: 8px;
     }
@@ -193,16 +204,74 @@
             outline: 2px solid #3498db;
             outline-offset: 2px;
         }
+
+    /* Calendar Modal Styling */
+    .fc-toolbar {
+        background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px !important;
+    }
+
+    .fc-toolbar-title {
+        color: white !important;
+        font-weight: 600;
+    }
+
+    .fc-button {
+        background: #6c757d !important;
+        border: none !important;
+        border-radius: 5px !important;
+        font-weight: 500;
+    }
+
+    .fc-button-active {
+        background: #3498db !important;
+    }
+
+    .fc-day-today {
+        background-color: rgba(52, 152, 219, 0.1) !important;
+    }
+
+    .fc-event {
+        border-radius: 5px;
+        padding: 3px 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 1px 0;
+    }
+
+    .fc-event-title {
+        font-weight: 600;
+    }
+
+    .fc-event-time {
+        font-weight: 500;
+        margin-right: 3px;
+    }
+
+    .fc-event:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Make events more compact */
+    .fc-daygrid-event {
+        white-space: normal !important;
+        line-height: 1.2 !important;
+    }
 </style>
-
-
-
 
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <i class="fas fa-calendar-alt me-2"></i> Schedule Maintenance Visit
         </div>
+
         <div class="card-body">
             @if (TempData["Error"] != null)
             {
@@ -212,19 +281,20 @@
             {
                 <div class="alert alert-success">@TempData["Message"]</div>
             }
+            <div class="text-end mb-3">
+                <button type="button" class="btn btn-info" id="checkAvailabilityBtn">
+                    <i class="fas fa-calendar-check me-2"></i> Check Availability
+                </button>
+            </div>
 
             <form asp-action="ScheduleVisit" method="post">
                 @Html.AntiForgeryToken()
 
                 <div class="mb-3">
                     <label for="requestSelect" class="form-label">Select Maintenance Request</label>
-
-                    <!-- use tag helper asp-items to render the SelectList safely -->
                     <select asp-for="MaintenanceRequestId" asp-items="ViewBag.Requests" class="form-select" id="requestSelect" required>
                         <option value="">-- Select Request --</option>
                     </select>
-
-                    <!-- quick debug: show how many options the controller provided -->
                     <small class="text-muted">Available: @(ViewBag.Requests == null ? 0 : ((IEnumerable<SelectListItem>)ViewBag.Requests).Count())</small>
                 </div>
 
@@ -267,200 +337,174 @@
     </div>
 </div>
 
+<!-- Availability Modal -->
+<div class="modal fade" id="availabilityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-calendar-alt me-2"></i> Technician Availability</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="calendar"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <!-- FullCalendar CSS/JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
     <script>
-        // Parse JSON safely
-        const requestsData = @Html.Raw(ViewBag.RequestsJson ?? "[]");
+        document.addEventListener('DOMContentLoaded', function() {
+            let calendar;
+            let calendarInitialized = false;
 
-        const requestSelect = document.getElementById('requestSelect');
-        const customerNameInput = document.getElementById('customerName');
-        const customerAddressInput = document.getElementById('customerAddress');
-        const fridgeModelInput = document.getElementById('fridgeModel');
+            // Button click handler to show modal
+            document.getElementById('checkAvailabilityBtn').addEventListener('click', function() {
+                const modalElement = document.getElementById('availabilityModal');
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            });
 
-        // Helper to fill the readonly fields
-        function fillDetailsById(id) {
-            const request = requestsData.find(r => r.id === id);
-            if (request) {
-                customerNameInput.value = request.customer;
-                customerAddressInput.value = request.customerAddress;
-                fridgeModelInput.value = request.model;
-            } else {
-                customerNameInput.value = '';
-                customerAddressInput.value = '';
-                fridgeModelInput.value = '';
-            }
-        }
-
-        // On change: populate fields
-        requestSelect.addEventListener('change', function () {
-            const id = parseInt(this.value) || 0;
-            fillDetailsById(id);
-        });
-
-        // Optional: preselect the first available option on page load (if any)
-        (function preselectFirst() {
-            // wait until options rendered
-            setTimeout(() => {
-                if (requestSelect.options.length > 1 && !requestSelect.value) {
-                    // select the first item after placeholder (index 1)
-                    requestSelect.selectedIndex = 1;
-                    const selectedId = parseInt(requestSelect.value);
-                    fillDetailsById(selectedId);
+            // Modal shown event
+            document.getElementById('availabilityModal').addEventListener('shown.bs.modal', function() {
+                if (!calendarInitialized) {
+                    initializeCalendar();
+                } else {
+                    calendar.refetchEvents();
                 }
-            }, 50);
-        })();
+            });
+
+            function initializeCalendar() {
+                const calendarEl = document.getElementById('calendar');
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    events: {
+                        url: '/MaintenanceSubSystem/Maintenance/GetTechnicianSchedule',
+
+                        method: 'GET',
+                        success: function(data) {
+                            if (data.error) {
+                                console.error("Server error:", data.error);
+                                alert("Error loading calendar: " + data.error);
+                            } else {
+                                console.log("Events loaded from server:", data);
+                            }
+                        },
+                        failure: function() {
+                            console.error('Failed to fetch events from server');
+                            alert('Failed to fetch calendar events from server');
+                        }
+                    },
+                    height: 500,
+                    navLinks: true,
+                    editable: false,
+                    selectable: false,
+                    nowIndicator: true,
+                    dayMaxEvents: 3,
+                    eventTimeFormat: {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short'
+                    },
+                    eventContent: function(arg) {
+                        const time = arg.event.extendedProps.time;
+                        const title = arg.event.title;
+
+                        return {
+                            html: `
+                                <div class="fc-event-content">
+                                    ${time !== 'All Day' ? `<div class="fc-event-time">${time}</div>` : ''}
+                                    <div class="fc-event-title">${title}</div>
+                                </div>
+                            `
+                        };
+                    },
+                    eventClick: function(info) {
+                        const event = info.event;
+                        const details = event.extendedProps;
+
+                        alert(
+                            `Maintenance Visit\n\n` +
+                            `Date: ${details.date}\n` +
+                            `Time: ${details.time}\n` +
+                            `Fridge: ${details.fridge}\n` +
+                            `Customer: ${details.customer}\n` +
+                            `Address: ${details.address}`
+                        );
+                    },
+                    eventDidMount: function(info) {
+                        if (info.event.extendedProps.customer) {
+                            info.el.setAttribute('title',
+                                `Fridge: ${info.event.title}\n` +
+                                `Time: ${info.event.extendedProps.time}\n` +
+                                `Customer: ${info.event.extendedProps.customer}`
+                            );
+                        }
+                    },
+                    loading: function(isLoading) {
+                        if (isLoading) {
+                            console.log('Loading calendar events...');
+                        } else {
+                            console.log('Calendar events loaded, total events:', calendar.getEvents().length);
+                        }
+                    }
+                });
+
+                calendar.render();
+                calendarInitialized = true;
+            }
+
+            // Fill request details (optional)
+            const requestsData = @Html.Raw(ViewBag.RequestsJson ?? "[]");
+            const requestSelect = document.getElementById('requestSelect');
+            const customerNameInput = document.getElementById('customerName');
+            const customerAddressInput = document.getElementById('customerAddress');
+            const fridgeModelInput = document.getElementById('fridgeModel');
+
+            function fillDetailsById(id) {
+                const request = requestsData.find(r => r.id === id);
+                if (request) {
+                    customerNameInput.value = request.customer || '';
+                    customerAddressInput.value = request.customerAddress || '';
+                    fridgeModelInput.value = request.model || '';
+                } else {
+                    customerNameInput.value = '';
+                    customerAddressInput.value = '';
+                    fridgeModelInput.value = '';
+                }
+            }
+
+            if (requestSelect) {
+                requestSelect.addEventListener('change', function() {
+                    const id = parseInt(this.value) || 0;
+                    fillDetailsById(id);
+                });
+
+                // Preselect first request
+                if (requestSelect.options.length > 1 && !requestSelect.value) {
+                    requestSelect.selectedIndex = 1;
+                    const initialId = parseInt(requestSelect.value);
+                    if (!isNaN(initialId)) {
+                        fillDetailsById(initialId);
+                    }
+                }
+            }
+        });
     </script>
+
 
     <partial name="_ValidationScriptsPartial" />
 }
-
-
-@* @model FinalYearProject.Models.MaintenanceVisit
-
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Message"]
-    </div>
-}
-
-@{
-    ViewData["Title"] = "Schedule Maintenance Visit";
-}
-
-<h2>@ViewData["Title"]</h2>
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success">@TempData["Message"]</div>
-}
-
-<form asp-action="ScheduleVisit" method="post">
-    @Html.AntiForgeryToken()
-
-    <div class="form-group mb-3">
-        <label for="FridgeId">Select Fridge</label>
-        
-       <select id="fridgeDropdown" name="FridgeId" class="form-control">
-    <option value="">-- Select Fridge --</option>
-    @foreach (var fridge in ViewBag.Fridges)
-    {
-        string optionHtml = $"<option value='{fridge.FridgeId}' " +
-                            $"data-customer-name='{fridge.Customer.CustomerName}' " +
-                            $"data-customer-address='{fridge.Customer.Address}'" +
-                            (fridge.FridgeId == Model.FridgeId ? " selected" : "") +
-                            $">{fridge.FridgeName}</option>"; // <-- show Fridge Name here
-        @Html.Raw(optionHtml)
-    }
-   </select>
-
-
-    </div>
-
-    <div class="form-group mb-3">
-        <label>Customer Name</label>
-        <input type="text" class="form-control" id="customerName" readonly value="@Model.Fridge?.Customer?.CustomerName" />
-    </div>
-
-    <div class="form-group mb-3">
-        <label>Customer Address</label>
-        <input type="text" class="form-control" id="customerAddress" readonly value="@Model.Fridge?.Customer?.Address" />
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="ScheduledDate">Scheduled Date</label>
-        <input asp-for="ScheduledDate" class="form-control" type="date" />
-        <span asp-validation-for="ScheduledDate" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="ScheduledTime">Scheduled Time</label>
-        <input asp-for="ScheduledTime" class="form-control" type="time" />
-        <span asp-validation-for="ScheduledTime" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="VisitNotes">Visit Notes</label>
-        <textarea asp-for="VisitNotes" class="form-control">@Model.VisitNotes</textarea>
-        <span asp-validation-for="VisitNotes" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label>Fault Report (separate items with ;)</label>
-        <input type="text" class="form-control" name="FaultReportString" value="@Model.FaultReportString" />
-    </div>
-
-    <div class="form-group mb-3">
-        <label>Components Used (separate items with ;)</label>
-        <input type="text" class="form-control" name="ComponentUsedString" value="@Model.ComponentUsedString" />
-    </div>
-
-    <div class="form-group mb-3">
-        <label>Maintenance Checklist (separate items with ;)</label>
-        <input type="text" class="form-control" name="MaintenanceChecklistString" value="@Model.MaintenanceChecklistString" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Schedule Visit</button>
-</form>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-
-    <script>
-        // Update Customer Name & Address when fridge changes
-        document.getElementById('fridgeDropdown').addEventListener('change', function () {
-            var selectedOption = this.options[this.selectedIndex];
-            document.getElementById('customerName').value = selectedOption.dataset.customerName || '';
-            document.getElementById('customerAddress').value = selectedOption.dataset.customerAddress || '';
-        });
-    </script>
-} *@
-
-@* //Comments for understandning:  *@
-
-@* 1️⃣ Razor Dropdown / Options
-
-Always render <option> using @Html.Raw() or <text> if you need dynamic attributes.
-
-Keep the Fridge Name in the dropdown (@fridge.FridgeName) and never mix C# inline in the attribute.
-
-Store extra info for JS (like data-customer-name and data-customer-address) only as data- attributes.
-
-2️⃣ JavaScript
-
-Only use JS to read data- attributes and fill input fields.
-
-Avoid manipulating Razor variables in JS — just update HTML input values.
-
-Keep the ids of inputs (customerName, customerAddress) consistent.
-
-3️⃣ POST Action
-
-Always check for an existing maintenance request before adding a visit.
-
-If a visit already exists, update it instead of creating a new one — this prevents duplicate key errors.
-
-Update the linked MaintenanceRequest.TaskStatus to Scheduled every time.
-
-Wrap _context.SaveChanges() in a try/catch and display meaningful TempData errors.
-
-4️⃣ Model Binding / Validation
-
-Keep your form field names in sync with your model properties.
-
-Validate the model after IDs are assigned, not before.
-
-Use TempData for success/error messages — they display reliably across redirects.
-
-5️⃣ General Maintenance Tips
-
-Don’t touch the Razor <option> code unless you fully understand tag helper restrictions.
-
-Always test one fridge selection before submitting the form.
-
-Backup the controller/view before making changes — that way you can always revert if something breaks. *@
