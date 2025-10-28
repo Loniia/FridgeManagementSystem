@@ -1,156 +1,290 @@
 ﻿@model FridgeManagementSystem.Models.FaultReport
-
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Fault Report Details";
+    ViewData["Sidebar"] = "FaultTechSubsystem";
 }
 
 <div class="container-fluid">
     <!-- Header -->
-    <div class="row mb-3 border-bottom pb-2">
-        <div class="col-md-8">
-            <h5 class="fw-bold">Fault Report Details</h5>
-            <p><strong>Report No:</strong> FR@(Model.FaultReportId.ToString("D3"))</p>
-            <p><strong>Fault Type:</strong> <span class="badge bg-info">@Model.FaultType</span></p>
-            <p><strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(Model.UrgencyLevel)">@Model.UrgencyLevel</span></p>
-            <p><strong>Date Reported:</strong> @Model.ReportDate.ToString("yyyy/MM/dd")</p>
-            <p><strong>Status:</strong> <span class="badge @GetStatusBadgeClass(Model.StatusFilter)">@Model.StatusFilter</span></p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-gray-800">Fault Report Details</h1>
         </div>
-        <div class="col-md-4 text-end">
-            <img src="~/images/logo.png" alt="Company Logo" style="max-height:60px;" />
+        <div class="btn-group">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+            <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
         </div>
     </div>
 
-    <!-- Details Section -->
-    <div class="border p-3 mb-3">
-        <h6 class="fw-bold mb-3 text-center">Fault Details</h6>
-        <div class="row">
-            <!-- Fault Information -->
-            <div class="col-md-6 border-end">
-                <h6 class="fw-bold">Fault Information:</h6>
-                <p><strong>Description:</strong> @Model.FaultDescription</p>
-                <p>
-                    <strong>Reported By:</strong>
-                    @if (Model.MaintenanceVisitId > 0)
+    <!-- Status Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Status
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <span class="badge @GetStatusBadgeClass(Model.Status.ToString())">@Model.Status</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Urgency
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <span class="badge @GetUrgencyBadgeClass(Model.UrgencyLevel)">@Model.UrgencyLevel</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Report Date
+                            </div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">
+                                @Model.ReportDate.ToString("MMM dd, yyyy HH:mm")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Repair Status
+                            </div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">
+                                @{
+                                    var latestRepair = Model.RepairSchedules?.OrderByDescending(r => r.CreatedDate).FirstOrDefault();
+                                    var repairStatus = latestRepair?.Status ?? "Not Started";
+                                }
+                                <span class="badge @GetRepairStatusBadgeClass(repairStatus)">@repairStatus</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tools fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Fault & Fridge Information -->
+        <div class="col-lg-6">
+            <!-- Fault Information Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Fault Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-4 font-weight-bold text-primary">Fault Type:</div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-info">@Model.FaultType</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-sm-4 font-weight-bold text-primary">Description:</div>
+                        <div class="col-sm-8">@Model.FaultDescription</div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-sm-4 font-weight-bold text-primary">Reported By:</div>
+                        <div class="col-sm-8">
+                            @if (Model.MaintenanceVisitId > 0)
+                            {
+                                <text>Maintenance Technician</text>
+                            }
+                            else
+                            {
+                                <text>Customer</text>
+                            }
+                        </div>
+                    </div>
+                    @if (Model.MaintenanceVisit != null)
                     {
-                        <text>Maintenance Technician</text>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Maintenance Visit:</div>
+                            <div class="col-sm-8">@Model.MaintenanceVisit.ScheduledDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Fridge Information Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Fridge Information</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Fridge != null)
+                    {
+                        <div class="row">
+                            <div class="col-sm-4 font-weight-bold text-primary">Serial Number:</div>
+                            <div class="col-sm-8">@Model.Fridge.SerialNumber</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Model:</div>
+                            <div class="col-sm-8">@Model.Fridge.Model</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Brand:</div>
+                            <div class="col-sm-8">@Model.Fridge.Brand</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Type:</div>
+                            <div class="col-sm-8">@Model.Fridge.FridgeType</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Condition:</div>
+                            <div class="col-sm-8">
+                                <span class="badge @GetConditionBadgeClass(Model.Fridge.Condition)">@Model.Fridge.Condition</span>
+                            </div>
+                        </div>
                     }
                     else
                     {
-                        <text>Customer</text>
+                        <p class="text-muted">No fridge information available.</p>
                     }
-                </p>
-                @if (Model.MaintenanceVisit != null)
-                {
-                    <p><strong>Maintenance Visit:</strong> @Model.MaintenanceVisit.ScheduledDate.ToString("yyyy/MM/dd")</p>
-                }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Customer & Repair History -->
+        <div class="col-lg-6">
+            <!-- Customer Information Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Customer Information</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Fridge?.Customer != null)
+                    {
+                        <div class="row">
+                            <div class="col-sm-4 font-weight-bold text-primary">Full Name:</div>
+                            <div class="col-sm-8">@Model.Fridge.Customer.FullName</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Email:</div>
+                            <div class="col-sm-8">@Model.Fridge.Customer.Email</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Phone:</div>
+                            <div class="col-sm-8">@Model.Fridge.Customer.PhoneNumber</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4 font-weight-bold text-primary">Location:</div>
+                            <div class="col-sm-8">@Model.Fridge.Customer.Location</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No customer information available.</p>
+                    }
+                </div>
             </div>
 
-            <!-- Fridge Information -->
-            <div class="col-md-6">
-                <h6 class="fw-bold">Fridge Information:</h6>
-                @if (Model.Fridge != null)
-                {
-                    <p><strong>Serial Number:</strong> @Model.Fridge.SerialNumber</p>
-                    <p><strong>Model:</strong> @Model.Fridge.Model</p>
-                    <p><strong>Brand:</strong> @Model.Fridge.Brand</p>
-                    <p><strong>Type:</strong> @Model.Fridge.FridgeType</p>
-                    <p><strong>Condition:</strong> <span class="badge @GetConditionBadgeClass(Model.Fridge.Condition)">@Model.Fridge.Condition</span></p>
-                }
-                else
-                {
-                    <p class="text-muted">No fridge information available.</p>
-                }
+            <!-- Repair History Card -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Repair History</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.RepairSchedules != null && Model.RepairSchedules.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Diagnosis</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var repair in Model.RepairSchedules.OrderByDescending(r => r.CreatedDate))
+                                    {
+                                        <tr>
+                                            <td>@repair.CreatedDate.ToString("MM/dd HH:mm")</td>
+                                            <td>
+                                                <span class="badge @GetRepairStatusBadgeClass(repair.Status)">@repair.Status</span>
+                                            </td>
+                                            <td title="@repair.Diagnosis">
+                                                @(string.IsNullOrEmpty(repair.Diagnosis) ? "N/A" : repair.Diagnosis.Length > 30 ? repair.Diagnosis.Substring(0, 30) + "..." : repair.Diagnosis)
+                                            </td>
+                                            <td title="@repair.RepairNotes">
+                                                @(string.IsNullOrEmpty(repair.RepairNotes) ? "N/A" : repair.RepairNotes.Length > 30 ? repair.RepairNotes.Substring(0, 30) + "..." : repair.RepairNotes)
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No repair history available.</p>
+                    }
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Repair History -->
-    <div class="border p-3 mb-3">
-        <h6 class="fw-bold mb-3 text-center">Repair History</h6>
-        @if (Model.RepairSchedules != null && Model.RepairSchedules.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Repair Date</th>
-                            <th>Status</th>
-                            <th>Diagnosis</th>
-                            <th>Repair Notes</th>
-                            <th>Parts Used</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var repair in Model.RepairSchedules.OrderByDescending(r => r.CreatedDate))
-                        {
-                            <tr>
-                                <td>@repair.CreatedDate.ToString("yyyy/MM/dd")</td>
-                                <td><span class="badge @GetRepairStatusBadgeClass(repair.Status)">@repair.Status</span></td>
-                                <td>@(repair.Diagnosis ?? "N/A")</td>
-                                <td>@(repair.RepairNotes ?? "N/A")</td>
-                                <td>@(repair.PartsUsed ?? "N/A")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <p class="text-muted text-center">No repair history available for this fault report.</p>
-        }
-    </div>
-
-    <!-- Customer Information -->
-    <div class="mb-3">
-        <h6 class="fw-bold">Customer Information:</h6>
-        @if (Model.Fridge?.Customer != null)
-        {
-            <table class="table table-bordered table-striped">
-                <thead class="table-primary">
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Phone No</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>@Model.Fridge.Customer.FullName</td>
-                        <td>@Model.Fridge.Customer.Email</td>
-                        <td>@Model.Fridge.Customer.PhoneNumber</td>
-                        <td>@Model.Fridge.Customer.Location</td>
-                    </tr>
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p class="text-muted">No customer information available.</p>
-        }
-    </div>
-
     <!-- Action Buttons -->
-    <div class="mt-3">
-        <div class="btn-group" role="group">
-            <a asp-action="Process" asp-route-id="@Model.FaultReportId" class="btn btn-primary">
-                <i class="fas fa-cogs"></i> Process Fault
-            </a>
-            @if (Model.StatusFilter == "In Progress" || Model.StatusFilter == "Diagnosing")
-            {
-                <a asp-action="Repair" asp-route-id="@Model.FaultReportId" class="btn btn-warning">
-                    <i class="fas fa-tools"></i> Start Repair
+    <div class="card shadow mt-4">
+        <div class="card-body text-center">
+            <div class="btn-group" role="group">
+                <a asp-action="Process" asp-route-id="@Model.FaultReportId" class="btn btn-primary btn-lg">
+                    <i class="fas fa-cogs"></i> Process Fault
                 </a>
-            }
-            <a asp-action="UpdateCondition" asp-route-id="@Model.FaultReportId" class="btn btn-secondary">
-                <i class="fas fa-thermometer-half"></i> Update Condition
-            </a>
-            <button type="button" class="btn btn-danger" onclick="window.print()">
-                <i class="fas fa-print"></i> Print
-            </button>
-            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                @if (Model.Status == FridgeManagementSystem.Models.TaskStatus.InProgress ||
+                Model.RepairSchedules?.Any(r => r.Status == "Diagnosing" || r.Status == "Repairing") == true)
+                {
+                    <a asp-action="Repair" asp-route-id="@Model.FaultReportId" class="btn btn-warning btn-lg">
+                        <i class="fas fa-tools"></i> Repair Fridge
+                    </a>
+                }
+                <a asp-action="UpdateCondition" asp-route-id="@Model.FridgeId" class="btn btn-info btn-lg">
+                    <i class="fas fa-thermometer-half"></i> Update Condition
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -160,24 +294,23 @@
     {
         return urgencyLevel switch
         {
-            UrgencyLevel.Critical => "bg-danger",
-            UrgencyLevel.Emergency => "bg-dark",
+            UrgencyLevel.Critical or UrgencyLevel.Emergency => "bg-danger",
             UrgencyLevel.High => "bg-warning",
-            UrgencyLevel.Medium => "bg-info",
-            UrgencyLevel.Low => "bg-success",
+            UrgencyLevel.Medium => "bg-primary",
+            UrgencyLevel.Low => "bg-secondary",
             _ => "bg-secondary"
         };
     }
 
-    public string GetStatusBadgeClass(string statusFilter)
+    public string GetStatusBadgeClass(string status)
     {
-        return statusFilter?.ToLower() switch
+        return status?.ToLower() switch
         {
             "pending" => "bg-warning",
-            "in progress" => "bg-primary",
-            "resolved" => "bg-success",
+            "inprogress" => "bg-primary",
+            "onhold" => "bg-info",
+            "complete" => "bg-success",
             "cancelled" => "bg-secondary",
-            "diagnosing" => "bg-info",
             _ => "bg-secondary"
         };
     }
@@ -187,9 +320,9 @@
         return repairStatus?.ToLower() switch
         {
             "diagnosing" => "bg-info",
-            "awaiting parts" => "bg-warning",
-            "repairing" => "bg-danger",
-            "testing" => "bg-primary",
+            "awaiting parts" or "parts ordered" => "bg-warning",
+            "repairing" or "in progress" => "bg-primary",
+            "testing" => "bg-orange",
             "completed" => "bg-success",
             _ => "bg-secondary"
         };
@@ -207,3 +340,19 @@
         };
     }
 }
+
+<style>
+    .bg-orange {
+        background-color: #ff9800 !important;
+        color: white !important;
+    }
+
+    .card {
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+</style>

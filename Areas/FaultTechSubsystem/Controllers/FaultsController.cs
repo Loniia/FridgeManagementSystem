@@ -441,7 +441,7 @@ namespace FridgeManagementSystem.Controllers
         // POST: Faults/UpdateCondition/5 - Update Fridge Condition
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateCondition(int id, [Bind("FridgeID,Model,SerialNumber,Brand,Type,Condition,Notes,UpdatedDate")] Fridge fridge)
+        public async Task<IActionResult> UpdateCondition(int id, [Bind("FridgeId,Model,SerialNumber,Brand,FridgeType,Condition,Notes,UpdatedDate")] Fridge fridge)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem";
 
@@ -459,8 +459,9 @@ namespace FridgeManagementSystem.Controllers
                     {
                         existingFridge.Condition = fridge.Condition;
                         existingFridge.Notes = fridge.Notes;
-                        // Use provided date or default
-                        if (fridge.UpdatedDate == default)
+
+                        // Use provided date or current time if null/default
+                        if (fridge.UpdatedDate == null || fridge.UpdatedDate == default(DateTime))
                         {
                             existingFridge.UpdatedDate = DateTime.Now;
                         }
@@ -468,8 +469,10 @@ namespace FridgeManagementSystem.Controllers
                         {
                             existingFridge.UpdatedDate = fridge.UpdatedDate;
                         }
+
                         _context.Update(existingFridge);
 
+                        // Auto-complete fault reports when condition set to "Working"
                         if (fridge.Condition == "Working")
                         {
                             var relatedFaultReports = await _context.FaultReport
@@ -489,6 +492,11 @@ namespace FridgeManagementSystem.Controllers
                         TempData["SuccessMessage"] = $"Fridge condition updated to '{fridge.Condition}' successfully!";
                         return RedirectToAction(nameof(Index));
                     }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Fridge not found.";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -501,20 +509,28 @@ namespace FridgeManagementSystem.Controllers
                         throw;
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating fridge condition for fridge {FridgeId}", id);
+                    TempData["ErrorMessage"] = "An error occurred while updating the fridge condition.";
+                }
             }
 
+            // If we get here, there were validation errors
             var faultReportInfo = await _context.FaultReport
                 .Include(fr => fr.Fridge)
+                .Include(fr => fr.Fridge.Customer)
+                .Include(fr => fr.Fridge.Location)
                 .FirstOrDefaultAsync(fr => fr.FridgeId == id);
 
             ViewBag.FaultReport = faultReportInfo;
             ViewBag.ConditionOptions = new SelectList(new[]
             {
-                new { Value = "Working", Text = "Working - Fully Functional" },
-                new { Value = "Under Repair", Text = "Under Repair" },
-                new { Value = "Faulty", Text = "Faulty - Needs Attention" },
-                new { Value = "Scrapped", Text = "Scrapped - Beyond Repair" }
-            }, "Value", "Text", fridge.Condition);
+        new { Value = "Working", Text = "Working - Fully Functional" },
+        new { Value = "Under Repair", Text = "Under Repair" },
+        new { Value = "Faulty", Text = "Faulty - Needs Attention" },
+        new { Value = "Scrapped", Text = "Scrapped - Beyond Repair" }
+    }, "Value", "Text", fridge.Condition);
 
             return View(fridge);
         }

@@ -1,23 +1,30 @@
 ﻿@model FridgeManagementSystem.Models.RepairSchedule
-
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Complete Repair";
+    ViewData["Sidebar"] = "FaultTechSubsystem";
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 text-gray-800">Complete Repair</h1>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Fault Reports
-        </a>
+        <div>
+            <a asp-action="Process" asp-route-id="@Model.FaultReportId" class="btn btn-info">
+                <i class="fas fa-cogs"></i> Back to Process
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> All Faults
+            </a>
+        </div>
     </div>
 
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 bg-success text-white">
-                    <h6 class="m-0 font-weight-bold">Repair Completion Summary</h6>
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-check-circle"></i> Repair Completion Summary
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-success">
@@ -25,13 +32,13 @@
                         <p class="mb-0">This repair will be marked as completed and the fridge condition will be updated to "Working".</p>
                     </div>
 
+                    <!-- Repair Information -->
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h6 class="font-weight-bold">Fault Report Information</h6>
-                            <p><strong>Report No:</strong> FR@(Model.FaultReport?.FaultReportId.ToString("D3"))</p>
+                            <p><strong>Report ID:</strong> #@Model.FaultReportId</p>
                             <p><strong>Fault Type:</strong> <span class="badge bg-info">@Model.FaultReport?.FaultType</span></p>
-                            <p><strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(Model.FaultReport?.UrgencyLevel ?? UrgencyLevel.Medium)">@Model.FaultReport?.UrgencyLevel</span></p>
-                            <p><strong>Description:</strong> @Model.FaultReport?.FaultDescription</p>
+                            <p><strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(Model.FaultReport?.UrgencyLevel ?? FridgeManagementSystem.Models.UrgencyLevel.Medium)">@Model.FaultReport?.UrgencyLevel</span></p>
                         </div>
                         <div class="col-md-6">
                             <h6 class="font-weight-bold">Fridge Information</h6>
@@ -42,25 +49,52 @@
                         </div>
                     </div>
 
+                    @if (!string.IsNullOrEmpty(Model.FaultReport?.FaultDescription))
+                    {
+                        <div class="mb-4">
+                            <strong>Fault Description:</strong>
+                            <p class="mb-0 mt-1">@Model.FaultReport.FaultDescription</p>
+                        </div>
+                    }
+
+                    <!-- Repair Details -->
                     <div class="card mb-4">
                         <div class="card-header">
                             <h6 class="m-0 font-weight-bold text-primary">Repair Details</h6>
                         </div>
                         <div class="card-body">
-                            <p><strong>Repair Type:</strong> @Model.RepairType</p>
-                            <p><strong>Diagnosis:</strong> @Model.Diagnosis</p>
-                            <p><strong>Parts Used:</strong> @(string.IsNullOrEmpty(Model.PartsUsed) ? "None" : Model.PartsUsed)</p>
-                            <p><strong>Repair Notes:</strong> @(string.IsNullOrEmpty(Model.RepairNotes) ? "No notes" : Model.RepairNotes)</p>
-                            @if (Model.RepairCost.HasValue)
-                            {
-                                <p><strong>Repair Cost:</strong> R @Model.RepairCost.Value.ToString("F2")</p>
-                            }
-                            <p><strong>Current Status:</strong> <span class="badge @GetRepairStatusBadgeClass(Model.Status)">@Model.Status</span></p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Repair Type:</strong> @Model.RepairType</p>
+                                    <p><strong>Diagnosis:</strong> @(string.IsNullOrEmpty(Model.Diagnosis) ? "No diagnosis" : Model.Diagnosis)</p>
+                                    <p><strong>Parts Used:</strong> @(string.IsNullOrEmpty(Model.PartsUsed) ? "None" : Model.PartsUsed)</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Repair Notes:</strong> @(string.IsNullOrEmpty(Model.RepairNotes) ? "No notes" : Model.RepairNotes)</p>
+                                    @if (Model.RepairCost.HasValue)
+                                    {
+                                        <p><strong>Repair Cost:</strong> R @Model.RepairCost.Value.ToString("F2")</p>
+                                    }
+                                    <p><strong>Current Status:</strong> <span class="badge @GetRepairStatusBadgeClass(Model.Status)">@Model.Status</span></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <form asp-action="CompleteConfirmed" asp-route-id="@Model.RepairID" method="post">
+                    <!-- Completion Form -->
+                    <!-- FIXED: Changed to use HttpPost action and proper form -->
+                    <form asp-action="Complete" method="post">
                         @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.RepairID" />
+
+                        <div class="form-group mb-4">
+                            <label for="completionDate" class="font-weight-bold">Completion Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="completionDate" name="completionDate"
+                                   value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                            <small class="form-text text-muted">
+                                Set the date and time when the repair was completed (defaults to current time)
+                            </small>
+                        </div>
 
                         <div class="alert alert-warning">
                             <h6><i class="fas fa-exclamation-triangle"></i> Final Verification</h6>
@@ -70,7 +104,7 @@
                                 <li>The fridge is functioning properly</li>
                                 <li>All tests have been passed</li>
                                 <li>The fridge is ready for customer use</li>
-                                <li>Fault report status will be updated to "Resolved"</li>
+                                <li>Fault report status will be updated to "Complete"</li>
                                 <li>Fridge condition will be set to "Working"</li>
                             </ul>
                         </div>
@@ -80,20 +114,27 @@
                                 <i class="fas fa-check-circle"></i> Confirm Repair Completion
                             </button>
                             <a asp-action="Process" asp-route-id="@Model.FaultReportId" class="btn btn-secondary">Back to Process</a>
+                            <a asp-action="Repair" asp-route-id="@Model.FaultReportId" class="btn btn-warning">
+                                <i class="fas fa-tools"></i> Back to Repair
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
+        <!-- Sidebar -->
         <div class="col-lg-4">
-            <div class="card shadow">
+            <!-- Completion Checklist -->
+            <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Completion Checklist</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-clipboard-check"></i> Completion Checklist
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
-                        <h6><i class="fas fa-clipboard-check"></i> Pre-Completion Checks</h6>
+                        <h6><i class="fas fa-list-check"></i> Pre-Completion Checks</h6>
                         <ul class="mb-0 small">
                             <li>✅ Fridge cools to set temperature</li>
                             <li>✅ Door seals properly</li>
@@ -104,90 +145,135 @@
                             <li>✅ Customer notified (if applicable)</li>
                         </ul>
                     </div>
+                </div>
+            </div>
 
-                    @if (Model.Fridge?.Customer != null)
-                    {
-                        <div class="mt-3">
-                            <h6 class="font-weight-bold">Customer Contact</h6>
-                            <p class="mb-1"><strong>Name:</strong> @Model.Fridge.Customer.FullName</p>
-                            <p class="mb-1"><strong>Phone:</strong> @Model.Fridge.Customer.PhoneNumber</p>
-                            <p class="mb-1">
-                                <strong>Location:</strong> @(Model.Fridge.Customer.Location != null ?
-                            $"{Model.Fridge.Customer.Location.Address}, {Model.Fridge.Customer.Location.City}" : "N/A")
-                            </p>
-                            <p class="mb-0"><strong>Ready for pickup/delivery</strong></p>
-                        </div>
+            <!-- Customer Information -->
+            @if (Model.Fridge?.Customer != null)
+            {
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-user"></i> Customer Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Name:</strong> @Model.Fridge.Customer.FullName</p>
+                        <p class="mb-1"><strong>Phone:</strong> @Model.Fridge.Customer.PhoneNumber</p>
+                        <p class="mb-1"><strong>Email:</strong> @Model.Fridge.Customer.Email</p>
+                        <p class="mb-0"><strong>Location:</strong> @Model.Fridge.Customer.Location</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Repair Timeline -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-clock"></i> Repair Timeline
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Reported:</strong> @Model.FaultReport?.ReportDate.ToString("MMM dd, yyyy")</p>
+                    <p class="mb-1"><strong>Repair Started:</strong> @Model.CreatedDate.ToString("MMM dd, yyyy HH:mm")</p>
+                    <p class="mb-1"><strong>Last Updated:</strong> @Model.UpdatedDate.ToString("MMM dd, yyyy HH:mm")</p>
+                    <p class="mb-0"><strong>Completion:</strong> @DateTime.Now.ToString("MMM dd, yyyy HH:mm")</p>
+
+                    @{
+                        var duration = DateTime.Now - Model.CreatedDate;
                     }
-
-                    <div class="mt-3">
-                        <h6 class="font-weight-bold">Repair Timeline</h6>
-                        <p class="mb-1"><strong>Reported:</strong> @Model.FaultReport?.ReportDate.ToString("yyyy/MM/dd")</p>
-                        <p class="mb-1"><strong>Repair Started:</strong> @Model.CreatedDate.ToString("yyyy/MM/dd HH:mm")</p>
-                        <p class="mb-1"><strong>Completed:</strong> @DateTime.Now.ToString("yyyy/MM/dd HH:mm")</p>
-                        @{
-                            var duration = DateTime.Now - Model.CreatedDate;
-                            <p class="mb-0"><strong>Total Duration:</strong> @duration.TotalHours.ToString("F1") hours</p>
+                    <div class="mt-2 pt-2 border-top">
+                        <strong>Total Duration:</strong>
+                        @if (duration.TotalDays >= 1)
+                        {
+                            <span>@duration.Days day@(duration.Days > 1 ? "s" : ""), @duration.Hours hour@(duration.Hours > 1 ? "s" : "")</span>
+                        }
+                        else if (duration.TotalHours >= 1)
+                        {
+                            <span>@duration.Hours hour@(duration.Hours > 1 ? "s" : ""), @duration.Minutes minute@(duration.Minutes > 1 ? "s" : "")</span>
+                        }
+                        else
+                        {
+                            <span>@duration.Minutes minute@(duration.Minutes > 1 ? "s" : "")</span>
                         }
                     </div>
-
-                    <!-- Repair History Summary -->
-                    @if (Model.FaultReport?.RepairSchedules != null && Model.FaultReport.RepairSchedules.Any())
-                    {
-                        <div class="mt-3">
-                            <h6 class="font-weight-bold">Repair History</h6>
-                            <p class="mb-1 small">
-                                <strong>Total repair attempts:</strong> @Model.FaultReport.RepairSchedules.Count
-                            </p>
-                            @{
-                                var uniqueStatuses = Model.FaultReport.RepairSchedules.Select(r => r.Status).Distinct();
-                            }
-                            <p class="mb-0 small">
-                                <strong>Status history:</strong> @string.Join(", ", uniqueStatuses)
-                            </p>
-                        </div>
-                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@functions {
-    public string GetConditionBadgeClass(string condition)
+@{
+    // Helper functions moved to inline code block
+    string GetConditionBadgeClass(string condition)
     {
-        return condition?.ToLower() switch
+        if (condition == null) return "bg-secondary";
+        switch (condition.ToLower())
         {
-            "working" => "bg-success",
-            "under repair" => "bg-warning",
-            "faulty" => "bg-danger",
-            "scrapped" => "bg-dark",
-            _ => "bg-secondary"
-        };
+            case "working": return "bg-success";
+            case "under repair": return "bg-warning";
+            case "faulty": return "bg-danger";
+            case "scrapped": return "bg-dark";
+            default: return "bg-secondary";
+        }
     }
 
-    public string GetUrgencyBadgeClass(UrgencyLevel urgencyLevel)
+    string GetUrgencyBadgeClass(FridgeManagementSystem.Models.UrgencyLevel urgencyLevel)
     {
-        return urgencyLevel switch
+        switch (urgencyLevel)
         {
-            UrgencyLevel.Critical => "danger",
-            UrgencyLevel.Emergency => "dark",
-            UrgencyLevel.High => "warning",
-            UrgencyLevel.Medium => "info",
-            UrgencyLevel.Low => "success",
-            _ => "secondary"
-        };
+            case FridgeManagementSystem.Models.UrgencyLevel.Critical:
+            case FridgeManagementSystem.Models.UrgencyLevel.Emergency:
+                return "bg-danger";
+            case FridgeManagementSystem.Models.UrgencyLevel.High:
+                return "bg-warning";
+            case FridgeManagementSystem.Models.UrgencyLevel.Medium:
+                return "bg-primary";
+            case FridgeManagementSystem.Models.UrgencyLevel.Low:
+                return "bg-secondary";
+            default:
+                return "bg-secondary";
+        }
     }
 
-    public string GetRepairStatusBadgeClass(string repairStatus)
+    string GetRepairStatusBadgeClass(string repairStatus)
     {
-        return repairStatus?.ToLower() switch
+        if (repairStatus == null) return "bg-secondary";
+        switch (repairStatus.ToLower())
         {
-            "diagnosing" => "bg-info",
-            "awaiting parts" => "bg-warning",
-            "repairing" => "bg-danger",
-            "testing" => "bg-primary",
-            "completed" => "bg-success",
-            _ => "bg-secondary"
-        };
+            case "diagnosing": return "bg-info";
+            case "awaiting parts":
+            case "parts ordered": return "bg-warning";
+            case "repairing":
+            case "in progress": return "bg-primary";
+            case "testing": return "bg-orange";
+            case "completed": return "bg-success";
+            default: return "bg-secondary";
+        }
     }
+}
+
+<style>
+    .bg-orange {
+        background-color: #ff9800 !important;
+        color: white !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Set default completion date to current time
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('completionDate').value = now.toISOString().slice(0, 16);
+
+            // Add confirmation for completion
+            $('form').submit(function(e) {
+                if (!confirm('Are you sure you want to mark this repair as complete? This will update the fridge condition to "Working" and close the fault report.')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 }

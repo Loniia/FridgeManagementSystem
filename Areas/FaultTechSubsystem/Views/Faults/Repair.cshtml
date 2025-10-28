@@ -1,149 +1,283 @@
 ﻿@model FridgeManagementSystem.Models.RepairSchedule
-
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Repair Fridge";
+    ViewData["Sidebar"] = "FaultTechSubsystem";
+    
     var faultReport = ViewBag.FaultReport as FridgeManagementSystem.Models.FaultReport;
+    var repairTypes = ViewBag.RepairTypes as IEnumerable<SelectListItem>;
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 text-gray-800">Repair Fridge</h1>
-        <a asp-action="Process" asp-route-id="@faultReport?.FaultReportId" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Process
-        </a>
+        <div>
+            <a asp-action="Process" asp-route-id="@faultReport?.FaultReportId" class="btn btn-info">
+                <i class="fas fa-cogs"></i> Back to Process
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> All Faults
+            </a>
+        </div>
     </div>
 
+    <!-- Fault Report Summary -->
     @if (faultReport != null)
     {
         <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-warning">
-                <h6 class="m-0 font-weight-bold">Repair Information</h6>
+            <div class="card-header py-3 bg-warning text-dark">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="fas fa-tools"></i> Repair Information - Report #@faultReport.FaultReportId
+                </h6>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4">
-                        <strong>Report No:</strong> FR@(faultReport.FaultReportId.ToString("D3"))<br>
-                        <strong>Fault Type:</strong> <span class="badge bg-info">@faultReport.FaultType</span><br>
-                        <strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(faultReport.UrgencyLevel)">@faultReport.UrgencyLevel</span>
+                    <div class="col-md-3">
+                        <strong>Report ID:</strong> #@faultReport.FaultReportId<br>
+                        <strong>Fault Type:</strong> <span class="badge bg-info">@faultReport.FaultType</span>
                     </div>
-                    <div class="col-md-4">
-                        <strong>Fridge:</strong> @(faultReport.Fridge?.Model ?? "N/A")<br>
-                        <strong>Serial No:</strong> @(faultReport.Fridge?.SerialNumber ?? "N/A")<br>
-                        <strong>Brand:</strong> @(faultReport.Fridge?.Brand ?? "N/A")
+                    <div class="col-md-3">
+                        <strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(faultReport.UrgencyLevel)">@faultReport.UrgencyLevel</span><br>
+                        <strong>Status:</strong> <span class="badge @GetStatusBadgeClass(faultReport.Status.ToString())">@faultReport.Status</span>
                     </div>
-                    <div class="col-md-4">
-                        <strong>Customer:</strong> @(faultReport.Fridge?.Customer?.FullName ?? "N/A")<br>
-                        <strong>Contact:</strong> @(faultReport.Fridge?.Customer?.PhoneNumber ?? "N/A")<br>
-                        <strong>Location:</strong> @(faultReport.Fridge?.Customer?.Location != null ?
-                    $"{faultReport.Fridge.Customer.Location.Address}, {faultReport.Fridge.Customer.Location.City}, {faultReport.Fridge.Customer.Location.Province}" : "N/A")
+                    <div class="col-md-3">
+                        <strong>Fridge:</strong> @faultReport.Fridge?.Brand @faultReport.Fridge?.Model<br>
+                        <strong>Serial:</strong> @faultReport.Fridge?.SerialNumber
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Customer:</strong> @faultReport.Fridge?.Customer?.FullName<br>
+                        <strong>Phone:</strong> @faultReport.Fridge?.Customer?.PhoneNumber
                     </div>
                 </div>
-                <div class="row mt-2">
+                <div class="row mt-3">
                     <div class="col-12">
-                        <strong>Fault Description:</strong> @faultReport.FaultDescription
+                        <strong>Fault Description:</strong> 
+                        <p class="mb-0 mt-1">@faultReport.FaultDescription</p>
                     </div>
                 </div>
+                @if (faultReport.Fridge?.Customer?.Location != null)
+                {
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <strong>Location:</strong> @faultReport.Fridge.Customer.Location
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     }
 
     <div class="row">
+        <!-- Main Repair Form -->
         <div class="col-lg-8">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Repair Details</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-wrench"></i> Repair Details
+                    </h6>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Repair" asp-route-id="@faultReport?.FaultReportId">
+                    <!-- FIXED: Added method="post" and RepairID hidden field -->
+                    <form asp-action="Repair" asp-route-id="@faultReport?.FaultReportId" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="FaultReportId" />
                         <input type="hidden" asp-for="FridgeId" />
+                        <input type="hidden" asp-for="RepairID" />
 
-                        <div class="form-group mb-3">
-                            <label asp-for="RepairType" class="control-label">Repair Type</label>
-                            <select asp-for="RepairType" class="form-control" asp-items="ViewBag.RepairTypes">
+                        <!-- Repair Type -->
+                        <div class="form-group mb-4">
+                            <label asp-for="RepairType" class="font-weight-bold">Repair Type *</label>
+                            <select asp-for="RepairType" class="form-control" required
+                                    asp-items="repairTypes">
                                 <option value="">-- Select Repair Type --</option>
                             </select>
-                            <span asp-validation-for="RepairType" class="text-danger"></span>
+                            <span asp-validation-for="RepairType" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Select the primary type of repair performed
+                            </small>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="PartsUsed" class="control-label">Parts Used</label>
-                            <textarea asp-for="PartsUsed" class="form-control" rows="2"
-                                      placeholder="List all parts used in the repair..."></textarea>
-                            <span asp-validation-for="PartsUsed" class="text-danger"></span>
+                        <!-- Parts Used -->
+                        <div class="form-group mb-4">
+                            <label asp-for="PartsUsed" class="font-weight-bold">Parts Used</label>
+                            <textarea asp-for="PartsUsed" class="form-control" rows="3"
+                                      placeholder="List all parts used in the repair with quantities and part numbers...">@Model.PartsUsed</textarea>
+                            <span asp-validation-for="PartsUsed" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Include part numbers, quantities, and descriptions for inventory tracking
+                            </small>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="RepairNotes" class="control-label">Repair Procedure & Notes</label>
-                            <textarea asp-for="RepairNotes" class="form-control" rows="4"
-                                      placeholder="Describe the repair procedure, challenges, and solutions..."></textarea>
-                            <span asp-validation-for="RepairNotes" class="text-danger"></span>
+                        <!-- Repair Notes -->
+                        <div class="form-group mb-4">
+                            <label asp-for="RepairNotes" class="font-weight-bold">Repair Procedure & Notes *</label>
+                            <textarea asp-for="RepairNotes" class="form-control" rows="4" required
+                                      placeholder="Describe the repair procedure, challenges encountered, solutions implemented, and testing results...">@Model.RepairNotes</textarea>
+                            <span asp-validation-for="RepairNotes" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Detailed documentation helps with future repairs and quality assurance
+                            </small>
                         </div>
 
-                        <div class="row">
+                        <!-- Repair Cost and Status -->
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="RepairCost" class="control-label">Repair Cost (R)</label>
-                                    <input type="number" asp-for="RepairCost" class="form-control" step="0.01" min="0"
-                                           placeholder="0.00" />
-                                    <span asp-validation-for="RepairCost" class="text-danger"></span>
+                                <div class="form-group">
+                                    <label asp-for="RepairCost" class="font-weight-bold">Repair Cost (R)</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">R</span>
+                                        </div>
+                                        <input type="number" asp-for="RepairCost" class="form-control" step="0.01" min="0"
+                                               placeholder="0.00" />
+                                    </div>
+                                    <span asp-validation-for="RepairCost" class="text-danger small"></span>
+                                    <small class="form-text text-muted">
+                                        Total cost of parts and labor for this repair
+                                    </small>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="control-label">Current Status</label>
-                                    <input type="text" class="form-control" value="@faultReport?.StatusFilter" readonly />
-                                    <small class="form-text text-muted">Status will update to 'Testing' after repair</small>
+                                <div class="form-group">
+                                    <label asp-for="Status" class="font-weight-bold">Repair Status *</label>
+                                    <select asp-for="Status" class="form-control" required>
+                                        <option value="">-- Select Status --</option>
+                                        <option value="Diagnosing">Diagnosing</option>
+                                        <option value="Awaiting Parts">Awaiting Parts</option>
+                                        <option value="Repairing">Repairing</option>
+                                        <option value="Testing">Testing</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger small"></span>
+                                    <small class="form-text text-muted">
+                                        Current stage of the repair process
+                                    </small>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-wrench"></i> Complete Repair
+                        <!-- Dates -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CreatedDate" class="font-weight-bold">Repair Start Date</label>
+                                    <input asp-for="CreatedDate" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="CreatedDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="UpdatedDate" class="font-weight-bold">Last Updated</label>
+                                    <input asp-for="UpdatedDate" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="UpdatedDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Save Repair Details
                             </button>
-                            <a asp-action="Process" asp-route-id="@faultReport?.FaultReportId" class="btn btn-secondary">Cancel</a>
-                            <a asp-action="UpdateCondition" asp-route-id="@faultReport?.FaultReportId" class="btn btn-info">
+                            <a asp-action="Process" asp-route-id="@faultReport?.FaultReportId" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                            <a asp-action="UpdateCondition" asp-route-id="@faultReport?.FridgeId" class="btn btn-info">
                                 <i class="fas fa-thermometer-half"></i> Update Condition
                             </a>
+                            
+                            @if (Model.Status == "Completed")
+                            {
+                                <a asp-action="Complete" asp-route-id="@Model.RepairID" class="btn btn-primary">
+                                    <i class="fas fa-check-circle"></i> Mark Complete
+                                </a>
+                            }
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
+        <!-- Sidebar - Guidance and Information -->
         <div class="col-lg-4">
-            <div class="card shadow">
+            <!-- Common Repairs Guide -->
+            <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Common Repairs</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-lightbulb"></i> Common Repairs Guide
+                    </h6>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-warning">
-                        <h6><i class="fas fa-lightbulb"></i> Quick Reference</h6>
-                        <ul class="mb-0 small">
-                            <li><strong>Electrical:</strong> Wiring, controls, power issues</li>
-                            <li><strong>Mechanical:</strong> Doors, hinges, shelves</li>
-                            <li><strong>Refrigeration:</strong> Cooling system, gas leaks</li>
-                            <li><strong>Thermostat:</strong> Temperature control issues</li>
-                            <li><strong>Compressor:</strong> Motor, starting components</li>
+                    <div class="alert alert-warning small">
+                        <h6><i class="fas fa-tools"></i> Quick Reference</h6>
+                        <ul class="mb-0 pl-3">
+                            <li><strong>Electrical:</strong> Wiring, controls, power supply issues</li>
+                            <li><strong>Mechanical:</strong> Doors, hinges, shelves, handles</li>
+                            <li><strong>Refrigeration:</strong> Cooling system, gas leaks, coils</li>
+                            <li><strong>Thermostat:</strong> Temperature control, calibration</li>
+                            <li><strong>Compressor:</strong> Motor, starting components, valves</li>
+                            <li><strong>Other:</strong> Custom or complex repairs</li>
                         </ul>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Previous Repair Notes -->
+            <!-- Repair History -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history"></i> Repair History
+                    </h6>
+                </div>
+                <div class="card-body">
                     @if (faultReport?.RepairSchedules != null && faultReport.RepairSchedules.Any())
                     {
-                        <div class="alert alert-info mt-3">
-                            <h6><i class="fas fa-history"></i> Previous Repair Notes</h6>
-                            @foreach (var repair in faultReport.RepairSchedules.OrderByDescending(r => r.CreatedDate).Take(2))
+                        <div class="timeline small">
+                            @foreach (var repair in faultReport.RepairSchedules.OrderByDescending(r => r.CreatedDate).Take(4))
                             {
-                                <p class="mb-1 small">
-                                    <strong>@repair.Status:</strong> @(repair.RepairNotes?.Length > 50 ? repair.RepairNotes.Substring(0, 50) + "..." : repair.RepairNotes)
-                                </p>
+                                <div class="timeline-item mb-3 pb-2 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <strong class="text-primary">@repair.Status</strong>
+                                        <small class="text-muted">@repair.CreatedDate.ToString("MM/dd HH:mm")</small>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(repair.RepairType))
+                                    {
+                                        <div class="text-muted"><small>Type: @repair.RepairType</small></div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(repair.RepairNotes))
+                                    {
+                                        <div class="text-muted mt-1">
+                                            <small>@(repair.RepairNotes.Length > 60 ? repair.RepairNotes.Substring(0, 60) + "..." : repair.RepairNotes)</small>
+                                        </div>
+                                    }
+                                </div>
                             }
                         </div>
                     }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">No previous repairs</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <a asp-action="Process" asp-route-id="@faultReport?.FaultReportId" class="btn btn-primary btn-sm mb-2 w-100">
+                        <i class="fas fa-cogs"></i> Update Process
+                    </a>
+                    <a asp-action="UpdateCondition" asp-route-id="@faultReport?.FridgeId" class="btn btn-info btn-sm mb-2 w-100">
+                        <i class="fas fa-thermometer-half"></i> Update Condition
+                    </a>
+                    <a asp-action="Complete" asp-route-id="@Model.RepairID" class="btn btn-success btn-sm w-100">
+                        <i class="fas fa-check-circle"></i> Mark Complete
+                    </a>
                 </div>
             </div>
         </div>
@@ -151,15 +285,27 @@
 </div>
 
 @functions {
+    public string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "inprogress" => "bg-primary",
+            "onhold" => "bg-info",
+            "complete" => "bg-success",
+            "cancelled" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
     public string GetUrgencyBadgeClass(UrgencyLevel urgencyLevel)
     {
         return urgencyLevel switch
         {
-            UrgencyLevel.Critical => "bg-danger",
-            UrgencyLevel.Emergency => "bg-dark",
+            UrgencyLevel.Critical or UrgencyLevel.Emergency => "bg-danger",
             UrgencyLevel.High => "bg-warning",
-            UrgencyLevel.Medium => "bg-info",
-            UrgencyLevel.Low => "bg-success",
+            UrgencyLevel.Medium => "bg-primary",
+            UrgencyLevel.Low => "bg-secondary",
             _ => "bg-secondary"
         };
     }
@@ -169,4 +315,25 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    
+    <script>
+        $(document).ready(function() {
+            // Set current values
+            $('#RepairType').val('@Model.RepairType');
+            $('#Status').val('@Model.Status');
+            
+            // Auto-set dates if empty
+            if (!$('#CreatedDate').val()) {
+                var now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('CreatedDate').value = now.toISOString().slice(0, 16);
+            }
+            
+            if (!$('#UpdatedDate').val()) {
+                var now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('UpdatedDate').value = now.toISOString().slice(0, 16);
+            }
+        });
+    </script>
 }

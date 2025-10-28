@@ -1,87 +1,206 @@
 ﻿@model IEnumerable<FridgeManagementSystem.Models.FaultReport>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "View Fault Reports";
+    ViewData["Title"] = "Active Fault Reports";
+    ViewData["Sidebar"] = "FaultTechSubsystem";
 }
 
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">View Fault Reports</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Active Fault Reports</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Create New Fault Report
+        </a>
+    </div>
 
-    <!-- Search Bar -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search by customer name, fault description...">
-                <button class="btn btn-primary" type="button">
-                    <i class="fas fa-search"></i> Search
-                </button>
+    <!-- Status Filter Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Active Faults
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count()</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                High Priority
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Count(f => f.UrgencyLevel == UrgencyLevel.High || f.UrgencyLevel == UrgencyLevel.Critical || f.UrgencyLevel == UrgencyLevel.Emergency)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Pending
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Count(f => f.Status == FridgeManagementSystem.Models.TaskStatus.Pending)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                In Progress
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Count(f => f.Status == FridgeManagementSystem.Models.TaskStatus.InProgress)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tools fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Fault Reports Table -->
     <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Active Fault Reports</h6>
+        </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-bordered table-hover" id="faultsTable">
                     <thead class="thead-light">
                         <tr>
-                            <th>Report ID</th>
-                            <th>Customer Name</th>
-                            <th>Fridge Model</th>
+                            <th>Report Date</th>
+                            <th>Fridge</th>
+                            <th>Customer</th>
                             <th>Fault Type</th>
-                            <th>Description</th>
-                            <th>Date Reported</th>
                             <th>Urgency</th>
                             <th>Status</th>
+                            <th>Repair Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (Model != null && Model.Any())
                         {
-                            @foreach (var item in Model)
+                            @foreach (var item in Model.OrderByDescending(f => f.UrgencyLevel).ThenByDescending(f => f.ReportDate))
                             {
                                 <tr>
-                                    <td>FR@(item.FaultReportId.ToString("D3"))</td>
-                                    <td>@(item.Fridge?.Customer?.FullName ?? "N/A")</td>
-                                    <td>@(item.Fridge?.Model ?? "N/A")</td>
+                                    <td>@item.ReportDate.ToString("MMM dd, yyyy HH:mm")</td>
+                                    <td>
+                                        @if (item.Fridge != null)
+                                        {
+                                            <div>
+                                                <strong>@item.Fridge.Brand @item.Fridge.Model</strong>
+                                                <small class="text-muted d-block">SN: @item.Fridge.SerialNumber</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Fridge?.Customer != null)
+                                        {
+                                            @item.Fridge.Customer.FullName
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
                                     <td>
                                         <span class="badge bg-info">@item.FaultType</span>
                                     </td>
-                                    <td>@item.FaultDescription</td>
-                                    <td>@item.ReportDate.ToString("yyyy-MM-dd")</td>
                                     <td>
-                                        <span class="badge @(item.UrgencyLevel == UrgencyLevel.Critical || item.UrgencyLevel == UrgencyLevel.Emergency ? "bg-danger" :
-                                                        item.UrgencyLevel == UrgencyLevel.High ? "bg-warning" :
-                                                        item.UrgencyLevel == UrgencyLevel.Medium ? "bg-info" : "bg-secondary")">
-                                            @item.UrgencyLevel
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge @(item.StatusFilter == "Pending" ? "bg-danger" :
-                                                        item.StatusFilter == "In Progress" ? "bg-warning" :
-                                                        item.StatusFilter == "Resolved" ? "bg-success" : "bg-secondary")">
-                                            @item.StatusFilter
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a asp-action="Details" asp-route-id="@item.FaultReportId" class="btn btn-outline-info btn-sm" title="View Details">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a asp-action="Process" asp-route-id="@item.FaultReportId" class="btn btn-outline-primary btn-sm" title="Process Fault">
-                                                <i class="fas fa-cogs"></i>
-                                            </a>
-                                            @if (item.StatusFilter == "In Progress" || item.StatusFilter == "Diagnosing")
+                                        @{
+                                            var urgencyBadgeClass = item.UrgencyLevel switch
                                             {
-                                                <a asp-action="Repair" asp-route-id="@item.FaultReportId" class="btn btn-outline-warning btn-sm" title="Start Repair">
-                                                    <i class="fas fa-tools"></i>
+                                                UrgencyLevel.Critical or UrgencyLevel.Emergency => "bg-danger",
+                                                UrgencyLevel.High => "bg-warning",
+                                                UrgencyLevel.Medium => "bg-primary",
+                                                UrgencyLevel.Low => "bg-secondary",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @urgencyBadgeClass">@item.UrgencyLevel</span>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var statusBadgeClass = item.Status.ToString() switch
+                                            {
+                                                "Pending" => "bg-warning",
+                                                "InProgress" => "bg-primary",
+                                                "OnHold" => "bg-info",
+                                                "Complete" => "bg-success",
+                                                "Cancelled" => "bg-secondary",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @statusBadgeClass">@item.Status</span>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var latestRepair = item.RepairSchedules?.OrderByDescending(r => r.CreatedDate).FirstOrDefault();
+                                            var repairStatus = latestRepair?.Status ?? "Not Started";
+                                            var repairBadgeClass = repairStatus.ToLower() switch
+                                            {
+                                                "completed" => "bg-success",
+                                                "repairing" or "in progress" => "bg-primary",
+                                                "diagnosing" => "bg-info",
+                                                "awaiting parts" => "bg-warning",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @repairBadgeClass">@repairStatus</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Process" asp-route-id="@item.FaultReportId"
+                                               class="btn btn-outline-primary" title="Process Fault">
+                                                <i class="fas fa-cogs"></i> Process
+                                            </a>
+                                            @if (item.Status == FridgeManagementSystem.Models.TaskStatus.InProgress ||
+                                           latestRepair?.Status == "Diagnosing" ||
+                                           latestRepair?.Status == "Repairing")
+                                            {
+                                                <a asp-action="Repair" asp-route-id="@item.FaultReportId"
+                                                   class="btn btn-outline-warning" title="Repair Fridge">
+                                                    <i class="fas fa-tools"></i> Repair
                                                 </a>
                                             }
-                                            <a asp-action="UpdateCondition" asp-route-id="@item.FaultReportId" class="btn btn-outline-secondary btn-sm" title="Update Condition">
-                                                <i class="fas fa-thermometer-half"></i>
-                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -90,7 +209,14 @@
                         else
                         {
                             <tr>
-                                <td colspan="9" class="text-center">No fault reports found</td>
+                                <td colspan="9" class="text-center py-4">
+                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No Active Fault Reports</h5>
+                                    <p class="text-muted">All fault reports have been completed or cancelled.</p>
+                                    <a asp-action="Create" class="btn btn-primary">
+                                        <i class="fas fa-plus-circle"></i> Create New Fault Report
+                                    </a>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -99,7 +225,33 @@
         </div>
     </div>
 
+    <!-- Information Alert -->
     <div class="alert alert-info mt-4">
-        <strong>Note:</strong> Use the action buttons to manage each fault report. Start with "Process" for new fault reports.
+        <h6><i class="fas fa-info-circle"></i> Quick Actions Guide</h6>
+        <ul class="mb-0">
+            <li><strong>Process:</strong> Diagnose and update fault status</li>
+            <li><strong>Repair:</strong> Available when fault is In Progress or being diagnosed/repaired</li>
+            <li>Faults are automatically filtered to exclude Completed and Cancelled statuses</li>
+        </ul>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable
+            $('#faultsTable').DataTable({
+                "pageLength": 25,
+                "order": [[1, 'desc']], // Sort by report date descending
+                "language": {
+                    "emptyTable": "No active fault reports found"
+                }
+            });
+
+            // Auto-refresh page every 2 minutes to get latest fault status
+            setInterval(function() {
+                location.reload();
+            }, 120000); // 2 minutes
+        });
+    </script>
+}

@@ -1,125 +1,37 @@
-﻿@model FridgeManagementSystem.Models.FaultReport
+﻿@model FridgeManagementSystem.Models.Fridge
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Update Fridge Condition";
+    ViewData["Sidebar"] = "FaultTechSubsystem";
+
+    var faultReport = ViewBag.FaultReport as FridgeManagementSystem.Models.FaultReport;
+    var conditionOptions = ViewBag.ConditionOptions as IEnumerable<SelectListItem>;
+
+    // Simple helper functions
+    string GetConditionBadgeClass(string condition)
+    {
+        if (condition == null) return "bg-secondary";
+        switch (condition.ToLower())
+        {
+            case "working": return "bg-success";
+            case "under repair": return "bg-warning";
+            case "faulty": return "bg-danger";
+            case "scrapped": return "bg-dark";
+            default: return "bg-secondary";
+        }
+    }
+
+    string GetStatusBadgeClass(string status)
+    {
+        if (status == null) return "bg-secondary";
+        switch (status.ToLower())
+        {
+            case "pending": return "bg-warning";
+            case "inprogress": return "bg-primary";
+            case "onhold": return "bg-info";
+            case "complete": return "bg-success";
+            case "cancelled": return "bg-secondary";
+            default: return "bg-secondary";
+        }
+    }
 }
-@{
-    ViewData["Title"] = "Update Fault Status";
-}
-
-<div class="modal-header">
-    <h5 class="modal-title" id="updateStatusModalLabel">
-        <i class="fas fa-sync-alt"></i> Update Status - Fault #F@(Model.FaultReportId.ToString("D4"))
-    </h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-</div>
-
-<form asp-action="UpdateStatus" asp-route-id="@Model.FaultReportId" id="statusForm" method="post">
-    <div class="modal-body">
-        @Html.AntiForgeryToken()
-
-        <input type="hidden" asp-for="FaultReportId" />
-
-        <div class="mb-3">
-            <label class="form-label">Current Description</label>
-            <p class="form-control-plaintext">@Model.FaultDescription</p>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Current Priority</label>
-            <p class="form-control-plaintext">
-                @{
-                    var priorityBadgeClass = Model.UrgencyLevel.ToString() switch
-                    {
-                        "High" or "Critical" or "Emergency" => "badge bg-danger",
-                        "Medium" => "badge bg-warning",
-                        "Low" => "badge bg-info",
-                        _ => "badge bg-secondary"
-                    };
-                    var priorityText = Model.UrgencyLevel.ToString();
-                }
-                <span class="@priorityBadgeClass">@priorityText</span>
-            </p>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Current Status</label>
-            <p class="form-control-plaintext">
-                @{
-                    var statusBadgeClass = Model.StatusFilter switch
-                    {
-                        "Pending" => "badge bg-danger",
-                        "In Progress" => "badge bg-warning",
-                        "Resolved" => "badge bg-success",
-                        "Closed" => "badge bg-secondary",
-                        _ => "badge bg-info"
-                    };
-                }
-                <span class="@statusBadgeClass">@Model.StatusFilter</span>
-            </p>
-        </div>
-
-        <div class="form-group">
-            <label for="newStatus" class="form-label">Update Status To</label>
-            <select name="status" id="newStatus" class="form-control" required>
-                <option value="">-- Select New Status --</option>
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
-            </select>
-        </div>
-
-        <div id="resolutionNotes" class="form-group mt-3" style="display: none;">
-            <label for="resolutionDetails" class="form-label">Resolution Details (Optional)</label>
-            <textarea name="resolutionDetails" id="resolutionDetails" class="form-control" rows="3"
-                      placeholder="Add any notes about the resolution..."></textarea>
-        </div>
-    </div>
-
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            <i class="fas fa-times"></i> Cancel
-        </button>
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-check"></i> Update Status
-        </button>
-    </div>
-</form>
-
-<script>
-    $(document).ready(function() {
-        // Show resolution notes when Resolved or Closed is selected
-        $('#newStatus').change(function() {
-            if ($(this).val() === 'Resolved' || $(this).val() === 'Closed') {
-                $('#resolutionNotes').slideDown();
-            } else {
-                $('#resolutionNotes').slideUp();
-            }
-        });
-
-        // AJAX form submission for modal
-        $('#statusForm').on('submit', function(e) {
-            e.preventDefault();
-
-            var form = $(this);
-            $.ajax({
-                url: form.attr('action'),
-                type: 'POST',
-                data: form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        // Close modal and refresh page
-                        $('#updateStatusModal').modal('hide');
-                        location.reload();
-                    } else {
-                        alert(response.message || 'Error updating status.');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert('Error updating status. Please try again.');
-                }
-            });
-        });
-    });
-</script>
