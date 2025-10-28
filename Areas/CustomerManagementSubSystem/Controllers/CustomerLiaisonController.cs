@@ -249,27 +249,22 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 return RedirectToAction("ProcessPendingAllocations");
             }
 
-            // ✅ Parse user-provided AllocationDate / ReturnDate from form, allow past 6 months
+            // Parse user-provided AllocationDate / ReturnDate
             DateOnly? allocationDateFromUser = null;
             DateOnly? returnDateFromUser = null;
 
-            if (Request.Form["AllocationDate"].Count > 0)
+            if (Request.Form["AllocationDate"].Count > 0 &&
+                DateOnly.TryParse(Request.Form["AllocationDate"], out var parsedDate) &&
+                parsedDate >= DateOnly.FromDateTime(DateTime.Now.AddMonths(-6)) &&
+                parsedDate <= DateOnly.FromDateTime(DateTime.Now))
             {
-                if (DateOnly.TryParse(Request.Form["AllocationDate"], out var parsedDate))
-                {
-                    // allow past 6 months
-                    if (parsedDate >= DateOnly.FromDateTime(DateTime.Now.AddMonths(-6)) &&
-                        parsedDate <= DateOnly.FromDateTime(DateTime.Now))
-                    {
-                        allocationDateFromUser = parsedDate;
-                    }
-                }
+                allocationDateFromUser = parsedDate;
             }
 
-            if (Request.Form["ReturnDate"].Count > 0)
+            if (Request.Form["ReturnDate"].Count > 0 &&
+                DateOnly.TryParse(Request.Form["ReturnDate"], out var parsedReturn))
             {
-                if (DateOnly.TryParse(Request.Form["ReturnDate"], out var parsedReturn))
-                    returnDateFromUser = parsedReturn;
+                returnDateFromUser = parsedReturn;
             }
 
             // Allocate fridge
@@ -300,7 +295,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             }
             _context.SaveChanges();
 
-            // Check for existing MaintenanceRequest
+            // Create or check MaintenanceRequest
             var existingRequest = _context.MaintenanceRequest
                 .FirstOrDefault(mr => mr.FridgeId == fridge.FridgeId && mr.IsActive && mr.TaskStatus == Models.TaskStatus.Pending);
 
@@ -309,7 +304,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 var maintenanceRequest = new MaintenanceRequest
                 {
                     FridgeId = fridge.FridgeId,
-                    RequestDate = null, // no pre-set date; technician chooses later
+                    RequestDate = allocation.AllocationDate.HasValue
+                    ? allocation.AllocationDate.Value.ToDateTime(TimeOnly.MinValue)
+                    : DateTime.Now, // fallback if null
                     TaskStatus = Models.TaskStatus.Pending,
                     IsActive = true
                 };
@@ -317,7 +314,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 _context.SaveChanges();
 
                 TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated to {customer.FullName}. " +
-                                      $"A maintenance request has been created.";
+                                      $"A maintenance request has been created with the allocation date.";
             }
             else
             {
@@ -327,6 +324,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
             return RedirectToAction("ProcessPendingAllocations");
         }
+
 
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
         {
