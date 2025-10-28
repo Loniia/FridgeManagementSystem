@@ -19,50 +19,62 @@ namespace FridgeManagementSystem.Controllers
         {
             _context = context;
         }
-        public IActionResult Index()
+        public async Task <IActionResult> Index()
         {
+            var model = new ReportDashboardViewModel();
+
+            // ✅ Load the KPI data
+            model.MaintenanceKpi = await GetMonthlyMaintenanceKpi();
             return View();
         }
 
-        public IActionResult FaultReports()
+        public  IActionResult FaultReports()
         {
+            
             return View();
         }
         [HttpGet]
-        public async Task<IActionResult> GetMaintenanceChartData()
+        private async Task<MaintenanceKpiViewModel> GetMonthlyMaintenanceKpi()
         {
-            try
-            {
-                var sixMonthsAgo = DateTime.Now.AddMonths(-6);
+            var now = DateTime.Now;
+            var month = now.Month;
+            var year = now.Year;
 
-                var monthlyData = await _context.MaintenanceVisit
-                    .Include(v => v.MaintenanceRequest)
-                    .Where(v => v.ScheduledDate >= sixMonthsAgo)
-                    .GroupBy(v => new { v.ScheduledDate.Year, v.ScheduledDate.Month })
-                    .Select(g => new
-                    {
-                        Month = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM"),
-                        Scheduled = g.Count(),
-                        Completed = g.Count(v => v.Status == Models.TaskStatus.Complete),
-                        Rescheduled = g.Count(v => v.Status == Models.TaskStatus.Rescheduled),
-                        Canceled = g.Count(v => v.Status == Models.TaskStatus.Cancelled),
-                        AvgResponseTime = g.Where(v => v.Status == Models.TaskStatus.Complete &&
-                                                     v.MaintenanceRequest.CompletedDate != null)
-                                         .Average(v => (double?)EF.Functions.DateDiffDay(
-                                             v.MaintenanceRequest.RequestDate,
-                                             v.MaintenanceRequest.CompletedDate.Value)) ?? 0
-                    })
-                    .OrderBy(x => x.Month)
-                    .ToListAsync();
+            var kpi = new MaintenanceKpiViewModel();
 
-                return Json(monthlyData);
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                return Json(new { error = "Failed to load chart data" });
-            }
+            // Requests created this month
+            var monthlyRequests = await _context.MaintenanceRequest
+                .Where(r => r.RequestDate.Month == month && r.RequestDate.Year == year)
+                .ToListAsync();
+
+            var monthlyCompleted = monthlyRequests
+    .Where(r => r.TaskStatus == Models.TaskStatus.Complete && r.CompletedDate != null)
+    .ToList();
+
+            kpi.CompletedThisMonth = monthlyCompleted.Count;
+
+            // Avg days to complete
+            kpi.AvgCompletionDays = monthlyCompleted.Any()
+                ? monthlyCompleted.Average(r => (r.CompletedDate.Value - r.RequestDate).TotalDays)
+                : 0;
+
+            // Success rate
+            kpi.SuccessRate = monthlyRequests.Any()
+                ? (monthlyCompleted.Count * 100.0) / monthlyRequests.Count
+                : 0;
+
+            // Repeat visits: >1 completed visit for same fridge this month
+            kpi.MonthlyRepeatVisits = await _context.MaintenanceVisit
+                .Where(v => v.Status == Models.TaskStatus.Complete &&
+                            v.ScheduledDate.Month == month &&
+                            v.ScheduledDate.Year == year)
+                .GroupBy(v => v.FridgeId)
+                .Where(g => g.Count() > 1)
+                .CountAsync();
+
+            return kpi;
         }
+
 
         //============
         //Customer Management SubSystem Report Part

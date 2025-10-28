@@ -1,4 +1,6 @@
-﻿@{
+﻿@model ReportDashboardViewModel
+
+@{
     ViewData["Title"] = "Reports Dashboard";
     Layout = "_Layout";
 }
@@ -16,86 +18,12 @@
 <div class="container-fluid">
     <h1 class="mb-4">Reports Dashboard</h1>
 
-    <!-- Maintenance Reports Section -->
-    <section class="mb-5">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h3 class="card-title mb-0">
-                    <i class="fas fa-tools me-2"></i>Maintenance Reports
-                </h3>
-            </div>
-            <div class="card-body">
-                <!-- Maintenance KPIs -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card text-white bg-info">
-                            <div class="card-body">
-                                <h6 class="card-title">Completed This Month</h6>
-                                <h3 id="completedCount" class="mb-0">0</h3>
-                                <small>Maintenance Visits</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h6 class="card-title">Scheduled</h6>
-                                <h3 id="scheduledCount" class="mb-0">0</h3>
-                                <small>Pending Visits</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h6 class="card-title">Avg Response Time</h6>
-                                <h3 id="avgResponseTime" class="mb-0">0</h3>
-                                <small>Days</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h6 class="card-title">Completion Rate</h6>
-                                <h3 id="completionRate" class="mb-0">0%</h3>
-                                <small>This Month</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <h2>Maintenance Performance - This Month</h2>
 
-                <!-- Maintenance Trends Line Graph -->
-                <div class="chart-container">
-                    <canvas id="maintenanceTrendsChart"></canvas>
-                </div>
+    <canvas id="maintenanceChart" width="400" height="200"></canvas>
 
-                <!-- Status Distribution -->
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Visit Status Distribution</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="statusDistributionChart" height="250"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Top Technicians</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="technicianPerformanceChart" height="250"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    
+
 
     <!-- Customer Management Reports Section -->
     <section class="mb-5">
@@ -472,7 +400,31 @@
 </section>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+       
     <script>
+        var ctx = document.getElementById('maintenanceChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Completed Tasks', 'Avg Completion Days', 'Success Rate %', 'Repeat Visits'],
+                datasets: [{
+                    label: 'Maintenance KPIs (This Month)',
+                    data: [
+                        @Model.MaintenanceKpi.CompletedThisMonth,
+                        @Model.MaintenanceKpi.AvgCompletionDays.ToString("0"),
+                        @Model.MaintenanceKpi.SuccessRate.ToString("0"),
+                        @Model.MaintenanceKpi.MonthlyRepeatVisits
+                    ],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    
         // Debug function to check what's happening
         function debugLog(message, data = null) {
             console.log(`[DEBUG] ${message}`, data || '');
@@ -516,226 +468,7 @@
             document.querySelector('.container-fluid').prepend(errorDiv);
         }
 
-        // =============================================
-        // MAINTENANCE REPORT FUNCTIONS
-        // =============================================
-        async function loadMaintenanceData() {
-            debugLog('Loading maintenance data...');
-
-            try {
-                // Use a simple test data if controller actions don't exist
-                const maintenanceData = await tryLoadMaintenanceData();
-
-                if (maintenanceData) {
-                    await createMaintenanceCharts(maintenanceData);
-                } else {
-                    // Use sample data for testing
-                    debugLog('Using sample maintenance data');
-                    const sampleData = getSampleMaintenanceData();
-                    await createMaintenanceCharts(sampleData);
-                }
-            } catch (error) {
-                debugLog('Error in loadMaintenanceData:', error);
-                // Use sample data as fallback
-                const sampleData = getSampleMaintenanceData();
-                await createMaintenanceCharts(sampleData);
-            }
-        }
-
-        async function tryLoadMaintenanceData() {
-            try {
-                // Try different possible controller names and routes
-                const urls = [
-                    '@Url.Action("GetMaintenanceTrends", "Maintenance")',
-                    '/MaintenanceSubSystem/Maintenance/GetMaintenanceTrends',
-                    '/Maintenance/GetMaintenanceTrends'
-                ];
-
-                for (const url of urls) {
-                    try {
-                        debugLog(`Trying URL: ${url}`);
-                        const response = await fetch(url);
-                        if (response.ok) {
-                            const data = await response.json();
-                            debugLog('Successfully loaded maintenance data from:', url);
-                            return data;
-                        }
-                    } catch (e) {
-                        debugLog(`Failed to load from ${url}:`, e.message);
-                    }
-                }
-                return null;
-            } catch (error) {
-                debugLog('Error in tryLoadMaintenanceData:', error);
-                return null;
-            }
-        }
-
-        async function createMaintenanceCharts(data) {
-            try {
-                // Update KPI cards with sample data
-                document.getElementById('completedCount').textContent = '12';
-                document.getElementById('scheduledCount').textContent = '8';
-                document.getElementById('avgResponseTime').textContent = '2.5';
-                document.getElementById('completionRate').textContent = '85%';
-
-                // Create maintenance trends chart
-                createMaintenanceTrendsChart(data.trends);
-
-                // Create status distribution chart
-                createStatusDistributionChart(data.statusDistribution);
-
-                // Create technician performance chart
-                createTechnicianPerformanceChart(data.technicians);
-
-            } catch (error) {
-                debugLog('Error creating maintenance charts:', error);
-            }
-        }
-
-        function createMaintenanceTrendsChart(data) {
-            try {
-                const ctx = document.getElementById('maintenanceTrendsChart').getContext('2d');
-
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.map(d => d.Month),
-                        datasets: [
-                            {
-                                label: 'Completed Visits',
-                                data: data.map(d => d.Completed),
-                                borderColor: 'rgba(46, 204, 113, 1)',
-                                backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                                borderWidth: 3,
-                                tension: 0.4,
-                                fill: true
-                            },
-                            {
-                                label: 'Scheduled Visits',
-                                data: data.map(d => d.Scheduled),
-                                borderColor: 'rgba(52, 152, 219, 1)',
-                                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                                borderWidth: 3,
-                                tension: 0.4,
-                                fill: true
-                            },
-                            {
-                                label: 'In Progress',
-                                data: data.map(d => d.InProgress),
-                                borderColor: 'rgba(243, 156, 18, 1)',
-                                backgroundColor: 'rgba(243, 156, 18, 0.1)',
-                                borderWidth: 3,
-                                tension: 0.4,
-                                fill: true
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Maintenance Trends - Last 6 Months',
-                                font: { size: 16 }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Visits'
-                                }
-                            }
-                        }
-                    }
-                });
-                debugLog('Maintenance trends chart created successfully');
-            } catch (error) {
-                debugLog('Error creating maintenance trends chart:', error);
-            }
-        }
-
-        function createStatusDistributionChart(data) {
-            try {
-                const ctx = document.getElementById('statusDistributionChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.map(d => d.Status),
-                        datasets: [{
-                            data: data.map(d => d.Count),
-                            backgroundColor: [
-                                'rgba(46, 204, 113, 0.8)',
-                                'rgba(52, 152, 219, 0.8)',
-                                'rgba(243, 156, 18, 0.8)',
-                                'rgba(155, 89, 182, 0.8)',
-                                'rgba(231, 76, 60, 0.8)'
-                            ],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
-                debugLog('Status distribution chart created successfully');
-            } catch (error) {
-                debugLog('Error creating status distribution chart:', error);
-            }
-        }
-
-        function createTechnicianPerformanceChart(data) {
-            try {
-                const ctx = document.getElementById('technicianPerformanceChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(p => p.Technician),
-                        datasets: [
-                            {
-                                label: 'Completed',
-                                data: data.map(p => p.Completed),
-                                backgroundColor: 'rgba(46, 204, 113, 0.8)'
-                            },
-                            {
-                                label: 'Scheduled',
-                                data: data.map(p => p.Scheduled),
-                                backgroundColor: 'rgba(52, 152, 219, 0.8)'
-                            },
-                            {
-                                label: 'In Progress',
-                                data: data.map(p => p.InProgress),
-                                backgroundColor: 'rgba(243, 156, 18, 0.8)'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                stacked: true
-                            },
-                            y: {
-                                stacked: true,
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-                debugLog('Technician performance chart created successfully');
-            } catch (error) {
-                debugLog('Error creating technician performance chart:', error);
-            }
-        }
-
+        
         // =============================================
         // CUSTOMER MANAGEMENT REPORT FUNCTIONS
         // =============================================
