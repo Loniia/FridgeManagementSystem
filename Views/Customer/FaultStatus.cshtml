@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = "Fault Status & History";
     Layout = "_Layout";
+
+    // Resolve TaskStatus ambiguity
+    var status = Model.Status;
+    var statusFilter = Model.StatusFilter;
 }
 
 <div class="container-fluid">
@@ -25,8 +29,8 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h6 class="card-title">Current Status</h6>
-                                    <span class="badge @GetStatusBadgeClass(Model.StatusFilter) fs-6">
-                                        @Model.StatusFilter
+                                    <span class="badge @GetStatusBadgeClass(status.ToString()) fs-6">
+                                        @status
                                     </span>
                                 </div>
                             </div>
@@ -56,7 +60,7 @@
                                     <p class="mb-0">
                                         @if (Model.Fridge != null)
                                         {
-                                            @Model.Fridge.Brand
+                                            @Model.Fridge.Brand @Model.Fridge.Model
                                         }
                                         else
                                         {
@@ -91,11 +95,11 @@
                             </div>
 
                             <!-- Repair Progress (if any) -->
-                            @if (Model.Fault?.RepairSchedules != null && Model.Fault.RepairSchedules.Any())
+                            @if (Model.RepairSchedules != null && Model.RepairSchedules.Any())
                             {
-                                foreach (var repair in Model.Fault.RepairSchedules.OrderBy(r => r.CreatedDate))
+                                foreach (var repair in Model.RepairSchedules.OrderBy(r => r.CreatedDate))
                                 {
-                                    <div class="timeline-item @(repair.Status == "Completed" ? "completed" : "active")">
+                                    <div class="timeline-item @(repair.Status?.ToLower() == "completed" ? "completed" : "active")">
                                         <div class="timeline-marker @GetRepairStatusBadgeClass(repair.Status)">
                                             <i class="fas fa-tools"></i>
                                         </div>
@@ -120,7 +124,7 @@
                                     </div>
                                 }
                             }
-                            else if (Model.StatusFilter == "Pending")
+                            else if (status.ToString() == "Pending")
                             {
                                 <div class="timeline-item pending">
                                     <div class="timeline-marker bg-secondary">
@@ -134,7 +138,7 @@
                             }
 
                             <!-- Final Resolution -->
-                            @if (Model.StatusFilter == "Resolved")
+                            @if (status.ToString() == "Completed")
                             {
                                 <div class="timeline-item completed">
                                     <div class="timeline-marker bg-success">
@@ -143,7 +147,13 @@
                                     <div class="timeline-content">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <h6 class="mb-1">Fault Resolved</h6>
-                                            <small class="text-muted">@DateTime.Now.ToString("MMM dd, yyyy HH:mm")</small>
+                                            @{
+                                                var completionDate = Model.RepairSchedules?
+                                                .Where(r => r.Status?.ToLower() == "completed")
+                                                .OrderByDescending(r => r.CreatedDate)
+                                                .FirstOrDefault()?.CreatedDate ?? DateTime.Now;
+                                            }
+                                            <small class="text-muted">@completionDate.ToString("MMM dd, yyyy HH:mm")</small>
                                         </div>
                                         <p class="mb-0 text-success">
                                             <i class="fas fa-check"></i> The fault has been successfully resolved and your fridge is back in working order.
@@ -151,7 +161,7 @@
                                     </div>
                                 </div>
                             }
-                            else if (Model.StatusFilter == "Cancelled")
+                            else if (status.ToString() == "Cancelled")
                             {
                                 <div class="timeline-item cancelled">
                                     <div class="timeline-marker bg-danger">
@@ -166,43 +176,6 @@
                         </div>
                     </div>
 
-                    <!-- Assigned Technician Info -->
-                    @if (Model.Fault?.AssignedTechnician != null)
-                    {
-                        <div class="card mt-4">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-user-cog"></i> Assigned Technician
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <h6>@Model.Fault.AssignedTechnician.FullName</h6>
-                                        <p class="text-muted mb-1">
-                                            <i class="fas fa-briefcase"></i>
-                                            @Model.Fault.AssignedTechnician
-                                        </p>
-                                        @if (!string.IsNullOrEmpty(Model.Fault.AssignedTechnician.PhoneNumber))
-                                        {
-                                            <p class="mb-1">
-                                                <i class="fas fa-phone"></i>
-                                                @Model.Fault.AssignedTechnician.PhoneNumber
-                                            </p>
-                                        }
-                                        @if (!string.IsNullOrEmpty(Model.Fault.AssignedTechnician.Email))
-                                        {
-                                            <p class="mb-0">
-                                                <i class="fas fa-envelope"></i>
-                                                @Model.Fault.AssignedTechnician.Email
-                                            </p>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 mt-4">
                         <a asp-action="FaultDetails" asp-route-id="@Model.FaultReportId"
@@ -212,12 +185,16 @@
                         <a asp-action="MyFaults" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to My Faults
                         </a>
-                        @if (Model.StatusFilter == "Pending")
+                        @if (status.ToString() == "Pending")
                         {
-                            <a asp-action="CancelFault" asp-route-id="@Model.FaultReportId"
-                               class="btn btn-outline-danger ms-auto">
-                                <i class="fas fa-times"></i> Cancel Report
-                            </a>
+                            <form asp-action="CancelFault" method="post" class="d-inline ms-auto">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.FaultReportId" />
+                                <button type="submit" class="btn btn-outline-danger"
+                                        onclick="return confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')">
+                                    <i class="fas fa-times"></i> Cancel Report
+                                </button>
+                            </form>
                         }
                     </div>
                 </div>
@@ -232,8 +209,8 @@
         return status?.ToLower() switch
         {
             "pending" => "bg-warning",
-            "in progress" => "bg-primary",
-            "resolved" => "bg-success",
+            "inprogress" => "bg-primary",
+            "completed" => "bg-success",
             "cancelled" => "bg-secondary",
             _ => "bg-secondary"
         };
@@ -247,7 +224,6 @@
             UrgencyLevel.Medium => "bg-warning",
             UrgencyLevel.High => "bg-orange",
             UrgencyLevel.Critical => "bg-danger",
-            UrgencyLevel.Emergency => "bg-dark",
             _ => "bg-secondary"
         };
     }
@@ -256,11 +232,11 @@
     {
         return repairStatus?.ToLower() switch
         {
-            "diagnosing" => "bg-info",
-            "awaiting parts" => "bg-warning",
-            "repairing" => "bg-primary",
+            "diagnosing" or "diagnosed" => "bg-info",
+            "awaiting parts" or "parts ordered" => "bg-warning",
+            "repairing" or "in progress" => "bg-primary",
             "testing" => "bg-orange",
-            "completed" => "bg-success",
+            "completed" or "resolved" => "bg-success",
             _ => "bg-secondary"
         };
     }

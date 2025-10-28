@@ -9,8 +9,8 @@
     var orderContext = ViewBag.OrderContext as string ?? string.Empty;
 }
 
-<a href="@Url.Action("OrderHistory", "Customer")" class="btn btn-secondary">
-    <i class="fas fa-arrow-left me-1"></i>Back to Orders
+<a href="@Url.Action("MyFaults", "Customer")" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i>Back to My Faults
 </a>
 
 <div class="container-fluid">
@@ -35,13 +35,6 @@
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
-                    @if (TempData["InfoMessage"] != null)
-                    {
-                        <div class="alert alert-info alert-dismissible fade show" role="alert">
-                            <i class="fas fa-info-circle"></i> @TempData["InfoMessage"]
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     }
@@ -118,22 +111,12 @@
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label asp-for="FaultType" class="form-label">Fault Type *</label>
-                                        <select asp-for="FaultType" class="form-select">
-                                            <option value="">-- Select Fault Type --</option>
-                                            <option value="Electrical">Electrical</option>
-                                            <option value="DoorSeal">Door Seal</option>
-                                            <option value="CoolingIssue">Cooling Issue</option>
-                                            <option value="NoiseVibration">Noise/Vibration</option>
-                                            <option value="PowerIssue">Power Issue</option>
-                                            <option value="Compressor">Compressor</option>
-                                            <option value="Thermostat">Thermostat</option>
-                                            <option value="WaterLeak">Water Leak</option>
-                                            <option value="IceMaker">Ice Maker</option>
-                                        </select>
+                                        <input asp-for="FaultType" class="form-control"
+                                               placeholder="e.g., Not Cooling, Loud Noise, Water Leak" />
                                         <span asp-validation-for="FaultType" class="text-danger"></span>
                                         <small class="form-text text-muted">
                                             <i class="fas fa-info-circle"></i>
-                                            Select the type of fault you're experiencing
+                                            Describe the type of fault (e.g., Not Cooling, Loud Noise, Water Leak)
                                         </small>
                                     </div>
                                 </div>
@@ -151,6 +134,19 @@
                                         </small>
                                     </div>
                                 </div>
+
+                                <!-- Report Date (Optional) -->
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="reportDate" class="form-label">When did the fault occur? (Optional)</label>
+                                        <input type="datetime-local" id="reportDate" name="reportDate"
+                                               class="form-control" />
+                                        <small class="form-text text-muted">
+                                            <i class="fas fa-info-circle"></i>
+                                            Leave blank for current date/time. You can report faults up to 6 months old.
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="row mt-4">
@@ -158,6 +154,9 @@
                                     <button type="submit" class="btn btn-primary me-2">
                                         <i class="fas fa-paper-plane me-1"></i>Report Fault
                                     </button>
+                                    <a href="@Url.Action("MyFaults", "Customer")" class="btn btn-secondary">
+                                        <i class="fas fa-times me-1"></i>Cancel
+                                    </a>
                                 </div>
                             </div>
                         </form>
@@ -195,10 +194,15 @@
                 $('#Priority').val('Medium');
             }
 
+            // Set default datetime to now for the report date
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('reportDate').value = now.toISOString().slice(0, 16);
+
             // Character count and validation for description
             $('#FaultDescription').on('input', function() {
                 var length = $(this).val().length;
-                var maxLength = 500; // Match your StringLength attribute
+                var maxLength = 1000; // Adjust based on your model
 
                 // Update character counter
                 var counter = $(this).siblings('.char-counter');

@@ -2,6 +2,9 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Fault Details";
+
+    // Resolve TaskStatus ambiguity by using the full namespace
+    var status = Model.Status;
 }
 
 <div class="container-fluid">
@@ -39,6 +42,7 @@
                                 </div>
                                 <div class="card-body">
                                     <dl class="row">
+
                                         <dt class="col-sm-4">Report Date:</dt>
                                         <dd class="col-sm-8">@Model.ReportDate.ToString("dd MMM yyyy HH:mm")</dd>
 
@@ -47,6 +51,7 @@
                                             @if (Model.Fridge != null)
                                             {
                                                 @Model.Fridge.Brand @Model.Fridge.Model
+                                                <small class="text-muted d-block">@Model.Fridge.FridgeType</small>
                                             }
                                             else
                                             {
@@ -77,16 +82,16 @@
                                         <dt class="col-sm-4">Status:</dt>
                                         <dd class="col-sm-8">
                                             @{
-                                                var statusBadgeClass = Model.StatusFilter?.ToLower() switch
+                                                var statusBadgeClass = status.ToString() switch
                                                 {
-                                                    "pending" => "bg-warning",
-                                                    "in progress" => "bg-primary",
-                                                    "resolved" => "bg-success",
-                                                    "cancelled" => "bg-secondary",
+                                                    "Pending" => "bg-warning",
+                                                    "InProgress" => "bg-primary",
+                                                    "Completed" => "bg-success",
+                                                    "Cancelled" => "bg-secondary",
                                                     _ => "bg-secondary"
                                                 };
                                             }
-                                            <span class="badge @statusBadgeClass">@Model.StatusFilter</span>
+                                            <span class="badge @statusBadgeClass">@status</span>
                                         </dd>
                                     </dl>
                                 </div>
@@ -97,30 +102,36 @@
                         <div class="col-md-6">
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0">Fault Description</h5>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Fault Description</h5>
+                                        @if (status.ToString() == "Pending")
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                    onclick="enableDescriptionEdit()">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                        }
+                                    </div>
                                 </div>
                                 <div class="card-body">
-                                    <p>@Model.FaultDescription</p>
+                                    <div id="descriptionView">
+                                        <p id="descriptionText">@Model.FaultDescription</p>
+                                    </div>
+                                    <div id="descriptionEdit" style="display: none;">
+                                        <textarea id="descriptionInput" class="form-control" rows="4">@Model.FaultDescription</textarea>
+                                        <div class="mt-2">
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                    onclick="updateDescription(@Model.FaultReportId)">
+                                                <i class="fas fa-save"></i> Save
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-secondary"
+                                                    onclick="cancelDescriptionEdit()">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Technician Information (if assigned) -->
-                            @if (Model.Fault?.AssignedTechnician != null)
-                            {
-                                <div class="card mb-4">
-                                    <div class="card-header bg-light">
-                                        <h5 class="mb-0">Assigned Technician</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="mb-1">
-                                            <strong>@Model.Fault.AssignedTechnician.FullName</strong>
-                                        </p>
-                                        <p class="text-muted mb-0">
-                                            <small>@Model.Fault.AssignedTechnician</small>
-                                        </p>
-                                    </div>
-                                </div>
-                            }
 
                             <!-- Actions -->
                             <div class="card">
@@ -133,13 +144,21 @@
                                             <i class="fas fa-arrow-left"></i> Back to My Faults
                                         </a>
 
-                                        @if (Model.StatusFilter == "Pending")
+                                        @if (status.ToString() == "Pending")
                                         {
-                                            <button type="button" class="btn btn-danger"
-                                                    onclick="cancelFault(@Model.FaultReportId)">
-                                                <i class="fas fa-times"></i> Cancel Fault Report
-                                            </button>
+                                            <form asp-action="CancelFault" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@Model.FaultReportId" />
+                                                <button type="submit" class="btn btn-danger w-100"
+                                                        onclick="return confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')">
+                                                    <i class="fas fa-times"></i> Cancel Fault Report
+                                                </button>
+                                            </form>
                                         }
+
+                                        <a href="@Url.Action("FaultStatus", new { id = Model.FaultReportId })" class="btn btn-info">
+                                            <i class="fas fa-sync-alt"></i> Check Status Updates
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -147,18 +166,23 @@
                     </div>
 
                     <!-- Repair Progress (if available) -->
-                    @if (Model.Fault?.RepairSchedules != null && Model.Fault.RepairSchedules.Any())
+                    @if (Model.RepairSchedules != null && Model.RepairSchedules.Any())
                     {
                         <div class="card mt-4">
                             <div class="card-header bg-light">
                                 <h5 class="mb-0">Repair Progress</h5>
                             </div>
                             <div class="card-body">
-                                @foreach (var repair in Model.Fault.RepairSchedules.OrderByDescending(r => r.CreatedDate))
+                                @foreach (var repair in Model.RepairSchedules.OrderByDescending(r => r.CreatedDate))
                                 {
                                     <div class="mb-3 p-3 border rounded">
                                         <div class="d-flex justify-content-between align-items-start">
-                                            <h6 class="mb-1">@repair.Status</h6>
+                                            <h6 class="mb-1">
+                                                @if (!string.IsNullOrEmpty(repair.Status))
+                                                {
+                                                    <span class="badge bg-primary">@repair.Status</span>
+                                                }
+                                            </h6>
                                             <small class="text-muted">@repair.CreatedDate.ToString("dd MMM yyyy HH:mm")</small>
                                         </div>
                                         @if (!string.IsNullOrEmpty(repair.Diagnosis))
@@ -182,20 +206,57 @@
 
 @section Scripts {
     <script>
-        function cancelFault(faultReportId) {
-            if (confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')) {
-                $.post('@Url.Action("CancelFault")', { id: faultReportId })
-                    .done(function (response) {
-                        if (response.success) {
-                            location.reload();
-                        } else {
-                            alert(response.message || 'Error cancelling fault report.');
-                        }
-                    })
-                    .fail(function () {
-                        alert('Error cancelling fault report.');
-                    });
-            }
+        function enableDescriptionEdit() {
+            document.getElementById('descriptionView').style.display = 'none';
+            document.getElementById('descriptionEdit').style.display = 'block';
         }
+
+        function cancelDescriptionEdit() {
+            document.getElementById('descriptionEdit').style.display = 'none';
+            document.getElementById('descriptionView').style.display = 'block';
+            // Reset textarea to original value
+            document.getElementById('descriptionInput').value = document.getElementById('descriptionText').textContent;
+        }
+
+        function updateDescription(faultReportId) {
+            var newDescription = document.getElementById('descriptionInput').value.trim();
+
+            if (!newDescription) {
+                alert('Description cannot be empty.');
+                return;
+            }
+
+            $.post('@Url.Action("UpdateFaultDescription")', {
+                id: faultReportId,
+                description: newDescription
+            })
+            .done(function (response) {
+                if (response.success) {
+                    // Update the displayed text
+                    document.getElementById('descriptionText').textContent = newDescription;
+                    cancelDescriptionEdit();
+
+                    // Show success message
+                    alert(response.message);
+                } else {
+                    alert(response.message || 'Error updating description.');
+                }
+            })
+            .fail(function () {
+                alert('Error updating description. Please try again.');
+            });
+        }
+
+        // Handle form submission confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            const cancelForm = document.querySelector('form[asp-action="CancelFault"]');
+            if (cancelForm) {
+                cancelForm.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
     </script>
 }

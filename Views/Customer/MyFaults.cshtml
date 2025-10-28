@@ -52,11 +52,12 @@
                                     @foreach (var faultReport in Model)
                                     {
                                         <tr>
-                                            <td>@faultReport.ReportDate.ToString("dd MMM yyyy")</td>
+                                            <td>@faultReport.ReportDate.ToString("dd MMM yyyy HH:mm")</td>
                                             <td>
                                                 @if (faultReport.Fridge != null)
                                                 {
                                                     @faultReport.Fridge.Brand @faultReport.Fridge.Model
+                                                    <small class="text-muted d-block">@faultReport.Fridge.FridgeType</small>
                                                 }
                                                 else
                                                 {
@@ -81,29 +82,41 @@
                                             </td>
                                             <td>
                                                 @{
-                                                    var statusBadgeClass = faultReport.StatusFilter?.ToLower() switch
+                                                    var status = faultReport.Status.ToString();
+                                                    var statusBadgeClass = status switch
                                                     {
-                                                        "pending" => "bg-warning",
-                                                        "in progress" => "bg-primary",
-                                                        "resolved" => "bg-success",
-                                                        "cancelled" => "bg-secondary",
+                                                        "Pending" => "bg-warning",
+                                                        "InProgress" => "bg-primary",
+                                                        "Completed" => "bg-success",
+                                                        "Cancelled" => "bg-secondary",
                                                         _ => "bg-secondary"
                                                     };
                                                 }
-                                                <span class="badge @statusBadgeClass">@faultReport.StatusFilter</span>
+                                                <span class="badge @statusBadgeClass">@status</span>
                                             </td>
                                             <td>
-                                                <a asp-action="FaultDetails" asp-route-id="@faultReport.FaultReportId"
-                                                   class="btn btn-sm btn-outline-primary" title="View Details">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                @if (faultReport.StatusFilter == "Pending")
-                                                {
-                                                    <button type="button" class="btn btn-sm btn-outline-danger"
-                                                            title="Cancel Fault" onclick="cancelFault(@faultReport.FaultReportId)">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                }
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a asp-action="FaultDetails" asp-route-id="@faultReport.FaultReportId"
+                                                       class="btn btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a asp-action="FaultStatus" asp-route-id="@faultReport.FaultReportId"
+                                                       class="btn btn-outline-info" title="Status & History">
+                                                        <i class="fas fa-history"></i>
+                                                    </a>
+                                                    @if (faultReport.Status.ToString() == "Pending")
+                                                    {
+                                                        <form asp-action="CancelFault" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@faultReport.FaultReportId" />
+                                                            <button type="submit" class="btn btn-outline-danger"
+                                                                    title="Cancel Fault"
+                                                                    onclick="return confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                </div>
                                             </td>
                                         </tr>
                                     }
@@ -123,11 +136,19 @@
                         </div>
                     }
                 </div>
-                <div class="card-footer">
-                    <a asp-action="CreateFault" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Report New Fault
-                    </a>
-                </div>
+                @if (Model != null && Model.Any())
+                {
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Showing @Model.Count() fault report@(Model.Count() != 1 ? "s" : "")
+                            </small>
+                            <a asp-action="CreateFault" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Report New Fault
+                            </a>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -135,20 +156,16 @@
 
 @section Scripts {
     <script>
-        function cancelFault(faultReportId) {
-            if (confirm('Are you sure you want to cancel this fault report?')) {
-                $.post('@Url.Action("CancelFault")', { id: faultReportId })
-                    .done(function (response) {
-                        if (response.success) {
-                            location.reload();
-                        } else {
-                            alert(response.message || 'Error cancelling fault report.');
-                        }
-                    })
-                    .fail(function () {
-                        alert('Error cancelling fault report.');
-                    });
-            }
-        }
+        // Handle form submission confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            const cancelForms = document.querySelectorAll('form[asp-action="CancelFault"]');
+            cancelForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
     </script>
 }
