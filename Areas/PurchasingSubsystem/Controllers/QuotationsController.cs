@@ -135,7 +135,7 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
             {
                 PONumber = GeneratePONumber(),
                 QuotationID = quotation.QuotationID,
-                SupplierID = quotation.SupplierId,
+                SupplierID = quotation.SupplierID ?? 0,
                 TotalAmount = quotation.QuotationAmount,
                 OrderDate = DateTime.Now,
                 Status = "Ordered",

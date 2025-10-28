@@ -18,7 +18,7 @@ namespace FridgeManagementSystem.Models
         [Required]
         [Display(Name = "Supplier")]
         [ForeignKey("Supplier")]
-        public int SupplierId { get; set; }
+        public int?SupplierID { get; set; }
         public virtual Supplier Supplier { get; set; }
 
         [DataType(DataType.Date)]

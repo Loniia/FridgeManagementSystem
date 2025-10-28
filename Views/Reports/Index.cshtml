@@ -4,6 +4,16 @@
 }
 
 <div class="container-fluid">
+    <!-- Go Back To Dashboard Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="https://localhost:7130/Administrator/ManageEmployee/Dashboard" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Go Back To Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
     <h1 class="mb-4">Reports Dashboard</h1>
 
     <!-- Maintenance Reports Section -->
@@ -339,6 +349,120 @@
                             <a href="@Url.Action("FaultReports", "Reports")" class="btn btn-danger btn-lg">
                                 <i class="fas fa-chart-bar me-2"></i>View Detailed Fault Reports
                             </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add this section AFTER the Fault Management Reports section -->
+<section class="mb-5">
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-chart-line me-2"></i>My Custom Reports
+            </h3>
+        </div>
+        <div class="card-body">
+            <!-- Custom Reports Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Total Revenue</h6>
+                            <h2 class="mb-0">$12,450</h2>
+                            <small>Current Month</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Active Projects</h6>
+                            <h2 class="mb-0">15</h2>
+                            <small>In Progress</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Customer Satisfaction</h6>
+                            <h2 class="mb-0">92%</h2>
+                            <small>Average Rating</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Pending Tasks</h6>
+                            <h2 class="mb-0">8</h2>
+                            <small>Require Attention</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Charts Row -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Monthly Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center p-4">
+                                <p class="text-muted">Performance chart will be displayed here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title">Project Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center p-4">
+                                <p class="text-muted">Project distribution chart will be displayed here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Custom Reports -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Quarterly Growth Trends</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center p-4">
+                                <p class="text-muted">Growth trends chart will be displayed here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Reports Actions -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Custom Report Actions</h5>
+                            <p class="card-text">Generate custom reports and export data for further analysis.</p>
+                            <button class="btn btn-info me-2">
+                                <i class="fas fa-download me-2"></i>Export Report
+                            </button>
+                            <button class="btn btn-outline-info">
+                                <i class="fas fa-plus me-2"></i>Create Custom Report
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1162,7 +1286,231 @@
                 debugLog('Error creating fault status chart:', error);
             }
         }
+        // =============================================
+        // MY CUSTOM REPORTS FUNCTIONS
+        // =============================================
+        async function loadMyCustomReports() {
+            debugLog('Loading my custom reports...');
 
+            try {
+                // Load your custom data
+                const customData = await tryLoadCustomData();
+
+                if (customData) {
+                    await createCustomCharts(customData);
+                } else {
+                    // Use sample data for testing
+                    debugLog('Using sample custom data');
+                    const sampleData = getSampleCustomData();
+                    await createCustomCharts(sampleData);
+                }
+            } catch (error) {
+                debugLog('Error in loadMyCustomReports:', error);
+                // Use sample data as fallback
+                const sampleData = getSampleCustomData();
+                await createCustomCharts(sampleData);
+            }
+        }
+
+        async function tryLoadCustomData() {
+            try {
+                // Replace with your actual API endpoints
+                const urls = [
+                    '@Url.Action("GetMyCustomData", "MyReports")',
+                    '/MyReports/GetMyCustomData',
+                    '/api/mycustomreports'
+                ];
+
+                for (const url of urls) {
+                    try {
+                        debugLog(`Trying custom URL: ${url}`);
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const data = await response.json();
+                            debugLog('Successfully loaded custom data from:', url);
+                            return data;
+                        }
+                    } catch (e) {
+                        debugLog(`Failed to load custom data from ${url}:`, e.message);
+                    }
+                }
+                return null;
+            } catch (error) {
+                debugLog('Error in tryLoadCustomData:', error);
+                return null;
+            }
+        }
+
+        async function createCustomCharts(data) {
+            try {
+                // Update summary cards
+                document.getElementById('totalRevenue').textContent = data.summary?.totalRevenue || '$12,450';
+                document.getElementById('activeProjects').textContent = data.summary?.activeProjects || '15';
+                document.getElementById('customerSatisfaction').textContent = data.summary?.customerSatisfaction || '92%';
+                document.getElementById('pendingTasks').textContent = data.summary?.pendingTasks || '8';
+
+                // Create monthly performance chart
+                createMonthlyPerformanceChart(data.performance);
+
+                // Create project distribution chart
+                createProjectDistributionChart(data.projects);
+
+                // Create growth trends chart
+                createGrowthTrendsChart(data.growth);
+
+            } catch (error) {
+                debugLog('Error creating custom charts:', error);
+            }
+        }
+
+        function createMonthlyPerformanceChart(data) {
+            try {
+                const ctx = document.getElementById('monthlyPerformanceChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(p => p.month),
+                        datasets: [
+                            {
+                                label: 'Revenue',
+                                data: data.map(p => p.revenue),
+                                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Target',
+                                data: data.map(p => p.target),
+                                backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Monthly performance chart created successfully');
+            } catch (error) {
+                debugLog('Error creating monthly performance chart:', error);
+            }
+        }
+
+        function createProjectDistributionChart(data) {
+            try {
+                const ctx = document.getElementById('projectDistributionChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(p => p.category),
+                        datasets: [{
+                            data: data.map(p => p.count),
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.8)',
+                                'rgba(54, 162, 235, 0.8)',
+                                'rgba(255, 205, 86, 0.8)',
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(153, 102, 255, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                debugLog('Project distribution chart created successfully');
+            } catch (error) {
+                debugLog('Error creating project distribution chart:', error);
+            }
+        }
+
+        function createGrowthTrendsChart(data) {
+            try {
+                const ctx = document.getElementById('growthTrendsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(g => g.quarter),
+                        datasets: [
+                            {
+                                label: 'Revenue Growth',
+                                data: data.map(g => g.revenue),
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Customer Growth',
+                                data: data.map(g => g.customers),
+                                borderColor: 'rgba(0, 123, 255, 1)',
+                                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                debugLog('Growth trends chart created successfully');
+            } catch (error) {
+                debugLog('Error creating growth trends chart:', error);
+            }
+        }
+
+        function getSampleCustomData() {
+            return {
+                summary: {
+                    totalRevenue: '$12,450',
+                    activeProjects: 15,
+                    customerSatisfaction: '92%',
+                    pendingTasks: 8
+                },
+                performance: [
+                    { month: 'Jan', revenue: 8500, target: 8000 },
+                    { month: 'Feb', revenue: 9200, target: 8500 },
+                    { month: 'Mar', revenue: 7800, target: 9000 },
+                    { month: 'Apr', revenue: 10500, target: 9500 },
+                    { month: 'May', revenue: 12450, target: 11000 },
+                    { month: 'Jun', revenue: 11800, target: 12000 }
+                ],
+                projects: [
+                    { category: 'Web Development', count: 6 },
+                    { category: 'Mobile Apps', count: 4 },
+                    { category: 'Consulting', count: 3 },
+                    { category: 'Maintenance', count: 2 }
+                ],
+                growth: [
+                    { quarter: 'Q1 2023', revenue: 45, customers: 120 },
+                    { quarter: 'Q2 2023', revenue: 52, customers: 145 },
+                    { quarter: 'Q3 2023', revenue: 48, customers: 138 },
+                    { quarter: 'Q4 2023', revenue: 65, customers: 165 },
+                    { quarter: 'Q1 2024', revenue: 72, customers: 189 },
+                    { quarter: 'Q2 2024', revenue: 85, customers: 215 }
+                ]
+            };
+        }
          // =============================================
         // SAMPLE DATA FOR TESTING
         // =============================================

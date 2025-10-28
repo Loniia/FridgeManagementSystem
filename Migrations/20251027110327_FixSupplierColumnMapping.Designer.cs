@@ -4,6 +4,7 @@ using FridgeManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    partial class FridgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027110327_FixSupplierColumnMapping")]
+    partial class FixSupplierColumnMapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1371,8 +1374,7 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int?>("SupplierID")
-                        .IsRequired()
+                    b.Property<int>("SupplierID")
                         .HasColumnType("int");
 
                     b.HasKey("QuotationID");
@@ -1505,7 +1507,7 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int?>("SupplierID")
+                    b.Property<int>("SupplierID")
                         .HasColumnType("int");
 
                     b.HasKey("RFQID");
@@ -2185,7 +2187,9 @@ namespace FridgeManagementSystem.Migrations
 
                     b.HasOne("FridgeManagementSystem.Models.Supplier", "Supplier")
                         .WithMany()
-                        .HasForeignKey("SupplierID");
+                        .HasForeignKey("SupplierID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("PurchaseRequest");
 
