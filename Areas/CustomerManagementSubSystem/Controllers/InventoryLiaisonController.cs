@@ -281,9 +281,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return View(model);
         }
 
-        // --------------------------
-        // Create Purchase Request (POST)
-        // --------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePurchaseRequest(CreatePurchaseRequestViewModel model)
@@ -312,6 +309,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 }
             }
 
+            // --------------------------
+            // Create new PurchaseRequest
+            // --------------------------
             var newRequest = new PurchaseRequest
             {
                 ItemFullNames = model.ItemFullNames,
@@ -326,13 +326,24 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 InventoryID = model.InventoryID != 0 ? model.InventoryID : (int?)null
             };
 
-            var year = DateTime.Now.Year;
-            int countForYear = await _context.PurchaseRequests
-                .CountAsync(r => r.RequestDate.HasValue && r.RequestDate.Value.ToDateTime(TimeOnly.MinValue).Year == year) + 1;
+            // --------------------------
+            // Count PurchaseRequests for this year (safe client-side)
+            // --------------------------
+            var currentYear = DateTime.Now.Year;
 
+            // Fetch only rows with RequestDate
+            var allRequestsWithDate = await _context.PurchaseRequests
+                .Where(r => r.RequestDate.HasValue)
+                .ToListAsync();
 
-            newRequest.RequestNumber = SerialNumberGenerator.GeneratePurchaseRequestNumber(countForYear, year);
+            int countForYear = allRequestsWithDate
+                .Count(r => r.RequestDate.Value.Year == currentYear) + 1;
 
+            newRequest.RequestNumber = SerialNumberGenerator.GeneratePurchaseRequestNumber(countForYear, currentYear);
+
+            // --------------------------
+            // Save new request
+            // --------------------------
             _context.PurchaseRequests.Add(newRequest);
             await _context.SaveChangesAsync();
 
