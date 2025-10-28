@@ -20,7 +20,7 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
         public async Task<IActionResult> Index()
         {
             var deliveryNotes = await _context.DeliveryNotes
-                .Include(dn => dn.purchaseOrder)
+                .Include(dn => dn.PurchaseOrder)
                 .ThenInclude(po => po.Supplier)
                 .OrderByDescending(dn => dn.DeliveryDate)
                 .ToListAsync();
@@ -103,7 +103,7 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var deliveryNote = await _context.DeliveryNotes
-                .Include(dn => dn.purchaseOrder)
+                .Include(dn => dn.PurchaseOrder)
                 .ThenInclude(po => po.Supplier)
                 .Include(dn => dn.Supplier)
                 .FirstOrDefaultAsync(dn => dn.DeliveryNoteID == id);
@@ -118,7 +118,7 @@ namespace FridgeManagementSystem.Areas.PurchasingSubsystem.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var deliveryNote = await _context.DeliveryNotes
-                .Include(dn => dn.purchaseOrder)
+                .Include(dn => dn.PurchaseOrder)
                 .FirstOrDefaultAsync(dn => dn.DeliveryNoteID == id);
 
             if (deliveryNote == null)
