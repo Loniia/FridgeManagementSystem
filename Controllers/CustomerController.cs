@@ -291,7 +291,11 @@ namespace FridgeManagementSystem.Controllers
         // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmCheckout(string fullName, string phoneNumber, string deliveryAddress)
+        public async Task<IActionResult> ConfirmCheckout(
+            string fullName,
+            string phoneNumber,
+            string deliveryAddress,
+            DateTime? orderDate) // <-- Added optional orderDate
         {
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0) return RedirectToAction("Login", "Account");
@@ -307,15 +311,21 @@ namespace FridgeManagementSystem.Controllers
                 return RedirectToAction("ViewCart");
             }
 
+            // ✅ Determine which date to use: user-provided (within 6 months) or DateTime.Now
+            var orderDateToUse = orderDate.HasValue && orderDate.Value >= DateTime.Now.AddMonths(-6)
+                ? orderDate.Value
+                : DateTime.Now;
+
             // ✅ Create new order
             var order = new Order
             {
                 CustomerID = customerId,
-                OrderDate = DateTime.Now,
+                OrderDate = orderDateToUse, // <-- Use allowed past date
                 Status = "Pending Payment",
                 DeliveryAddress = deliveryAddress,
                 ContactName = fullName,
                 ContactPhone = phoneNumber,
+                PaymentDate = DateTime.Now,
                 TotalAmount = cart.CartItems.Sum(i => i.Price * i.Quantity),
                 OrderItems = new List<OrderItem>()
             };
@@ -458,7 +468,7 @@ namespace FridgeManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddCard(PaymentViewModel model)
+        public async Task<IActionResult> AddCard(PaymentViewModel model, DateTime? paymentDate) // <-- optional paymentDate
         {
             var customerId = GetLoggedInCustomerId();
             if (customerId == 0) return RedirectToAction("Login", "Account");
@@ -481,12 +491,17 @@ namespace FridgeManagementSystem.Controllers
                 return View(model);
             }
 
+            // ✅ Allow past payment date up to 6 months
+            var paymentDateToUse = paymentDate.HasValue && paymentDate.Value >= DateTime.Now.AddMonths(-6)
+                ? paymentDate.Value
+                : DateTime.Now;
+
             Payment payment = new Payment
             {
                 OrderId = model.OrderId,
                 Amount = model.Amount,
                 Method = model.Method,
-                PaymentDate = DateTime.Now
+                PaymentDate = paymentDateToUse // <-- updated
             };
 
             if (model.Method == Method.Card)
@@ -499,13 +514,11 @@ namespace FridgeManagementSystem.Controllers
             }
             else if (model.Method == Method.EFT)
             {
-                // ✅ USING UTILITY CLASS FOR PAYMENT REFERENCE
                 payment.PaymentReference = SerialNumberGenerator.GeneratePaymentReference();
                 payment.BankReference = model.BankReference;
 
                 if (model.ProofOfPayment != null && model.ProofOfPayment.Length > 0)
                 {
-                    // If proof uploaded, wait for admin approval
                     var fileName = $"{payment.PaymentReference}_{model.ProofOfPayment.FileName}";
                     var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/payments", fileName);
 
@@ -513,22 +526,19 @@ namespace FridgeManagementSystem.Controllers
                     await model.ProofOfPayment.CopyToAsync(stream);
 
                     payment.ProofFilePath = "/uploads/payments/" + fileName;
-                    payment.Status = "AwaitingAdminApproval"; // Waiting admin
+                    payment.Status = "AwaitingAdminApproval";
                     order.Status = "AwaitingPayment";
                 }
                 else
                 {
-                    // No proof yet, just mark as pending
                     payment.Status = "Pending";
                     order.Status = "AwaitingPayment";
                 }
             }
 
             _context.Payments.Add(payment);
-
             await _context.SaveChangesAsync();
 
-            // ✅ Notify admin that a payment is waiting approval
             var admins = await _userManager.GetUsersInRoleAsync(Roles.Admin);
             var admin = admins.FirstOrDefault();
             if (admin != null)
@@ -811,7 +821,7 @@ namespace FridgeManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel)
+        public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel, DateTime? reportDate) // <-- added optional reportDate
         {
             if (!ModelState.IsValid)
             {
@@ -834,16 +844,19 @@ namespace FridgeManagementSystem.Controllers
                     return View(viewModel);
                 }
 
-                // ✅ SIMPLIFIED: Create FaultReport WITHOUT MaintenanceVisit
+                // ✅ Allow past date up to 6 months, otherwise use now
+                var reportDateToUse = reportDate.HasValue && reportDate.Value >= DateTime.Now.AddMonths(-6)
+                    ? reportDate.Value
+                    : DateTime.Now;
+
                 var faultReport = new FaultReport
                 {
                     FridgeId = viewModel.FridgeId,
                     FaultDescription = viewModel.FaultDescription,
                     FaultType = viewModel.FaultType,
-                    ReportDate = DateTime.Now,
+                    ReportDate = reportDateToUse, // <-- updated
                     UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
                     Status = TaskStatus.Pending,
-                    // MaintenanceVisitId is NULL - no foreign key constraint issues!
                 };
 
                 _context.FaultReport.Add(faultReport);
@@ -861,6 +874,7 @@ namespace FridgeManagementSystem.Controllers
                 return View(viewModel);
             }
         }
+
 
         // NEW HELPER METHOD: Get fridges from a specific order
         private async Task<List<SelectListItem>> GetFridgesFromOrderAsync(int orderId, int customerId)
@@ -1048,9 +1062,9 @@ namespace FridgeManagementSystem.Controllers
                 .Include(v => v.ComponentUsed)
                 .Include(v => v.FaultReport)
                 .Where(v =>
-    v.MaintenanceRequest.FridgeId == fridgeId &&
-    v.Status == TaskStatus.Complete &&
-    v.MaintenanceRequest.CompletedDate != null
+                v.MaintenanceRequest.FridgeId == fridgeId &&
+                v.Status == TaskStatus.Complete &&
+                v.MaintenanceRequest.CompletedDate != null
 )
                 .OrderByDescending(v => v.ScheduledDate)
                 .ToListAsync();

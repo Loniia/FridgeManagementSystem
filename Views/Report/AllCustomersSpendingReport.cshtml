@@ -34,9 +34,17 @@
                 <div>
                     Period:
                     <strong>
-                        @(customer.Orders.Any() ? customer.Orders.Min(o => o.OrderDate).ToString("yyyy-MM-dd") : "-")
+                        @(
+                            customer.Orders.Any()
+                            ? customer.Orders.Min(o => o.OrderDate)?.ToString("yyyy-MM-dd") ?? "-"
+                            : "-"
+                            )
                         -
-                        @(customer.Orders.Any() ? customer.Orders.Max(o => o.OrderDate).ToString("yyyy-MM-dd") : "-")
+                        @(
+                            customer.Orders.Any()
+                            ? customer.Orders.Max(o => o.OrderDate)?.ToString("yyyy-MM-dd") ?? "-"
+                            : "-"
+                            )
                     </strong>
                 </div>
             </div>
@@ -60,7 +68,7 @@
                             foreach (var item in order.OrderItems)
                             {
                                 <tr>
-                                    <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
+                                   <td>@(order.OrderDate.HasValue ? order.OrderDate.Value.ToString("yyyy-MM-dd") : "-")</td>
                                     <td>@order.OrderId</td>
                                     <td>@item.Fridge.Brand @item.Fridge.Model</td>
                                     <td>@item.Quantity</td>

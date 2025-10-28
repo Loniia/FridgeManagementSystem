@@ -3,6 +3,9 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Cancel Fault Report";
+
+    // Resolve TaskStatus ambiguity
+    var status = Model.Status.ToString();
 }
 
 <div class="row justify-content-center">
@@ -20,8 +23,9 @@
                 <div class="fault-info mb-4">
                     <h5>Fault Details:</h5>
                     <dl class="row">
+
                         <dt class="col-sm-4">Reported Date:</dt>
-                        <dd class="col-sm-8">@Model.ReportDate.ToString("MMM dd, yyyy")</dd>
+                        <dd class="col-sm-8">@Model.ReportDate.ToString("MMM dd, yyyy HH:mm")</dd>
 
                         <dt class="col-sm-4">Fault Type:</dt>
                         <dd class="col-sm-8">
@@ -40,7 +44,7 @@
                             @if (Model.Fridge != null)
                             {
                                 @Model.Fridge.Brand @Model.Fridge.Model
-                                <small class="text-muted">(@Model.Fridge.SerialNumber)</small>
+                                <small class="text-muted d-block">@Model.Fridge.FridgeType</small>
                             }
                             else
                             {
@@ -53,8 +57,8 @@
 
                         <dt class="col-sm-4">Current Status:</dt>
                         <dd class="col-sm-8">
-                            <span class="badge @GetStatusBadgeClass(Model.StatusFilter)">
-                                @Model.StatusFilter
+                            <span class="badge @GetStatusBadgeClass(status)">
+                                @status
                             </span>
                         </dd>
                     </dl>
@@ -75,16 +79,32 @@
 
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Note:</strong> Once cancelled, this fault report cannot be reopened.
-                        You will need to create a new fault report if the issue persists.
+                        <strong>Note:</strong>
+                        @if (status != "Pending")
+                        {
+                            <text>This fault report can no longer be cancelled as it's already @status.ToLower().</text>
+                        }
+                        else
+                        {
+                            <text>Once cancelled, this fault report cannot be reopened. You will need to create a new fault report if the issue persists.</text>
+                        }
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-danger flex-fill">
-                            <i class="fas fa-times-circle"></i> Confirm Cancellation
-                        </button>
+                        @if (status == "Pending")
+                        {
+                            <button type="submit" class="btn btn-danger flex-fill">
+                                <i class="fas fa-times-circle"></i> Confirm Cancellation
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-secondary flex-fill" disabled>
+                                <i class="fas fa-ban"></i> Cannot Cancel (@status)
+                            </button>
+                        }
                         <a href="@Url.Action("FaultDetails", new { id = Model.FaultReportId })"
-                           class="btn btn-secondary flex-fill">
+                           class="btn btn-outline-secondary flex-fill">
                             <i class="fas fa-arrow-left"></i> Back to Details
                         </a>
                     </div>
@@ -103,7 +123,6 @@
             UrgencyLevel.Medium => "bg-warning",
             UrgencyLevel.High => "bg-orange",
             UrgencyLevel.Critical => "bg-danger",
-            UrgencyLevel.Emergency => "bg-dark",
             _ => "bg-secondary"
         };
     }
@@ -113,8 +132,8 @@
         return status?.ToLower() switch
         {
             "pending" => "bg-warning",
-            "in progress" => "bg-primary",
-            "resolved" => "bg-success",
+            "inprogress" => "bg-primary",
+            "completed" => "bg-success",
             "cancelled" => "bg-secondary",
             _ => "bg-secondary"
         };
@@ -124,6 +143,7 @@
 <style>
     .bg-orange {
         background-color: #ff9800 !important;
+        color: white !important;
     }
 
     .fault-info dl dt {
@@ -134,3 +154,20 @@
         margin-bottom: 0.5rem;
     }
 </style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            if (submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to cancel this fault report? This action cannot be undone.')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -61,7 +61,7 @@
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Request Date:</td>
-                                    <td>@Model.RequestDate.ToString("dd MMM yyyy")</td>
+                                    <td>@(Model.RequestDate.HasValue ? Model.RequestDate.Value.ToString("dd MMM yyyy") : "")</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Viewed Date:</td>

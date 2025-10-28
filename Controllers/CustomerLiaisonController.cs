@@ -581,7 +581,9 @@ namespace FridgeManagementSystem.Controllers
                             {
                                 table.Cell().Text($"{allocation.Fridge?.Brand} - {allocation.Fridge?.Model}");
                                 table.Cell().Text(allocation.QuantityAllocated.ToString());
-                                table.Cell().Text(allocation.AllocationDate.ToString("yyyy/MM/dd"));
+                                table.Cell().Text(allocation.AllocationDate.HasValue
+                                 ? allocation.AllocationDate.Value.ToString("yyyy/MM/dd")
+                                 : "");
                                 table.Cell().Text(allocation.ReturnDate?.ToString("yyyy/MM/dd") ?? "N/A");
                                 table.Cell().Text(allocation.Status);
                             }

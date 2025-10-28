@@ -19,11 +19,10 @@ namespace FridgeManagementSystem.Models
         [ForeignKey("Customers")]
         public int CustomerID { get; set; }
         public virtual Customer Customers { get; set; }
-
         [Required]
-        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime? OrderDate { get; set; } // remove auto Now, allow backdating
+        public DateTime? PaymentDate { get; set; } // nullable to allow no payment yet
         public decimal Amount { get; set; }
-        public DateTime PaymentDate { get; set; }
         public string PaymentMethod { get; set; }
         [Required]
         [Range(0.01, 1000000)]

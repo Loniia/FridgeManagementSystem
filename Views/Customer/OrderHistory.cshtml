@@ -38,7 +38,7 @@ else
             {
                         <tr>
                             <td>@order.OrderId</td>
-                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                           <td>@(order.OrderDate.HasValue ? order.OrderDate.Value.ToString("dd/MM/yyyy") : "")</td>
                             <td>@($"R{order.TotalAmount:0.00}")</td>
                             <td>
                                 <a asp-action="ViewOrder" asp-route-id="@order.OrderId" class="btn btn-sm btn-success btn-3d">

@@ -12,12 +12,14 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
     [Area("MaintenanceSubSystem")]
     public class MaintenanceController : Controller
     {
+        private readonly ILogger<MaintenanceController> _logger;
         private readonly FridgeDbContext _context;
         private readonly IMaintenanceRequestService _mrService;
-        public MaintenanceController(FridgeDbContext context, IMaintenanceRequestService mrService)
+        public MaintenanceController(FridgeDbContext context, IMaintenanceRequestService mrService, ILogger<MaintenanceController> logger)
         {
             _context = context;
             _mrService = mrService;
+            _logger = logger;
         }
 
         // ✅ Helper property – only Active Maintenance Technicians
@@ -69,37 +71,99 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
         }
 
         // ✅ Show all active requests
-        public async Task<IActionResult> MaintenanceRequests()
+        // ✅ Show requests with filter
+        public async Task<IActionResult> MaintenanceRequests(string statusFilter)
         {
-            var requests = await _context.MaintenanceRequest
+            var requestsQuery = _context.MaintenanceRequest
                 .Include(r => r.Fridge)
                     .ThenInclude(f => f.Customer)
-                       .ThenInclude(c=>c.Location)
-                .Where(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Pending)
+                        .ThenInclude(c => c.Location)
+                .Where(r => r.IsActive)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "All")
+            {
+                if (Enum.TryParse<Models.TaskStatus>(statusFilter, out var parsedStatus))
+                {
+                    requestsQuery = requestsQuery.Where(r => r.TaskStatus == parsedStatus);
+                }
+            }
+
+            var requests = await requestsQuery
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
+
+            ViewBag.SelectedStatus = statusFilter ?? "All";
 
             return View(requests);
         }
 
-        // ✅ Search requests
-        public async Task<IActionResult> Search(string query)
+
+        //// ✅ Search requests
+        //public async Task<IActionResult> Search(string query)
+        //{
+        //    var filterRequests = _context.MaintenanceRequest
+        //        .Include(r => r.Fridge)
+        //            .ThenInclude(f => f.Customer)
+        //        .AsQueryable();
+
+        //    if (!string.IsNullOrEmpty(query))
+        //    {
+        //        filterRequests = filterRequests.Where(r =>
+        //            r.Fridge.Brand.Contains(query) ||
+        //            r.Fridge.Customer.FullName.Contains(query) ||
+        //            r.Fridge.Customer.Location.Address.Contains(query) ||
+        //            r.Fridge.Model.Contains(query));
+        //    }
+
+        //    return View("MaintenanceRequests", await filterRequests.ToListAsync());
+        //}
+        [HttpGet]
+        public IActionResult GetTechnicianSchedule()
         {
-            var filterRequests = _context.MaintenanceRequest
-                .Include(r => r.Fridge)
-                    .ThenInclude(f => f.Customer)
-                .AsQueryable();
+            var visits = _context.MaintenanceVisit
+                .Include(v => v.MaintenanceRequest)
+                    .ThenInclude(r => r.Fridge)
+                        .ThenInclude(f => f.Customer)
+                            .ThenInclude(c => c.Location)
+                .Where(v => v.Status == Models.TaskStatus.Scheduled || v.Status == Models.TaskStatus.Rescheduled)
+                .AsEnumerable()
+                .Select(v => new
+                {
+                    id = v.MaintenanceVisitId,
+                    title = v.MaintenanceRequest.Fridge?.Brand ?? "Unknown",
+                    start = $"{v.ScheduledDate:yyyy-MM-dd}T{v.ScheduledTime:hh\\:mm}",  // ✅ Add Time
+                    end = $"{v.ScheduledDate:yyyy-MM-dd}T{(v.ScheduledTime + TimeSpan.FromHours(1)):hh\\:mm}", // ✅ Auto 1-hr duration
+                    allDay = false,
+                    backgroundColor = "#3498db",
+                    borderColor = "#2980b9",
+                    textColor = "#fff",
+                    extendedProps = new
+                    {
+                        time = v.ScheduledTime.ToString(@"hh\:mm"),   // ✅ FIX — Send the time
+                        date = v.ScheduledDate.ToString("yyyy-MM-dd"),
+                        fridge = v.MaintenanceRequest.Fridge?.Brand ?? "Unknown Fridge",
+                        customer = v.MaintenanceRequest.Fridge?.Customer?.FullName ?? "Unknown Customer",
+                        address = v.MaintenanceRequest.Fridge?.Customer?.Location?.Address ?? "Address N/A"
+                    }
+                })
+                .ToList();
 
-            if (!string.IsNullOrEmpty(query))
+            return Json(visits);
+        }
+
+
+        private static string GetStatusColor(Models.TaskStatus status)
+        {
+            return status switch
             {
-                filterRequests = filterRequests.Where(r =>
-                    r.Fridge.Brand.Contains(query) ||
-                    r.Fridge.Customer.FullName.Contains(query) ||
-                    r.Fridge.Customer.Location.Address.Contains(query) ||
-                    r.Fridge.Model.Contains(query));
-            }
-
-            return View("MaintenanceRequests", await filterRequests.ToListAsync());
+                Models.TaskStatus.Scheduled => "#3498db",    // Blue
+                Models.TaskStatus.Rescheduled => "#f39c12",  // Orange
+                Models.TaskStatus.InProgress => "#2ecc71",   // Green
+                Models.TaskStatus.Complete => "#27ae60",    // Dark Green
+                Models.TaskStatus.Cancelled => "#e74c3c",    // Red
+                _ => "#95a5a6"                        // Gray
+            };
         }
 
         public IActionResult ScheduleVisit()
@@ -325,17 +389,17 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 MaintenanceVisit nextVisit = null;
                 if (nextRequest != null)
                 {
-                    nextVisit = new MaintenanceVisit
-                    {
-                        MaintenanceRequestId = nextRequest.MaintenanceRequestId,
-                        FridgeId = visit.FridgeId,
-                        ScheduledDate = nextRequest.RequestDate,
-                        ScheduledTime = visit.ScheduledTime,
-                        Status = Models.TaskStatus.Scheduled,
-                        EmployeeID = visit.EmployeeID
-                    };
+                nextVisit = new MaintenanceVisit
+                {
+                    MaintenanceRequestId = nextRequest.MaintenanceRequestId,
+                    FridgeId = visit.FridgeId,
+                    ScheduledDate = nextRequest.RequestDate ?? DateTime.Today, // fallback to today
+                    ScheduledTime = visit.ScheduledTime,
+                    Status = Models.TaskStatus.Scheduled,
+                    EmployeeID = visit.EmployeeID
+                };
 
-                    _context.MaintenanceVisit.Add(nextVisit);
+                _context.MaintenanceVisit.Add(nextVisit);
                     await _context.SaveChangesAsync();
                 }
 

@@ -16,28 +16,29 @@ namespace FridgeManagementSystem.Models
         [Required]
         [ForeignKey("Fridge")]
         public int FridgeId { get; set; }
+
         [Required]
         [ForeignKey("OrderItem")]
         public int OrderItemId { get; set; }
-       
+
         [Required]
         [DataType(DataType.Date)]
-        public DateOnly AllocationDate { get; set; }= DateOnly.FromDateTime(DateTime.Now);
+        public DateOnly? AllocationDate { get; set; } // ✅ made nullable and removed auto 'Now'
 
         [DataType(DataType.Date)]
         public DateOnly? ReturnDate { get; set; }
 
         [Required]
         [StringLength(50, ErrorMessage = "Status cannot be longer than 50 characters")]
-        public string Status { get; set; } 
+        public string Status { get; set; }
+
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         public int QuantityAllocated { get; set; }
-       
-        //Navigation Property
+
+        // Navigation Properties
         public virtual Customer Customer { get; set; }
         public virtual Fridge Fridge { get; set; }
         public virtual OrderItem OrderItem { get; set; }
-      
     }
 }
