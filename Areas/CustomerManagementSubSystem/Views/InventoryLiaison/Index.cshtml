@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FridgeManagementSystem.Models.FridgeViewModel>
+﻿@model FridgeManagementSystem.ViewModels.InventoryDashboardViewModel
 
 @{
     ViewData["Title"] = "Fridge Inventory";
@@ -14,6 +14,10 @@
     </div>
 }
 
+<!-- -------------------------- -->
+<!-- Active Fridges -->
+<!-- -------------------------- -->
+<h3 class="mt-4 mb-2 text-secondary">Active Fridges</h3>
 <table class="table table-hover table-bordered shadow-sm">
     <thead class="table-dark text-center">
         <tr>
@@ -24,7 +28,7 @@
             <th>Serial Number</th>
             <th>Condition</th>
             <th>Status</th>
-            <th>Quantity</th>
+            <th>Available Stock</th>
             <th>Customer Name</th>
             <th>Allocation Date</th>
             <th>Return Date</th>
@@ -32,92 +36,167 @@
         </tr>
     </thead>
     <tbody class="text-center align-middle">
-        @foreach (var fridge in Model)
+        @if (Model.ActiveFridges != null && Model.ActiveFridges.Any())
+        {
+            foreach (var fridge in Model.ActiveFridges)
+            {
+                <tr>
+                    <td>@fridge.FridgeId</td>
+                    <td>@fridge.FridgeType</td>
+                    <td>@fridge.Brand</td>
+                    <td>@fridge.Model</td>
+                    <td>@fridge.SerialNumber</td>
+                    <td>
+                        <span class="badge @(fridge.Condition == "Working" ? "bg-success" :
+                                             fridge.Condition == "Under Repair" ? "bg-warning text-dark" :
+                                             fridge.Condition == "Faulty" ? "bg-danger" : "bg-secondary")">
+                            @fridge.Condition
+                        </span>
+                    </td>
+                    <td class="@(fridge.Status == "Received" ? "table-warning" :
+                                fridge.Status == "Available" ? "table-success" :
+                                fridge.Status == "Scrapped" ? "table-danger" : "table-secondary")">
+                        @fridge.Status
+                    </td>
+                    <td class="@(fridge.AvailableStock < 5 ? "table-danger fw-bold" : "")">
+                        @fridge.AvailableStock
+                        @if (fridge.AvailableStock < 5)
+                        {
+                            <a asp-area="CustomerManagementSubSystem"
+                               asp-controller="InventoryLiaison"
+                               asp-action="CreatePurchaseRequest"
+                               asp-route-fridgeId="@fridge.FridgeId"
+                               class="text-danger fw-bold text-decoration-none ms-2">
+                                ⚠ Low Stock
+                            </a>
+                        }
+                    </td>
+                    <td>@(fridge.CustomerName ?? "N/A")</td>
+                    <td>@(fridge.AllocationDate.HasValue ? fridge.AllocationDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
+                    <td>@(fridge.ReturnDate.HasValue ? fridge.ReturnDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
+                    <td>
+                        <div class="btn-group">
+                            <a asp-action="UpdateStatus" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-sync"></i> Update
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <form asp-area="CustomerManagementSubSystem"
+                                          asp-controller="InventoryLiaison"
+                                          asp-action="DeleteConfirmed"
+                                          asp-route-id="@fridge.FridgeId"
+                                          method="post"
+                                          style="margin:0;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-trash-alt"></i> Remove Fridge
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@fridge.FridgeId</td>
-                <td>@fridge.FridgeType</td>
-                <td>@fridge.Brand</td>
-                <td>@fridge.Model</td>
-                <td>@fridge.SerialNumber</td>
-
-                <td>
-                    <span class="badge @(fridge.Condition == "Working" ? "bg-success" :
-                                         fridge.Condition == "Under Repair" ? "bg-warning text-dark" :
-                                         fridge.Condition == "Faulty" ? "bg-danger" : "bg-secondary")">
-                        @fridge.Condition
-                    </span>
-                </td>
-
-                <td class="@(fridge.Status == "Received" ? "table-warning" :
-                            fridge.Status == "Available" ? "table-success" :
-                            fridge.Status == "Scrapped" ? "table-danger" : "table-secondary")">
-                    @fridge.Status
-                </td>
-
-                <!-- Quantity and low stock alert -->
-                <td class="@(fridge.Quantity < 5 ? "table-danger fw-bold" : "")">
-                    @fridge.Quantity
-                    @if (fridge.Quantity < 5)
-                    {
-                        <a asp-area="CustomerManagementSubSystem"
-                           asp-controller="InventoryLiaison"
-                           asp-action="CreatePurchaseRequest"
-                           asp-route-fridgeId="@fridge.FridgeId"
-                           class="text-danger fw-bold text-decoration-none ms-2">
-                            ⚠ Low Stock
-                        </a>
-                    }
-                </td>
-
-                <td>@(fridge.CustomerName ?? "N/A")</td>
-
-                <!-- ✅ Fix DateOnly? formatting from controller -->
-                <td>@(fridge.AllocationDate.HasValue ? fridge.AllocationDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
-                <td>@(fridge.ReturnDate.HasValue ? fridge.ReturnDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
-
-                <!-- Actions -->
-                <td>
-                    <div class="btn-group">
-                        <a asp-action="UpdateStatus" asp-route-id="@fridge.FridgeId" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-sync"></i> Update
-                        </a>
-
-                        <button type="button" class="btn btn-sm btn-outline-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="visually-hidden">Toggle Dropdown</span>
-                        </button>
-
-                        <ul class="dropdown-menu">
-                            <li>
-                                <form asp-area="CustomerManagementSubSystem"
-                                      asp-controller="InventoryLiaison"
-                                      asp-action="DeleteConfirmed"
-                                      asp-route-id="@fridge.FridgeId"
-                                      method="post"
-                                      style="margin:0;">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="fas fa-trash-alt"></i> Remove Fridge
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                </td>
+                <td colspan="12" class="text-muted fst-italic">No active fridges found.</td>
             </tr>
         }
     </tbody>
 </table>
 
-<div class="mt-4 text-end">
-    <a asp-action="Receive" class="btn btn-success shadow-sm">
-        <i class="fas fa-plus-circle"></i> Receive New Fridge
-    </a>
-</div>
+<!-- -------------------------- -->
+<!-- Returned Fridges -->
+<!-- -------------------------- -->
+<h3 class="mt-5 mb-2 text-secondary">Returned Fridges</h3>
+<table class="table table-hover table-bordered shadow-sm">
+    <thead class="table-dark text-center">
+        <tr>
+            <th>Fridge ID</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Status</th>
+            <th>Condition</th>
+            <th>Quantity</th>
+            <th>Return Date</th>
+            <th>Customer</th>
+        </tr>
+    </thead>
+    <tbody class="text-center align-middle">
+        @if (Model.ReturnedFridges != null && Model.ReturnedFridges.Any())
+        {
+            foreach (var fridge in Model.ReturnedFridges)
+            {
+                <tr>
+                    <td>@fridge.FridgeId</td>
+                    <td>@fridge.Brand</td>
+                    <td>@fridge.Model</td>
+                    <td>@fridge.Status</td>
+                    <td>@fridge.Condition</td>
+                    <td>@fridge.Quantity</td>
+                    <td>@(fridge.ReturnDate.HasValue ? fridge.ReturnDate.Value.ToString("yyyy-MM-dd") : "-")</td>
+                    <td>@(fridge.CustomerName ?? "N/A")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" class="text-muted fst-italic">No returned fridges found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- -------------------------- -->
+<!-- Scrapped Fridges -->
+<!-- -------------------------- -->
+<h3 class="mt-5 mb-2 text-secondary">Scrapped Fridges</h3>
+<table class="table table-hover table-bordered shadow-sm">
+    <thead class="table-dark text-center">
+        <tr>
+            <th>Fridge ID</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Status</th>
+            <th>Condition</th>
+            <th>Quantity</th>
+            <th>Customer</th>
+        </tr>
+    </thead>
+    <tbody class="text-center align-middle">
+        @if (Model.ScrappedFridges != null && Model.ScrappedFridges.Any())
+        {
+            foreach (var fridge in Model.ScrappedFridges)
+            {
+                <tr>
+                    <td>@fridge.FridgeId</td>
+                    <td>@fridge.Brand</td>
+                    <td>@fridge.Model</td>
+                    <td>@fridge.Status</td>
+                    <td>@fridge.Condition</td>
+                    <td>@fridge.Quantity</td>
+                    <td>@(fridge.CustomerName ?? "N/A")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="text-muted fst-italic">No scrapped fridges found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @section Scripts {
     <script>
-        // Auto-dismiss alerts after 5 seconds
         setTimeout(function () {
             $('.alert').alert('close');
         }, 5000);
