@@ -1,6 +1,10 @@
 ﻿@model FridgeManagementSystem.Models.FaultReport
 @{
     ViewData["Title"] = "Fault Status";
+    Layout = "_Layout";
+
+    // Resolve TaskStatus ambiguity
+    var status = Model.Status.ToString();
 }
 
 <div class="container-fluid">
@@ -8,55 +12,155 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-tasks"></i> Fault Status & History
-                    </h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-tasks"></i> Fault Status & History
+                        </h4>
+                        <span class="badge bg-light text-dark">
+                            Report #@Model.FaultReportId
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
+                    <!-- Quick Status Overview -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body py-3">
+                                    <h6 class="card-title mb-1">Current Status</h6>
+                                    <span class="badge @GetStatusBadgeClass(status) fs-6">
+                                        @status
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body py-3">
+                                    <h6 class="card-title mb-1">Fridge</h6>
+                                    <p class="mb-0">
+                                        @if (Model.Fridge != null)
+                                        {
+                                            @Model.Fridge.Brand @Model.Fridge.Model
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Status Timeline -->
                     <div class="timeline">
-                        <div class="timeline-item @(Model.StatusFilter != "Pending" ? "completed" : "")">
-                            <div class="timeline-marker bg-success"></div>
+                        <!-- Initial Report -->
+                        <div class="timeline-item completed">
+                            <div class="timeline-marker bg-success">
+                                <i class="fas fa-flag"></i>
+                            </div>
                             <div class="timeline-content">
-                                <h6>Fault Reported</h6>
-                                <p class="text-muted">@Model.ReportDate.ToString("MMM dd, yyyy HH:mm")</p>
-                                <p>Fault reported by customer</p>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="mb-1">Fault Reported</h6>
+                                    <small class="text-muted">@Model.ReportDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                </div>
+                                <p class="mb-1 text-muted">Fault reported by customer</p>
+                                <p class="mb-0"><strong>Type:</strong> @Model.FaultType</p>
+                                <p class="mb-0"><strong>Description:</strong> @Model.FaultDescription</p>
                             </div>
                         </div>
 
-                        @if (Model.Fault?.RepairSchedules != null)
+                        <!-- Repair Progress (if any) -->
+                        @if (Model.RepairSchedules != null && Model.RepairSchedules.Any())
                         {
-                            foreach (var repair in Model.Fault.RepairSchedules.OrderBy(r => r.CreatedDate))
+                            foreach (var repair in Model.RepairSchedules.OrderBy(r => r.CreatedDate))
                             {
-                                <div class="timeline-item @(repair.Status == "Completed" ? "completed" : "")">
-                                    <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-item @(repair.Status?.ToLower() == "completed" ? "completed" : "active")">
+                                    <div class="timeline-marker @GetRepairStatusBadgeClass(repair.Status)">
+                                        <i class="fas fa-tools"></i>
+                                    </div>
                                     <div class="timeline-content">
-                                        <h6>@repair.Status</h6>
-                                        <p class="text-muted">@repair.CreatedDate.ToString("MMM dd, yyyy HH:mm")</p>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="mb-1">@repair.Status</h6>
+                                            <small class="text-muted">@repair.CreatedDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </div>
                                         @if (!string.IsNullOrEmpty(repair.Diagnosis))
                                         {
-                                            <p><strong>Diagnosis:</strong> @repair.Diagnosis</p>
+                                            <p class="mb-1"><strong>Diagnosis:</strong> @repair.Diagnosis</p>
                                         }
                                         @if (!string.IsNullOrEmpty(repair.RepairNotes))
                                         {
-                                            <p><strong>Notes:</strong> @repair.RepairNotes</p>
+                                            <p class="mb-1"><strong>Technician Notes:</strong> @repair.RepairNotes</p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(repair.PartsUsed))
+                                        {
+                                            <p class="mb-0"><strong>Parts Used:</strong> @repair.PartsUsed</p>
                                         }
                                     </div>
                                 </div>
                             }
                         }
-
-                        @if (Model.StatusFilter == "Resolved")
+                        else if (status == "Pending")
                         {
-                            <div class="timeline-item completed">
-                                <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-item pending">
+                                <div class="timeline-marker bg-secondary">
+                                    <i class="fas fa-clock"></i>
+                                </div>
                                 <div class="timeline-content">
-                                    <h6>Fault Resolved</h6>
-                                    <p class="text-muted">@DateTime.Now.ToString("MMM dd, yyyy HH:mm")</p>
-                                    <p>Fault has been successfully resolved</p>
+                                    <h6 class="mb-1">Awaiting Technician Assignment</h6>
+                                    <p class="mb-0 text-muted">Your fault report is in the queue and awaiting assignment to a technician.</p>
                                 </div>
                             </div>
                         }
+
+                        <!-- Final Resolution -->
+                        @if (status == "Completed")
+                        {
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="mb-1">Fault Resolved</h6>
+                                        @{
+                                            var completionDate = Model.RepairSchedules?
+                                            .Where(r => r.Status?.ToLower() == "completed")
+                                            .OrderByDescending(r => r.CreatedDate)
+                                            .FirstOrDefault()?.CreatedDate ?? DateTime.Now;
+                                        }
+                                        <small class="text-muted">@completionDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                    </div>
+                                    <p class="mb-0 text-success">
+                                        <i class="fas fa-check"></i> The fault has been successfully resolved and your fridge is back in working order.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                        else if (status == "Cancelled")
+                        {
+                            <div class="timeline-item cancelled">
+                                <div class="timeline-marker bg-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Fault Report Cancelled</h6>
+                                    <p class="mb-0 text-muted">This fault report has been cancelled.</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        <a asp-action="FaultDetails" asp-route-id="@Model.FaultReportId"
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle"></i> View Full Details
+                        </a>
+                        <a asp-action="MyFaults" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to My Faults
+                        </a>
                     </div>
                 </div>
             </div>
@@ -64,15 +168,57 @@
     </div>
 </div>
 
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "inprogress" => "bg-primary",
+            "completed" => "bg-success",
+            "cancelled" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetRepairStatusBadgeClass(string repairStatus)
+    {
+        return repairStatus?.ToLower() switch
+        {
+            "diagnosing" or "diagnosed" => "bg-info",
+            "awaiting parts" or "parts ordered" => "bg-warning",
+            "repairing" or "in progress" => "bg-primary",
+            "testing" => "bg-orange",
+            "completed" or "resolved" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}
+
 <style>
+    .bg-orange {
+        background-color: #ff9800 !important;
+        color: white !important;
+    }
+
     .timeline {
         position: relative;
         padding-left: 30px;
     }
 
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
     .timeline-item {
         position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
         padding-left: 20px;
     }
 
@@ -80,19 +226,37 @@
         position: absolute;
         left: -30px;
         top: 0;
-        width: 20px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
     }
 
     .timeline-item.completed .timeline-marker {
         background-color: #28a745 !important;
     }
 
+    .timeline-item.active .timeline-marker {
+        background-color: #007bff !important;
+    }
+
+    .timeline-item.pending .timeline-marker {
+        background-color: #6c757d !important;
+    }
+
+    .timeline-item.cancelled .timeline-marker {
+        background-color: #dc3545 !important;
+    }
+
     .timeline-content {
         background: #f8f9fa;
         padding: 15px;
-        border-radius: 5px;
-        border-left: 3px solid #007bff;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 </style>

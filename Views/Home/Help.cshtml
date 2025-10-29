@@ -9,6 +9,46 @@
         <div class="col-12">
             <h1 class="text-center mb-5">Help & Support</h1>
 
+            <!-- Customer Guide Download Section -->
+            <div class="card mb-5">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-book me-2"></i>Customer Guide
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5>Complete User Manual</h5>
+                            <p class="text-muted mb-3">
+                                Download our comprehensive Customer Guide to learn how to use all features of the
+                                Fridge Management System, including fault reporting, maintenance scheduling, and account management.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Step-by-step instructions</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Troubleshooting tips</li>
+                                <li><i class="fas fa-check text-success me-2"></i>FAQ section</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Visual guides and screenshots</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="border rounded p-4 bg-light">
+                                <i class="fas fa-file-pdf fa-4x text-danger mb-3"></i>
+                                <h6>Customer Guide.pdf</h6>
+                                <p class="text-muted small">Updated: @DateTime.Now.ToString("MMMM yyyy")</p>
+                                <a href="~/documents/CustomerGuide.pdf" download="DynamicIce-CustomerGuide.pdf"
+                                   class="btn btn-danger btn-lg w-100">
+                                    <i class="fas fa-download me-2"></i>Download Guide
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-5">Help & Support</h1>
+
             <!-- Contact Information -->
             @if (Model != null)
             {

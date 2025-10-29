@@ -76,55 +76,55 @@ namespace FridgeManagementSystem.Controllers
             return View(dashboardData);
         }
 
-        // GET: Faults/Create - Create New Fault Report
-        [HttpGet]
-        public IActionResult Create()
-        {
-            ViewData["Sidebar"] = "FaultTechSubsystem";
+        //// GET: Faults/Create - Create New Fault Report
+        //[HttpGet]
+        //public IActionResult Create()
+        //{
+        //    ViewData["Sidebar"] = "FaultTechSubsystem";
 
-            // Populate dropdowns
-            ViewBag.FridgeId = new SelectList(_context.Fridge, "FridgeId", "SerialNumber");
-            ViewBag.FaultType = new SelectList(Enum.GetValues(typeof(FaultType)));
-            ViewBag.UrgencyLevel = new SelectList(Enum.GetValues(typeof(UrgencyLevel)));
+        //    // Populate dropdowns
+        //    ViewBag.FridgeId = new SelectList(_context.Fridge, "FridgeId", "SerialNumber");
+        //    ViewBag.FaultType = new SelectList(Enum.GetValues(typeof(FaultType)));
+        //    ViewBag.UrgencyLevel = new SelectList(Enum.GetValues(typeof(UrgencyLevel)));
 
-            return View();
-        }
+        //    return View();
+        //}
 
-        // POST: Faults/Create - Create New Fault Report
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FaultReportId,ReportDate,FaultType,UrgencyLevel,FaultDescription,FridgeId")] FaultReport faultReport)
-        {
-            ViewData["Sidebar"] = "FaultTechSubsystem";
+        //// POST: Faults/Create - Create New Fault Report
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("FaultReportId,ReportDate,FaultType,UrgencyLevel,FaultDescription,FridgeId")] FaultReport faultReport)
+        //{
+        //    ViewData["Sidebar"] = "FaultTechSubsystem";
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Set default status - NO automatic date setting
-                    faultReport.Status = FridgeManagementSystem.Models.TaskStatus.Pending;
-                    faultReport.StatusFilter = FridgeManagementSystem.Models.TaskStatus.Pending.ToString();
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            // Set default status - NO automatic date setting
+        //            faultReport.Status = FridgeManagementSystem.Models.TaskStatus.Pending;
+        //            faultReport.StatusFilter = FridgeManagementSystem.Models.TaskStatus.Pending.ToString();
 
-                    _context.Add(faultReport);
-                    await _context.SaveChangesAsync();
+        //            _context.Add(faultReport);
+        //            await _context.SaveChangesAsync();
 
-                    TempData["SuccessMessage"] = "Fault report created successfully!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error creating fault report");
-                    ModelState.AddModelError("", "Error creating fault report. Please try again.");
-                }
-            }
+        //            TempData["SuccessMessage"] = "Fault report created successfully!";
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.LogError(ex, "Error creating fault report");
+        //            ModelState.AddModelError("", "Error creating fault report. Please try again.");
+        //        }
+        //    }
 
-            // Repopulate dropdowns if validation fails
-            ViewBag.FridgeId = new SelectList(_context.Fridge, "FridgeId", "SerialNumber", faultReport.FridgeId);
-            ViewBag.FaultType = new SelectList(Enum.GetValues(typeof(FaultType)), faultReport.FaultType);
-            ViewBag.UrgencyLevel = new SelectList(Enum.GetValues(typeof(UrgencyLevel)), faultReport.UrgencyLevel);
+        //    // Repopulate dropdowns if validation fails
+        //    ViewBag.FridgeId = new SelectList(_context.Fridge, "FridgeId", "SerialNumber", faultReport.FridgeId);
+        //    ViewBag.FaultType = new SelectList(Enum.GetValues(typeof(FaultType)), faultReport.FaultType);
+        //    ViewBag.UrgencyLevel = new SelectList(Enum.GetValues(typeof(UrgencyLevel)), faultReport.UrgencyLevel);
 
-            return View(faultReport);
-        }
+        //    return View(faultReport);
+        //}
 
         // GET: Faults/Process/5 - Process Fault Report
         [HttpGet]
@@ -302,10 +302,8 @@ namespace FridgeManagementSystem.Controllers
 
             return View(repairSchedule);
         }
-
-        // GET: Faults/Repair/5 - Repair Fridge
+        // GET: Faults/Repair/5 - Show the repair form
         [HttpGet]
-        [Route("Faults/Repair/{id?}")]
         public async Task<IActionResult> Repair(int? id)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem";
@@ -326,7 +324,6 @@ namespace FridgeManagementSystem.Controllers
                 return NotFound();
             }
 
-            // Don't automatically update status - let user control it
             var repairSchedule = faultReport.RepairSchedules
                 .OrderByDescending(rs => rs.CreatedDate)
                 .FirstOrDefault() ?? new RepairSchedule
@@ -337,23 +334,26 @@ namespace FridgeManagementSystem.Controllers
                 };
 
             ViewBag.FaultReport = faultReport;
+
+            // Make sure you have repair types defined
             ViewBag.RepairTypes = new SelectList(new[]
             {
-                new { Value = "Electrical", Text = "Electrical Repair" },
-                new { Value = "Mechanical", Text = "Mechanical Repair" },
-                new { Value = "Refrigeration", Text = "Refrigeration System" },
-                new { Value = "Thermostat", Text = "Thermostat Replacement" },
-                new { Value = "Compressor", Text = "Compressor Repair" },
-                new { Value = "Other", Text = "Other" }
-            }, "Value", "Text");
+        new { Value = "Electrical", Text = "Electrical Repair" },
+        new { Value = "Mechanical", Text = "Mechanical Repair" },
+        new { Value = "Refrigeration", Text = "Refrigeration System" },
+        new { Value = "Thermostat", Text = "Thermostat Replacement" },
+        new { Value = "Compressor", Text = "Compressor Repair" },
+        new { Value = "Seal", Text = "Door Seal Replacement" },
+        new { Value = "Other", Text = "Other" }
+    }, "Value", "Text");
 
             return View(repairSchedule);
         }
 
-        // POST: Faults/Repair/5 - Repair Fridge
+        // POST: Faults/Repair/5 - Process the repair form
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Repair(int id, [Bind("RepairID,RepairType,PartsUsed,RepairNotes,RepairCost,Status,FaultReportId,FridgeID,CreatedDate,UpdatedDate")] RepairSchedule repairSchedule)
+        public async Task<IActionResult> Repair(int id, RepairSchedule repairSchedule)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem";
 
@@ -367,38 +367,25 @@ namespace FridgeManagementSystem.Controllers
                 try
                 {
                     var existingRepair = await _context.RepairSchedules
-                        .FirstOrDefaultAsync(r => r.FaultReportId == id && r.RepairID == repairSchedule.RepairID);
+                        .FirstOrDefaultAsync(r => r.FaultReportId == id);
 
                     if (existingRepair != null)
                     {
+                        // Update existing repair
                         existingRepair.RepairType = repairSchedule.RepairType;
                         existingRepair.PartsUsed = repairSchedule.PartsUsed;
                         existingRepair.RepairNotes = repairSchedule.RepairNotes;
                         existingRepair.RepairCost = repairSchedule.RepairCost;
                         existingRepair.Status = repairSchedule.Status;
-                        // Use provided date or default
-                        if (repairSchedule.UpdatedDate == default)
-                        {
-                            existingRepair.UpdatedDate = DateTime.Now;
-                        }
-                        else
-                        {
-                            existingRepair.UpdatedDate = repairSchedule.UpdatedDate;
-                        }
+                        existingRepair.UpdatedDate = DateTime.Now;
                         _context.Update(existingRepair);
                     }
                     else
                     {
+                        // Create new repair
                         repairSchedule.FaultReportId = id;
-                        // Use provided dates or defaults
-                        if (repairSchedule.CreatedDate == default)
-                        {
-                            repairSchedule.CreatedDate = DateTime.Now;
-                        }
-                        if (repairSchedule.UpdatedDate == default)
-                        {
-                            repairSchedule.UpdatedDate = DateTime.Now;
-                        }
+                        repairSchedule.CreatedDate = DateTime.Now;
+                        repairSchedule.UpdatedDate = DateTime.Now;
                         _context.Add(repairSchedule);
                     }
 
@@ -418,8 +405,14 @@ namespace FridgeManagementSystem.Controllers
                         throw;
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error saving repair details for fault {FaultReportId}", id);
+                    ModelState.AddModelError("", "Error saving repair details. Please try again.");
+                }
             }
 
+            // If we get here, there was an error - repopulate ViewBag
             var faultReport = await _context.FaultReport
                 .Include(fr => fr.Fridge)
                 .FirstOrDefaultAsync(fr => fr.FaultReportId == id);
@@ -427,21 +420,57 @@ namespace FridgeManagementSystem.Controllers
             ViewBag.FaultReport = faultReport;
             ViewBag.RepairTypes = new SelectList(new[]
             {
-                new { Value = "Electrical", Text = "Electrical Repair" },
-                new { Value = "Mechanical", Text = "Mechanical Repair" },
-                new { Value = "Refrigeration", Text = "Refrigeration System" },
-                new { Value = "Thermostat", Text = "Thermostat Replacement" },
-                new { Value = "Compressor", Text = "Compressor Repair" },
-                new { Value = "Other", Text = "Other" }
-            }, "Value", "Text", repairSchedule.RepairType);
+        new { Value = "Electrical", Text = "Electrical Repair" },
+        new { Value = "Mechanical", Text = "Mechanical Repair" },
+        new { Value = "Refrigeration", Text = "Refrigeration System" },
+        new { Value = "Thermostat", Text = "Thermostat Replacement" },
+        new { Value = "Compressor", Text = "Compressor Repair" },
+        new { Value = "Seal", Text = "Door Seal Replacement" },
+        new { Value = "Other", Text = "Other" }
+    }, "Value", "Text", repairSchedule.RepairType);
 
             return View(repairSchedule);
+        }
+
+        private bool RepairScheduleExists(int id)
+        {
+            return _context.RepairSchedules.Any(e => e.RepairID == id);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateCondition(int? id)
+        {
+            ViewData["Sidebar"] = "FaultTechSubsystem";
+
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var fridge = await _context.Fridge
+                .Include(f => f.Customer)
+                .FirstOrDefaultAsync(f => f.FridgeId == id);
+
+            if (fridge == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.ConditionOptions = new SelectList(new[]
+            {
+        new { Value = "Working", Text = "Working - Fully Functional" },
+        new { Value = "Under Repair", Text = "Under Repair" },
+        new { Value = "Faulty", Text = "Faulty - Needs Attention" },
+        new { Value = "Scrapped", Text = "Scrapped - Beyond Repair" }
+    }, "Value", "Text", fridge.Condition);
+
+            return View(fridge);
         }
 
         // POST: Faults/UpdateCondition/5 - Update Fridge Condition
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateCondition(int id, [Bind("FridgeID,Model,SerialNumber,Brand,Type,Condition,Notes,UpdatedDate")] Fridge fridge)
+        public async Task<IActionResult> UpdateCondition(int id, [Bind("FridgeId,Model,SerialNumber,Brand,FridgeType,Condition,Notes,UpdatedDate")] Fridge fridge)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem";
 
@@ -459,8 +488,9 @@ namespace FridgeManagementSystem.Controllers
                     {
                         existingFridge.Condition = fridge.Condition;
                         existingFridge.Notes = fridge.Notes;
-                        // Use provided date or default
-                        if (fridge.UpdatedDate == default)
+
+                        // Use provided date or current time if null/default
+                        if (fridge.UpdatedDate == null || fridge.UpdatedDate == default(DateTime))
                         {
                             existingFridge.UpdatedDate = DateTime.Now;
                         }
@@ -468,8 +498,10 @@ namespace FridgeManagementSystem.Controllers
                         {
                             existingFridge.UpdatedDate = fridge.UpdatedDate;
                         }
+
                         _context.Update(existingFridge);
 
+                        // Auto-complete fault reports when condition set to "Working"
                         if (fridge.Condition == "Working")
                         {
                             var relatedFaultReports = await _context.FaultReport
@@ -489,6 +521,11 @@ namespace FridgeManagementSystem.Controllers
                         TempData["SuccessMessage"] = $"Fridge condition updated to '{fridge.Condition}' successfully!";
                         return RedirectToAction(nameof(Index));
                     }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Fridge not found.";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -501,60 +538,105 @@ namespace FridgeManagementSystem.Controllers
                         throw;
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating fridge condition for fridge {FridgeId}", id);
+                    TempData["ErrorMessage"] = "An error occurred while updating the fridge condition.";
+                }
             }
 
+            // If we get here, there were validation errors
             var faultReportInfo = await _context.FaultReport
                 .Include(fr => fr.Fridge)
+                .Include(fr => fr.Fridge.Customer)
+                .Include(fr => fr.Fridge.Location)
                 .FirstOrDefaultAsync(fr => fr.FridgeId == id);
 
             ViewBag.FaultReport = faultReportInfo;
             ViewBag.ConditionOptions = new SelectList(new[]
             {
-                new { Value = "Working", Text = "Working - Fully Functional" },
-                new { Value = "Under Repair", Text = "Under Repair" },
-                new { Value = "Faulty", Text = "Faulty - Needs Attention" },
-                new { Value = "Scrapped", Text = "Scrapped - Beyond Repair" }
-            }, "Value", "Text", fridge.Condition);
+        new { Value = "Working", Text = "Working - Fully Functional" },
+        new { Value = "Under Repair", Text = "Under Repair" },
+        new { Value = "Faulty", Text = "Faulty - Needs Attention" },
+        new { Value = "Scrapped", Text = "Scrapped - Beyond Repair" }
+    }, "Value", "Text", fridge.Condition);
 
             return View(fridge);
         }
 
-        // POST: Faults/Complete/5 - Complete Repair Process
-        [HttpPost, ActionName("Complete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CompleteConfirmed(int id, DateTime? completionDate)
+        // GET: Faults/Complete/5 - Shows the confirmation page
+        [HttpGet]
+        public async Task<IActionResult> Complete(int? id)
         {
             ViewData["Sidebar"] = "FaultTechSubsystem";
+
+            if (id == null)
+            {
+                return NotFound();
+            }
 
             var repairSchedule = await _context.RepairSchedules
                 .Include(r => r.FaultReport)
                 .Include(r => r.Fridge)
+                .ThenInclude(f => f.Customer)
                 .FirstOrDefaultAsync(r => r.RepairID == id);
 
-            if (repairSchedule != null)
+            if (repairSchedule == null)
             {
-                repairSchedule.Status = "Completed";
-                // Use provided completion date or current date
-                repairSchedule.UpdatedDate = completionDate ?? DateTime.Now;
+                return NotFound();
+            }
 
-                if (repairSchedule.FaultReport != null)
+            return View(repairSchedule);
+        }
+
+        // POST: Faults/Complete/5 - Processes the completion and redirects
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Complete(int id, DateTime? completionDate)
+        {
+            ViewData["Sidebar"] = "FaultTechSubsystem";
+
+            try
+            {
+                var repairSchedule = await _context.RepairSchedules
+                    .Include(r => r.FaultReport)
+                    .Include(r => r.Fridge)
+                    .FirstOrDefaultAsync(r => r.RepairID == id);
+
+                if (repairSchedule != null)
                 {
-                    repairSchedule.FaultReport.Status = FridgeManagementSystem.Models.TaskStatus.Complete;
-                    repairSchedule.FaultReport.StatusFilter = FridgeManagementSystem.Models.TaskStatus.Complete.ToString();
-                    _context.Update(repairSchedule.FaultReport);
-                }
+                    repairSchedule.Status = "Completed";
+                    repairSchedule.UpdatedDate = completionDate ?? DateTime.Now;
+                    repairSchedule.CompletionDate = completionDate ?? DateTime.Now;
 
-                if (repairSchedule.Fridge != null)
+                    if (repairSchedule.FaultReport != null)
+                    {
+                        repairSchedule.FaultReport.Status = FridgeManagementSystem.Models.TaskStatus.Complete;
+                        repairSchedule.FaultReport.StatusFilter = FridgeManagementSystem.Models.TaskStatus.Complete.ToString();
+                        _context.Update(repairSchedule.FaultReport);
+                    }
+
+                    if (repairSchedule.Fridge != null)
+                    {
+                        repairSchedule.Fridge.Condition = "Working";
+                        repairSchedule.Fridge.UpdatedDate = completionDate ?? DateTime.Now;
+                        _context.Update(repairSchedule.Fridge);
+                    }
+
+                    _context.Update(repairSchedule);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Repair completed successfully! Fridge is now working.";
+                }
+                else
                 {
-                    repairSchedule.Fridge.Condition = "Working";
-                    repairSchedule.Fridge.UpdatedDate = completionDate ?? DateTime.Now;
-                    _context.Update(repairSchedule.Fridge);
+                    TempData["ErrorMessage"] = "Repair schedule not found.";
                 }
-
-                _context.Update(repairSchedule);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Repair completed successfully! Fridge is now working.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error completing repair {RepairID}", id);
+                TempData["ErrorMessage"] = "Error completing repair. Please try again.";
             }
 
             return RedirectToAction(nameof(Index));
@@ -620,10 +702,6 @@ namespace FridgeManagementSystem.Controllers
             return _context.FaultReport.Any(e => e.FaultReportId == id);
         }
 
-        private bool RepairScheduleExists(int id)
-        {
-            return _context.RepairSchedules.Any(e => e.RepairID == id);
-        }
 
         private bool FridgeExists(int id)
         {

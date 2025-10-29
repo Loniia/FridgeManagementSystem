@@ -1,49 +1,41 @@
 ﻿@model FridgeManagementSystem.Controllers.DashboardViewModel
-
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Fault Technician Dashboard";
+    ViewData["Sidebar"] = "FaultTechSubsystem";
 }
 
 <div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Fault Technician Dashboard</h1>
+        <a asp-action="Reports" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-chart-bar fa-sm text-white-50"></i> Generate Reports
+        </a>
+    </div>
+
     <!-- Stats Cards -->
     <div class="row mb-4">
+        <!-- Total Active Faults -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Fault Reports
+                                Active Faults
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalFaults</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                            <i class="fas fa-list fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Unattended Faults
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.UnattendedFaults</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- High Priority Faults -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-danger shadow h-100 py-2">
                 <div class="card-body">
@@ -55,25 +47,45 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.HighPriorityFaults</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-flag fa-2x text-gray-300"></i>
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Unattended Faults -->
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
+            <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Completed This Week
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.CompletedThisWeek</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.UnattendedFaults</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Repairs -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Today's Repairs
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TodaysRepairs</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tools fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -86,23 +98,30 @@
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Recent Fault Reports</h6>
-                    <a asp-action="Index" class="btn btn-primary btn-sm">View All Fault Reports</a>
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Active Fault Reports</h6>
+                    <div>
+                        <a asp-action="Create" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> New Fault Report
+                        </a>
+                        <a asp-action="Index" class="btn btn-primary btn-sm">
+                            <i class="fas fa-list"></i> View All
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (Model.RecentFaults.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-bordered" width="100%" cellspacing="0">
-                                <thead>
+                            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                                <thead class="bg-light">
                                     <tr>
-                                        <th>Report ID</th>
-                                        <th>Fault Type</th>
-                                        <th>Description</th>
-                                        <th>Status</th>
-                                        <th>Urgency</th>
-                                        <th>Fridge Model</th>
+                                        <th>Report Date</th>
+                                        <th>Fridge</th>
                                         <th>Customer</th>
+                                        <th>Fault Type</th>
+                                        <th>Urgency</th>
+                                        <th>Status</th>
+                                        <th>Repair Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -110,27 +129,62 @@
                                     @foreach (var faultReport in Model.RecentFaults)
                                     {
                                         <tr>
-                                            <td>FR@(faultReport.FaultReportId.ToString("D3"))</td>
+                                            <td>@faultReport.ReportDate.ToString("MM/dd HH:mm")</td>
+                                            <td>
+                                                @if (faultReport.Fridge != null)
+                                                {
+                                                    <div>
+                                                        <strong>@faultReport.Fridge.Brand @faultReport.Fridge.Model</strong>
+                                                        <small class="text-muted d-block">SN: @faultReport.Fridge.SerialNumber</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (faultReport.Fridge?.Customer != null)
+                                                {
+                                                    @faultReport.Fridge.Customer.FullName
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
                                             <td>
                                                 <span class="badge bg-info">@faultReport.FaultType</span>
-                                            </td>
-                                            <td>@faultReport.FaultDescription</td>
-                                            <td>
-                                                <span class="badge @GetStatusBadgeClass(faultReport.StatusFilter)">@faultReport.StatusFilter</span>
                                             </td>
                                             <td>
                                                 <span class="badge @GetUrgencyBadgeClass(faultReport.UrgencyLevel)">@faultReport.UrgencyLevel</span>
                                             </td>
-                                            <td>@(faultReport.Fridge?.Model ?? "N/A")</td>
-                                            <td>@(faultReport.Fridge?.Customer?.FullName ?? "N/A")</td>
                                             <td>
-                                                <a asp-action="Details" asp-route-id="@faultReport.FaultReportId"
-                                                   class="btn btn-info btn-sm">View</a>
-                                                @if (faultReport.StatusFilter == "Pending" || faultReport.StatusFilter == "Diagnosing")
-                                                {
-                                                    <a asp-action="Process" asp-route-id="@faultReport.FaultReportId"
-                                                       class="btn btn-primary btn-sm">Process</a>
+                                                <span class="badge @GetStatusBadgeClass(faultReport.Status.ToString())">@faultReport.Status</span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var latestRepair = faultReport.RepairSchedules?.OrderByDescending(r => r.CreatedDate).FirstOrDefault();
+                                                    var repairStatus = latestRepair?.Status ?? "Not Started";
                                                 }
+                                                <span class="badge @GetRepairStatusBadgeClass(repairStatus)">@repairStatus</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a asp-action="Process" asp-route-id="@faultReport.FaultReportId"
+                                                       class="btn btn-primary" title="Process Fault">
+                                                        <i class="fas fa-cogs"></i>
+                                                    </a>
+                                                    @if (faultReport.Status == FridgeManagementSystem.Models.TaskStatus.InProgress ||
+                                                   latestRepair?.Status == "Diagnosing" ||
+                                                   latestRepair?.Status == "Repairing")
+                                                    {
+                                                        <a asp-action="Repair" asp-route-id="@faultReport.FaultReportId"
+                                                           class="btn btn-warning" title="Repair Fridge">
+                                                            <i class="fas fa-tools"></i>
+                                                        </a>
+                                                    }
+                                                </div>
                                             </td>
                                         </tr>
                                     }
@@ -140,10 +194,13 @@
                     }
                     else
                     {
-                        <div class="text-center py-4">
-                            <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No recent fault reports found.</p>
-                            <p class="text-muted small">New fault reports will appear here as they are reported.</p>
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5 class="text-success">No Active Fault Reports</h5>
+                            <p class="text-muted">All fault reports have been completed or are currently being processed.</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus-circle"></i> Create New Fault Report
+                            </a>
                         </div>
                     }
                 </div>
@@ -159,29 +216,33 @@
                     <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 text-center mb-3">
-                            <a asp-action="Index" class="btn btn-primary btn-lg btn-block">
-                                <i class="fas fa-list fa-2x mb-2"></i><br>
-                                View All Reports
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Index" class="btn btn-primary btn-lg w-100 h-100 py-3">
+                                <i class="fas fa-list fa-2x mb-2 d-block"></i>
+                                View All Faults
+                                <small class="d-block text-light">Manage all active reports</small>
                             </a>
                         </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <a asp-action="Index" class="btn btn-warning btn-lg btn-block">
-                                <i class="fas fa-cogs fa-2x mb-2"></i><br>
-                                Process Reports
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Create" class="btn btn-success btn-lg w-100 h-100 py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2 d-block"></i>
+                                New Report
+                                <small class="d-block text-light">Create fault report</small>
                             </a>
                         </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <a asp-action="Index" class="btn btn-danger btn-lg btn-block">
-                                <i class="fas fa-tools fa-2x mb-2"></i><br>
-                                Repair Fridges
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Reports" class="btn btn-info btn-lg w-100 h-100 py-3">
+                                <i class="fas fa-chart-bar fa-2x mb-2 d-block"></i>
+                                Reports
+                                <small class="d-block text-light">View analytics</small>
                             </a>
                         </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <a asp-action="Index" class="btn btn-success btn-lg btn-block">
-                                <i class="fas fa-thermometer-half fa-2x mb-2"></i><br>
-                                Update Conditions
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Dashboard" class="btn btn-warning btn-lg w-100 h-100 py-3">
+                                <i class="fas fa-sync-alt fa-2x mb-2 d-block"></i>
+                                Refresh
+                                <small class="d-block text-light">Update dashboard</small>
                             </a>
                         </div>
                     </div>
@@ -192,19 +253,15 @@
 </div>
 
 @functions {
-    public string GetStatusBadgeClass(string statusFilter)
+    public string GetStatusBadgeClass(string status)
     {
-        return statusFilter?.ToLower() switch
+        return status?.ToLower() switch
         {
             "pending" => "bg-warning",
-            "in progress" => "bg-info",
-            "resolved" => "bg-success",
+            "inprogress" => "bg-primary",
+            "onhold" => "bg-info",
+            "complete" => "bg-success",
             "cancelled" => "bg-secondary",
-            "diagnosing" => "bg-primary",
-            "awaiting parts" => "bg-warning",
-            "repairing" => "bg-danger",
-            "testing" => "bg-info",
-            "completed" => "bg-success",
             _ => "bg-secondary"
         };
     }
@@ -213,12 +270,61 @@
     {
         return urgencyLevel switch
         {
-            UrgencyLevel.Critical => "bg-danger",
-            UrgencyLevel.Emergency => "bg-dark",
+            UrgencyLevel.Critical or UrgencyLevel.Emergency => "bg-danger",
             UrgencyLevel.High => "bg-warning",
-            UrgencyLevel.Medium => "bg-info",
-            UrgencyLevel.Low => "bg-success",
+            UrgencyLevel.Medium => "bg-primary",
+            UrgencyLevel.Low => "bg-secondary",
             _ => "bg-secondary"
         };
     }
+
+    public string GetRepairStatusBadgeClass(string repairStatus)
+    {
+        return repairStatus?.ToLower() switch
+        {
+            "diagnosing" => "bg-info",
+            "awaiting parts" or "parts ordered" => "bg-warning",
+            "repairing" or "in progress" => "bg-primary",
+            "testing" => "bg-orange",
+            "completed" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<style>
+    .bg-orange {
+        background-color: #ff9800 !important;
+        color: white !important;
+    }
+
+    .card {
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+    .btn-lg {
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Auto-refresh dashboard every 2 minutes
+        setInterval(function() {
+            location.reload();
+        }, 120000);
+
+        // Add smooth animations
+        $(document).ready(function() {
+            $('.card').addClass('animate__animated animate__fadeInUp');
+        });
+    </script>
 }

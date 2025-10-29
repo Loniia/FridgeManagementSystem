@@ -1,120 +1,179 @@
 ﻿@model FridgeManagementSystem.Models.RepairSchedule
-
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Process Fault Report";
+    ViewData["Sidebar"] = "FaultTechSubsystem";
+
     var faultReport = ViewBag.FaultReport as FridgeManagementSystem.Models.FaultReport;
+    var statusOptions = ViewBag.StatusOptions as IEnumerable<SelectListItem>;
+    var conditionOptions = ViewBag.ConditionOptions as IEnumerable<SelectListItem>;
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 text-gray-800">Process Fault Report</h1>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Fault Reports
-        </a>
+        <div>
+            <a asp-action="Details" asp-route-id="@faultReport?.FaultReportId" class="btn btn-info">
+                <i class="fas fa-eye"></i> View Details
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
     </div>
 
+    <!-- Fault Report Summary -->
     @if (faultReport != null)
     {
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-primary text-white">
-                <h6 class="m-0 font-weight-bold">Fault Report Information</h6>
+                <h6 class="m-0 font-weight-bold">
+                    <i class="fas fa-info-circle"></i> Fault Report #@faultReport.FaultReportId
+                </h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
-                        <strong>Report No:</strong> FR@(faultReport.FaultReportId.ToString("D3"))<br>
                         <strong>Fault Type:</strong> <span class="badge bg-info">@faultReport.FaultType</span>
                     </div>
                     <div class="col-md-3">
                         <strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(faultReport.UrgencyLevel)">@faultReport.UrgencyLevel</span><br>
-                        <strong>Status:</strong> <span class="badge @GetStatusBadgeClass(faultReport.StatusFilter)">@faultReport.StatusFilter</span>
+                        <strong>Status:</strong> <span class="badge @GetStatusBadgeClass(faultReport.Status.ToString())">@faultReport.Status</span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Reported:</strong> @faultReport.ReportDate.ToString("yyyy/MM/dd")<br>
-                        <strong>Source:</strong>
-                        @if (faultReport.MaintenanceVisitId > 0)
-                        {
-                            <text>Maintenance</text>
-                        }
-                        else
-                        {
-                            <text>Customer</text>
-                        }
+                        <strong>Reported:</strong> @faultReport.ReportDate.ToString("MMM dd, yyyy HH:mm")<br>
+                        <strong>Fridge:</strong> @faultReport.Fridge?.Brand @faultReport.Fridge?.Model
                     </div>
                     <div class="col-md-3">
-                        <strong>Fridge:</strong> @(faultReport.Fridge?.Model ?? "N/A")<br>
-                        <strong>Serial:</strong> @(faultReport.Fridge?.SerialNumber ?? "N/A")
+                        <strong>Serial No:</strong> @faultReport.Fridge?.SerialNumber<br>
+                        <strong>Condition:</strong> <span class="badge @GetConditionBadgeClass(faultReport.Fridge?.Condition)">@faultReport.Fridge?.Condition</span>
                     </div>
                 </div>
-                <div class="row mt-2">
+                <div class="row mt-3">
                     <div class="col-12">
-                        <strong>Description:</strong> @faultReport.FaultDescription
+                        <strong>Description:</strong>
+                        <p class="mb-0 mt-1">@faultReport.FaultDescription</p>
                     </div>
                 </div>
+                @if (faultReport.Fridge?.Customer != null)
+                {
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <strong>Customer:</strong> @faultReport.Fridge.Customer.FullName - @faultReport.Fridge.Customer.PhoneNumber
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     }
 
     <div class="row">
+        <!-- Main Processing Form -->
         <div class="col-lg-8">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Fault Report Processing</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-cogs"></i> Process Fault Report
+                    </h6>
                 </div>
                 <div class="card-body">
-                    <!-- FIXED FORM: Added method="post" and RepairID hidden field -->
                     <form asp-action="Process" asp-route-id="@faultReport?.FaultReportId" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="FaultReportId" />
                         <input type="hidden" asp-for="FridgeId" />
                         <input type="hidden" asp-for="RepairID" />
 
-                        <div class="form-group mb-3">
-                            <label asp-for="Diagnosis" class="control-label">Initial Diagnosis</label>
-                            <textarea asp-for="Diagnosis" class="form-control" rows="3"
-                                      placeholder="Enter initial diagnosis findings..."></textarea>
-                            <span asp-validation-for="Diagnosis" class="text-danger"></span>
+                        <!-- Diagnosis Section -->
+                        <div class="form-group mb-4">
+                            <label asp-for="Diagnosis" class="font-weight-bold">Diagnosis *</label>
+                            <textarea asp-for="Diagnosis" class="form-control" rows="4"
+                                      placeholder="Enter detailed diagnosis of the fault, including root cause analysis and testing results..."
+                                      required>@Model.Diagnosis</textarea>
+                            <span asp-validation-for="Diagnosis" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Provide comprehensive diagnosis including symptoms, root cause, and initial findings
+                            </small>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="RepairNotes" class="control-label">Repair Notes & Observations</label>
+                        <!-- Repair Notes -->
+                        <div class="form-group mb-4">
+                            <label asp-for="RepairNotes" class="font-weight-bold">Technician Notes</label>
                             <textarea asp-for="RepairNotes" class="form-control" rows="3"
-                                      placeholder="Enter repair notes and observations..."></textarea>
-                            <span asp-validation-for="RepairNotes" class="text-danger"></span>
+                                      placeholder="Enter repair notes, observations, and any additional information...">@Model.RepairNotes</textarea>
+                            <span asp-validation-for="RepairNotes" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Notes for other technicians or future reference
+                            </small>
                         </div>
 
-                        <div class="row">
+                        <!-- Status and Condition -->
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Status" class="control-label">Process Status</label>
-                                    <select asp-for="Status" class="form-control" asp-items="ViewBag.StatusOptions">
-                                        <option value="">-- Select Status --</option>
+                                <div class="form-group">
+                                    <label asp-for="Status" class="font-weight-bold">Repair Status *</label>
+                                    <select asp-for="Status" class="form-control" required
+                                            asp-items="statusOptions">
+                                        <option value="">-- Select Repair Status --</option>
                                     </select>
-                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                    <span asp-validation-for="Status" class="text-danger small"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="control-label">Fridge Condition</label>
-                                    <select name="fridgeCondition" class="form-control" asp-items="ViewBag.ConditionOptions">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Fridge Condition *</label>
+                                    <select name="fridgeCondition" class="form-control" required
+                                            asp-items="conditionOptions">
                                         <option value="">-- Select Condition --</option>
                                     </select>
+                                    <small class="form-text text-muted">
+                                        Update fridge condition based on current status
+                                    </small>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Update Process
+                        <!-- Fault Report Status -->
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold">Fault Report Status *</label>
+                            <select name="faultStatus" class="form-control" required
+                                    asp-items="Html.GetEnumSelectList<FridgeManagementSystem.Models.TaskStatus>()">
+                                <option value="">-- Select Fault Status --</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Update overall fault report status
+                            </small>
+                        </div>
+
+                        <!-- Repair Date -->
+                        <div class="form-group mb-4">
+                            <label asp-for="RepairDate" class="font-weight-bold">Repair Date</label>
+                            <input asp-for="RepairDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="RepairDate" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Date and time when repair was performed (optional)
+                            </small>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Save Process Updates
                             </button>
                             <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 
-                            @if (faultReport?.StatusFilter != "Resolved")
+                            @if (faultReport?.Status == FridgeManagementSystem.Models.TaskStatus.InProgress ||
+                            Model.Status == "Diagnosing" || Model.Status == "Repairing")
                             {
                                 <a asp-action="Repair" asp-route-id="@faultReport?.FaultReportId" class="btn btn-warning">
-                                    <i class="fas fa-tools"></i> Start Repair
+                                    <i class="fas fa-tools"></i> Detailed Repair
                                 </a>
+                            }
+
+                            @if (Model.Status == "Completed")
+                            {
+                                <button type="submit" name="complete" value="true" class="btn btn-success">
+                                    <i class="fas fa-check-circle"></i> Mark Complete
+                                </button>
                             }
                         </div>
                     </form>
@@ -122,35 +181,76 @@
             </div>
         </div>
 
+        <!-- Sidebar - Guidance and History -->
         <div class="col-lg-4">
-            <div class="card shadow">
+            <!-- Process Guide -->
+            <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Process Guide</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-lightbulb"></i> Process Guide
+                    </h6>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
+                    <div class="alert alert-info small">
                         <h6><i class="fas fa-info-circle"></i> Processing Steps</h6>
-                        <ol class="mb-0 small">
-                            <li><strong>Diagnosing:</strong> Initial assessment and testing</li>
-                            <li><strong>Awaiting Parts:</strong> Waiting for replacement parts</li>
-                            <li><strong>Repairing:</strong> Active repair work in progress</li>
-                            <li><strong>Testing:</strong> Post-repair verification</li>
-                            <li><strong>Completed:</strong> Fault resolved and verified</li>
+                        <ol class="mb-0 pl-3">
+                            <li><strong>Diagnosis:</strong> Identify root cause and required parts</li>
+                            <li><strong>Parts Order:</strong> Request necessary components</li>
+                            <li><strong>Repair:</strong> Perform the actual repair work</li>
+                            <li><strong>Testing:</strong> Verify repair success</li>
+                            <li><strong>Completion:</strong> Update status and condition</li>
                         </ol>
                     </div>
+                </div>
+            </div>
 
+            <!-- Repair History -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history"></i> Repair History
+                    </h6>
+                </div>
+                <div class="card-body">
                     @if (faultReport?.RepairSchedules != null && faultReport.RepairSchedules.Any())
                     {
-                        <div class="alert alert-warning mt-3">
-                            <h6><i class="fas fa-history"></i> Recent Activity</h6>
-                            @foreach (var repair in faultReport.RepairSchedules.OrderByDescending(r => r.CreatedDate).Take(2))
+                        <div class="timeline small">
+                            @foreach (var repair in faultReport.RepairSchedules.OrderByDescending(r => r.CreatedDate).Take(5))
                             {
-                                <p class="mb-1 small">
-                                    <strong>@repair.Status</strong> - @repair.CreatedDate.ToString("MM/dd HH:mm")
-                                </p>
+                                <div class="timeline-item mb-3">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>@repair.Status</strong>
+                                        <small class="text-muted">@repair.CreatedDate.ToString("MM/dd HH:mm")</small>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(repair.Diagnosis))
+                                    {
+                                        <div class="text-muted">@(repair.Diagnosis.Length > 50 ? repair.Diagnosis.Substring(0, 50) + "..." : repair.Diagnosis)</div>
+                                    }
+                                </div>
                             }
                         </div>
                     }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">No repair history yet</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <a asp-action="Repair" asp-route-id="@faultReport?.FaultReportId" class="btn btn-warning btn-sm mb-2 w-100">
+                        <i class="fas fa-tools"></i> Start Repair
+                    </a>
+                    <a asp-action="UpdateCondition" asp-route-id="@faultReport?.FridgeId" class="btn btn-info btn-sm mb-2 w-100">
+                        <i class="fas fa-thermometer-half"></i> Update Condition
+                    </a>
                 </div>
             </div>
         </div>
@@ -158,19 +258,15 @@
 </div>
 
 @functions {
-    public string GetStatusBadgeClass(string statusFilter)
+    public string GetStatusBadgeClass(string status)
     {
-        return statusFilter?.ToLower() switch
+        return status?.ToLower() switch
         {
             "pending" => "bg-warning",
-            "in progress" => "bg-primary",
-            "resolved" => "bg-success",
+            "inprogress" => "bg-primary",
+            "onhold" => "bg-info",
+            "complete" => "bg-success",
             "cancelled" => "bg-secondary",
-            "diagnosing" => "bg-info",
-            "awaiting parts" => "bg-warning",
-            "repairing" => "bg-danger",
-            "testing" => "bg-primary",
-            "completed" => "bg-success",
             _ => "bg-secondary"
         };
     }
@@ -179,11 +275,22 @@
     {
         return urgencyLevel switch
         {
-            UrgencyLevel.Critical => "bg-danger",
-            UrgencyLevel.Emergency => "bg-dark",
+            UrgencyLevel.Critical or UrgencyLevel.Emergency => "bg-danger",
             UrgencyLevel.High => "bg-warning",
-            UrgencyLevel.Medium => "bg-info",
-            UrgencyLevel.Low => "bg-success",
+            UrgencyLevel.Medium => "bg-primary",
+            UrgencyLevel.Low => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetConditionBadgeClass(string condition)
+    {
+        return condition?.ToLower() switch
+        {
+            "working" => "bg-success",
+            "under repair" => "bg-warning",
+            "faulty" => "bg-danger",
+            "scrapped" => "bg-dark",
             _ => "bg-secondary"
         };
     }
@@ -193,4 +300,19 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function() {
+            // Set current values for selects
+            $('select[name="faultStatus"]').val('@faultReport?.Status');
+            $('select[name="fridgeCondition"]').val('@faultReport?.Fridge?.Condition');
+
+            // Auto-update repair date to current time if empty
+            if (!$('#RepairDate').val()) {
+                var now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('RepairDate').value = now.toISOString().slice(0, 16);
+            }
+        });
+    </script>
 }

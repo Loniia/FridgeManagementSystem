@@ -47,7 +47,7 @@ namespace FridgeManagementSystem.Models
         [Display(Name = "Purchase Order")]
         [ForeignKey("PurchaseOrder")]
         public int PurchaseOrderId { get; set; }
-        public PurchaseOrder purchaseOrder { get; set; }
+        public PurchaseOrder PurchaseOrder { get; set; }
 
         public int SupplierId { get; set; }
         public Supplier Supplier { get; set; }
