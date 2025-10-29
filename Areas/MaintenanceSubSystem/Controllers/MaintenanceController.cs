@@ -400,11 +400,16 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 };
 
                 _context.MaintenanceVisit.Add(nextVisit);
-                    await _context.SaveChangesAsync();
-                }
+                await _context.SaveChangesAsync();
 
-                // Feedback
-                if (nextVisit != null)
+                // ✅ Ensure request gets status updated properly
+                UpdateVisitAndRequestStatus(nextVisit, Models.TaskStatus.Scheduled);
+                await _context.SaveChangesAsync();
+
+            }
+
+            // Feedback
+            if (nextVisit != null)
                     TempData["Message"] = $"Maintenance completed. Next visit scheduled for {nextVisit.ScheduledDate:yyyy-MM-dd}.";
                 else if (nextRequest != null)
                     TempData["Message"] = $"Maintenance completed. Next request created for {nextRequest.RequestDate:yyyy-MM-dd}.";
