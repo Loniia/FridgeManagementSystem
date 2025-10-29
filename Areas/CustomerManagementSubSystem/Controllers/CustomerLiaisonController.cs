@@ -34,12 +34,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             _logger = logger; // Initialize logger
         }
 
-        // --------------------------
-        // List Customers (Active + Inactive)
-        // --------------------------
+        //INDEX
         public async Task<IActionResult> Index()
         {
-            // ✅ use service instead of _context directly
             var customers = await _customerService.GetAllCustomersWithFridgesAsync();
 
             var model = customers.Select(c => new CustomerViewModel
@@ -57,7 +54,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                     FridgeId = a.FridgeId,
                     QuantityAllocated = a.QuantityAllocated,
                     AllocationDate = a.AllocationDate,
-                    ReturnDate = a.ReturnDate,
+                    ReturnDate = a.ReturnDate, // ✅ will now have 30-day return date
                     Status = a.Status,
                     Fridge = new FridgeViewModel
                     {
@@ -71,6 +68,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
             return View(model);
         }
+
 
         // --------------------------
         // Create Customer
@@ -276,18 +274,20 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 return RedirectToAction("ProcessPendingAllocations");
             }
 
+            // Determine allocation date
+            var allocationDate = allocationDateFromUser ?? DateOnly.FromDateTime(DateTime.Now);
+
             // Create allocation
             var allocation = new FridgeAllocation
             {
                 FridgeId = fridge.FridgeId,
                 CustomerID = customerId,
                 OrderItemId = orderItemId,
-                AllocationDate = allocationDateFromUser ?? DateOnly.FromDateTime(DateTime.Now),
-                ReturnDate = returnDateFromUser,
+                AllocationDate = allocationDate,
+                ReturnDate = allocationDate.AddDays(30), // ✅ always 30 days later
                 Status = "Allocated",
                 QuantityAllocated = quantityToAllocate
             };
-            _context.FridgeAllocation.Add(allocation);
 
             // Reduce stock
             fridge.Quantity -= quantityToAllocate;

@@ -72,9 +72,9 @@
                         }
                     </td>
                     <td>
-                        @if (allocation.ReturnDate.HasValue)
+                        @if (allocation.AllocationDate.HasValue)
                         {
-                            @allocation.ReturnDate.Value.ToString("yyyy/MM/dd")
+                            @(allocation.AllocationDate.Value.AddDays(30).ToString("yyyy/MM/dd"))
                         }
                         else
                         {
