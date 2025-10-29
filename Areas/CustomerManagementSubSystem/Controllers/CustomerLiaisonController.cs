@@ -429,19 +429,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return RedirectToAction("Index", "InventoryLiaison");
         }
 
-        //PENDING REQUESTS
-        public async Task<IActionResult> PendingReturns()
-        {
-            var pendingReturns = await _context.FridgeAllocation
-                .Include(fa => fa.Fridge)
-                .Include(fa => fa.Customer)
-                .Where(fa => fa.ReturnRequested && fa.Status == "Allocated")
-                .ToListAsync();
-
-            return View(pendingReturns);
-        }
-
-
 
         // --------------------------
         // Scrap Fridge
