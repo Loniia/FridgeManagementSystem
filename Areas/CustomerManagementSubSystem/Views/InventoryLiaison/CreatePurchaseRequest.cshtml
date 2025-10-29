@@ -122,9 +122,11 @@
         </div>
 
         <!-- 📅 Request Date (auto set by controller, show for info only) -->
+       <!-- 📅 Request Date (Editable) -->
         <div class="mb-3">
-            <label class="form-label">Request Date</label>
-            <input class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
+            <label asp-for="RequestDate" class="form-label">Request Date</label>
+            <input asp-for="RequestDate" type="date" class="form-control" />
+            <span asp-validation-for="RequestDate" class="text-danger"></span>
         </div>
 
         <!-- 🧮 Assigned Role (auto) -->

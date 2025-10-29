@@ -182,6 +182,83 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Receive(ReceiveFridgeVm model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+                ViewBag.StatusOptions = new SelectList(new List<string> { "Received", "Available" }, model.Status);
+                TempData["ErrorMessage"] = "Please correct the errors and try again.";
+                return View(model);
+            }
+
+            try
+            {
+                // Find fridge or create a new one
+                Fridge fridge;
+
+                if (model.FridgeId > 0)
+                {
+                    fridge = await _context.Fridge.FindAsync(model.FridgeId);
+                    if (fridge == null)
+                    {
+                        TempData["ErrorMessage"] = "Fridge not found!";
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    // Update existing fridge info
+                    fridge.SerialNumber = model.SerialNumber;
+                    fridge.Quantity = model.Quantity;
+                    fridge.DateAdded = model.DateAdded ?? DateOnly.FromDateTime(DateTime.Today);
+                    fridge.Status = model.Status;
+                    fridge.SupplierID = model.SupplierId;
+                }
+                else
+                {
+                    // Create a new fridge record
+                    fridge = new Fridge
+                    {
+                        Brand = model.Brand,
+                        Model = model.ModelName,
+                        FridgeType = model.Type,
+                        SerialNumber = model.SerialNumber,
+                        Quantity = model.Quantity,
+                        DateAdded = model.DateAdded ?? DateOnly.FromDateTime(DateTime.Today),
+                        Status = model.Status,
+                        SupplierID = model.SupplierId,
+                        IsActive = true
+                    };
+                    _context.Fridge.Add(fridge);
+                }
+
+                // Save fridge data
+                await _context.SaveChangesAsync();
+
+                // Optional: update the related purchase request to "Completed"
+                if (model.PurchaseRequestID > 0)
+                {
+                    var request = await _context.PurchaseRequests.FindAsync(model.PurchaseRequestID);
+                    if (request != null)
+                    {
+                        request.Status = "Completed";
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                TempData["SuccessMessage"] = "Fridge successfully received!";
+                return RedirectToAction("Index", "InventoryLiaison");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error receiving fridge: " + ex.Message;
+                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+                ViewBag.StatusOptions = new SelectList(new List<string> { "Received", "Available" }, model.Status);
+                return View(model);
+            }
+        }
+
 
         // --------------------------
         // Update Fridge Status
@@ -319,7 +396,13 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 RequestBy = "Inventory Liaison",
                 RequestType = "Fridge Purchase",
                 AssignedToRole = EmployeeRoles.PurchasingManager,
-                RequestDate = DateOnly.FromDateTime(DateTime.Now),
+
+                // ✅ FIXED: Use the date the user picked, fallback to today if blank
+                // ✅ FIXED: Convert DateTime? from the model to DateOnly
+                RequestDate = model.RequestDate.HasValue
+                    ? DateOnly.FromDateTime(model.RequestDate.Value)
+                    : DateOnly.FromDateTime(DateTime.Today),
+
                 Status = "Pending",
                 IsActive = true,
                 FridgeId = linkedFridge?.FridgeId, // link fridge only if it exists
@@ -327,11 +410,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             };
 
             // --------------------------
-            // Count PurchaseRequests for this year (safe client-side)
+            // Count PurchaseRequests for this year
             // --------------------------
             var currentYear = DateTime.Now.Year;
-
-            // Fetch only rows with RequestDate
             var allRequestsWithDate = await _context.PurchaseRequests
                 .Where(r => r.RequestDate.HasValue)
                 .ToListAsync();
@@ -350,6 +431,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             TempData["SuccessMessage"] = $"Purchase request {newRequest.RequestNumber} created successfully!";
             return RedirectToAction(nameof(ProcessPurchaseRequests));
         }
+
 
         // --------------------------
         // Process Purchase Requests (List)
@@ -379,80 +461,94 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         // --------------------------
         // Monthly Dashboard View (Grouped by Month)
         // --------------------------
-        public async Task<IActionResult> MonthlyDashboard(int? year)
+        public async Task<IActionResult> MonthlyDashboard(int? month)
         {
-            int selectedYear = year ?? DateTime.Now.Year;
+            int selectedYear = 2025; // ✅ fixed to 2025 only
+            int selectedMonth = month ?? DateTime.Now.Month;
+            int LowStockThreshold = 5;
 
             // --------------------------
-            // Fetch and process data in memory
+            // 1️⃣ Received Fridges
             // --------------------------
-
-            // Received Fridges
             var receivedData = _context.Fridge
-                .Where(f => f.IsActive && f.DateAdded.HasValue)
-                .AsEnumerable() // Switch to client-side
-                .Where(f => f.DateAdded.Value.Year == selectedYear)
+                .Where(f => f.IsActive && f.DateAdded.HasValue && f.DateAdded.Value.Year == selectedYear)
                 .GroupBy(f => f.DateAdded.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
                 .ToList();
 
-            // Allocated Fridges
+            // --------------------------
+            // 2️⃣ Allocated Fridges
+            // --------------------------
             var allocatedData = _context.FridgeAllocation
-                .Where(a => a.Status == "Allocated" && a.AllocationDate.HasValue)
-                .AsEnumerable()
-                .Where(a => a.AllocationDate.Value.Year == selectedYear)
+                .Where(a => a.Status == "Allocated" && a.AllocationDate.HasValue && a.AllocationDate.Value.Year == selectedYear)
                 .GroupBy(a => a.AllocationDate.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
                 .ToList();
 
-            // Returned Fridges
+            // --------------------------
+            // 3️⃣ Returned Fridges
+            // --------------------------
             var returnedData = _context.FridgeAllocation
-                .Where(a => a.ReturnDate.HasValue)
-                .AsEnumerable()
-                .Where(a => a.ReturnDate.Value.Year == selectedYear)
+                .Where(a => a.ReturnDate.HasValue && a.ReturnDate.Value.Year == selectedYear)
                 .GroupBy(a => a.ReturnDate.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
                 .ToList();
 
             // --------------------------
-            // Prepare lists for chart
+            // 4️⃣ Purchase Requests (Fridge Purchases)
+            // --------------------------
+            var purchaseData = _context.PurchaseRequests
+                .Where(p => p.RequestType == "Fridge Purchase"
+                    && p.RequestDate.HasValue
+                    && p.RequestDate.Value.Year == selectedYear)
+                .GroupBy(p => p.RequestDate.Value.Month)
+                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .ToList();
+
+            // --------------------------
+            // Prepare month labels and counts
             // --------------------------
             var months = Enumerable.Range(1, 12)
                 .Select(m => new DateTime(selectedYear, m, 1).ToString("MMMM"))
                 .ToList();
 
-            var receivedCounts = months
-                .Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
-                .ToList();
+            var receivedCounts = months.Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
+            var allocatedCounts = months.Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
+            var returnedCounts = months.Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
+            var purchaseCounts = months.Select((m, i) => purchaseData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
 
-            var allocatedCounts = months
-                .Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
-                .ToList();
-
-            var returnedCounts = months
-                .Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
-                .ToList();
-
+            // --------------------------
+            // Color coding for Received (Low Stock)
+            // --------------------------
             var receivedColors = receivedCounts
-                .Select(c => c < LowStockThreshold ? "rgba(255, 99, 132, 0.6)" : "rgba(54, 162, 235, 0.6)")
+                .Select(c => c < LowStockThreshold
+                    ? "rgba(255, 99, 132, 0.8)"  // 🔴 Low Stock
+                    : "rgba(54, 162, 235, 0.8)") // 🔵 Normal
                 .ToList();
 
             // --------------------------
-            // Summary
+            // Summary Section
             // --------------------------
             ViewBag.TotalReceived = receivedCounts.Sum();
             ViewBag.TotalAllocated = allocatedCounts.Sum();
             ViewBag.TotalReturned = returnedCounts.Sum();
             ViewBag.LowStockMonths = receivedCounts.Count(c => c < LowStockThreshold);
-            ViewBag.SelectedYear = selectedYear;
+            ViewBag.TotalPurchaseRequests = purchaseCounts.Sum(); // ✅ matches chart data now
 
+            ViewBag.SelectedYear = selectedYear;
+            ViewBag.SelectedMonth = selectedMonth;
+
+            // --------------------------
+            // Build ViewModel
+            // --------------------------
             var model = new MonthlyDashboardViewModel
             {
                 Months = months,
                 ReceivedCounts = receivedCounts,
                 ReceivedColors = receivedColors,
                 AllocatedCounts = allocatedCounts,
-                ReturnedCounts = returnedCounts
+                ReturnedCounts = returnedCounts,
+                PurchaseCounts = purchaseCounts 
             };
 
             return View(model);
