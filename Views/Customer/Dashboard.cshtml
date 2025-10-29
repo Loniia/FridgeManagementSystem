@@ -1,4 +1,683 @@
-﻿
+﻿@model FridgeManagementSystem.Models.CustomerViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* 🌟 Main Layout */
+    .dashboard-container {
+        display: flex;
+        min-height: calc(100vh - 76px);
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* 🌟 Sidebar Styles */
+    .sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+        color: #fff;
+        padding: 30px 0;
+        flex-shrink: 0;
+        height: 100%;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        position: relative;
+        overflow-y: auto;
+    }
+
+    .sidebar-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 0 25px;
+    }
+
+        .sidebar-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ecf0f1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sidebar-header .subtitle {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            opacity: 0.8;
+        }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .sidebar-menu li {
+            margin: 8px 20px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent;
+        }
+
+            .sidebar-menu li a {
+                display: flex;
+                align-items: center;
+                padding: 15px 20px;
+                text-decoration: none;
+                color: #ecf0f1;
+                font-weight: 500;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
+
+                .sidebar-menu li a i {
+                    margin-right: 12px;
+                    font-size: 1.1rem;
+                    width: 20px;
+                    text-align: center;
+                }
+
+            .sidebar-menu li:hover {
+                background: rgba(52, 152, 219, 0.1);
+                border-left-color: #3498db;
+                transform: translateX(5px);
+            }
+
+                .sidebar-menu li:hover a {
+                    color: #3498db;
+                }
+
+            .sidebar-menu li.active {
+                background: linear-gradient(135deg, #3498db, #2980b9);
+                border-left-color: #1abc9c;
+                box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            }
+
+                .sidebar-menu li.active a {
+                    color: white;
+                    font-weight: 600;
+                }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+            color: white;
+        }
+
+    /* 🌟 Main Content Styles */
+    .main-content {
+        flex: 1;
+        padding: 40px;
+        overflow-y: auto;
+        background: transparent;
+    }
+
+    .dashboard-welcome {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .dashboard-welcome::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .dashboard-welcome h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .dashboard-welcome p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 300;
+            margin-bottom: 0;
+            position: relative;
+        }
+
+    /* 🌟 Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 20px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        background: white;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+        .filter-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+    .search-btn {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+    .reset-btn {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+            color: white;
+        }
+
+    /* 🌟 Products Grid */
+    .products-section {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+    }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #3498db, #1abc9c);
+            border-radius: 2px;
+        }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    /* 🌟 Product Card Styles */
+    .product-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+        border: none;
+    }
+
+        .product-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+    .product-image {
+        height: 220px;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.1);
+    }
+
+    .badge-stock {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 0.75rem;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 2;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .badge-in-stock {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+    }
+
+    .badge-out-of-stock {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    .product-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 12px;
+        line-height: 1.3;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #27ae60;
+        margin-bottom: 8px;
+    }
+
+    .product-stock {
+        font-size: 0.95rem;
+        color: #7f8c8d;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
+    .btn-add-to-cart {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+        border-radius: 12px;
+        padding: 14px 24px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-add-to-cart:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2980b9, #1f618d);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-add-to-cart:disabled {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-add-to-cart.loading {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            pointer-events: none;
+        }
+
+    /* 🌟 Quantity Selector */
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+        .quantity-selector button {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .quantity-selector button:hover {
+                background: #f0f0f0;
+            }
+
+    .quantity-input {
+        width: 60px;
+        text-align: center;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        padding: 5px;
+        font-size: 1rem;
+    }
+
+    /* 🌟 Animations */
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-10px) rotate(1deg);
+        }
+    }
+
+    .product-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Dashboard Container -->
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Customer Dashboard</h2>
+            <div class="subtitle">Manage Your Fridge Experience</div>
+        </div>
+        <ul class="sidebar-menu" id="sidebar-menu">
+            <li class="active"><a asp-action="Dashboard" asp-controller="Customer"><i class="fas fa-home"></i> Home</a></li>
+            <li><a asp-action="ViewCart" asp-controller="Customer"><i class="fas fa-shopping-cart"></i> My Cart</a></li>
+            <li><a asp-action="Checkout" asp-controller="Customer"><i class="fas fa-credit-card"></i> Checkout</a></li>
+            <li><a asp-action="MyAccount" asp-controller="Customer"><i class="fas fa-box"></i> My Orders</a></li>
+            <li><a asp-action="OrderHistory" asp-controller="Customer"><i class="fas fa-history"></i> Order History</a></li>
+            <li><a asp-action="TrackOrder" asp-controller="Customer"><i class="fas fa-map-marker-alt"></i> Track Order</a></li>
+            <li><a asp-action="UpcomingVisits" asp-controller="Customer"><i class="fas fa-tools"></i> Maintenance Visits</a></li>
+            <li><a asp-action="MyFaults" asp-controller="Customer"><i class="fas fa-exclamation-triangle"></i> My Faults</a></li>
+            <li><a asp-action="CreateFault" asp-controller="Customer"><i class="fas fa-plus-circle"></i> Report Fault</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="notification-bell-container">
+            <a asp-action="Notifications" asp-controller="Customer" class="notification-bell">
+                <i class="fas fa-bell"></i>
+                @if (ViewBag.UnreadCount > 0)
+                {
+                    <span class="badge">@ViewBag.UnreadCount</span>
+                }
+            </a>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="dashboard-welcome">
+            <h2>Welcome, @User.Identity?.Name!</h2>
+            <p>Browse our collection of premium fridges and find the perfect one for your needs.</p>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get" class="filter-form">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <div class="filter-label">Search Fridges</div>
+                        <input type="text" name="search" class="form-control" placeholder="Search by brand or model..." value="@ViewData["Search"]" />
+                    </div>
+                    <div class="filter-group">
+                        <div class="filter-label">Stock Status</div>
+                        <select name="stockFilter" class="filter-select" onchange="this.form.submit()">
+                            <option value="all" selected="@(ViewData["StockFilter"]?.ToString() == "all")">All Stock</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button type="submit" class="search-btn"><i class="fas fa-search"></i> Apply Filters</button>
+                    </div>
+                    <div class="filter-group">
+                        <a asp-action="Dashboard" class="reset-btn"><i class="fas fa-refresh"></i> Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Products Section -->
+        <div class="products-section">
+            <h3 class="section-title">Available Fridges</h3>
+
+            @if (!Model.Fridges.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No fridges found</h4>
+                    <p class="text-muted">Try adjusting your search criteria or stock filter.</p>
+                    <a asp-action="Dashboard" class="btn btn-primary mt-3"><i class="fas fa-refresh"></i> Show All Fridges</a>
+                </div>
+            }
+            else
+            {
+                <div class="products-grid">
+                    @foreach (var fridgeVm in Model.Fridges)
+                    {
+                        var isInStock = fridgeVm.Status == "In Stock";
+
+                        <div class="product-card @(!isInStock ? "dimmed" : "")">
+                            <span class="badge-stock @(isInStock ? "badge-in-stock" : "badge-out-of-stock")">@fridgeVm.Status</span>
+                            <img src="@Url.Content(fridgeVm.ImageUrl)" class="product-image" alt="@fridgeVm.Brand @fridgeVm.Model" />
+                            <div class="card-body">
+                                <h5 class="product-title">@fridgeVm.Brand @fridgeVm.Model</h5>
+                                <p class="text-muted mb-2">@fridgeVm.FridgeType</p>
+
+                                @if (isInStock)
+                                {
+                                    <p class="product-stock"><i class="fas fa-box text-success"></i> Available: @fridgeVm.Quantity units</p>
+                                }
+                                else
+                                {
+                                    <p class="product-stock"><i class="fas fa-box text-danger"></i> Currently unavailable</p>
+                                }
+
+                                <p class="product-price">@($"R{fridgeVm.Price:0.00}")</p>
+
+                                <form asp-action="AddToCart" asp-controller="Customer" method="post" class="add-to-cart-form">
+                                    <input type="hidden" name="fridgeId" value="@fridgeVm.FridgeId" />
+
+                                    @if (isInStock)
+                                    {
+                                        <div class="quantity-selector">
+                                            <button type="button" class="decrease-btn">-</button>
+                                            <input type="number" name="quantity" value="1" min="1" max="@fridgeVm.Quantity" class="quantity-input" />
+                                            <button type="button" class="increase-btn">+</button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <input type="hidden" name="quantity" value="1" />
+                                    }
+
+                                    <button type="submit" class="btn-add-to-cart" @(!isInStock ? "disabled" : "")>
+                                        <i class="fas fa-cart-plus"></i>
+                                        <span class="btn-text">@((isInStock) ? "Add to Cart" : "Out of Stock")</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sidebar active state
+            const sidebarItems = document.querySelectorAll(".sidebar-menu li");
+            const currentUrl = window.location.href;
+            sidebarItems.forEach(item => {
+                const link = item.querySelector('a');
+                if (link && currentUrl.includes(link.getAttribute('href'))) {
+                    sidebarItems.forEach(i => i.classList.remove("active"));
+                    item.classList.add("active");
+                }
+                item.addEventListener("click", function () {
+                    sidebarItems.forEach(i => i.classList.remove("active"));
+                    this.classList.add("active");
+                });
+            });
+
+            // Add to Cart loading
+            const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+            addToCartForms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    const button = this.querySelector('.btn-add-to-cart');
+                    const btnText = this.querySelector('.btn-text');
+                    if (button && !button.disabled) {
+                        button.classList.add('loading');
+                        btnText.textContent = 'Adding...';
+                        setTimeout(() => {
+                            if (button.classList.contains('loading')) {
+                                button.classList.remove('loading');
+                                btnText.textContent = 'Add to Cart';
+                            }
+                        }, 3000);
+                    }
+                });
+            });
+
+            // Quantity selector
+            document.querySelectorAll('.quantity-selector').forEach(selector => {
+                const input = selector.querySelector('.quantity-input');
+                const increase = selector.querySelector('.increase-btn');
+                const decrease = selector.querySelector('.decrease-btn');
+
+                increase.addEventListener('click', () => {
+                    let val = parseInt(input.value);
+                    if (val < parseInt(input.max)) input.value = val + 1;
+                });
+                decrease.addEventListener('click', () => {
+                    let val = parseInt(input.value);
+                    if (val > parseInt(input.min)) input.value = val - 1;
+                });
+            });
+
+            // Product card animation delay
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach((card, index) => { card.style.animationDelay = `${index * 0.1}s`; });
+
+            // Auto-submit stock filter
+            const stockFilter = document.querySelector('select[name="stockFilter"]');
+            if (stockFilter) stockFilter.addEventListener('change', function () { this.form.submit(); });
+        });
+
+        // Product card interactive tilt
+        document.addEventListener('mousemove', function (e) {
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const angleY = (x - centerX) / 25;
+                    const angleX = (centerY - y) / 25;
+                    card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale3d(1.02, 1.02, 1.02)`;
+                } else {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                }
+            });
+        });
+    </script>
+}
+
 
 
 @* @model FridgeManagementSystem.Models.CustomerViewModel
