@@ -1,4 +1,5 @@
 ﻿@model MonthlyDashboardViewModel
+
 @{
     ViewData["Title"] = "Monthly Dashboard";
 }
@@ -18,10 +19,10 @@
         transition: 0.3s;
     }
 
-    .dashboard-container:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-    }
+        .dashboard-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
 
     h2 {
         text-align: center;
@@ -37,10 +38,10 @@
         transition: all 0.3s ease;
     }
 
-    .card-glow:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 25px rgba(0,0,0,0.25);
-    }
+        .card-glow:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.25);
+        }
 
     .card-title {
         font-size: 1.1rem;
@@ -50,6 +51,10 @@
     .card-text {
         font-size: 1.6rem;
         font-weight: 600;
+    }
+
+    .card .card-body {
+        min-height: 90px; /* ✅ Ensures all cards are same height */
     }
 
     select {
@@ -62,9 +67,9 @@
         transition: 0.3s;
     }
 
-    select:hover {
-        border-color: #007bff;
-    }
+        select:hover {
+            border-color: #007bff;
+        }
 
     /* 3D Chart Container */
     #chartWrapper {
@@ -76,21 +81,22 @@
 </style>
 
 <div class="dashboard-container">
-    <h2>📊 Monthly Fridge Dashboard - @ViewBag.SelectedYear</h2>
+    <h2>📊 Monthly Fridge Dashboard - 2025</h2>
 
-    <!-- Year Dropdown -->
+    <!-- Month Dropdown -->
     <div class="text-center mb-4">
-        <label for="yearSelect" class="fw-bold me-2">Select Year:</label>
-        <select id="yearSelect">
-            @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 5; y--)
+        <label for="monthSelect" class="fw-bold me-2">Select Month:</label>
+        <select id="monthSelect">
+            @for (int m = 1; m <= 12; m++)
             {
-                if (y == ViewBag.SelectedYear)
+                var monthName = new DateTime(2025, m, 1).ToString("MMMM");
+                if (m == ViewBag.SelectedMonth)
                 {
-                    <option value="@y" selected>@y</option>
+                    <option value="@m" selected>@monthName</option>
                 }
                 else
                 {
-                    <option value="@y">@y</option>
+                    <option value="@m">@monthName</option>
                 }
             }
         </select>
@@ -98,7 +104,7 @@
 
     <!-- Summary Cards -->
     <div class="row text-center mb-4" id="summaryCards">
-        <div class="col-md-3">
+        <div class="col-md-2 mb-3">
             <div class="card bg-primary text-white card-glow">
                 <div class="card-body">
                     <div class="card-title">Total Received</div>
@@ -106,7 +112,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+
+        <div class="col-md-2 mb-3">
             <div class="card bg-success text-white card-glow">
                 <div class="card-body">
                     <div class="card-title">Total Allocated</div>
@@ -114,7 +121,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+
+        <div class="col-md-2 mb-3">
             <div class="card bg-warning text-dark card-glow">
                 <div class="card-body">
                     <div class="card-title">Total Returned</div>
@@ -122,11 +130,21 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+
+        <div class="col-md-2 mb-3">
             <div class="card bg-danger text-white card-glow card-filter" data-filter="lowStock" style="cursor: pointer;">
                 <div class="card-body">
                     <div class="card-title">Low Stock Months ⚠️</div>
                     <div class="card-text" id="lowStockMonths">@ViewBag.LowStockMonths</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2 mb-3">
+            <div class="card text-white card-glow" style="background-color: #e83e8c;">
+                <div class="card-body">
+                    <div class="card-title">Purchases Made 💰</div>
+                    <div class="card-text" id="totalPurchases">@ViewBag.TotalPurchaseRequests</div>
                 </div>
             </div>
         </div>
@@ -143,8 +161,9 @@
     <script>
         var ctx = document.getElementById('fridgeChart').getContext('2d');
         var data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+        const threshold = 5;
 
-        // Create Chart
+        // ===== Create Chart =====
         var fridgeChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -153,12 +172,10 @@
                     {
                         label: 'Received',
                         data: data.ReceivedCounts,
-                        backgroundColor: data.ReceivedColors,
+                        backgroundColor: data.ReceivedColors, // ✅ Uses red/blue from controller
                         borderColor: '#003f88',
                         borderWidth: 2,
-                        borderRadius: 6,
-                        barPercentage: 0.9,
-                        categoryPercentage: 0.8
+                        borderRadius: 6
                     },
                     {
                         label: 'Allocated',
@@ -175,28 +192,156 @@
                         borderColor: 'rgba(255, 206, 86, 1)',
                         borderWidth: 2,
                         borderRadius: 6
+                    },
+                    {
+                        label: 'Purchases',
+                        data: data.PurchaseCounts,
+                        backgroundColor: 'rgba(232, 62, 140, 0.7)',
+                        borderColor: 'rgba(232, 62, 140, 1)',
+                        borderWidth: 2,
+                        borderRadius: 6
                     }
                 ]
             },
             options: {
                 responsive: true,
+                layout: {
+                    padding: { bottom: 30 }
+                },
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { font: { size: 13, weight: 'bold' } }
+                        labels: {
+                            font: { size: 13, weight: 'bold' },
+                            boxWidth: 15
+                        }
                     },
                     title: {
                         display: true,
-                        text: 'Monthly Fridge Performance (' + @ViewBag.SelectedYear + ')',
+                        text: 'Monthly Fridge Performance (2025)',
                         font: { size: 18, weight: 'bold' },
                         color: '#333'
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y;
+                                if (label === 'Received' && value < threshold) {
+                                    return `${label}: ${value} ⚠️ Low Stock!`;
+                                }
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Units' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Month' }
+                    }
+                }
+            }
+        });
+
+        // ===== Month selection reload =====
+        $('#monthSelect').on('change', function () {
+            const selectedMonth = $(this).val();
+            window.location.href = '@Url.Action("MonthlyDashboard", "InventoryLiaison")' + '?month=' + selectedMonth;
+        });
+
+        // ===== Low Stock Filter =====
+        let lowStockActive = false;
+        $('.card-filter').on('click', function () {
+            lowStockActive = !lowStockActive;
+            if (lowStockActive) {
+                fridgeChart.data.datasets[0].backgroundColor = fridgeChart.data.datasets[0].data.map(v =>
+                    v < threshold ? "rgba(255, 99, 132, 0.8)" : "rgba(200, 200, 200, 0.3)"
+                );
+            } else {
+                fridgeChart.data.datasets[0].backgroundColor = data.ReceivedColors;
+            }
+            fridgeChart.update();
+        });
+    </script>
+}
+
+
+@* @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('fridgeChart').getContext('2d');
+        var data = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        // ===== Create Chart =====
+        var fridgeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.Months,
+                datasets: [
+                    {
+                        label: 'Received',
+                        data: data.ReceivedCounts,
+                        backgroundColor: data.ReceivedColors,
+                        borderColor: '#003f88',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Allocated',
+                        data: data.AllocatedCounts,
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Returned',
+                        data: data.ReturnedCounts,
+                        backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Purchases',
+                        data: data.PurchaseCounts,
+                        backgroundColor: 'rgba(232, 62, 140, 0.7)',
+                        borderColor: 'rgba(232, 62, 140, 1)',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                layout: {        /* ✅ Fix legend overlap */
+                    padding: { bottom: 30 }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 13, weight: 'bold' },
+                            boxWidth: 15
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Monthly Fridge Performance (2025)',
+                        font: { size: 18, weight: 'bold' },
+                        color: '#333'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
                                 var label = context.dataset.label || '';
                                 var value = context.parsed.y;
-                                if (label === 'Received' && value < 5) {
+                                var threshold = 5;
+                                if (label === 'Received' && value < threshold) {
                                     return label + ': ' + value + ' ⚠️ Low Stock!';
                                 }
                                 return label + ': ' + value;
@@ -205,30 +350,21 @@
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Units' } },
-                    x: { title: { display: true, text: 'Month' } }
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Units' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Month' }
+                    }
                 }
             }
         });
 
-        // ===== Year selection reload =====
-        $('#yearSelect').on('change', function () {
-            var selectedYear = $(this).val();
-            $.getJSON('@Url.Action("GetMonthlyStats", "InventoryLiaison")', { year: selectedYear }, function (data) {
-                fridgeChart.data.labels = data.months;
-                fridgeChart.data.datasets[0].data = data.receivedCounts;
-                fridgeChart.data.datasets[0].backgroundColor = data.receivedColors;
-                fridgeChart.data.datasets[1].data = data.allocatedCounts;
-                fridgeChart.data.datasets[2].data = data.returnedCounts;
-                fridgeChart.options.plugins.title.text = 'Monthly Fridge Performance (' + selectedYear + ')';
-                fridgeChart.update();
-
-                // Update summary cards
-                $('#totalReceived').text(data.totalReceived);
-                $('#totalAllocated').text(data.totalAllocated);
-                $('#totalReturned').text(data.totalReturned);
-                $('#lowStockMonths').text(data.lowStockMonths);
-            });
+        // ===== Month selection reload =====
+        $('#monthSelect').on('change', function () {
+            var selectedMonth = $(this).val();
+            window.location.href = '@Url.Action("MonthlyDashboard", "InventoryLiaison")' + '?month=' + selectedMonth;
         });
 
         // ===== Low Stock Filter =====
@@ -244,4 +380,4 @@
             fridgeChart.update();
         });
     </script>
-}
+} *@

@@ -461,80 +461,94 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         // --------------------------
         // Monthly Dashboard View (Grouped by Month)
         // --------------------------
-        public async Task<IActionResult> MonthlyDashboard(int? year)
+        public async Task<IActionResult> MonthlyDashboard(int? month)
         {
-            int selectedYear = year ?? DateTime.Now.Year;
+            int selectedYear = 2025; // ✅ fixed to 2025 only
+            int selectedMonth = month ?? DateTime.Now.Month;
+            int LowStockThreshold = 5;
 
             // --------------------------
-            // Fetch and process data in memory
+            // 1️⃣ Received Fridges
             // --------------------------
-
-            // Received Fridges
             var receivedData = _context.Fridge
-                .Where(f => f.IsActive && f.DateAdded.HasValue)
-                .AsEnumerable() // Switch to client-side
-                .Where(f => f.DateAdded.Value.Year == selectedYear)
+                .Where(f => f.IsActive && f.DateAdded.HasValue && f.DateAdded.Value.Year == selectedYear)
                 .GroupBy(f => f.DateAdded.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
                 .ToList();
 
-            // Allocated Fridges
+            // --------------------------
+            // 2️⃣ Allocated Fridges
+            // --------------------------
             var allocatedData = _context.FridgeAllocation
-                .Where(a => a.Status == "Allocated" && a.AllocationDate.HasValue)
-                .AsEnumerable()
-                .Where(a => a.AllocationDate.Value.Year == selectedYear)
+                .Where(a => a.Status == "Allocated" && a.AllocationDate.HasValue && a.AllocationDate.Value.Year == selectedYear)
                 .GroupBy(a => a.AllocationDate.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
                 .ToList();
 
-            // Returned Fridges
+            // --------------------------
+            // 3️⃣ Returned Fridges
+            // --------------------------
             var returnedData = _context.FridgeAllocation
-                .Where(a => a.ReturnDate.HasValue)
-                .AsEnumerable()
-                .Where(a => a.ReturnDate.Value.Year == selectedYear)
+                .Where(a => a.ReturnDate.HasValue && a.ReturnDate.Value.Year == selectedYear)
                 .GroupBy(a => a.ReturnDate.Value.Month)
                 .Select(g => new { Month = g.Key, Count = g.Count() })
                 .ToList();
 
             // --------------------------
-            // Prepare lists for chart
+            // 4️⃣ Purchase Requests (Fridge Purchases)
+            // --------------------------
+            var purchaseData = _context.PurchaseRequests
+                .Where(p => p.RequestType == "Fridge Purchase"
+                    && p.RequestDate.HasValue
+                    && p.RequestDate.Value.Year == selectedYear)
+                .GroupBy(p => p.RequestDate.Value.Month)
+                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .ToList();
+
+            // --------------------------
+            // Prepare month labels and counts
             // --------------------------
             var months = Enumerable.Range(1, 12)
                 .Select(m => new DateTime(selectedYear, m, 1).ToString("MMMM"))
                 .ToList();
 
-            var receivedCounts = months
-                .Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
-                .ToList();
+            var receivedCounts = months.Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
+            var allocatedCounts = months.Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
+            var returnedCounts = months.Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
+            var purchaseCounts = months.Select((m, i) => purchaseData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
 
-            var allocatedCounts = months
-                .Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
-                .ToList();
-
-            var returnedCounts = months
-                .Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0)
-                .ToList();
-
+            // --------------------------
+            // Color coding for Received (Low Stock)
+            // --------------------------
             var receivedColors = receivedCounts
-                .Select(c => c < LowStockThreshold ? "rgba(255, 99, 132, 0.6)" : "rgba(54, 162, 235, 0.6)")
+                .Select(c => c < LowStockThreshold
+                    ? "rgba(255, 99, 132, 0.8)"  // 🔴 Low Stock
+                    : "rgba(54, 162, 235, 0.8)") // 🔵 Normal
                 .ToList();
 
             // --------------------------
-            // Summary
+            // Summary Section
             // --------------------------
             ViewBag.TotalReceived = receivedCounts.Sum();
             ViewBag.TotalAllocated = allocatedCounts.Sum();
             ViewBag.TotalReturned = returnedCounts.Sum();
             ViewBag.LowStockMonths = receivedCounts.Count(c => c < LowStockThreshold);
-            ViewBag.SelectedYear = selectedYear;
+            ViewBag.TotalPurchaseRequests = purchaseCounts.Sum(); // ✅ matches chart data now
 
+            ViewBag.SelectedYear = selectedYear;
+            ViewBag.SelectedMonth = selectedMonth;
+
+            // --------------------------
+            // Build ViewModel
+            // --------------------------
             var model = new MonthlyDashboardViewModel
             {
                 Months = months,
                 ReceivedCounts = receivedCounts,
                 ReceivedColors = receivedColors,
                 AllocatedCounts = allocatedCounts,
-                ReturnedCounts = returnedCounts
+                ReturnedCounts = returnedCounts,
+                PurchaseCounts = purchaseCounts 
             };
 
             return View(model);
