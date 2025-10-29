@@ -1,5 +1,4 @@
 ﻿using FridgeManagementSystem.Models;
-using FridgeManagementSystem.ViewModels;
 using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -22,113 +21,51 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             _context = context;
         }
 
-        // INDEX
+        // --------------------------
+        // View Fridge Stock
+        // --------------------------
         public async Task<IActionResult> Index()
         {
-            // Load all fridges with allocations and customers
-            var allFridges = await _context.Fridge
+            var fridges = await _context.Fridge
                 .Include(f => f.FridgeAllocation)
                     .ThenInclude(a => a.Customer)
-                .ToListAsync();
-
-            // --------------------------
-            // Active Fridges (Available Stock)
-            // --------------------------
-            var activeFridges = allFridges
-                .Where(f => f.Status == "Received" || f.Status == "Available" || f.Status == "Damaged")
-                .Select(f =>
+                // ✅ Show all fridges that are already in your subsystem (Received, Available, Damaged, Scrapped)
+                .Where(f => f.Status == "Received" || f.Status == "Available" || f.Status == "Damaged" || f.Status == "Scrapped")
+                .Select(f => new FridgeViewModel
                 {
-                    // Quantity currently allocated (not returned, not scrapped)
-                    int allocatedQty = f.FridgeAllocation
-                        .Where(a => a.ReturnDate == null && a.Status != "Scrapped")
-                        .Sum(a => a.QuantityAllocated);
+                    FridgeId = f.FridgeId,
+                    FridgeType = f.FridgeType,
+                    Brand = f.Brand,
+                    Model = f.Model,
+                    SerialNumber = f.SerialNumber,
+                    Condition = f.Condition,
+                    Status = f.Status,
+                    Quantity = f.Quantity,
 
-                    // Quantity returned by customers
-                    int returnedQty = f.FridgeAllocation
-                        .Where(a => a.ReturnDate != null && a.Status != "Scrapped")
-                        .Sum(a => a.QuantityAllocated);
+                    // Stock availability calculation
+                    AvailableStock = f.Quantity - f.FridgeAllocation
+                        .Where(a => a.ReturnDate == null || a.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
+                        .Sum(a => 1),
 
-                    // Quantity scrapped
-                    int scrappedQty = f.FridgeAllocation
-                        .Where(a => a.Status == "Scrapped")
-                        .Sum(a => a.QuantityAllocated);
-
-                    // Compute available stock: total - allocated + returned - scrapped
-                    int availableStock = f.Quantity - allocatedQty + returnedQty - scrappedQty;
-
-                    // Get last allocation info for display
-                    var lastAllocation = f.FridgeAllocation
+                    // Take the latest allocation for CustomerName, AllocationDate, and ReturnDate
+                    CustomerName = f.FridgeAllocation
                         .OrderByDescending(a => a.AllocationDate)
-                        .FirstOrDefault();
+                        .Select(a => a.Customer.FullName)
+                        .FirstOrDefault(),
 
-                    return new FridgeViewModel
-                    {
-                        FridgeId = f.FridgeId,
-                        FridgeType = f.FridgeType,
-                        Brand = f.Brand,
-                        Model = f.Model,
-                        SerialNumber = f.SerialNumber,
-                        Condition = f.Condition,
-                        Status = f.Status,
-                        Quantity = f.Quantity,
-                        AvailableStock = availableStock,
-                        CustomerName = lastAllocation?.Customer.FullName,
-                        AllocationDate = lastAllocation?.AllocationDate,
-                        ReturnDate = lastAllocation?.ReturnDate
-                    };
-                })
-                .ToList();
+                    AllocationDate = f.FridgeAllocation
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => (DateOnly?)a.AllocationDate)
+                        .FirstOrDefault(),
 
-            // --------------------------
-            // Returned Fridges (per allocation)
-            // --------------------------
-            var returnedFridges = await _context.FridgeAllocation
-                .Include(a => a.Fridge)
-                .Include(a => a.Customer)
-                .Where(a => a.ReturnDate != null && a.Status != "Scrapped")
-                .Select(a => new FridgeViewModel
-                {
-                    FridgeId = a.FridgeId,
-                    Brand = a.Fridge.Brand,
-                    Model = a.Fridge.Model,
-                    Status = a.Fridge.Status,
-                    Condition = a.Fridge.Condition,
-                    Quantity = a.QuantityAllocated,
-                    ReturnDate = a.ReturnDate,
-                    CustomerName = a.Customer.FullName
+                    ReturnDate = f.FridgeAllocation
+                        .OrderByDescending(a => a.AllocationDate)
+                        .Select(a => (DateOnly?)a.ReturnDate)
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
-            // --------------------------
-            // Scrapped Fridges (per allocation)
-            // --------------------------
-            var scrappedFridges = await _context.FridgeAllocation
-                .Include(a => a.Fridge)
-                .Include(a => a.Customer)
-                .Where(a => a.Status == "Scrapped")
-                .Select(a => new FridgeViewModel
-                {
-                    FridgeId = a.FridgeId,
-                    Brand = a.Fridge.Brand,
-                    Model = a.Fridge.Model,
-                    Status = a.Fridge.Status,
-                    Condition = a.Fridge.Condition,
-                    Quantity = a.QuantityAllocated,
-                    CustomerName = a.Customer.FullName
-                })
-                .ToListAsync();
-
-            // --------------------------
-            // Prepare Dashboard ViewModel
-            // --------------------------
-            var model = new InventoryDashboardViewModel
-            {
-                ActiveFridges = activeFridges,
-                ReturnedFridges = returnedFridges,
-                ScrappedFridges = scrappedFridges
-            };
-
-            return View(model);
+            return View(fridges);
         }
 
 
