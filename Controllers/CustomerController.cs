@@ -1045,7 +1045,7 @@ namespace FridgeManagementSystem.Controllers
                 .ThenInclude(r => r.Fridge)
                 .Include(v => v.Employee)
                 .Where(v => v.MaintenanceRequest.Fridge.CustomerID == customerId &&
-                            (v.Status == TaskStatus.Scheduled || v.Status == TaskStatus.Rescheduled || v.MaintenanceRequest.TaskStatus == TaskStatus.Scheduled || v.MaintenanceRequest.TaskStatus == TaskStatus.Rescheduled))
+                            (v.Status == TaskStatus.Scheduled || v.Status == TaskStatus.Rescheduled || v.MaintenanceRequest.TaskStatus == TaskStatus.Scheduled || v.MaintenanceRequest.TaskStatus == TaskStatus.Rescheduled || v.Status == TaskStatus.Cancelled || v.MaintenanceRequest.TaskStatus == TaskStatus.Cancelled))
                 .OrderBy(v => v.ScheduledDate)
                 .ThenBy(v => v.ScheduledTime)
                 .ToListAsync();

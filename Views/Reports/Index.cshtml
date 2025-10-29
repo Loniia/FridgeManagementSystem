@@ -1,4 +1,4 @@
-﻿@model ReportDashboardViewModel
+﻿@model FridgeManagementSystem.Models.ReportDashboardViewModel
 
 @{
     ViewData["Title"] = "Reports Dashboard";
@@ -18,11 +18,11 @@
 <div class="container-fluid">
     <h1 class="mb-4">Reports Dashboard</h1>
 
-    <h2>Maintenance Performance - This Month</h2>
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Maintenance Performance - This Month</h2>
 
-    <canvas id="maintenanceChart" width="400" height="200"></canvas>
-
-    
+        <canvas id="maintenanceChart" width="400" height="200"></canvas>
+    </div>
 
 
     <!-- Customer Management Reports Section -->
@@ -404,70 +404,34 @@
        
     <script>
         var ctx = document.getElementById('maintenanceChart').getContext('2d');
-        var chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Completed Tasks', 'Avg Completion Days', 'Success Rate %', 'Repeat Visits'],
-                datasets: [{
-                    label: 'Maintenance KPIs (This Month)',
-                    data: [
-                        @Model.MaintenanceKpi.CompletedThisMonth,
-                        @Model.MaintenanceKpi.AvgCompletionDays.ToString("0"),
-                        @Model.MaintenanceKpi.SuccessRate.ToString("0"),
-                        @Model.MaintenanceKpi.MonthlyRepeatVisits
-                    ],
-                    backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c']
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-            }
-        });
-    
-        // Debug function to check what's happening
-        function debugLog(message, data = null) {
-            console.log(`[DEBUG] ${message}`, data || '');
-        }
 
-        // Main initialization function
-        document.addEventListener('DOMContentLoaded', function () {
-            debugLog('DOM loaded, starting chart initialization');
-            initializeCharts();
-        });
-
-        async function initializeCharts() {
-            try {
-                // Test if Chart.js is loaded
-                if (typeof Chart === 'undefined') {
-                    debugLog('Chart.js not loaded');
-                    showError('Chart library not loaded. Please check your internet connection.');
-                    return;
-                }
-                debugLog('Chart.js loaded successfully');
-
-                // Load all data
-                await loadMaintenanceData();
-                await loadCustomerReports();
-                await loadFaultReports();
-
-            } catch (error) {
-                debugLog('Error initializing charts:', error);
-                showError('Error loading charts: ' + error.message);
-            }
-        }
-
-        function showError(message) {
-            // Create a visible error message
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
-            errorDiv.innerHTML = `
-                <strong>Error!</strong> ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.querySelector('.container-fluid').prepend(errorDiv);
-        }
-
+         var chart = new Chart(ctx, {
+             type: 'bar',
+             data: {
+                 labels: ['Completed Tasks', 'Avg Days to Complete', 'Success Rate %', 'Repeat Visits'],
+                 datasets: [{
+                     label: 'Maintenance KPI',
+                     data: [
+                         @Model.MaintenanceKpi.CompletedThisMonth,
+                         @Model.MaintenanceKpi.AvgCompletionDays.ToString("0"),
+                         @Model.MaintenanceKpi.SuccessRate.ToString("0"),
+                         @Model.MaintenanceKpi.MonthlyRepeatVisits
+                     ],
+                     backgroundColor: [
+                         '#3498db',
+                         '#2ecc71',
+                         '#f1c40f',
+                         '#e74c3c'
+                     ]
+                 }]
+             },
+             options: {
+                 responsive: true,
+                 scales: {
+                     y: { beginAtZero: true }
+                 }
+             }
+         });
         
         // =============================================
         // CUSTOMER MANAGEMENT REPORT FUNCTIONS

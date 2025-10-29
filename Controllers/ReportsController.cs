@@ -21,11 +21,11 @@ namespace FridgeManagementSystem.Controllers
         }
         public async Task <IActionResult> Index()
         {
-            //var model = new ReportDashboardViewModel();
+            var model = new ReportDashboardViewModel();
 
-            //// ✅ Load the KPI data
-            //model.MaintenanceKpi = await GetMonthlyMaintenanceKpi();
-            return View();
+            // ✅ Load the KPI data
+            model.MaintenanceKpi = await GetMonthlyMaintenanceKpi();
+            return View(model);
         }
 
         public  IActionResult FaultReports()
@@ -33,48 +33,48 @@ namespace FridgeManagementSystem.Controllers
             
             return View();
         }
-    //    [HttpGet]
-    //    private async Task<MaintenanceKpiViewModel> GetMonthlyMaintenanceKpi()
-    //    {
-    //        var now = DateTime.Now;
-    //        var month = now.Month;
-    //        var year = now.Year;
+        private async Task<MaintenanceKpiViewModel> GetMonthlyMaintenanceKpi()
+        {
+            var now = DateTime.Now;
+            var month = now.Month;
+            var year = now.Year;
 
-    //        var kpi = new MaintenanceKpiViewModel();
+            var kpi = new MaintenanceKpiViewModel();
 
-    //        //// Requests created this month
-    //        //var monthlyRequests = await _context.MaintenanceRequest
-    //        //    .Where(r => r.RequestDate.Month == month && r.RequestDate.Year == year)
-    //        //    .ToListAsync();
+            var monthlyRequests = await _context.MaintenanceRequest
+        .Where(r => r.RequestDate != null &&
+                    r.RequestDate.Value.Month == month &&
+                    r.RequestDate.Value.Year == year)
+        .ToListAsync();
 
-    //        var monthlyCompleted = monthlyRequests
-    //.Where(r => r.TaskStatus == Models.TaskStatus.Complete && r.CompletedDate != null)
-    //.ToList();
+            var monthlyCompleted = monthlyRequests
+                .Where(r => r.TaskStatus == Models.TaskStatus.Complete)
+                .ToList();
 
-    //        kpi.CompletedThisMonth = monthlyCompleted.Count;
+            kpi.CompletedThisMonth = monthlyCompleted.Count;
 
-    //        // Avg days to complete
-    //        kpi.AvgCompletionDays = monthlyCompleted.Any()
-    //            ? monthlyCompleted.Average(r => (r.CompletedDate.Value - r.RequestDate).TotalDays)
-    //            : 0;
+            kpi.AvgCompletionDays = monthlyCompleted.Any()
+    ? monthlyCompleted.Average(r =>
+        (r.CompletedDate.HasValue && r.RequestDate.HasValue)
+            ? (r.CompletedDate.Value - r.RequestDate.Value).TotalDays
+            : 0)
+    : 0;
 
-    //        // Success rate
-    //        kpi.SuccessRate = monthlyRequests.Any()
-    //            ? (monthlyCompleted.Count * 100.0) / monthlyRequests.Count
-    //            : 0;
 
-    //        // Repeat visits: >1 completed visit for same fridge this month
-    //        kpi.MonthlyRepeatVisits = await _context.MaintenanceVisit
-    //            .Where(v => v.Status == Models.TaskStatus.Complete &&
-    //                        v.ScheduledDate.Month == month &&
-    //                        v.ScheduledDate.Year == year)
-    //            .GroupBy(v => v.FridgeId)
-    //            .Where(g => g.Count() > 1)
-    //            .CountAsync();
+            kpi.SuccessRate = monthlyRequests.Any()
+                ? (monthlyCompleted.Count * 100.0) / monthlyRequests.Count
+                : 0;
 
-    //        return kpi;
-    //    }
+            kpi.MonthlyRepeatVisits = await _context.MaintenanceVisit
+                .Where(v => v.Status == Models.TaskStatus.Complete &&
+                            v.ScheduledDate.Month == month &&
+                            v.ScheduledDate.Year == year)
+                .GroupBy(v => v.FridgeId)
+                .Where(g => g.Count() > 1)
+                .CountAsync();
 
+            return kpi;
+        }
 
         //============
         //Customer Management SubSystem Report Part

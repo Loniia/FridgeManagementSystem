@@ -27,7 +27,9 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             model.ScheduledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Scheduled);
             model.RescheduledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Rescheduled);
             model.InProgressVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.InProgress);
-            model.CompletedTasks = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Complete);
+            model.CompletedTasks = await _context.MaintenanceVisit
+    .CountAsync(v => v.Status == Models.TaskStatus.Complete && v.MaintenanceRequest.IsActive);
+
             model.CancelledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Cancelled);
 
             // ✅ Labels + values for chart
