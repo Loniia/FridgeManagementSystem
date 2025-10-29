@@ -396,7 +396,13 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 RequestBy = "Inventory Liaison",
                 RequestType = "Fridge Purchase",
                 AssignedToRole = EmployeeRoles.PurchasingManager,
-                RequestDate = DateOnly.FromDateTime(DateTime.Now),
+
+                // ✅ FIXED: Use the date the user picked, fallback to today if blank
+                // ✅ FIXED: Convert DateTime? from the model to DateOnly
+                RequestDate = model.RequestDate.HasValue
+                    ? DateOnly.FromDateTime(model.RequestDate.Value)
+                    : DateOnly.FromDateTime(DateTime.Today),
+
                 Status = "Pending",
                 IsActive = true,
                 FridgeId = linkedFridge?.FridgeId, // link fridge only if it exists
@@ -404,11 +410,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             };
 
             // --------------------------
-            // Count PurchaseRequests for this year (safe client-side)
+            // Count PurchaseRequests for this year
             // --------------------------
             var currentYear = DateTime.Now.Year;
-
-            // Fetch only rows with RequestDate
             var allRequestsWithDate = await _context.PurchaseRequests
                 .Where(r => r.RequestDate.HasValue)
                 .ToListAsync();
@@ -427,6 +431,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             TempData["SuccessMessage"] = $"Purchase request {newRequest.RequestNumber} created successfully!";
             return RedirectToAction(nameof(ProcessPurchaseRequests));
         }
+
 
         // --------------------------
         // Process Purchase Requests (List)

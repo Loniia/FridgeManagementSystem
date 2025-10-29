@@ -26,6 +26,6 @@ namespace FridgeManagementSystem.Models
         [Required(ErrorMessage = "Please select a request date")]
         [DataType(DataType.Date)]
         [Display(Name = "Request Date")]
-        public DateTime RequestDate { get; set; }
+        public DateTime? RequestDate { get; set; }
     }
 }
