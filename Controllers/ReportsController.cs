@@ -510,5 +510,7 @@ namespace FridgeManagementSystem.Controllers
 
             return View(reportModel);
         }
+
+
     }
 }

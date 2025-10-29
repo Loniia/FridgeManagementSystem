@@ -395,6 +395,23 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ✅ Buttons Row -->
+            <div class="row mb-4">
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <!-- View All Customers Spending -->
+                    <a asp-controller="Reports" asp-action="AllCustomersSpendingReport"
+                       class="btn btn-info px-3">
+                        View All Customers Spending
+                    </a>
+
+                    <!-- Go Back to Dashboard -->
+                    <a asp-area="Administrator" asp-controller="ManageEmployee" asp-action="Dashboard"
+                       class="btn btn-secondary px-3">
+                        Go Back to Dashboard
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
