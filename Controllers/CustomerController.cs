@@ -628,13 +628,58 @@ namespace FridgeManagementSystem.Controllers
             if (customer == null)
                 return NotFound("Customer profile not found.");
 
+            // Load the order with its items and the associated fridge
             var order = await _context.Orders
                 .Where(o => o.OrderId == id && o.CustomerID == customer.CustomerID)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Fridge)
+                .Include(o => o.OrderItems) // Include allocations directly
+                    .ThenInclude(oi => oi.Fridge.FridgeAllocation)
                 .FirstOrDefaultAsync();
 
+            if (order == null)
+                return NotFound("Order not found.");
+
+            // For each order item, find the specific allocation
+            foreach (var item in order.OrderItems)
+            {
+                var allocation = item.Fridge?.FridgeAllocation?
+                    .FirstOrDefault(a => a.CustomerID == customer.CustomerID &&
+                                       a.OrderItemId == item.OrderItemId);
+
+                if (allocation != null)
+                {
+                    item.AllocationID = allocation.AllocationID;
+                    item.AllocationStatus = allocation.Status;
+                    item.ReturnRequested = allocation.ReturnRequested;
+                }
+            }
+
             return View(order);
+        }
+
+
+        [Authorize]
+        public async Task<IActionResult> RequestReturn(int allocationId)
+        {
+            var appUser = await _userManager.GetUserAsync(User);
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.ApplicationUserId == appUser.Id);
+
+            if (customer == null)
+                return NotFound("Customer profile not found.");
+
+            var allocation = await _context.FridgeAllocation
+                .Include(a => a.Fridge)
+                .FirstOrDefaultAsync(a => a.AllocationID == allocationId && a.CustomerID == customer.CustomerID);
+
+            if (allocation == null || allocation.Status != "Fridge Allocated")
+                return NotFound();
+
+            allocation.ReturnRequested = true;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Return request submitted successfully!";
+            return RedirectToAction("ViewOrder", new { id = allocation.OrderItemId });
         }
 
         // ==========================

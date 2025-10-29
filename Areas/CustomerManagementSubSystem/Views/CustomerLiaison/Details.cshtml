@@ -83,14 +83,28 @@
                     </td>
                     <td>@allocation.Status</td>
                     <td>
-                        @if (allocation.Status == "Allocated")
+                        @* Actions column *@
+                        @if (allocation.ReturnRequested)
                         {
+                            <span class="badge bg-warning me-2">Return Requested</span>
                             <a asp-action="ReturnFridge"
                                asp-route-allocationId="@allocation.AllocationID"
-                               class="btn btn-warning btn-sm">Return</a>
+                               class="btn btn-success btn-sm">
+                                Return
+                            </a>
+                        }
+                        else if (allocation.Status == "Allocated")
+                        {
+                            <a asp-action="RequestReturn"
+                               asp-route-allocationId="@allocation.AllocationID"
+                               class="btn btn-primary btn-sm me-1">
+                                Request Return
+                            </a>
                             <a asp-action="ScrapFridge"
                                asp-route-allocationId="@allocation.AllocationID"
-                               class="btn btn-danger btn-sm">Scrap</a>
+                               class="btn btn-danger btn-sm">
+                                Scrap
+                            </a>
                         }
                         else
                         {
