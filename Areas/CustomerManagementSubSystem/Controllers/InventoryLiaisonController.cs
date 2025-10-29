@@ -182,6 +182,83 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Receive(ReceiveFridgeVm model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+                ViewBag.StatusOptions = new SelectList(new List<string> { "Received", "Available" }, model.Status);
+                TempData["ErrorMessage"] = "Please correct the errors and try again.";
+                return View(model);
+            }
+
+            try
+            {
+                // Find fridge or create a new one
+                Fridge fridge;
+
+                if (model.FridgeId > 0)
+                {
+                    fridge = await _context.Fridge.FindAsync(model.FridgeId);
+                    if (fridge == null)
+                    {
+                        TempData["ErrorMessage"] = "Fridge not found!";
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    // Update existing fridge info
+                    fridge.SerialNumber = model.SerialNumber;
+                    fridge.Quantity = model.Quantity;
+                    fridge.DateAdded = model.DateAdded ?? DateOnly.FromDateTime(DateTime.Today);
+                    fridge.Status = model.Status;
+                    fridge.SupplierID = model.SupplierId;
+                }
+                else
+                {
+                    // Create a new fridge record
+                    fridge = new Fridge
+                    {
+                        Brand = model.Brand,
+                        Model = model.ModelName,
+                        FridgeType = model.Type,
+                        SerialNumber = model.SerialNumber,
+                        Quantity = model.Quantity,
+                        DateAdded = model.DateAdded ?? DateOnly.FromDateTime(DateTime.Today),
+                        Status = model.Status,
+                        SupplierID = model.SupplierId,
+                        IsActive = true
+                    };
+                    _context.Fridge.Add(fridge);
+                }
+
+                // Save fridge data
+                await _context.SaveChangesAsync();
+
+                // Optional: update the related purchase request to "Completed"
+                if (model.PurchaseRequestID > 0)
+                {
+                    var request = await _context.PurchaseRequests.FindAsync(model.PurchaseRequestID);
+                    if (request != null)
+                    {
+                        request.Status = "Completed";
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                TempData["SuccessMessage"] = "Fridge successfully received!";
+                return RedirectToAction("Index", "InventoryLiaison");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error receiving fridge: " + ex.Message;
+                ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "SupplierID", "Name", model.SupplierId);
+                ViewBag.StatusOptions = new SelectList(new List<string> { "Received", "Available" }, model.Status);
+                return View(model);
+            }
+        }
+
 
         // --------------------------
         // Update Fridge Status
