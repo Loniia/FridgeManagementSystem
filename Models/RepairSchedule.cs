@@ -8,10 +8,10 @@ namespace FridgeManagementSystem.Models
     {
         [Key]
         public int RepairID { get; set; }
-
         [Required]
-        [Display(Name = "Fault")]
-        public int FaultID { get; set; }
+        [Display(Name = "Fault Report")]
+        [ForeignKey("FaultReport")]
+        public int FaultReportId { get; set; } // Changed from FaultID
 
         [Required]
         [Display(Name = "Fridge")]
@@ -75,17 +75,8 @@ namespace FridgeManagementSystem.Models
 
         [Display(Name = "Updated Date")]
         public DateTime UpdatedDate { get; set; } = DateTime.Now;
-
-        [ForeignKey("FaultReport")]
-        public int FaultReportId { get; set; }
         public virtual FaultReport FaultReport { get; set; }
-
-
         public virtual Fridge Fridge { get; set; }
-
-        [ForeignKey("Employee")]
-        public virtual Employee FaultTechnician { get; set; }
-
         // Helper methods
         public bool IsCompleted => Status == "Completed";
 

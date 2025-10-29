@@ -4,6 +4,7 @@ using FridgeManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    partial class FridgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251029085829_RepairSchFK")]
+    partial class RepairSchFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1412,6 +1415,9 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<DateTime?>("DiagnosisDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("Employee")
+                        .HasColumnType("int");
+
                     b.Property<int?>("FaultID")
                         .HasColumnType("int");
 
@@ -1460,6 +1466,8 @@ namespace FridgeManagementSystem.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("RepairID");
+
+                    b.HasIndex("Employee");
 
                     b.HasIndex("FaultID");
 
@@ -2146,6 +2154,10 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.RepairSchedule", b =>
                 {
+                    b.HasOne("FridgeManagementSystem.Models.Employee", "FaultTechnician")
+                        .WithMany()
+                        .HasForeignKey("Employee");
+
                     b.HasOne("FridgeManagementSystem.Models.Fault", null)
                         .WithMany("RepairSchedules")
                         .HasForeignKey("FaultID");
@@ -2163,6 +2175,8 @@ namespace FridgeManagementSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("FaultReport");
+
+                    b.Navigation("FaultTechnician");
 
                     b.Navigation("Fridge");
                 });

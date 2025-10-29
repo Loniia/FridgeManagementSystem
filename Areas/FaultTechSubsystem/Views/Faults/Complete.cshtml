@@ -36,7 +36,6 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h6 class="font-weight-bold">Fault Report Information</h6>
-                            <p><strong>Report ID:</strong> #@Model.FaultReportId</p>
                             <p><strong>Fault Type:</strong> <span class="badge bg-info">@Model.FaultReport?.FaultType</span></p>
                             <p><strong>Urgency:</strong> <span class="badge @GetUrgencyBadgeClass(Model.FaultReport?.UrgencyLevel ?? FridgeManagementSystem.Models.UrgencyLevel.Medium)">@Model.FaultReport?.UrgencyLevel</span></p>
                         </div>
@@ -80,9 +79,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Completion Form -->
-                    <!-- FIXED: Changed to use HttpPost action and proper form -->
                     <form asp-action="Complete" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.RepairID" />
