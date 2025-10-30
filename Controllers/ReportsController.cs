@@ -105,55 +105,75 @@ namespace FridgeManagementSystem.Controllers
         }
 
         // ============
-        // FAULT MANAGEMENT REPORTS
+        // FAULT MANAGEMENT REPORTS WITH DATE RANGE SUPPORT
         // ============
 
-        // ✅ Fault Summary Data
+        // ✅ Fault Summary Data with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetFaultSummaryData()
+        public async Task<IActionResult> GetFaultSummaryData(DateTime? startDate, DateTime? endDate)
         {
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
+            var query = _context.FaultReport.Where(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate);
+
             var summary = new
             {
-                TotalFaults = await _context.FaultReport.CountAsync(),
-                PendingFaults = await _context.FaultReport.CountAsync(fr => fr.Status == FridgeManagementSystem.Models.TaskStatus.Pending),
-                HighPriorityFaults = await _context.FaultReport.CountAsync(fr =>
+                TotalFaults = await query.CountAsync(),
+                PendingFaults = await query.CountAsync(fr => fr.Status == FridgeManagementSystem.Models.TaskStatus.Pending),
+                HighPriorityFaults = await query.CountAsync(fr =>
                     fr.UrgencyLevel == UrgencyLevel.High ||
                     fr.UrgencyLevel == UrgencyLevel.Critical ||
                     fr.UrgencyLevel == UrgencyLevel.Emergency),
-                ResolvedThisWeek = await _context.FaultReport.CountAsync(fr =>
+                ResolvedThisWeek = await query.CountAsync(fr =>
                     fr.Status == FridgeManagementSystem.Models.TaskStatus.Complete &&
                     fr.ReportDate >= DateTime.Now.AddDays(-7)),
-                AverageResolutionDays = await _context.FaultReport
+                AverageResolutionDays = await query
                     .Where(fr => fr.Status == FridgeManagementSystem.Models.TaskStatus.Complete && fr.RepairSchedules.Any())
-                    .AverageAsync(fr => (double?)(fr.RepairSchedules.Max(rs => rs.UpdatedDate) - fr.ReportDate).TotalDays) ?? 0
+                    .AverageAsync(fr => (double?)(fr.RepairSchedules.Max(rs => rs.UpdatedDate) - fr.ReportDate).TotalDays) ?? 0,
+                DateRange = new { StartDate = startDate, EndDate = endDate }
             };
 
             return Json(summary);
         }
 
-        // ✅ Fault Type Distribution
+        // ✅ Fault Type Distribution with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetFaultTypeDistribution()
+        public async Task<IActionResult> GetFaultTypeDistribution(DateTime? startDate, DateTime? endDate)
         {
-            var faultTypeData = await _context.FaultReport
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
+            var baseQuery = _context.FaultReport.Where(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate);
+            var totalFaults = await baseQuery.CountAsync();
+
+            var faultTypeData = await baseQuery
                 .GroupBy(fr => fr.FaultType)
                 .Select(g => new
                 {
                     FaultType = g.Key.ToString(),
                     Count = g.Count(),
-                    Percentage = (double)g.Count() / _context.FaultReport.Count() * 100
+                    Percentage = totalFaults > 0 ? (double)g.Count() / totalFaults * 100 : 0
                 })
                 .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
-            return Json(faultTypeData);
+            return Json(new { Data = faultTypeData, DateRange = new { StartDate = startDate, EndDate = endDate } });
         }
 
-        // ✅ Urgency Level Distribution
+        // ✅ Urgency Level Distribution with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetUrgencyDistribution()
+        public async Task<IActionResult> GetUrgencyDistribution(DateTime? startDate, DateTime? endDate)
         {
-            var urgencyData = await _context.FaultReport
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
+            var query = _context.FaultReport.Where(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate);
+
+            var urgencyData = await query
                 .GroupBy(fr => fr.UrgencyLevel)
                 .Select(g => new
                 {
@@ -165,10 +185,10 @@ namespace FridgeManagementSystem.Controllers
                 .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
-            return Json(urgencyData);
+            return Json(new { Data = urgencyData, DateRange = new { StartDate = startDate, EndDate = endDate } });
         }
 
-        // ✅ Monthly Fault Trends
+        // ✅ Monthly Fault Trends (uses custom months parameter, not date range)
         [HttpGet]
         public async Task<IActionResult> GetFaultTrendsData(int months = 6)
         {
@@ -203,27 +223,34 @@ namespace FridgeManagementSystem.Controllers
                 t.AverageUrgency
             }).ToList();
 
-            return Json(result);
+            return Json(new { Data = result, Period = $"{months} months" });
         }
 
-        // ✅ Brand Fault Analysis
+        // ✅ Brand Fault Analysis with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetBrandFaultAnalysis()
+        public async Task<IActionResult> GetBrandFaultAnalysis(DateTime? startDate, DateTime? endDate)
         {
-            var brandAnalysis = await _context.FaultReport
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
+            var faultQuery = _context.FaultReport
                 .Include(fr => fr.Fridge)
+                .Where(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate);
+
+            var brandAnalysis = await faultQuery
                 .GroupBy(fr => fr.Fridge.Brand)
                 .Select(g => new
                 {
                     Brand = g.Key,
                     TotalFaults = g.Count(),
                     MostCommonFaultType = g.GroupBy(x => x.FaultType)
-                                         .OrderByDescending(ft => ft.Count())
-                                         .Select(ft => ft.Key.ToString())
-                                         .FirstOrDefault(),
+                                          .OrderByDescending(ft => ft.Count())
+                                          .Select(ft => ft.Key.ToString())
+                                          .FirstOrDefault(),
                     FaultRate = (double)g.Count() / _context.Fridge.Count(f => f.Brand == g.Key),
                     AverageRepairCost = g.Where(fr => fr.RepairSchedules.Any())
-                                       .Average(fr => fr.RepairSchedules.Sum(rs => rs.RepairCost)) ?? 0,
+                                        .Average(fr => fr.RepairSchedules.Sum(rs => rs.RepairCost)) ?? 0,
                     ResolutionRate = (double)g.Count(fr => fr.Status == FridgeManagementSystem.Models.TaskStatus.Complete) / g.Count() * 100
                 })
                 .Where(x => x.TotalFaults > 0)
@@ -231,10 +258,10 @@ namespace FridgeManagementSystem.Controllers
                 .Take(10)
                 .ToListAsync();
 
-            return Json(brandAnalysis);
+            return Json(new { Data = brandAnalysis, DateRange = new { StartDate = startDate, EndDate = endDate } });
         }
 
-        // ✅ Seasonal Fault Patterns
+        // ✅ Seasonal Fault Patterns (uses year parameter, not date range)
         [HttpGet]
         public async Task<IActionResult> GetSeasonalFaultPatterns(int year = 0)
         {
@@ -254,24 +281,29 @@ namespace FridgeManagementSystem.Controllers
                     ElectricalIssues = g.Count(fr => fr.FaultType == FaultType.Electrical),
                     DoorSealIssues = g.Count(fr => fr.FaultType == FaultType.DoorSeal),
                     MostCommonFault = g.GroupBy(fr => fr.FaultType)
-                                     .OrderByDescending(ft => ft.Count())
-                                     .Select(ft => ft.Key.ToString())
-                                     .FirstOrDefault()
+                                      .OrderByDescending(ft => ft.Count())
+                                      .Select(ft => ft.Key.ToString())
+                                      .FirstOrDefault()
                 })
                 .OrderBy(x => x.Month)
                 .ToListAsync();
 
-            return Json(seasonalData);
+            return Json(new { Data = seasonalData, Year = targetYear });
         }
 
-        // ✅ Technician Performance
+        // ✅ Technician Performance with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetTechnicianPerformance()
+        public async Task<IActionResult> GetTechnicianPerformance(DateTime? startDate, DateTime? endDate)
         {
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
             var technicianPerformance = await _context.RepairSchedules
-                .Where(rs => rs.Status == "Completed" && rs.FaultReport != null)
+                .Where(rs => rs.Status == "Completed" && rs.FaultReport != null &&
+                             rs.FaultReport.ReportDate >= startDate && rs.FaultReport.ReportDate <= endDate)
                 .Include(rs => rs.FaultReport)
-                .GroupBy(rs => rs.FaultReport.MaintenanceVisit.EmployeeID) // Adjust based on your relationships
+                .GroupBy(rs => rs.FaultReport.MaintenanceVisit.EmployeeID)
                 .Select(g => new
                 {
                     TechnicianId = g.Key,
@@ -287,15 +319,21 @@ namespace FridgeManagementSystem.Controllers
                 .Take(8)
                 .ToListAsync();
 
-            return Json(technicianPerformance);
+            return Json(new { Data = technicianPerformance, DateRange = new { StartDate = startDate, EndDate = endDate } });
         }
 
-        // ✅ Resolution Time Analysis
+        // ✅ Resolution Time Analysis with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetResolutionTimeAnalysis()
+        public async Task<IActionResult> GetResolutionTimeAnalysis(DateTime? startDate, DateTime? endDate)
         {
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
             var resolutionData = await _context.FaultReport
-                .Where(fr => fr.Status == FridgeManagementSystem.Models.TaskStatus.Complete && fr.RepairSchedules.Any())
+                .Where(fr => fr.Status == FridgeManagementSystem.Models.TaskStatus.Complete &&
+                             fr.RepairSchedules.Any() &&
+                             fr.ReportDate >= startDate && fr.ReportDate <= endDate)
                 .Select(fr => new
                 {
                     FaultType = fr.FaultType.ToString(),
@@ -316,15 +354,20 @@ namespace FridgeManagementSystem.Controllers
                 .OrderBy(x => x.AverageResolutionDays)
                 .ToListAsync();
 
-            return Json(resolutionData);
+            return Json(new { Data = resolutionData, DateRange = new { StartDate = startDate, EndDate = endDate } });
         }
 
-        // ✅ Top Fault-Prone Fridges
+        // ✅ Top Fault-Prone Fridges with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetFaultProneFridges()
+        public async Task<IActionResult> GetFaultProneFridges(DateTime? startDate, DateTime? endDate)
         {
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
             var faultProneFridges = await _context.FaultReport
                 .Include(fr => fr.Fridge)
+                .Where(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate)
                 .GroupBy(fr => new { fr.FridgeId, fr.Fridge.Brand, fr.Fridge.Model, fr.Fridge.SerialNumber })
                 .Select(g => new
                 {
@@ -335,26 +378,32 @@ namespace FridgeManagementSystem.Controllers
                     TotalFaults = g.Count(),
                     LastFaultDate = g.Max(fr => fr.ReportDate),
                     MostCommonIssue = g.GroupBy(fr => fr.FaultType)
-                                     .OrderByDescending(ft => ft.Count())
-                                     .Select(ft => ft.Key.ToString())
-                                     .FirstOrDefault(),
+                                      .OrderByDescending(ft => ft.Count())
+                                      .Select(ft => ft.Key.ToString())
+                                      .FirstOrDefault(),
                     Status = g.OrderByDescending(fr => fr.ReportDate)
-                            .Select(fr => fr.Status)
-                            .FirstOrDefault()
+                             .Select(fr => fr.Status)
+                             .FirstOrDefault()
                 })
                 .Where(x => x.TotalFaults >= 2) // Fridges with 2 or more faults
                 .OrderByDescending(x => x.TotalFaults)
                 .Take(15)
                 .ToListAsync();
 
-            return Json(faultProneFridges);
+            return Json(new { Data = faultProneFridges, DateRange = new { StartDate = startDate, EndDate = endDate } });
         }
 
-        // ✅ Fault Status Distribution
+        // ✅ Fault Status Distribution with Date Range
         [HttpGet]
-        public async Task<IActionResult> GetFaultStatusDistribution()
+        public async Task<IActionResult> GetFaultStatusDistribution(DateTime? startDate, DateTime? endDate)
         {
-            var statusData = await _context.FaultReport
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
+            var query = _context.FaultReport.Where(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate);
+
+            var statusData = await query
                 .GroupBy(fr => fr.Status)
                 .Select(g => new
                 {
@@ -365,7 +414,49 @@ namespace FridgeManagementSystem.Controllers
                 .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
-            return Json(statusData);
+            return Json(new { Data = statusData, DateRange = new { StartDate = startDate, EndDate = endDate } });
+        }
+
+        // GET: Faults/Reports - Main reports page with date range selection
+        [HttpGet]
+        [Route("Faults/Reports")]
+        public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate)
+        {
+            ViewData["Sidebar"] = "FaultTechSubsystem";
+
+            // Default to last 30 days if no dates provided
+            startDate ??= DateTime.Today.AddDays(-30);
+            endDate ??= DateTime.Today;
+
+            var reportData = new DashboardViewModel();
+
+            reportData.TotalFaults = await _context.FaultReport
+                .CountAsync(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate);
+
+            reportData.HighPriorityFaults = await _context.FaultReport
+                .CountAsync(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate &&
+                                 (fr.UrgencyLevel == UrgencyLevel.High ||
+                                  fr.UrgencyLevel == UrgencyLevel.Critical ||
+                                  fr.UrgencyLevel == UrgencyLevel.Emergency));
+
+            reportData.UnattendedFaults = await _context.FaultReport
+                .CountAsync(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate &&
+                                 fr.Status == FridgeManagementSystem.Models.TaskStatus.Pending);
+
+            reportData.RecentFaults = await _context.FaultReport
+                .Include(fr => fr.Fridge)
+                .Include(fr => fr.Fridge.Customer)
+                .Where(fr => fr.ReportDate >= startDate && fr.ReportDate <= endDate)
+                .OrderByDescending(fr => fr.ReportDate)
+                .Take(10)
+                .ToListAsync();
+
+            ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate.Value.ToString("yyyy-MM-dd");
+
+            // ... rest of report data population
+
+            return View(reportData);
         }
 
         //=================
