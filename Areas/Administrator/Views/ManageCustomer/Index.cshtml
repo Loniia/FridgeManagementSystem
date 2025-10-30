@@ -159,9 +159,7 @@
         <a asp-controller="ManageEmployee" asp-action="Dashboard" class="btn btn-back">
             ← Go Back to Dashboard
         </a>
-        <a asp-action="Create" asp-controller="ManageCustomer" class="btn btn-primary">
-            + Add New Customer
-        </a>
+
         <a asp-action="PendingPayments" asp-controller="ManageCustomer" class="btn btn-info">
             💳 Verify Payments
         </a>
@@ -173,8 +171,9 @@
         <div class="input-group">
             <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
                    class="form-control"
-                   placeholder="Search customers by Name or Email" />
+                   placeholder="Search customers by Name and Email" />
             <button type="submit" class="btn btn-primary">Search</button>
+            <a asp-action="Index" class="btn btn-secondary">Reset</a>
         </div>
     </form>
 

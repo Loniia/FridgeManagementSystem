@@ -697,12 +697,6 @@ namespace FridgeManagementSystem.Controllers
                 case "Fridge Allocated":
                     order.OrderProgress = OrderStatus.FridgeAllocated;
                     break;
-                case "Shipped":
-                    order.OrderProgress = OrderStatus.Shipped;
-                    break;
-                case "Delivered":
-                    order.OrderProgress = OrderStatus.Delivered;
-                    break;
                 default:
                     order.OrderProgress = OrderStatus.OrderPlaced;
                     break;

@@ -13,52 +13,106 @@
                class="form-control"
                placeholder="Search customers by Name and Email" />
         <button type="submit" class="btn btn-primary">Search</button>
+        <a asp-action="Index" class="btn btn-secondary">Reset</a>
     </div>
 </form>
 
-<p>
-    <a asp-action="Create" asp-controller="CustomerLiaison" class="btn btn-primary">Add New Customer</a>
-</p>
+<!-- Active/Inactive Filter -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="showInactiveToggle"
+            @(ViewBag.ShowInactive != null && ViewBag.ShowInactive ? "checked" : "")
+                   onchange="toggleInactiveCustomers(this)">
+            <label class="form-check-label" for="showInactiveToggle">
+                Show Inactive Customers
+            </label>
+        </div>
+        <small class="text-muted">When checked, deactivated customers will appear in the list.</small>
+    </div>
+</div>
+
+<script>
+    function toggleInactiveCustomers(checkbox) {
+        const showInactive = checkbox.checked ? 'true' : 'false';
+        window.location.href = `?showInactive=${showInactive}`;
+    }
+</script>
 
 <!-- Customers Table -->
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Full Names</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Total Fridges Allocated</th>
-            <th>Registration Date</th>
-            <th>Last Fridge Return</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var customer in Model)
-        {
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <h5>No customers found</h5>
+        <p class="mb-0">
+            @if (ViewBag.ShowInactive != null && ViewBag.ShowInactive)
+            {
+                <text>No customers (active or inactive) match your criteria.</text>
+            }
+            else
+            {
+                <text>No active customers found. Try <a href="?showInactive=true">showing inactive customers</a>.</text>
+            }
+        </p>
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
             <tr>
-                <td>@customer.FullNames</td>
-                <td>@customer.PhoneNumber</td>
-                <td>@customer.Email</td>
-                <td>@(customer.IsActive ? "Active" : "Inactive")</td>
-                <td>@customer.TotalFridgesAllocated</td> <!-- This now sums correctly -->
-                <td>@customer.RegistrationDate.ToString("yyyy/MM/dd")</td>
-                <td>
-                    @{
-                        var lastReturn = customer.FridgeAllocations?
-                        .OrderByDescending(a => a.AllocationDate)
-                        .FirstOrDefault()?.ReturnDate;
-                    }
-                    @(lastReturn.HasValue ? lastReturn.Value.ToString("yyyy/MM/dd") : "N/A")
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@customer.CustomerId" class="btn btn-warning btn-sm @(customer.IsActive ? "" : "disabled")">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@customer.CustomerId" class="btn btn-danger btn-sm @(customer.IsActive ? "" : "disabled")">Delete</a>
-                    <a asp-action="Details" asp-route-id="@customer.CustomerId" class="btn btn-info btn-sm">Details</a>
-                </td>
+                <th>Full Names</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Total Fridges Allocated</th>
+                <th>Registration Date</th>
+                <th>Last Fridge Return</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var customer in Model)
+            {
+                <tr class="@(customer.IsActive ? "" : "table-secondary")">
+                    <td>
+                        @customer.FullNames
+                        @if (!customer.IsActive)
+                        {
+                            <span class="badge bg-warning ms-1">Inactive</span>
+                        }
+                    </td>
+                    <td>@customer.PhoneNumber</td>
+                    <td>@customer.Email</td>
+                    <td>
+                        <span class="badge @(customer.IsActive ? "bg-success" : "bg-secondary")">
+                            @(customer.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td>@customer.TotalFridgesAllocated</td>
+                    <td>@customer.RegistrationDate.ToString("yyyy/MM/dd")</td>
+                    <td>
+                        @{
+                            var lastReturn = customer.FridgeAllocations?
+                            .Where(a => a.ReturnDate.HasValue)
+                            .OrderByDescending(a => a.ReturnDate)
+                            .FirstOrDefault()?.ReturnDate;
+                        }
+                        @(lastReturn.HasValue ? lastReturn.Value.ToString("yyyy/MM/dd") : "N/A")
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@customer.CustomerId"
+                           class="btn btn-warning btn-sm @(customer.IsActive ? "" : "disabled")">Edit</a>
 
+                        <!-- UNCOMMENTED DELETE BUTTON -->
+                        <a asp-action="Delete" asp-route-id="@customer.CustomerId"
+                           class="btn btn-danger btn-sm @(customer.IsActive ? "" : "disabled")">Delete</a>
+
+                        <a asp-action="Details" asp-route-id="@customer.CustomerId"
+                           class="btn btn-info btn-sm">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

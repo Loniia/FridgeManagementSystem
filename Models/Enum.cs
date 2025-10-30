@@ -196,7 +196,5 @@ namespace FridgeManagementSystem.Models
     {
         OrderPlaced = 1,
         FridgeAllocated = 2,
-        Shipped = 3,
-        Delivered = 4
     }
 }
