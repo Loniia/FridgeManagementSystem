@@ -22,20 +22,42 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
         {
             var model = new MaintenanceDashboardViewModel();
 
-            // ✅ Counts for category chart
+            // ✅ Use MaintenanceRequest for most statuses
             model.PendingRequests = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Pending);
             model.ScheduledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Scheduled);
             model.RescheduledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Rescheduled);
             model.InProgressVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.InProgress);
-            model.CompletedTasks = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Complete);
+
+            // ✅ Use MaintenanceVisit for completed tasks (so it matches line chart)
+            model.CompletedTasks = await _context.MaintenanceVisit
+                .CountAsync(v => v.Status == Models.TaskStatus.Complete);
+
             model.CancelledVisits = await _context.MaintenanceRequest.CountAsync(r => r.IsActive && r.TaskStatus == Models.TaskStatus.Cancelled);
 
-            // ✅ Labels + values for chart
+            // ✅ Labels + values for bar chart
             model.CategoryLabels = new List<string> { "Pending", "Scheduled", "Rescheduled", "InProgress", "Completed", "Cancelled" };
-            model.CategoryValues = new List<int> { model.PendingRequests, model.ScheduledVisits, model.RescheduledVisits, model.InProgressVisits, model.CompletedTasks, model.CancelledVisits };
+            model.CategoryValues = new List<int>
+    {
+        model.PendingRequests,
+        model.ScheduledVisits,
+        model.RescheduledVisits,
+        model.InProgressVisits,
+        model.CompletedTasks,
+        model.CancelledVisits
+    };
 
-            // ✅ Last 6 months chart
-            model.MonthLabels = Enumerable.Range(0, 6).Select(i => DateTime.Now.AddMonths(-i).ToString("MMM")).Reverse().ToList();
+            // ✅ Completion percent now based on total
+            var totalRequests = model.CategoryValues.Sum();
+            model.CompletionPercent = totalRequests > 0
+                ? (int)Math.Round((double)model.CompletedTasks / totalRequests * 100)
+                : 0;
+
+            // ✅ Last 6 months completed visits
+            model.MonthLabels = Enumerable.Range(0, 6)
+                .Select(i => DateTime.Now.AddMonths(-i).ToString("MMM"))
+                .Reverse()
+                .ToList();
+
             model.CompletedValues = Enumerable.Range(0, 6)
                 .Select(i =>
                 {
@@ -49,7 +71,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 .Reverse()
                 .ToList();
 
-            // ✅ Populate table
+            // ✅ Table: Pending requests needing scheduling
             var pendingRequests = await _context.MaintenanceRequest
                 .Include(r => r.Fridge)
                     .ThenInclude(f => f.Customer)
@@ -62,12 +84,12 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
             model.PendingRequestsNeedingScheduling = pendingRequests.Select(r => new MaintenanceRequestSummary
             {
                 MaintenanceRequestId = r.MaintenanceRequestId,
-                RequestDate = r.RequestDate ?? DateTime.MinValue, // handle null safely
+                RequestDate = r.RequestDate ?? DateTime.MinValue,
                 FridgeBrand = r.Fridge?.Brand ?? "Unknown",
                 FridgeModel = r.Fridge?.Model ?? "Unknown",
                 CustomerName = r.Fridge?.Customer?.FullName ?? "Unknown",
                 CustomerAddress = r.Fridge?.Customer?.Location?.Address ?? "Address not available",
-                DaysPending = (int)((DateTime.Now - (r.RequestDate ?? DateTime.Now)).TotalDays) // handle null safely
+                DaysPending = (int)((DateTime.Now - (r.RequestDate ?? DateTime.Now)).TotalDays)
             }).ToList();
 
             return View(model);

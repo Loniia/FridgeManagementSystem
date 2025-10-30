@@ -34,12 +34,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             _logger = logger; // Initialize logger
         }
 
-        // --------------------------
-        // List Customers (Active + Inactive)
-        // --------------------------
+        //INDEX
         public async Task<IActionResult> Index()
         {
-            // ✅ use service instead of _context directly
             var customers = await _customerService.GetAllCustomersWithFridgesAsync();
 
             var model = customers.Select(c => new CustomerViewModel
@@ -57,7 +54,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                     FridgeId = a.FridgeId,
                     QuantityAllocated = a.QuantityAllocated,
                     AllocationDate = a.AllocationDate,
-                    ReturnDate = a.ReturnDate,
+                    ReturnDate = a.ReturnDate, // ✅ will now have 30-day return date
                     Status = a.Status,
                     Fridge = new FridgeViewModel
                     {
@@ -71,6 +68,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
             return View(model);
         }
+
 
         // --------------------------
         // Create Customer
@@ -208,7 +206,6 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
             return View();
         }
-
         // POST: CustomerLiaison/Allocate
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -237,7 +234,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             if (orderItem == null)
                 return NotFound("Order item not found.");
 
-            // Check existing allocations
+            // Total already allocated for this order item
             var totalAllocated = _context.FridgeAllocation
                 .Where(fa => fa.OrderItemId == orderItemId && fa.CustomerID == customerId)
                 .Sum(fa => (int?)fa.QuantityAllocated) ?? 0;
@@ -254,9 +251,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             DateOnly? returnDateFromUser = null;
 
             if (Request.Form["AllocationDate"].Count > 0 &&
-                DateOnly.TryParse(Request.Form["AllocationDate"], out var parsedDate) &&
-                parsedDate >= DateOnly.FromDateTime(DateTime.Now.AddMonths(-6)) &&
-                parsedDate <= DateOnly.FromDateTime(DateTime.Now))
+                DateOnly.TryParse(Request.Form["AllocationDate"], out var parsedDate))
             {
                 allocationDateFromUser = parsedDate;
             }
@@ -267,35 +262,51 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 returnDateFromUser = parsedReturn;
             }
 
-            // Allocate fridge
+            // Parse quantity to allocate
+            int quantityToAllocate = 1; // default to 1
+            if (Request.Form["Quantity"].Count > 0 && int.TryParse(Request.Form["Quantity"], out var q))
+                quantityToAllocate = Math.Min(q, remainingToAllocate);
+
+            // Check stock
+            if (fridge.Quantity < quantityToAllocate)
+            {
+                TempData["ErrorMessage"] = $"Not enough stock. Only {fridge.Quantity} fridge(s) available!";
+                return RedirectToAction("ProcessPendingAllocations");
+            }
+
+            // Determine allocation date
+            var allocationDate = allocationDateFromUser ?? DateOnly.FromDateTime(DateTime.Now);
+
+            // Create allocation
             var allocation = new FridgeAllocation
             {
                 FridgeId = fridge.FridgeId,
                 CustomerID = customerId,
                 OrderItemId = orderItemId,
-                AllocationDate = allocationDateFromUser ?? DateOnly.FromDateTime(DateTime.Now),
-                ReturnDate = returnDateFromUser,
+                AllocationDate = allocationDate,
+                ReturnDate = allocationDate.AddDays(30), // ✅ always 30 days later
                 Status = "Allocated",
-                QuantityAllocated = 1
+                QuantityAllocated = quantityToAllocate
             };
-            _context.FridgeAllocation.Add(allocation);
-            _context.SaveChanges();
 
-            TempData["ReturnDate"] = allocation.ReturnDate?.ToDateTime(new TimeOnly()).ToString("yyyy-MM-dd") ?? "N/A";
+            // Reduce stock
+            fridge.Quantity -= quantityToAllocate;
 
-            // Update fridge and order
-            fridge.Status = "Allocated";
+            // Update fridge status
+            fridge.Status = fridge.Quantity == 0 ? "Allocated" : "Available";
             fridge.CustomerID = customerId;
-            totalAllocated += 1;
 
+            // Update order progress
+            totalAllocated += quantityToAllocate;
             if (totalAllocated >= orderItem.Quantity)
             {
                 order.Status = "Fridge Allocated";
                 order.OrderProgress = OrderStatus.FridgeAllocated;
             }
+
             _context.SaveChanges();
 
-            // Create or check MaintenanceRequest
+            // Maintenance request
             var existingRequest = _context.MaintenanceRequest
                 .FirstOrDefault(mr => mr.FridgeId == fridge.FridgeId && mr.IsActive && mr.TaskStatus == Models.TaskStatus.Pending);
 
@@ -305,25 +316,26 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 {
                     FridgeId = fridge.FridgeId,
                     RequestDate = allocation.AllocationDate.HasValue
-                    ? allocation.AllocationDate.Value.ToDateTime(TimeOnly.MinValue)
-                    : DateTime.Now, // fallback if null
+                        ? allocation.AllocationDate.Value.ToDateTime(TimeOnly.MinValue)
+                        : DateTime.Now,
                     TaskStatus = Models.TaskStatus.Pending,
                     IsActive = true
                 };
                 _context.MaintenanceRequest.Add(maintenanceRequest);
                 _context.SaveChanges();
 
-                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated to {customer.FullName}. " +
-                                      $"A maintenance request has been created with the allocation date.";
+                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated ({quantityToAllocate} unit(s)) to {customer.FullName}. " +
+                                      $"A maintenance request has been created.";
             }
             else
             {
-                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated to {customer.FullName}. " +
+                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated ({quantityToAllocate} unit(s)) to {customer.FullName}. " +
                                       $"Existing maintenance request is still pending.";
             }
 
             return RedirectToAction("ProcessPendingAllocations");
         }
+
 
 
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
@@ -369,9 +381,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         }
 
         // --------------------------
-        // Return Fridge
+        // Return Fridge (Partial Support)
         // --------------------------
-        public async Task<IActionResult> ReturnFridge(int allocationId, DateOnly? returnDate = null)
+        public async Task<IActionResult> ReturnFridge(int allocationId, int quantityToReturn = 0, DateOnly? returnDate = null)
         {
             var allocation = await _context.FridgeAllocation
                                            .Include(a => a.Fridge)
@@ -380,18 +392,43 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             if (allocation == null || allocation.Status != "Allocated")
                 return NotFound();
 
-            allocation.Status = "Returned";
+            if (quantityToReturn <= 0 || quantityToReturn > allocation.QuantityAllocated)
+            {
+                TempData["ErrorMessage"] = "Invalid return quantity.";
+                return RedirectToAction("Details", "Customer", new { id = allocation.CustomerID });
+            }
 
-            // ✅ Use provided date or default to today
+            // Update return date
             allocation.ReturnDate = returnDate ?? DateOnly.FromDateTime(DateTime.Now);
 
+            // Add returned quantity back to stock
             if (allocation.Fridge != null)
-                allocation.Fridge.Status = "Available";
+            {
+                allocation.Fridge.Quantity += quantityToReturn;
+
+                // If all fridges returned, mark allocation as returned
+                if (quantityToReturn == allocation.QuantityAllocated)
+                {
+                    allocation.Status = "Returned";
+                    allocation.Fridge.Status = "Available";
+                }
+                else
+                {
+                    // Partial return: reduce the allocated quantity
+                    allocation.QuantityAllocated -= quantityToReturn;
+                    TempData["SuccessMessage"] = $"{quantityToReturn} fridges returned. {allocation.QuantityAllocated} still allocated.";
+                }
+            }
 
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Fridge returned successfully!";
-            return RedirectToAction(nameof(Details), new { id = allocation.CustomerID });
+
+            if (allocation.Status == "Returned")
+                TempData["SuccessMessage"] = "All allocated fridges returned successfully and added back to inventory!";
+
+            // Redirect to Inventory stock view
+            return RedirectToAction("Index", "InventoryLiaison");
         }
+
 
         // --------------------------
         // Scrap Fridge
@@ -676,5 +713,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
             return File(pdfBytes, "application/pdf", $"Customer_{customer.CustomerID}_Allocations.pdf");
         }
+
+
     }
 }

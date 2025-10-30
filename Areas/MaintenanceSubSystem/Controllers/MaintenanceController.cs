@@ -400,11 +400,16 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                 };
 
                 _context.MaintenanceVisit.Add(nextVisit);
-                    await _context.SaveChangesAsync();
-                }
+                await _context.SaveChangesAsync();
 
-                // Feedback
-                if (nextVisit != null)
+                // ✅ Ensure request gets status updated properly
+                UpdateVisitAndRequestStatus(nextVisit, Models.TaskStatus.Scheduled);
+                await _context.SaveChangesAsync();
+
+            }
+
+            // Feedback
+            if (nextVisit != null)
                     TempData["Message"] = $"Maintenance completed. Next visit scheduled for {nextVisit.ScheduledDate:yyyy-MM-dd}.";
                 else if (nextRequest != null)
                     TempData["Message"] = $"Maintenance completed. Next request created for {nextRequest.RequestDate:yyyy-MM-dd}.";
@@ -585,6 +590,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
 
                 return View("CreateFaultReport", report);
             }
+            report.ReportSource = ReportedBy.Technician;
             report.StatusFilter = "Pending";
             _context.FaultReport.Add(report);
             _context.SaveChanges();
@@ -600,6 +606,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                     .ThenInclude(f => f.Customer)
                 .Include(f => f.MaintenanceVisit)
                     .ThenInclude(v => v.Employee)
+                    .Where(f => f.ReportSource == ReportedBy.Technician)
                 .OrderByDescending(f => f.ReportDate)
                 .ToList();
 

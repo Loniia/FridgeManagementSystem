@@ -171,8 +171,21 @@
             </div>
         </div>
 
+        <!-- ✅ Home link -->
+        <ul class="sidebar-menu">
+            <li>
+                <a asp-area="CustomerManagementSubsystem"
+                   asp-controller="CustomerManagementHome"
+                   asp-action="Index"
+                   class="active">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </li>
+        </ul>
+
         <!-- Inventory Liaison -->
         <ul class="sidebar-menu">
+
             <li>
                 <span class="menu-header" id="inventoryHeader">
                     <a asp-controller="InventoryLiaison" asp-action="MonthlyDashboard" class="text-decoration-none">

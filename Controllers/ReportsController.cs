@@ -19,201 +19,90 @@ namespace FridgeManagementSystem.Controllers
         {
             _context = context;
         }
-        public async Task <IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            //var model = new ReportDashboardViewModel();
+            var model = new ReportDashboardViewModel();
 
-            //// ✅ Load the KPI data
-            //model.MaintenanceKpi = await GetMonthlyMaintenanceKpi();
-            return View();
+            // ✅ Load the KPI data
+            model.MaintenanceKpi = await GetMonthlyMaintenanceKpi();
+
+            // ----------------------------
+            // YOUR FRIDGE SUBSYSTEM REPORT
+            // ----------------------------
+            model.Received = await _context.Fridge.CountAsync(f => f.Status == "Received");
+            model.Purchased = (int)await _context.PurchaseOrders.SumAsync(po => po.TotalAmount);
+            model.Scrapped = await _context.Fridge.CountAsync(f => f.Status == "Scrapped");
+            model.LowStock = await _context.Fridge.CountAsync(f => f.Quantity <= 5);
+            model.Returned = await _context.Fridge.CountAsync(f => f.Status == "Returned");
+
+            // Top 10 customers by total order amount
+            var topCustomers = await _context.Customers
+                .Include(c => c.Orders)
+                .Select(c => new TopCustomerViewModel
+                {
+                    Name = c.FullName,
+                    TotalAmount = c.Orders.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(c => c.TotalAmount)
+                .Take(10)
+                .ToListAsync();
+
+            model.TopCustomers = topCustomers;
+
+            return View(model);
         }
 
-        public  IActionResult FaultReports()
+        public IActionResult FaultReports()
         {
             
             return View();
         }
-    //    [HttpGet]
-    //    private async Task<MaintenanceKpiViewModel> GetMonthlyMaintenanceKpi()
-    //    {
-    //        var now = DateTime.Now;
-    //        var month = now.Month;
-    //        var year = now.Year;
-
-    //        var kpi = new MaintenanceKpiViewModel();
-
-    //        //// Requests created this month
-    //        //var monthlyRequests = await _context.MaintenanceRequest
-    //        //    .Where(r => r.RequestDate.Month == month && r.RequestDate.Year == year)
-    //        //    .ToListAsync();
-
-    //        var monthlyCompleted = monthlyRequests
-    //.Where(r => r.TaskStatus == Models.TaskStatus.Complete && r.CompletedDate != null)
-    //.ToList();
-
-    //        kpi.CompletedThisMonth = monthlyCompleted.Count;
-
-    //        // Avg days to complete
-    //        kpi.AvgCompletionDays = monthlyCompleted.Any()
-    //            ? monthlyCompleted.Average(r => (r.CompletedDate.Value - r.RequestDate).TotalDays)
-    //            : 0;
-
-    //        // Success rate
-    //        kpi.SuccessRate = monthlyRequests.Any()
-    //            ? (monthlyCompleted.Count * 100.0) / monthlyRequests.Count
-    //            : 0;
-
-    //        // Repeat visits: >1 completed visit for same fridge this month
-    //        kpi.MonthlyRepeatVisits = await _context.MaintenanceVisit
-    //            .Where(v => v.Status == Models.TaskStatus.Complete &&
-    //                        v.ScheduledDate.Month == month &&
-    //                        v.ScheduledDate.Year == year)
-    //            .GroupBy(v => v.FridgeId)
-    //            .Where(g => g.Count() > 1)
-    //            .CountAsync();
-
-    //        return kpi;
-    //    }
-
-
-        //============
-        //Customer Management SubSystem Report Part
-        //============
-        // ✅ Customer Reports - Summary Data
-        [HttpGet]
-        public async Task<IActionResult> GetCustomerSummaryData()
+        private async Task<MaintenanceKpiViewModel> GetMonthlyMaintenanceKpi()
         {
-            var summary = new
-            {
-                TotalCustomers = await _context.Customers.CountAsync(),
-                ActiveCustomers = await _context.Customers.CountAsync(c => c.IsActive),
-                TotalAllocated = await _context.FridgeAllocation
-                    .CountAsync(a => a.Status == "Allocated"),
-                AvailableFridges = await _context.Fridge
-                    .CountAsync(f => f.Status == "Available" && f.IsActive)
-            };
+            var now = DateTime.Now;
+            var month = now.Month;
+            var year = now.Year;
 
-            return Json(summary);
+            var kpi = new MaintenanceKpiViewModel();
+
+            var monthlyRequests = await _context.MaintenanceRequest
+        .Where(r => r.RequestDate != null &&
+                    r.RequestDate.Value.Month == month &&
+                    r.RequestDate.Value.Year == year)
+        .ToListAsync();
+
+            var monthlyCompleted = monthlyRequests
+                .Where(r => r.TaskStatus == Models.TaskStatus.Complete)
+                .ToList();
+
+            kpi.CompletedThisMonth = monthlyCompleted.Count;
+
+            kpi.AvgCompletionDays = monthlyCompleted.Any()
+    ? monthlyCompleted.Average(r =>
+        (r.CompletedDate.HasValue && r.RequestDate.HasValue)
+            ? (r.CompletedDate.Value - r.RequestDate.Value).TotalDays
+            : 0)
+    : 0;
+
+
+            kpi.SuccessRate = monthlyRequests.Any()
+                ? (monthlyCompleted.Count * 100.0) / monthlyRequests.Count
+                : 0;
+
+            kpi.MonthlyRepeatVisits = await _context.MaintenanceVisit
+    .Include(v => v.MaintenanceRequest)
+    .Where(v =>
+        v.Status == Models.TaskStatus.Complete &&
+        v.MaintenanceRequest.CompletedDate.HasValue &&
+        v.MaintenanceRequest.CompletedDate.Value.Month == month &&
+        v.MaintenanceRequest.CompletedDate.Value.Year == year)
+    .GroupBy(v => v.FridgeId)
+    .Where(g => g.Count() > 1)
+    .CountAsync();
+
+
+            return kpi;
         }
-
-        // ✅ Customer Status Distribution
-        [HttpGet]
-        public async Task<IActionResult> GetCustomerStatusData()
-        {
-            var statusData = await _context.Customers
-                .GroupBy(c => c.IsActive)
-                .Select(g => new
-                {
-                    Status = g.Key ? "Active" : "Inactive",
-                    Count = g.Count()
-                })
-                .ToListAsync();
-
-            return Json(statusData);
-        }
-
-        // ✅ Location Distribution
-        [HttpGet]
-        public async Task<IActionResult> GetLocationDistributionData()
-        {
-            var locationData = await _context.Customers
-                .Include(c => c.Location)
-                .Where(c => c.Location != null)
-                .GroupBy(c => c.Location.Address)
-                .Select(g => new
-                {
-                    Location = g.Key,
-                    CustomerCount = g.Count(),
-                    ActiveAllocations = g.SelectMany(c => c.FridgeAllocation)
-                                       .Count(a => a.Status == "Allocated")
-                })
-                .OrderByDescending(x => x.CustomerCount)
-                .Take(10)
-                .ToListAsync();
-
-            return Json(locationData);
-        }
-
-        // ✅ Fridge Allocation Summary
-        [HttpGet]
-        public async Task<IActionResult> GetFridgeAllocationSummary()
-        {
-            var allocationSummary = await _context.FridgeAllocation
-                .GroupBy(a => a.Status)
-                .Select(g => new
-                {
-                    Status = g.Key,
-                    Count = g.Count()
-                })
-                .ToListAsync();
-
-            // Add total count
-            var total = allocationSummary.Sum(x => x.Count);
-            var result = allocationSummary.Select(x => new
-            {
-                x.Status,
-                x.Count,
-                Percentage = total > 0 ? Math.Round((x.Count / (double)total) * 100, 1) : 0
-            }).ToList();
-
-            return Json(result);
-        }
-        [HttpGet]
-        public async Task<IActionResult> GetAllocationTrendsData()
-        {
-            var sixMonthsAgo = DateTime.Today.AddMonths(-6);
-            var sixMonthsAgoDateOnly = DateOnly.FromDateTime(sixMonthsAgo);
-
-            var trends = await _context.FridgeAllocation
-                .Where(a => a.AllocationDate != null && a.AllocationDate.Value >= sixMonthsAgoDateOnly)
-                .GroupBy(a => new
-                {
-                    Year = a.AllocationDate.Value.Year,
-                    Month = a.AllocationDate.Value.Month
-                })
-                .Select(g => new
-                {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    Allocations = g.Count(a => a.Status == "Allocated"),
-                    Returns = g.Count(a => a.Status == "Returned"),
-                    Scrapped = g.Count(a => a.Status == "Scrapped")
-                })
-                .OrderBy(x => x.Year)
-                .ThenBy(x => x.Month)
-                .ToListAsync();
-
-            var result = trends.Select(t => new
-            {
-                Month = new DateTime(t.Year, t.Month, 1).ToString("MMM yyyy"),
-                t.Allocations,
-                t.Returns,
-                t.Scrapped
-            }).ToList();
-
-            return Json(result);
-        }
-
-        // ✅ Top Customers
-        [HttpGet]
-        public async Task<IActionResult> GetTopCustomersData()
-        {
-            var topCustomers = await _context.Customers
-                .Select(c => new
-                {
-                    CustomerName = c.FullName,
-                    TotalAllocations = c.FridgeAllocation.Count(a => a.Status == "Allocated"),
-                    ActiveAllocations = c.FridgeAllocation.Count(a => a.Status == "Allocated"),
-                    ReturnedAllocations = c.FridgeAllocation.Count(a => a.Status == "Returned")
-                })
-                .Where(c => c.TotalAllocations > 0)
-                .OrderByDescending(c => c.ActiveAllocations)
-                .Take(8)
-                .ToListAsync();
-
-            return Json(topCustomers);
-        }
-
 
         // ============
         // FAULT MANAGEMENT REPORTS WITH DATE RANGE SUPPORT
@@ -601,5 +490,6 @@ namespace FridgeManagementSystem.Controllers
 
             return View(reportModel);
         }
+
     }
 }
