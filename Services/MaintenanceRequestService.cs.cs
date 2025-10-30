@@ -43,13 +43,24 @@ namespace FridgeManagementSystem.Services
 
         public async Task<MaintenanceRequest?> CreateNextMonthlyRequestAsync(int fridgeId)
         {
-            if (await HasPendingOrScheduledRequestAsync(fridgeId))
+            var now = DateTime.Now;
+            var nextMonth = now.AddMonths(1);
+
+            // Check if a request for the *next month* already exists
+            bool hasNextMonthRequest = await _context.MaintenanceRequest.AnyAsync(r =>
+                r.FridgeId == fridgeId &&
+                r.RequestDate.HasValue &&
+                r.RequestDate.Value.Month == nextMonth.Month &&
+                r.RequestDate.Value.Year == nextMonth.Year &&
+                r.IsActive);
+
+            if (hasNextMonthRequest)
                 return null;
 
             var req = new MaintenanceRequest
             {
                 FridgeId = fridgeId,
-                RequestDate = DateTime.Now.AddMonths(1),
+                RequestDate = nextMonth,
                 TaskStatus = Models.TaskStatus.Pending,
                 IsActive = true
             };
@@ -58,6 +69,7 @@ namespace FridgeManagementSystem.Services
             await _context.SaveChangesAsync();
             return req;
         }
+
     }
 }
 

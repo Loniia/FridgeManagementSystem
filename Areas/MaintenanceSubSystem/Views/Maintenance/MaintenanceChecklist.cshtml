@@ -343,19 +343,23 @@
                 </div>
 
                 <!-- Door Seal Condition -->
-                @foreach (var condition in Enum.GetValues(typeof(FridgeManagementSystem.Models.DoorSealCondition)))
-                {
-                    var cond = (FridgeManagementSystem.Models.DoorSealCondition)condition;
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               name="DoorSealCondition"
-                               value="@cond"
-                               @(Model.DoorSealCondition == cond ? "checked" : "") />
-                        <label class="form-check-label">@cond</label>
-                    </div>
-                }
-
-
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-door-closed"></i>
+                        <strong>Door Seal Condition</strong>
+                    </label>
+                    @foreach (var condition in Enum.GetValues(typeof(FridgeManagementSystem.Models.DoorSealCondition)))
+                    {
+                        var cond = (FridgeManagementSystem.Models.DoorSealCondition)condition;
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="DoorSealCondition"
+                                   value="@cond"
+                                   @(Model.DoorSealCondition == cond ? "checked" : "") />
+                            <label class="form-check-label">@cond</label>
+                        </div>
+                    }
+                </div>
                 <!-- Power Cable Condition -->
                 <div class="mb-3">
                     <label class="form-label">

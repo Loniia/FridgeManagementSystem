@@ -6,18 +6,16 @@
     <title>Maintenance System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Sidebar Styles */
+        /* ===== OPTIMIZED SIDEBAR STYLING ===== */
+
+        /* Sidebar Base */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             height: 100vh;
-            width: 280px;
+            width: 250px;
             background: #2c3e50;
             color: white;
             transition: all 0.3s ease;
@@ -29,7 +27,7 @@
         }
 
             .sidebar.collapsed {
-                width: 70px;
+                width: 60px;
             }
 
                 /* Hide text when collapsed */
@@ -43,34 +41,36 @@
                 }
 
                 .sidebar.collapsed .user-profile img {
-                    width: 40px;
-                    height: 40px;
+                    width: 35px;
+                    height: 35px;
+                    margin-bottom: 5px;
                 }
 
                 .sidebar.collapsed .menu li a {
                     justify-content: center;
-                    padding: 15px;
+                    padding: 12px 8px;
                 }
 
                     .sidebar.collapsed .menu li a i {
                         margin-right: 0;
-                        font-size: 1.2rem;
+                        font-size: 1.1rem;
                     }
 
         /* Toggle Button */
         .toggle-btn {
             position: fixed;
-            top: 20px;
-            left: 300px;
+            top: 15px;
+            left: 265px;
             z-index: 1001;
             background: #2c3e50;
             color: white;
             border: none;
-            padding: 10px 12px;
-            border-radius: 5px;
+            padding: 8px 10px;
+            border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 0.9rem;
         }
 
             .toggle-btn:hover {
@@ -79,67 +79,79 @@
             }
 
         .sidebar.collapsed + .toggle-btn {
-            left: 90px;
+            left: 75px;
         }
 
         /* Main Content */
         .main-content {
-            margin-left: 280px;
-            padding: 30px;
+            margin-left: 250px;
+            padding: 20px;
             transition: all 0.3s ease;
             min-height: 100vh;
             background: #f8f9fa;
         }
 
             .main-content.sidebar-collapsed {
-                margin-left: 70px;
+                margin-left: 60px;
             }
 
-        /* Logo */
+        /* Logo - Compact */
         .logo {
-            padding: 25px 20px;
+            padding: 15px 15px;
             text-align: center;
             border-bottom: 1px solid #34495e;
             background: #34495e;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
             .logo h1 {
-                font-size: 1.4rem;
+                font-size: 1.2rem;
                 margin: 0;
                 color: white;
                 font-weight: 600;
+                line-height: 1.2;
             }
 
-        /* User Profile */
+        /* User Profile - Compact */
         .user-profile {
-            padding: 25px 20px;
+            padding: 15px 15px;
             text-align: center;
             border-bottom: 1px solid #34495e;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
             .user-profile img {
-                width: 80px;
-                height: 80px;
+                width: 60px;
+                height: 60px;
                 border-radius: 50%;
-                margin-bottom: 12px;
-                border: 3px solid #3498db;
+                margin-bottom: 8px;
+                border: 2px solid #3498db;
                 object-fit: cover;
             }
 
             .user-profile h2 {
-                font-size: 1.1rem;
-                margin: 8px 0;
+                font-size: 0.95rem;
+                margin: 4px 0;
                 color: white;
                 font-weight: 600;
+                line-height: 1.2;
             }
 
             .user-profile p {
-                font-size: 0.85rem;
+                font-size: 0.75rem;
                 color: #bdc3c7;
                 margin: 0;
+                line-height: 1.2;
             }
 
-        /* Menu */
+        /* Menu - Compact */
         .menu {
             flex: 1;
             list-style: none;
@@ -149,53 +161,60 @@
         }
 
         .menu-heading {
-            padding: 20px 20px 8px 20px;
-            font-size: 0.75rem;
+            padding: 12px 15px 6px 15px;
+            font-size: 0.7rem;
             text-transform: uppercase;
             color: #95a5a6;
             font-weight: 600;
-            margin-top: 10px;
-            letter-spacing: 1px;
+            margin-top: 5px;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
         }
 
         .menu li a {
             display: flex;
             align-items: center;
-            padding: 14px 20px;
+            padding: 10px 15px;
             color: #ecf0f1;
             text-decoration: none;
             transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+            font-size: 0.85rem;
+            line-height: 1.2;
+            min-height: 40px;
         }
 
             .menu li a i {
-                width: 20px;
+                width: 18px;
                 text-align: center;
-                margin-right: 15px;
-                font-size: 1.1rem;
+                margin-right: 12px;
+                font-size: 1rem;
+                flex-shrink: 0;
             }
 
             .menu li a:hover {
                 background: #34495e;
                 color: white;
-                border-left: 4px solid #3498db;
-                padding-left: 25px;
+                border-left: 3px solid #3498db;
+                padding-left: 18px;
             }
 
             .menu li a.active {
                 background: #34495e;
                 color: white;
-                border-left: 4px solid #e74c3c;
+                border-left: 3px solid #e74c3c;
                 font-weight: 600;
             }
 
-        /* Sign Out */
+        /* Sign Out - Compact */
         .sign-out {
             margin-top: auto;
-            padding: 20px;
+            padding: 15px;
             border-top: 1px solid #34495e;
             background: #34495e;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
         }
 
             .sign-out a {
@@ -203,30 +222,34 @@
                 align-items: center;
                 color: #ecf0f1;
                 text-decoration: none;
-                padding: 12px 15px;
-                border-radius: 6px;
+                padding: 8px 12px;
+                border-radius: 4px;
                 transition: all 0.3s ease;
                 background: #2c3e50;
-                font-size: 0.95rem;
+                font-size: 0.85rem;
+                line-height: 1.2;
+                width: 100%;
+                min-height: 40px;
             }
 
                 .sign-out a:hover {
                     background: #e74c3c;
                     color: white;
-                    transform: translateX(5px);
+                    transform: translateX(3px);
                 }
 
                 .sign-out a i {
-                    margin-right: 12px;
-                    font-size: 1.1rem;
+                    margin-right: 10px;
+                    font-size: 1rem;
+                    flex-shrink: 0;
                 }
 
-        /* Responsive */
+        /* Responsive Design */
         @@media (max-width: 768px) {
             .sidebar
 
         {
-            width: 280px;
+            width: 250px;
             transform: translateX(-100%);
         }
 
@@ -236,11 +259,12 @@
 
         .main-content {
             margin-left: 0;
-            padding: 20px 15px;
+            padding: 15px;
         }
 
         .toggle-btn {
-            left: 20px;
+            left: 15px;
+            top: 15px;
         }
 
         .sidebar.collapsed {
@@ -255,7 +279,7 @@
 
         /* Scrollbar Styling */
         .menu::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
 
         .menu::-webkit-scrollbar-track {
@@ -264,12 +288,22 @@
 
         .menu::-webkit-scrollbar-thumb {
             background: #3498db;
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
             .menu::-webkit-scrollbar-thumb:hover {
                 background: #2980b9;
             }
+
+        /* Ensure proper spacing for menu items */
+        .menu li {
+            margin: 0;
+        }
+
+        /* Compact spacing between sections */
+        .logo + .user-profile {
+            border-top: none;
+        }
     </style>
 </head>
 <body>
@@ -320,7 +354,6 @@
                 </a>
             </li>
 
-           
             <li>
                 <a asp-area="MaintenanceSubSystem" asp-controller="Maintenance" asp-action="VisitList"
                    class="@(currentController == "Maintenance" && currentAction == "VisitList" ? "active" : "")">
@@ -367,10 +400,10 @@
 
                 // Update toggle button position and icon
                 if (sidebar.classList.contains('collapsed')) {
-                    toggleBtn.style.left = '90px';
+                    toggleBtn.style.left = '75px';
                     toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
                 } else {
-                    toggleBtn.style.left = '300px';
+                    toggleBtn.style.left = '265px';
                     toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
                 }
             } else {
@@ -386,7 +419,7 @@
             } else {
                 sidebar.classList.remove('collapsed');
                 mainContent.classList.remove('sidebar-collapsed');
-                toggleBtn.style.left = '20px';
+                toggleBtn.style.left = '15px';
                 toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
             }
         });
@@ -400,6 +433,7 @@
             });
         });
     </script>
+
     <!-- jQuery (Bootstrap 5 doesn't require it, but let's include it to be safe) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap Bundle with Popper -->

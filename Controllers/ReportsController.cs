@@ -66,12 +66,16 @@ namespace FridgeManagementSystem.Controllers
                 : 0;
 
             kpi.MonthlyRepeatVisits = await _context.MaintenanceVisit
-                .Where(v => v.Status == Models.TaskStatus.Complete &&
-                            v.ScheduledDate.Month == month &&
-                            v.ScheduledDate.Year == year)
-                .GroupBy(v => v.FridgeId)
-                .Where(g => g.Count() > 1)
-                .CountAsync();
+    .Include(v => v.MaintenanceRequest)
+    .Where(v =>
+        v.Status == Models.TaskStatus.Complete &&
+        v.MaintenanceRequest.CompletedDate.HasValue &&
+        v.MaintenanceRequest.CompletedDate.Value.Month == month &&
+        v.MaintenanceRequest.CompletedDate.Value.Year == year)
+    .GroupBy(v => v.FridgeId)
+    .Where(g => g.Count() > 1)
+    .CountAsync();
+
 
             return kpi;
         }

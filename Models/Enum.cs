@@ -2,6 +2,13 @@
 
 namespace FridgeManagementSystem.Models
 {
+    public enum ReportedBy
+    {
+        Customer,
+        Technician
+    }
+
+
     public enum LightingStatus
     {
         

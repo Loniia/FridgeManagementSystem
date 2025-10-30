@@ -590,6 +590,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
 
                 return View("CreateFaultReport", report);
             }
+            report.ReportSource = ReportedBy.Technician;
             report.StatusFilter = "Pending";
             _context.FaultReport.Add(report);
             _context.SaveChanges();
@@ -605,6 +606,7 @@ namespace FridgeManagementSystem.Areas.MaintenanceSubSystem.Controllers
                     .ThenInclude(f => f.Customer)
                 .Include(f => f.MaintenanceVisit)
                     .ThenInclude(v => v.Employee)
+                    .Where(f => f.ReportSource == ReportedBy.Technician)
                 .OrderByDescending(f => f.ReportDate)
                 .ToList();
 
