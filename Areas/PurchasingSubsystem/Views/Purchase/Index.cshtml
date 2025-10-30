@@ -7,9 +7,24 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-@*     <title>@ViewData["Title"] - Frost-Tech Purchasing</title>
- *@    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4bb543;
+            --warning: #ffcc00;
+            --danger: #dc3545;
+            --card-bg: #ffffff;
+            --sidebar-bg: linear-gradient(180deg, #4361ee 0%, #3a0ca3 100%);
+            --header-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 16px;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -18,467 +33,423 @@
         }
 
         body {
-            background-color: #f5f7f9;
-            color: #333;
+            background-color: #f5f7fb;
+            color: var(--dark);
             line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header Styles */
-        header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 20px 0;
+            left: 0;
+            top: 0;
+        }
+
+        .logo-container {
+            padding: 0 25px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
         }
 
         .logo {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
             .logo i {
                 margin-right: 10px;
-                font-size: 32px;
+                font-size: 28px;
+                color: var(--accent);
             }
 
-        nav ul {
-            display: flex;
-            list-style: none;
+        .nav-links {
+            padding: 25px 0;
         }
 
-            nav ul li {
-                margin-left: 25px;
+            .nav-links li {
+                list-style: none;
+                margin-bottom: 8px;
             }
 
-                nav ul li a {
-                    text-decoration: none;
+            .nav-links a {
+                display: flex;
+                align-items: center;
+                padding: 14px 25px;
+                color: rgba(255, 255, 255, 0.85);
+                text-decoration: none;
+                transition: all 0.3s;
+                border-left: 4px solid transparent;
+                font-weight: 500;
+            }
+
+                .nav-links a:hover, .nav-links a.active {
+                    background-color: rgba(255, 255, 255, 0.1);
                     color: white;
-                    font-weight: 500;
-                    transition: color 0.3s;
-                    padding: 5px 10px;
-                    border-radius: 4px;
+                    border-left: 4px solid var(--accent);
                 }
 
-                    nav ul li a:hover, nav ul li a.active {
-                        background-color: rgba(255, 255, 255, 0.1);
-                    }
+            .nav-links i {
+                margin-right: 12px;
+                font-size: 18px;
+                width: 20px;
+                text-align: center;
+            }
 
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header {
+            background: var(--header-bg);
+            color: var(--dark);
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 80px 0;
-            text-align: center;
+            font-weight: bold;
         }
 
-        .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
+        /* Dashboard Content */
+        .dashboard-content {
+            padding: 30px;
+            flex: 1;
         }
 
-        .hero h1 {
-            font-size: 42px;
-            margin-bottom: 20px;
-        }
-
-        .hero p {
-            font-size: 20px;
-            margin-bottom: 30px;
-        }
-
-        /* Dashboard Section */
-        .dashboard {
-            padding: 50px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 40px;
-            color: #2c3e50;
-            font-size: 32px;
-        }
-
-        .cards {
+        /* Quick Actions */
+        .quick-actions {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
         }
 
-        .card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+        .action-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
         }
 
-            .card:hover {
+            .action-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+                border-color: var(--primary);
             }
 
-        .card-header {
-            background: #3498db;
+        .action-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
             color: white;
-            padding: 20px;
-            text-align: center;
+        }
+
+        .action-1 .action-icon {
+            background: var(--primary);
+        }
+
+        .action-2 .action-icon {
+            background: var(--accent);
+        }
+
+        .action-3 .action-icon {
+            background: var(--success);
+        }
+
+        .action-4 .action-icon {
+            background: var(--warning);
+        }
+
+        .action-5 .action-icon {
+            background: #9c27b0;
+        }
+
+        .action-6 .action-icon {
+            background: #ff5722;
+        }
+
+        .action-card h3 {
             font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--dark);
             font-weight: 600;
         }
 
-        .card-body {
-            padding: 25px;
+        .action-card p {
+            color: #6c757d;
+            font-size: 15px;
+            line-height: 1.5;
         }
 
-            .card-body ul {
-                list-style: none;
-                margin-bottom: 20px;
+        /* Responsive Design */
+        @@media screen and (max-width: 992px) {
+            .sidebar {
+                width: 80px;
             }
 
-                .card-body ul li {
-                    padding: 10px 0;
-                    border-bottom: 1px solid #eee;
-                    display: flex;
-                    align-items: center;
-                }
-
-                    .card-body ul li i {
-                        margin-right: 10px;
-                        color: #3498db;
-                    }
-
-                    .card-body ul li:last-child {
-                        border-bottom: none;
-                    }
-
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-            text-align: center;
-            text-decoration: none;
-        }
-
-            .btn:hover {
-                background: #3498db;
+            .logo span, .nav-links span {
+                display: none;
             }
 
-        /* Stats Section */
-        .stats {
-            background: #2c3e50;
-            color: white;
-            padding: 50px 0;
-        }
-
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-box {
-            text-align: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        .stat-number {
-            font-size: 40px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .stat-title {
-            font-size: 18px;
-        }
-
-        /* Footer */
-        footer {
-            background: #1a252f;
-            color: white;
-            padding: 40px 0;
-            text-align: center;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            text-align: left;
-            margin-bottom: 30px;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        .footer-section p, .footer-section a {
-            margin-bottom: 10px;
-            color: #ddd;
-            text-decoration: none;
-            display: block;
-        }
-
-            .footer-section a:hover {
-                color: #3498db;
-            }
-
-        .footer-bottom {
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Responsive Design - FIXED MEDIA QUERY */
-        @@media screen and (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            nav ul {
-                margin-top: 20px;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-                nav ul li {
-                    margin: 10px;
-                }
-
-            .hero h1 {
-                font-size: 32px;
-            }
-
-            .hero p {
-                font-size: 18px;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-        }
-
-        @@media screen and (max-width: 480px) {
             .logo {
-                font-size: 22px;
+                justify-content: center;
             }
 
                 .logo i {
-                    font-size: 26px;
+                    margin-right: 0;
                 }
 
-            nav ul {
-                flex-direction: column;
-                align-items: center;
+            .nav-links a {
+                justify-content: center;
+                padding: 15px;
             }
 
-                nav ul li {
-                    margin: 5px 0;
-                }
-
-            .hero {
-                padding: 50px 0;
+            .nav-links i {
+                margin-right: 0;
+                font-size: 20px;
             }
 
-                .hero h1 {
-                    font-size: 28px;
-                }
+            .main-content {
+                margin-left: 80px;
+            }
+        }
 
-                .hero p {
-                    font-size: 16px;
-                }
+        @@media screen and (max-width: 768px) {
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
-            .section-title {
-                font-size: 26px;
+        @@media screen and (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
             }
 
-            .stat-number {
-                font-size: 32px;
+            .nav-links {
+                display: flex;
+                overflow-x: auto;
+                padding: 15px 0;
+            }
+
+                .nav-links li {
+                    margin-bottom: 0;
+                    flex-shrink: 0;
+                }
+
+                .nav-links a {
+                    padding: 12px 18px;
+                    border-left: none;
+                    border-bottom: 3px solid transparent;
+                }
+
+                    .nav-links a:hover, .nav-links a.active {
+                        border-left: none;
+                        border-bottom: 3px solid var(--accent);
+                    }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .logo-container {
+                padding: 15px;
+            }
+
+            header {
+                padding: 15px 20px;
+            }
+
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .action-card {
+                padding: 25px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-snowflake"></i>
-                    <span>Dynamic Ice </span>
-                </div>
-                
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-snowflake"></i>
+                <span>Dynamic Ice</span>
             </div>
         </div>
-    </header>
+        <ul class="nav-links">
+            <li>
+                <a href="#" class="active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a asp-area="PurchasingSubsystem" asp-controller="PurchaseOrders" asp-action="Index">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Purchase Orders</span>
+                </a>
+            </li>
+            <li>
+                <a asp-area="PurchasingSubsystem" asp-controller="ProcessPurchaseRequests" asp-action="Pending">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Purchase Requests</span>
+                </a>
+            </li>
+            <li>
+                <a asp-area="PurchasingSubsystem" asp-controller="Quotations" asp-action="Index">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Quotations</span>
+                </a>
+            </li>
+            <li>
+                <a asp-area="PurchasingSubsystem" asp-controller="DeliveryNotes" asp-action="Index">
+                    <i class="fas fa-truck-loading"></i>
+                    <span>Delivery Notes</span>
+                </a>
+            </li>
+            <li>
+                <a asp-area="PurchasingSubsystem" asp-controller="ManageSuppliers" asp-action="Index">
+                    <i class="fas fa-handshake"></i>
+                    <span>Suppliers</span>
+                </a>
+            </li>
+        </ul>
+    </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Dynamic-Ice Purchasing Subsystem</h1>
-                <p>Streamlining procurement processes for efficient business operations</p>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header>
+            <div class="user-info">
+                <div class="user-avatar">PM</div>
+                <span>Purchasing Manager</span>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Quick Actions - All Purchasing Functions -->
+            <div class="quick-actions">
+                <!-- Purchase Orders -->
+                <div class="action-card action-1" onclick="location.href='@Url.Action("Index", "PurchaseOrders", new { area = "PurchasingSubsystem" })'">
+                    <div class="action-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3>Purchase Orders</h3>
+                    <p>Create, view and manage all purchase orders. Track order status and history.</p>
+                </div>
+
+                <!-- Purchase Requests -->
+                <div class="action-card action-2" onclick="location.href='@Url.Action("Pending", "ProcessPurchaseRequests", new { area = "PurchasingSubsystem" })'">
+                    <div class="action-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>Purchase Requests</h3>
+                    <p>Review, approve and process purchase requests from different departments.</p>
+                </div>
+
+                <!-- Quotations -->
+                <div class="action-card action-3" onclick="location.href='@Url.Action("Index", "Quotations", new { area = "PurchasingSubsystem" })'">
+                    <div class="action-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h3>Quotations</h3>
+                    <p>Request, compare and manage supplier quotations for procurement needs.</p>
+                </div>
+
+                <!-- Delivery Notes -->
+                <div class="action-card action-4" onclick="location.href='@Url.Action("Index", "DeliveryNotes", new { area = "PurchasingSubsystem" })'">
+                    <div class="action-icon">
+                        <i class="fas fa-truck-loading"></i>
+                    </div>
+                    <h3>Delivery Notes</h3>
+                    <p>Track deliveries, create delivery notes and verify received goods.</p>
+                </div>
+
+                <!-- Suppliers -->
+                <div class="action-card action-5" onclick="location.href='@Url.Action("Index", "ManageSuppliers", new { area = "PurchasingSubsystem" })'">
+                    <div class="action-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Manage Suppliers</h3>
+                    <p>Add new suppliers, view supplier directory and manage contracts.</p>
+                </div>
+
+                <!-- Create New Order -->
+                <div class="action-card action-6" onclick="location.href='@Url.Action("Create", "PurchaseOrders", new { area = "PurchasingSubsystem" })'">
+                    <div class="action-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h3>Create New Order</h3>
+                    <p>Quickly create a new purchase order for immediate procurement needs.</p>
+                </div>
             </div>
         </div>
-    </section>
-
-    <!-- Dashboard Section -->
-    <section class="dashboard">
-        <div class="container">
-            <h2 class="section-title">Purchasing Dashboard</h2>
-            <div class="cards">
-                <!-- Purchase Orders Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-file-invoice-dollar"></i> Purchase Orders
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li><i class="fas fa-list"></i> View all purchase orders</li>
-                            <li><i class="fas fa-plus"></i> Create new purchase order</li>
-                            <li><i class="fas fa-search"></i> Track order status</li>
-                            <li><i class="fas fa-history"></i> Order history</li>
-                        </ul>
-                        <a asp-area="PurchasingSubsystem" asp-controller="PurchaseOrders" asp-action="Index" class="btn">Manage Purchase Orders</a>
-                    </div>
-                </div>
-
-                <!-- Purchase Requests Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-clipboard-list"></i> Purchase Requests
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li><i class="fas fa-plus-circle"></i> Create new request</li>
-                            <li><i class="fas fa-tasks"></i> Approve pending requests</li>
-                            <li><i class="fas fa-history"></i> Request history</li>
-                            <li><i class="fas fa-chart-bar"></i> Request analytics</li>
-                        </ul>
-                        <a asp-area="PurchasingSubsystem" asp-controller="ProcessPurchaseRequests" asp-action="Pending" class="btn">Process Purchase Requests</a>
-                    </div>
-                </div>
-
-                <!-- Quotations Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-file-contract"></i> Quotations
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li><i class="fas fa-envelope"></i> Request quotations</li>
-                            <li><i class="fas fa-inbox"></i> Received quotations</li>
-                            <li><i class="fas fa-check-circle"></i> Approve quotations</li>
-                            <li><i class="fas fa-file-download"></i> Download quotes</li>
-                        </ul>
-                        <a asp-area="PurchasingSubsystem" asp-controller="Quotations" asp-action="Index" class="btn">Manage Quotations</a>
-                    </div>
-                </div>
-
-                <!-- Delivery Notes Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-truck-loading"></i> Delivery Notes
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li><i class="fas fa-eye"></i> View delivery notes</li>
-                            <li><i class="fas fa-plus-square"></i> Create delivery note</li>
-                            <li><i class="fas fa-check-double"></i> Verify deliveries</li>
-                            <li><i class="fas fa-archive"></i> Archive records</li>
-                        </ul>
-                        <a asp-area="PurchasingSubsystem" asp-controller="DeliveryNotes" asp-action="Index" class="btn">Manage Delivery Notes</a>
-                    </div>
-                </div>
-
-                <!-- Suppliers Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-handshake"></i> Suppliers
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li><i class="fas fa-address-book"></i> Supplier directory</li>
-                            <li><i class="fas fa-user-plus"></i> Add new supplier</li>
-                            <li><i class="fas fa-star"></i> Rate suppliers</li>
-                            <li><i class="fas fa-file-alt"></i> Supplier contracts</li>
-                        </ul>
-                        <a asp-area="PurchasingSubsystem" asp-controller="ManageSuppliers" asp-action="Index" class="btn">Manage Suppliers</a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    @* 
- *@
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Dynamic-Ice Purchasing Subsystem</h3>
-                    <p>Building 201, North Campus</p>
-                    <p>Nelson Mandela University, Summerstrand</p>
-                    <p>info@dynamicice.co.za</p>
-                    <p>+27 41 123 4567</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <a asp-controller="PurchaseOrders" asp-action="Index">Purchase Orders</a>
-                    <a asp-controller="PurchaseRequests" asp-action="Index">Purchase Requests</a>
-                    <a asp-controller="Quotations" asp-action="Index">Quotations</a>
-                    <a asp-controller="DeliveryNotes" asp-action="Index">Delivery Notes</a>
-                </div>
-               
-            <div class="footer-bottom">
-                <p>&copy; Dynamic-Ice Purchasing Subsystem. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+    </div>
 
     <script>
-        // Simple JavaScript for interactive elements
-        document.addEventListener('DOMContentLoaded', function () {
-            const cards = document.querySelectorAll('.card');
-
-            cards.forEach(card => {
-                card.addEventListener('click', function () {
-                    const btn = this.querySelector('.btn');
-                    if (btn) {
-                        window.location.href = btn.getAttribute('href');
-                    }
-                });
+        // Set active nav link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function () {
+                document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
             });
         });
     </script>
 </body>
+</html>
