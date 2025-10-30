@@ -58,14 +58,15 @@ namespace FridgeManagementSystem.Services
         }
 
         // --------------------------
-        // Delete customer
+        // Delete customer (SOFT DELETE)
         // --------------------------
         public async Task DeleteCustomerAsync(int id)
         {
             var customer = await _context.Customers.FindAsync(id);
             if (customer != null)
             {
-                _context.Customers.Remove(customer);
+                // SOFT DELETE - don't remove, just set inactive
+                customer.IsActive = false;
                 await _context.SaveChangesAsync();
             }
         }

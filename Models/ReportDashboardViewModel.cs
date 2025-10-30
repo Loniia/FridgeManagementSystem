@@ -15,5 +15,11 @@ namespace FridgeManagementSystem.Models
         // Top 10 Customers
         public List<TopCustomerViewModel> TopCustomers { get; set; } = new List<TopCustomerViewModel>();
 
+        // Fault Report Data
+        public List<FaultReport> RecentFaults { get; set; } = new List<FaultReport>();
+        public int TotalFaultsCount { get; set; }
+        public int PendingFaultsCount { get; set; }
+        public int HighPriorityFaultsCount { get; set; }
+        public int ResolvedFaultsCount { get; set; }
     }
 }

@@ -48,7 +48,6 @@ namespace FridgeManagementSystem.Controllers
         public async Task<IActionResult> Dashboard(string search, string stockFilter = "all")
         {
             var customerId = GetLoggedInCustomerId();
-            // use identity user id for notifications
             var appUserId = await GetCurrentApplicationUserIdAsync();
             var unreadNotifications = await _notificationService.GetUnreadAsync(appUserId);
             ViewBag.UnreadCount = unreadNotifications.Count();
@@ -56,32 +55,36 @@ namespace FridgeManagementSystem.Controllers
             if (customerId == 0)
                 return RedirectToAction("Login", "Account");
 
-            // Fetch all fridges from DB
+            // Fetch all fridges
             var fridgesQuery = _context.Fridge.AsQueryable();
 
-            // Optional search
+            // 🔍 Optional search
             if (!string.IsNullOrEmpty(search))
             {
+                string lowerSearch = search.ToLower();
                 fridgesQuery = fridgesQuery.Where(f =>
-                    (f.Brand != null && f.Brand.Contains(search)) ||
-                    (f.Model != null && f.Model.Contains(search)));
+                    (f.Brand != null && f.Brand.ToLower().Contains(lowerSearch)) ||
+                    (f.Model != null && f.Model.ToLower().Contains(lowerSearch)));
             }
 
-            // Apply stock filter
+            // 🧊 Apply stock filter
             if (!string.IsNullOrEmpty(stockFilter) && stockFilter != "all")
             {
-                if (stockFilter == "in-stock")
+                switch (stockFilter.ToLower())
                 {
-                    fridgesQuery = fridgesQuery.Where(f =>
-                        f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity > 0);
-                }
-                else if (stockFilter == "out-of-stock")
-                {
-                    fridgesQuery = fridgesQuery.Where(f =>
-                        f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity == 0);
+                    case "in-stock":
+                        fridgesQuery = fridgesQuery.Where(f =>
+                            f.Status.ToLower() == "available" && f.Quantity > 0);
+                        break;
+
+                    case "out-of-stock":
+                        fridgesQuery = fridgesQuery.Where(f =>
+                            f.Status.ToLower() == "received" && f.Quantity == 0);
+                        break;
                 }
             }
 
+            // ✅ Fetch data
             var fridges = await fridgesQuery.ToListAsync();
 
             foreach (var f in fridges)
@@ -89,7 +92,7 @@ namespace FridgeManagementSystem.Controllers
                 _logger.LogInformation($"Fridge {f.Brand} {f.Model} - Status in DB: '{f.Status}', Quantity: {f.Quantity}");
             }
 
-            // Map to ViewModel with CORRECTED stock status logic
+            // 🧭 Map to ViewModel
             var fridgeViewModels = fridges.Select(f => new FridgeViewModel
             {
                 FridgeId = f.FridgeId,
@@ -98,13 +101,11 @@ namespace FridgeManagementSystem.Controllers
                 FridgeType = f.FridgeType,
                 Price = f.Price,
                 Quantity = f.Quantity,
-                // ✅ FIXED LOGIC: Only show "In Stock" for Available fridges with quantity > 0
-                // For "Received" status or Available with 0 quantity, show "Out of Stock"
-                Status = (f.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && f.Quantity > 0)
+                Status = (f.Status.ToLower() == "available" && f.Quantity > 0)
                     ? "In Stock"
                     : "Out of Stock",
                 ImageUrl = string.IsNullOrEmpty(f.ImageUrl)
-                    ? $"/images/fridges/fridge{f.FridgeId}.jpg"  // default naming based on ID
+                    ? $"/images/fridges/fridge{f.FridgeId}.jpg"
                     : f.ImageUrl
             }).ToList();
 
@@ -115,7 +116,7 @@ namespace FridgeManagementSystem.Controllers
             };
 
             ViewData["Search"] = search;
-            ViewData["StockFilter"] = stockFilter; // Pass filter to view
+            ViewData["StockFilter"] = stockFilter;
 
             return View(model);
         }
@@ -696,12 +697,6 @@ namespace FridgeManagementSystem.Controllers
                     break;
                 case "Fridge Allocated":
                     order.OrderProgress = OrderStatus.FridgeAllocated;
-                    break;
-                case "Shipped":
-                    order.OrderProgress = OrderStatus.Shipped;
-                    break;
-                case "Delivered":
-                    order.OrderProgress = OrderStatus.Delivered;
                     break;
                 default:
                     order.OrderProgress = OrderStatus.OrderPlaced;
