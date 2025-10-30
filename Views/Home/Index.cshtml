@@ -4,100 +4,389 @@
     ViewData["Title"] = "Home";
 }
 
-<!-- 🏠 Hero / Home Section -->
-<section id="home" class="d-flex align-items-center justify-content-center text-center text-white"
-         style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('/images/home-bg.jpg') center/cover no-repeat; height:100vh;">
+<style>
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2c3e50;
+        --success-color: #27ae60;
+        --accent-color: #9b59b6;
+        --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Global Styles */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    section {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        color: white;
+        text-align: center;
+    }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.05)" points="0,1000 1000,0 1000,1000"/></svg>');
+            background-size: cover;
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        animation: slideUp 1s ease-out;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .hero-subtitle {
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    .hero-btn {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .hero-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+    /* Section Styling */
+    .content-section {
+        padding: 5rem 0;
+        background: #f8f9fa;
+        position: relative;
+    }
+
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+    }
+
+    /* Cards */
+    .service-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-title {
+        font-weight: 700;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+    }
+
+    .card-text {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    /* Team Cards */
+    .team-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+    .team-img {
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .team-card:hover .team-img {
+        transform: scale(1.05);
+    }
+
+    .team-card-body {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .team-name {
+        font-weight: 700;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .team-role {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Contact Section */
+    .contact-section {
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        color: white;
+        padding: 5rem 0;
+    }
+
+    .contact-info {
+        font-size: 1.1rem;
+    }
+
+    .contact-icon {
+        margin-right: 0.5rem;
+        opacity: 0.8;
+    }
+
+    /* Footer */
+    .main-footer {
+        background: var(--secondary-color);
+        color: white;
+        padding: 2rem 0;
+        position: relative;
+    }
+
+        .main-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+
+    /* Animations */
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Staggered animations for cards */
+    .service-card, .team-card {
+        animation: slideUp 0.6s ease-out;
+    }
+
+        .service-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .service-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .service-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .service-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .service-card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .content-section {
+            padding: 3rem 0;
+        }
+    }
+</style>
+
+<!-- 🏠 Hero Section -->
+<section class="hero-section">
     <div class="container">
-        <h1 class="display-4 fw-bold">Welcome to <span class="text-success">Dynamic Ice Inc</span></h1>
-        <p class="lead">Smart control. Efficient storage. Seamless management.</p>
-        <a href="#about" class="btn btn-success btn-lg mt-3">Learn More</a>
+        <div class="hero-content">
+            <h1 class="hero-title">Welcome to <span style="color: #2ecc71;">Dynamic Ice Inc</span></h1>
+            <p class="hero-subtitle">Smart control. Efficient storage. Seamless management.</p>
+            <a href="#about" class="hero-btn">
+                <i class="fas fa-arrow-down me-2"></i>Learn More
+            </a>
+        </div>
     </div>
 </section>
 
 <!-- ℹ️ About Us Section -->
-<section id="about" class="py-5" style="background-color: #f7f7f7;">
+<section id="about" class="content-section">
     <div class="container">
-        <h2 class="fw-bold mb-4 text-center">About Dynamic Ice Inc</h2>
-        <p class="text-muted fs-5 mx-auto mb-3" style="max-width: 800px;">
-            Dynamic Inc Ice is a leading beverage company dedicated to delivering the freshest beverages to our customers.
-            To ensure proper refrigeration, we provide fridges to our clients, helping them keep their products at optimal temperature.
-        </p>
-        <p class="text-muted fs-5 mx-auto" style="max-width: 800px;">
-            Our Fridge Management System is designed to streamline operations, improve customer service, and simplify fridge inventory
-            management. From tracking fridge allocations and monitoring service history to reporting faults efficiently, the system
-            ensures smooth, reliable operations for both our team and our valued customers.
-        </p>
+        <h2 class="section-title">About Dynamic Ice Inc</h2>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="service-card p-4">
+                    <p class="card-text fs-5 mb-4">
+                        Dynamic Ice Inc is a leading beverage company dedicated to delivering the freshest beverages to our customers.
+                        To ensure proper refrigeration, we provide fridges to our clients, helping them keep their products at optimal temperature.
+                    </p>
+                    <p class="card-text fs-5">
+                        Our Fridge Management System is designed to streamline operations, improve customer service, and simplify fridge inventory
+                        management. From tracking fridge allocations and monitoring service history to reporting faults efficiently, the system
+                        ensures smooth, reliable operations for both our team and our valued customers.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 <!-- 🧰 Services Section -->
-<section id="services" class="py-5" style="background-color: #f7f7f7;">
-    <div class="container text-center">
-        <h2 class="fw-bold mb-5">Our Services</h2>
+<section id="services" class="content-section">
+    <div class="container">
+        <h2 class="section-title">Our Services</h2>
         <div class="row g-4">
 
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <i class="bi bi-people display-4 text-success mb-3"></i>
-                        <h5 class="card-title">Customer Management</h5>
-                        <p class="text-muted">
-                            Manage customer profiles, allocate fridges, and track fridge distribution efficiently 
-                            to ensure operational excellence and customer satisfaction.
-                        </p>
-                    </div>
+                <div class="service-card p-4 text-center">
+                    <i class="fas fa-users card-icon"></i>
+                    <h5 class="card-title">Customer Management</h5>
+                    <p class="card-text">
+                        Manage customer profiles, allocate fridges, and track fridge distribution efficiently
+                        to ensure operational excellence and customer satisfaction.
+                    </p>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <i class="bi bi-box-seam display-4 text-success mb-3"></i>
-                        <h5 class="card-title">Inventory Control</h5>
-                        <p class="text-muted">
-                            Keep real-time track of fridges in stock, new deliveries, and scrapped units. 
-                            Automatically generate purchase requests when stock is low.
-                        </p>
-                    </div>
+                <div class="service-card p-4 text-center">
+                    <i class="fas fa-boxes card-icon"></i>
+                    <h5 class="card-title">Inventory Control</h5>
+                    <p class="card-text">
+                        Keep real-time track of fridges in stock, new deliveries, and scrapped units.
+                        Automatically generate purchase requests when stock is low.
+                    </p>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <i class="bi bi-tools display-4 text-success mb-3"></i>
-                        <h5 class="card-title">Maintenance & Fault Reporting</h5>
-                        <p class="text-muted">
-                            Schedule and manage maintenance visits, process fault reports, and ensure fridges are serviced promptly.
-                            Customers can view upcoming visits and fridge service history.
-                        </p>
-                    </div>
+                <div class="service-card p-4 text-center">
+                    <i class="fas fa-tools card-icon"></i>
+                    <h5 class="card-title">Maintenance & Fault Reporting</h5>
+                    <p class="card-text">
+                        Schedule and manage maintenance visits, process fault reports, and ensure fridges are serviced promptly.
+                        Customers can view upcoming visits and fridge service history.
+                    </p>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <i class="bi bi-receipt display-4 text-success mb-3"></i>
-                        <h5 class="card-title">Purchasing & Supplier Management</h5>
-                        <p class="text-muted">
-                            Streamline procurement from suppliers, manage purchase requests and orders, 
-                            and ensure timely delivery of fridges to maintain stock levels.
-                        </p>
-                    </div>
+                <div class="service-card p-4 text-center">
+                    <i class="fas fa-receipt card-icon"></i>
+                    <h5 class="card-title">Purchasing & Supplier Management</h5>
+                    <p class="card-text">
+                        Streamline procurement from suppliers, manage purchase requests and orders,
+                        and ensure timely delivery of fridges to maintain stock levels.
+                    </p>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <i class="bi bi-graph-up display-4 text-success mb-3"></i>
-                        <h5 class="card-title">Reporting & Analytics</h5>
-                        <p class="text-muted">
-                            Gain insights into fridge allocations, maintenance history, customer interactions, 
-                            and inventory levels to optimize operations.
-                        </p>
-                    </div>
+                <div class="service-card p-4 text-center">
+                    <i class="fas fa-chart-line card-icon"></i>
+                    <h5 class="card-title">Reporting & Analytics</h5>
+                    <p class="card-text">
+                        Gain insights into fridge allocations, maintenance history, customer interactions,
+                        and inventory levels to optimize operations.
+                    </p>
                 </div>
             </div>
 
@@ -105,48 +394,47 @@
     </div>
 </section>
 
-
 <!-- 👨‍💼 Team Section -->
-<section id="team" class="py-5" style="background-color: #f7f7f7;">
-    <div class="container text-center">
-        <h2 class="fw-bold mb-5">Meet Our Team</h2>
+<section id="team" class="content-section">
+    <div class="container">
+        <h2 class="section-title">Meet Our Team</h2>
         <div class="row justify-content-center g-4">
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                   <img src="~/images/idah1.jpg" class="card-img-top rounded-top" alt="Team Member 1">
-                    <div class="card-body">
-                        <h5 class="card-title mb-0">Idah Munyai.</h5>
-                        <p class="text-muted">Customer Manager</p>
+                <div class="team-card">
+                    <img src="~/images/idah1.jpg" class="team-img w-100" alt="Idah Munyai">
+                    <div class="team-card-body">
+                        <h5 class="team-name">Idah Munyai</h5>
+                        <p class="team-role">Customer Manager</p>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <img src="/images/team2.jpg" class="card-img-top rounded-top" alt="Team Member 2">
-                    <div class="card-body">
-                        <h5 class="card-title mb-0">Onke Boyce.</h5>
-                        <p class="text-muted">Fault Technician</p>
+                <div class="team-card">
+                    <img src="~/images/Onke2 .jpg" class="team-img w-100" alt="Onke Boyce">
+                    <div class="team-card-body">
+                        <h5 class="team-name">Onke Boyce</h5>
+                        <p class="team-role">Fault Technician</p>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <img src="/images/Kay.JPG" class="card-img-top rounded-top" alt="Team Member 3">
-                    <div class="card-body">
-                        <h5 class="card-title mb-0">Kayla Williams.</h5>
-                        <p class="text-muted">Maintenance Technician</p>
+                <div class="team-card">
+                    <img src="/images/Kay.JPG" class="team-img w-100" alt="Kayla Williams">
+                    <div class="team-card-body">
+                        <h5 class="team-name">Kayla Williams</h5>
+                        <p class="team-role">Maintenance Technician</p>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <img src="/images/team4.jpg" class="card-img-top rounded-top" alt="Team Member 4">
-                    <div class="card-body">
-                        <h5 class="card-title mb-0">Lonia Tshokotshela.</h5>
-                        <p class="text-muted">Purchasing Manager</p>
+                <div class="team-card">
+                    <img src="/images/team4.jpg" class="team-img w-100" alt="Lonia Tshokotshela">
+                    <div class="team-card-body">
+                        <h5 class="team-name">Lonia Tshokotshela</h5>
+                        <p class="team-role">Purchasing Manager</p>
                     </div>
                 </div>
             </div>
@@ -155,35 +443,68 @@
 </section>
 
 <!-- 📞 Contact Section -->
-<section id="contact" class="py-5">
+<section id="contact" class="contact-section">
     <div class="container text-center">
-        <h2 class="fw-bold mb-4">Contact Us</h2>
-        <p class="text-muted fs-5">We’d love to hear from you! Get in touch with us for any questions or collaboration ideas.</p>
+        <h2 class="section-title" style="background: linear-gradient(135deg, #fff, #e3f2fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Contact Us</h2>
+        <p class="fs-5 mb-4" style="opacity: 0.9;">We'd love to hear from you! Get in touch with us for any questions or collaboration ideas.</p>
 
-        <div class="mt-4">
-            <p class="mb-1"><i class="bi bi-envelope text-success me-2"></i> info@fridgemanagement.com</p>
-            <p class="mb-1"><i class="bi bi-telephone text-success me-2"></i> +27 67 123 4567</p>
-            <p><i class="bi bi-geo-alt text-success me-2"></i> 123 Innovation Street, Pretoria, South Africa</p>
+        <div class="contact-info">
+            <p class="mb-3">
+                <i class="fas fa-envelope contact-icon"></i>info@fridgemanagement.com
+            </p>
+            <p class="mb-3">
+                <i class="fas fa-phone contact-icon"></i>+27 67 123 4567
+            </p>
+            <p class="mb-0">
+                <i class="fas fa-map-marker-alt contact-icon"></i>123 Innovation Street, Pretoria, South Africa
+            </p>
         </div>
     </div>
 </section>
 
 <!-- 🌟 Footer -->
-<footer class="text-center py-4" style="background-color: #f7f7f7; border-top: 1px solid #e0e0e0;">
-    <p class="mb-0 text-muted">&copy; 2025 Dynamic Ice Inc. | Designed with ❤️ By Us to You.</p>
+<footer class="main-footer text-center">
+    <div class="container">
+        <p class="mb-0">&copy; 2025 Dynamic Ice Inc. | Designed with ❤️ By Us to You.</p>
+    </div>
 </footer>
 
 @section Scripts {
     <script>
-        // Smooth scrolling enhancement for internal links
+        // Enhanced smooth scrolling with offset for fixed header
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const offset = 80; // Adjust based on your header height
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
                 }
             });
+        });
+
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'slideUp 0.6s ease-out forwards';
+                }
+            });
+        }, observerOptions);
+
+        // Observe service and team cards
+        document.querySelectorAll('.service-card, .team-card').forEach(card => {
+            observer.observe(card);
         });
     </script>
 }

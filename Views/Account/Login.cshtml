@@ -6,106 +6,398 @@
 }
 
 <style>
-    .alert {
-        animation: fadeInDown 0.5s ease;
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2c3e50;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
     }
 
-    @@keyframes fadeInDown {
+    .login-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.05)" points="0,1000 1000,0 1000,1000"/></svg>');
+            background-size: cover;
+        }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+        max-width: 450px;
+        width: 100%;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .logo-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .logo {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        animation: float 3s ease-in-out infinite;
+    }
+
+        .logo i {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+    .brand-text {
+        color: white;
+        margin-top: 1rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .brand-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    .card-body {
+        padding: 2.5rem;
+    }
+
+    .role-tabs {
+        display: flex;
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 5px;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .role-tab {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+        .role-tab.active {
+            color: white;
+        }
+
+        .role-tab:not(.active) {
+            color: #6c757d;
+        }
+
+    .role-tab-slider {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        height: calc(100% - 10px);
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .form-floating {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.1);
+            transform: translateY(-2px);
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+    .customer-links {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .alert {
+        border-radius: 12px;
+        border: none;
+        animation: slideInDown 0.5s ease;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Animations */
+    @@keyframes slideUp {
         from {
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(30px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .login-card {
+            margin: 1rem;
+            max-width: none;
+        }
+
+        .card-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .role-tab {
+            padding: 10px 12px;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        color: transparent;
+    }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-right-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+
+    @@keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header bg-primary text-white text-center">
-                    <h3 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Login</h3>
+<div class="login-container">
+    <div class="login-card">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <img src="/images/logo.jpg" alt="Fridge Management System Logo" class="logo-img"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+            <div class="brand-subtitle">Smart control. Efficient storage. Seamless management.</div>
+        </div>
+
+        <div class="card-body">
+            @if (TempData["LoginError"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    @TempData["LoginError"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <div class="card-body">
+            }
 
-                    @if (TempData["LoginError"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            @TempData["LoginError"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-
-                    <!-- Role Tabs -->
-                    <div class="d-flex justify-content-center mb-4">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-primary active tab" data-role="Customer">
-                                <i class="fas fa-user"></i> Customer
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary tab" data-role="Employee">
-                                <i class="fas fa-user-tie"></i> Employee
-                            </button>
-                            <button type="button" class="btn btn-outline-dark tab" data-role="Administrator">
-                                <i class="fas fa-user-shield"></i> Admin
-                            </button>
-                        </div>
-                    </div>
-
-                    <form asp-action="Login" method="post">
-                        <input type="hidden" asp-for="Role" id="role" value="Customer" />
-
-                        <div class="mb-3">
-                            <label asp-for="Username" class="form-label"></label>
-                            <input asp-for="Username" class="form-control form-control-lg" placeholder="Enter username" />
-                            <span asp-validation-for="Username" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label"></label>
-                            <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Enter password" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-check mb-3">
-                            <input asp-for="RememberMe" class="form-check-input" />
-                            <label asp-for="RememberMe" class="form-check-label">Remember me</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
-                            <i class="fas fa-sign-in-alt me-2"></i> Login
-                        </button>
-
-                        <!-- Customer-only links -->
-                        <div id="customer-links" class="text-center">
-                            <small>
-                                Not a member? <a asp-controller="Account" asp-action="RegisterCustomer">Register</a> |
-                                <a asp-controller="Account" asp-action="ForgetPassword">Forgot Password?</a>
-                            </small>
-                        </div>
-
-                        <!-- Display errors -->
-                        <div class="text-danger mt-3">
-                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                            {
-                                <div>@error.ErrorMessage</div>
-                            }
-                        </div>
-                    </form>
-
-                </div>
+            <!-- Role Tabs with Slider -->
+            <div class="role-tabs">
+                <div class="role-tab-slider" id="tabSlider"></div>
+                <button type="button" class="role-tab active" data-role="Customer">
+                    <i class="fas fa-user me-2"></i>Customer
+                </button>
+                <button type="button" class="role-tab" data-role="Employee">
+                    <i class="fas fa-user-tie me-2"></i>Employee
+                </button>
+                <button type="button" class="role-tab" data-role="Administrator">
+                    <i class="fas fa-user-shield me-2"></i>Admin
+                </button>
             </div>
+
+            <form asp-action="Login" method="post" id="loginForm">
+                <input type="hidden" asp-for="Role" id="role" value="Customer" />
+
+                <div class="form-floating">
+                    <input asp-for="Username" class="form-control" placeholder="Enter username" />
+                    <label asp-for="Username"><i class="fas fa-user me-2"></i>Username</label>
+                    <span asp-validation-for="Username" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="form-floating">
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Enter password" />
+                    <label asp-for="Password"><i class="fas fa-lock me-2"></i>Password</label>
+                    <span asp-validation-for="Password" class="text-danger small mt-1"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label">
+                        <i class="fas fa-history me-2"></i>Remember me
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary login-btn w-100 mb-4" id="loginButton">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </button>
+
+                <!-- Customer-only links -->
+                <div id="customer-links" class="customer-links">
+                    <small class="text-muted">
+                        <a asp-controller="Account" asp-action="RegisterCustomer" class="text-decoration-none me-3">
+                            <i class="fas fa-user-plus me-1"></i>Create Account
+                        </a>
+                        <a asp-controller="Account" asp-action="ForgetPassword" class="text-decoration-none">
+                            <i class="fas fa-key me-1"></i>Forgot Password?
+                        </a>
+                    </small>
+                </div>
+
+
+                <!-- Display errors -->
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mt-3"></div>
+            </form>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        const tabs = document.querySelectorAll('.tab');
+        const tabs = document.querySelectorAll('.role-tab');
+        const tabSlider = document.getElementById('tabSlider');
         const roleInput = document.getElementById("role");
         const customerLinks = document.getElementById("customer-links");
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+
+        // Initialize tab slider position
+        updateTabSlider();
 
         tabs.forEach(tab => {
             tab.addEventListener('click', function () {
@@ -115,17 +407,41 @@
                 const selectedRole = this.dataset.role;
                 roleInput.value = selectedRole;
 
+                updateTabSlider();
+
+                // Show/hide customer links with animation
                 if (selectedRole === 'Customer') {
                     customerLinks.style.display = 'block';
+                    customerLinks.style.animation = 'fadeIn 0.3s ease';
                 } else {
                     customerLinks.style.display = 'none';
                 }
             });
         });
 
+        function updateTabSlider() {
+            const activeTab = document.querySelector('.role-tab.active');
+            if (activeTab) {
+                const tabRect = activeTab.getBoundingClientRect();
+                const tabsRect = activeTab.parentElement.getBoundingClientRect();
+
+                tabSlider.style.width = `${tabRect.width}px`;
+                tabSlider.style.left = `${tabRect.left - tabsRect.left}px`;
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', updateTabSlider);
+
+        // Form submission loading state
+        loginForm.addEventListener('submit', function() {
+            loginButton.classList.add('btn-loading');
+            loginButton.disabled = true;
+        });
+
+        // Initialize based on current role
         if (roleInput.value !== 'Customer') {
             customerLinks.style.display = 'none';
         }
     </script>
 }
-
