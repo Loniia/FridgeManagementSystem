@@ -13,19 +13,19 @@ using System.Threading.Tasks;
 namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 {
     [Area("CustomerManagementSubSystem")]
-    public class CustomerManagemntHomeController : Controller
+    public class CustomerManagementHomeController : Controller
     {
         private readonly FridgeDbContext _context;
         private readonly CustomerService _customerService;
         private readonly IMaintenanceRequestService _mrService;
-        private readonly ILogger<CustomerManagemntHomeController> _logger;
+        private readonly ILogger<CustomerManagementHomeController> _logger;
         private const int LowStockThreshold = 5;
 
-        public CustomerManagemntHomeController(
+        public CustomerManagementHomeController(
             FridgeDbContext context,
             CustomerService customerService,
             IMaintenanceRequestService mrService,
-            ILogger<CustomerManagemntHomeController> logger)
+            ILogger<CustomerManagementHomeController> logger)
         {
             _context = context;
             _customerService = customerService;
@@ -33,9 +33,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             _logger = logger;
         }
 
-        // ===========================
-        // Dashboard/Home
-        // ===========================
+        // =========================== Dashboard/Home ===========================
         public async Task<IActionResult> Index()
         {
             var model = new DashboardViewModel
@@ -52,9 +50,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return View(model);
         }
 
-        // ===========================
-        // Low Stock Alert
-        // ===========================
+        // =========================== Low Stock Alert ===========================
         private async Task<List<Fridge>> GetLowStockFridges()
         {
             return await _context.Fridge
@@ -62,32 +58,50 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 .ToListAsync();
         }
 
-        // ===========================
-        // New Customers
-        // ===========================
+        // =========================== New Customers ===========================
         private async Task<List<Customer>> GetNewCustomers()
         {
             var last30Days = DateTime.Now.AddDays(-30);
-            return await _context.Customers
-                .Where(c => c.RegistrationDate.ToDateTime(TimeOnly.MinValue) >= last30Days)
+
+            // Fetch all active customers first
+            var customers = await _context.Customers
+                .Where(c => c.IsActive)
                 .ToListAsync();
+
+            // Now filter using DateOnly in memory
+            return customers
+                .Where(c => c.RegistrationDate >= DateOnly.FromDateTime(last30Days))
+                .ToList();
         }
 
-        // ===========================
-        // Pending Allocations
-        // ===========================
-        private async Task<List<FridgeAllocation>> GetPendingAllocations()
+
+        // =========================== Pending Allocations ===========================
+        private async Task<List<PendingAllocationViewModel>> GetPendingAllocations()
         {
-            return await _context.FridgeAllocation
+            var allocations = await _context.FridgeAllocation
                 .Include(fa => fa.Customer)
                 .Include(fa => fa.Fridge)
+                .Include(fa => fa.OrderItem)
                 .Where(fa => fa.ReturnDate == null || fa.ReturnDate > DateOnly.FromDateTime(DateTime.Today))
                 .ToListAsync();
+
+            return allocations.Select(fa => new PendingAllocationViewModel
+            {
+                CustomerId = fa.CustomerID,
+                CustomerName = fa.Customer?.FullName ?? "N/A",
+                OrderId = fa.OrderItem?.OrderId ?? 0,
+                OrderItemId = fa.OrderItemId,
+                FridgeId = fa.FridgeId,
+                FridgeBrand = fa.Fridge?.Brand ?? "N/A",
+                FridgeModel = fa.Fridge?.Model ?? "N/A",
+                QuantityAllocated = fa.QuantityAllocated,
+                QuantityOrdered = fa.OrderItem?.Quantity ?? 0,
+                QuantityPending = (fa.OrderItem?.Quantity ?? 0) - fa.QuantityAllocated,
+                Status = ((fa.OrderItem?.Quantity ?? 0) - fa.QuantityAllocated) > 0 ? "Pending" : "Allocated"
+            }).ToList();
         }
 
-        // ===========================
-        // Fridge Summary
-        // ===========================
+        // =========================== Fridge Summary ===========================
         private async Task<FridgeSummaryViewModel> GetFridgeSummary()
         {
             var fridges = await _context.Fridge.ToListAsync();
@@ -102,29 +116,23 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             };
         }
 
-        // ===========================
-        // Customers grouped by location
-        // ===========================
-        private async Task<Dictionary<string, IEnumerable<Customer>>> GetCustomersByLocation()
+        // =========================== Customers grouped by location ===========================
+        private async Task<Dictionary<string, List<Customer>>> GetCustomersByLocation()
         {
             var customers = await _context.Customers.ToListAsync();
             var locations = await _context.Locations.ToListAsync();
 
-            var result = new Dictionary<string, IEnumerable<Customer>>();
+            var result = new Dictionary<string, List<Customer>>();
 
             foreach (var location in locations)
             {
-                var list = customers.Where(c => c.LocationId == location.LocationId).ToList();
-                // Use City + Province as key since Location has no Name
-                result.Add($"{location.City}, {location.Province}", list);
+                result.Add(location.Address, customers.Where(c => c.LocationId == location.LocationId).ToList());
             }
 
             return result;
         }
 
-        // ===========================
-        // Pending Purchase Requests
-        // ===========================
+        // =========================== Pending Purchase Requests ===========================
         private async Task<List<PurchaseRequest>> GetPendingPurchaseRequests()
         {
             return await _context.PurchaseRequests
@@ -134,9 +142,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 .ToListAsync();
         }
 
-        // ===========================
-        // Pending Maintenance Requests
-        // ===========================
+        // =========================== Pending Maintenance Requests ===========================
         private async Task<List<MaintenanceRequest>> GetPendingMaintenanceRequests()
         {
             return await _context.MaintenanceRequest

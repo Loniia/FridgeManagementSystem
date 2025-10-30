@@ -1,4 +1,5 @@
 ﻿@model FridgeManagementSystem.ViewModels.DashboardViewModel
+@using FridgeManagementSystem.ViewModels
 
 @{
     ViewData["Title"] = "Customer Management Dashboard";
@@ -7,72 +8,93 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <div class="container-fluid mt-4">
-
     <h2 class="mb-4 fw-bold text-center text-secondary">Customer Management Dashboard</h2>
 
     <!-- ================== Alerts Row ================== -->
     <div class="row g-3 mb-4">
 
         <!-- Low Stock -->
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="card text-white bg-danger h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Low Stock Fridges</h5>
-                    <p class="card-text fs-4">@Model.LowStockFridges?.Count() ?? 0</p>
-                    <a class="btn btn-light btn-sm" data-bs-toggle="collapse" href="#lowStockTable" role="button">View</a>
+                    <p class="card-text fs-4">@Model.LowStockFridges?.Count()</p>
+                    <button class="btn btn-light btn-sm toggle-btn" type="button" data-bs-toggle="collapse" data-bs-target="#lowStockTable" aria-expanded="false" aria-controls="lowStockTable">
+                        View
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- New Customers -->
-        <div class="col-md-2">
+                <!-- New Customers -->
+        <div class="col-md-3">
             <div class="card text-white bg-success h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">New Customers (30 Days)</h5>
-                    <p class="card-text fs-4">@Model.NewCustomers?.Count() ?? 0</p>
-                    <a class="btn btn-light btn-sm" data-bs-toggle="collapse" href="#newCustomersTable" role="button">View</a>
+                    <p class="card-text fs-4">@Model.NewCustomers?.Count() </p>
+                    <button class="btn btn-light btn-sm toggle-btn" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#newCustomersTable"
+                            aria-expanded="false"
+                            aria-controls="newCustomersTable">
+                        View
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Pending Allocations -->
-        <div class="col-md-2">
-            <div class="card text-white bg-warning h-100 shadow-sm">
+        <div class="col-md-3">
+            <div class="card text-dark bg-warning h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Pending Allocations</h5>
-                    <p class="card-text fs-4">@Model.PendingAllocations?.Count() ?? 0</p>
-                    <a class="btn btn-light btn-sm" data-bs-toggle="collapse" href="#pendingAllocationsTable" role="button">View</a>
+                    <p class="card-text fs-4">@Model.PendingAllocations?.Count() </p>
+                    <button class="btn btn-light btn-sm toggle-btn" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#pendingAllocationsTable"
+                            aria-expanded="false"
+                            aria-controls="pendingAllocationsTable">
+                        View
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Pending Purchase Requests -->
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="card text-white bg-primary h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Pending Purchase Requests</h5>
-                    <p class="card-text fs-4">@Model.PendingPurchaseRequests?.Count() ?? 0</p>
-                    <a class="btn btn-light btn-sm" data-bs-toggle="collapse" href="#pendingPRTable" role="button">View</a>
+                    <p class="card-text fs-4">@Model.PendingPurchaseRequests?.Count()</p>
+                    <button class="btn btn-light btn-sm toggle-btn" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#pendingPRTable"
+                            aria-expanded="false"
+                            aria-controls="pendingPRTable">
+                        View
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Fridge Summary -->
-        <div class="col-md-4">
-            <div class="card text-white bg-info h-100 shadow-sm">
+
+    <!-- ================== Fridge Summary ================== -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white fw-bold">Fridge Summary</div>
                 <div class="card-body">
-                    <h5 class="card-title">Fridge Summary</h5>
-                    <p class="card-text fs-6">
-                        Total: @Model.FridgeSummary?.Count() ?? 0<br />
-                        Available: @Model.FridgeSummary?.Count(f => f.Status == "Available") ?? 0<br />
-                        Allocated: @Model.FridgeSummary?.Count(f => f.Status == "Allocated") ?? 0<br />
-                        Damaged: @Model.FridgeSummary?.Count(f => f.Status == "Damaged") ?? 0<br />
-                        Scrapped: @Model.FridgeSummary?.Count(f => f.Status == "Scrapped") ?? 0
+                    <p class="card-text fs-6 mb-0">
+                        Total: @Model.FridgeSummary?.TotalFridges<br />
+                        Available: @Model.FridgeSummary?.Available<br />
+                        Allocated: @Model.FridgeSummary?.Allocated<br />
+                        Damaged: @Model.FridgeSummary?.Damaged<br />
+                        Scrapped: @Model.FridgeSummary?.Scrapped
                     </p>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- ================== Tables Row ================== -->
@@ -129,7 +151,7 @@
                                     <td>@c.FullName</td>
                                     <td>@c.Email</td>
                                     <td>@c.PhoneNumber</td>
-                                    <td>@c.Location?.City ?? "N/A"</td>
+                                    <td>@c.Location?.Address</td>
                                 </tr>
                             }
                         </tbody>
@@ -155,15 +177,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var p in Model.PendingAllocations ?? Enumerable.Empty<FridgeAllocation>())
+                            @foreach (var p in Model.PendingAllocations ?? Enumerable.Empty<PendingAllocationViewModel>())
                             {
                                 <tr>
-                                    <td>@p.Customer?.FullName ?? "N/A"</td>
-                                    <td>@p.Fridge?.Brand @p.Fridge?.Model</td>
+                                    <td>@p.CustomerName</td>
+                                    <td>@p.FridgeBrand @p.FridgeModel</td>
                                     <td>@p.QuantityOrdered</td>
                                     <td>@p.QuantityAllocated</td>
-                                    <td>@(p.QuantityOrdered - p.QuantityAllocated)</td>
-                                    <td>@(p.QuantityAllocated < p.QuantityOrdered ? "Pending" : "Allocated")</td>
+                                    <td>@p.QuantityPending</td>
+                                    <td>@p.Status</td>
                                 </tr>
                             }
                         </tbody>
@@ -206,5 +228,113 @@
 
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const collapseElements = document.querySelectorAll('.collapse');
+
+        // When one section opens, close others (accordion behavior)
+        collapseElements.forEach(collapse => {
+            collapse.addEventListener('show.bs.collapse', function () {
+                collapseElements.forEach(otherCollapse => {
+                    if (otherCollapse !== this && otherCollapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(otherCollapse);
+                        bsCollapse.hide();
+                    }
+                });
+            });
+        });
+
+        // Close all when clicking outside
+        document.addEventListener('click', function (e) {
+            const isToggleButton = e.target.closest('.toggle-btn');
+            const isInsideCollapse = e.target.closest('.collapse');
+
+            if (!isToggleButton && !isInsideCollapse) {
+                collapseElements.forEach(collapse => {
+                    if (collapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                        bsCollapse.hide();
+                    }
+                });
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                collapseElements.forEach(collapse => {
+                    if (collapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                        bsCollapse.hide();
+                    }
+                });
+            }
+        });
+    });
+</script>
+@* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all toggle buttons and collapse elements
+        const toggleButtons = document.querySelectorAll('.toggle-btn');
+        const collapseElements = document.querySelectorAll('.collapse');
+
+        // Add click event to each toggle button
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.stopPropagation();
+
+                const targetId = this.getAttribute('data-bs-target');
+                const targetCollapse = document.querySelector(targetId);
+
+                // Check if the target is currently shown
+                const isCurrentlyShown = targetCollapse.classList.contains('show');
+
+                // Close all collapse elements first
+                collapseElements.forEach(collapse => {
+                    const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                });
+
+                // If the clicked section wasn't shown, open it
+                if (!isCurrentlyShown) {
+                    const bsTargetCollapse = new bootstrap.Collapse(targetCollapse, {
+                        toggle: true
+                    });
+                }
+            });
+        });
+
+        // Close all collapses when clicking anywhere else on the page
+        document.addEventListener('click', function (e) {
+            // Check if click is outside any toggle button and outside any collapse content
+            const isToggleButton = e.target.closest('.toggle-btn');
+            const isInsideCollapse = e.target.closest('.collapse');
+
+            if (!isToggleButton && !isInsideCollapse) {
+                // Close all collapse elements
+                collapseElements.forEach(collapse => {
+                    const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                });
+            }
+        });
+
+        // Also close when pressing Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                collapseElements.forEach(collapse => {
+                    const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                });
+            }
+        });
+    });
+</script> *@

@@ -188,112 +188,151 @@
     </div>
 
     <!-- Customer Management Reports - Compact -->
-    <section class="mb-4">
+    <!-- Customer Management Reports Section -->
+    <section class="mb-5">
         <div class="card">
             <div class="card-header bg-success text-white">
-                <i class="fas fa-users"></i>Customer Management Reports
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>Customer Management Reports
+                </h3>
             </div>
             <div class="card-body">
-                <!-- Compact Summary Cards -->
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <div class="card text-white bg-primary summary-card">
-                            <div class="card-body text-center p-2">
-                                <h6 class="card-title">Total Customers</h6>
-                                <h2 id="totalCustomers" class="mb-1">0</h2>
-                                <small>Active & Inactive</small>
+                <!-- Simple Overview Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body text-center">
+                                <i class="fas fa-refrigerator fa-2x mb-2"></i>
+                                <h4 class="card-title">Total Fridges</h4>
+                                <h2 class="mb-0" id="totalFridges">156</h2>
+                                <small>In System</small>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-success summary-card">
-                            <div class="card-body text-center p-2">
-                                <h6 class="card-title">Active Customers</h6>
-                                <h2 id="activeCustomers" class="mb-1">0</h2>
-                                <small>With Allocations</small>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body text-center">
+                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                <h4 class="card-title">Allocated</h4>
+                                <h2 class="mb-0" id="allocatedFridges">89</h2>
+                                <small>With Customers</small>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-warning summary-card">
-                            <div class="card-body text-center p-2">
-                                <h6 class="card-title">Total Allocated</h6>
-                                <h2 id="totalAllocated" class="mb-1">0</h2>
-                                <small>Currently Active</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-white bg-info summary-card">
-                            <div class="card-body text-center p-2">
-                                <h6 class="card-title">Available Fridges</h6>
-                                <h2 id="availableFridges" class="mb-1">0</h2>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body text-center">
+                                <i class="fas fa-warehouse fa-2x mb-2"></i>
+                                <h4 class="card-title">Available</h4>
+                                <h2 class="mb-0" id="availableFridges">45</h2>
                                 <small>In Stock</small>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Compact Charts Row -->
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <div class="card h-100">
-                            <div class="card-header py-2">
-                                <h6 class="card-title mb-0">Customer Distribution by Location</h6>
-                            </div>
-                            <div class="card-body p-2">
-                                <canvas id="locationDistributionChart" height="150"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="card-header py-2">
-                                <h6 class="card-title mb-0">Customer Status</h6>
-                            </div>
-                            <div class="card-body p-2">
-                                <canvas id="customerStatusChart" height="150"></canvas>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <h4 class="card-title">Active Customers</h4>
+                                <h2 class="mb-0" id="activeCustomers">67</h2>
+                                <small>With Fridges</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Compact Table -->
-                <div class="row mb-3">
-                    <div class="col-md-12">
+                <!-- Top Customers and Fridge Status -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header py-2">
-                                <h6 class="card-title mb-0">Fridge Allocation Summary</h6>
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-trophy me-2"></i>Top 5 Customers
+                                </h5>
                             </div>
-                            <div class="card-body p-2">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-bordered">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Status</th>
-                                                <th class="text-end">Count</th>
-                                                <th class="text-end">Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="fridgeAllocationSummary">
-                                            <tr><td colspan="3" class="text-center">Loading data...</td></tr>
-                                        </tbody>
-                                    </table>
+                            <div class="card-body">
+                                <div id="topCustomersList">
+                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-3">1</span>
+                                            <div>
+                                                <h6 class="mb-1">ABC Restaurant</h6>
+                                                <small class="text-muted">Downtown</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success">8 fridges</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-3">2</span>
+                                            <div>
+                                                <h6 class="mb-1">XYZ Hotel</h6>
+                                                <small class="text-muted">City Center</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success">6 fridges</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-3">3</span>
+                                            <div>
+                                                <h6 class="mb-1">City Hospital</h6>
+                                                <small class="text-muted">Medical District</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success">5 fridges</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-3">4</span>
+                                            <div>
+                                                <h6 class="mb-1">Tech Campus</h6>
+                                                <small class="text-muted">University Area</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success">4 fridges</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-2">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-3">5</span>
+                                            <div>
+                                                <h6 class="mb-1">Food Market</h6>
+                                                <small class="text-muted">Shopping Mall</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success">4 fridges</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Fridge Status Distribution -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>Fridge Status
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="fridgeStatusChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Compact Trends Chart -->
+                <!-- Location Distribution -->
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header py-2">
-                                <h6 class="card-title mb-0">Allocation Trends (Last 6 Months)</h6>
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Fridge Locations
+                                </h5>
                             </div>
-                            <div class="card-body p-2">
-                                <canvas id="allocationTrendsChart" height="80"></canvas>
+                            <div class="card-body">
+                                <canvas id="locationChart" height="150"></canvas>
                             </div>
                         </div>
                     </div>
@@ -389,29 +428,28 @@
                 </div>
             </div>
         </div>
-    </section>
-</div>
 
-            <!-- Custom Reports Actions -->
-            <div class="row mt-4">
-                <div class="col-12 text-center">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Custom Report Actions</h5>
-                            <p class="card-text">Generate custom reports and export data for further analysis.</p>
-                            <button class="btn btn-info me-2">
-                                <i class="fas fa-download me-2"></i>Export Report
-                            </button>
-                            <button class="btn btn-outline-info">
-                                <i class="fas fa-plus me-2"></i>Create Custom Report
-                            </button>
-                        </div>
+        <!-- Custom Reports Actions -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Custom Report Actions</h5>
+                        <p class="card-text">Generate custom reports and export data for further analysis.</p>
+                        <button class="btn btn-info me-2">
+                            <i class="fas fa-download me-2"></i>Export Report
+                        </button>
+                        <button class="btn btn-outline-info">
+                            <i class="fas fa-plus me-2"></i>Create Custom Report
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+</div>
+
+    
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -448,6 +486,67 @@
             }
         });
 
+        // Simple Fridge Management Charts
+        function createFridgeStatusChart() {
+            const ctx = document.getElementById('fridgeStatusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Allocated', 'Available', 'Under Maintenance', 'Faulty', 'Scrapped'],
+                    datasets: [{
+                        data: [89, 45, 12, 8, 2],
+                        backgroundColor: [
+                            '#28a745',
+                            '#ffc107',
+                            '#fd7e14',
+                            '#dc3545',
+                            '#6c757d'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createLocationChart() {
+            const ctx = document.getElementById('locationChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Downtown', 'City Center', 'Medical District', 'University Area', 'Shopping Mall', 'Other'],
+                    datasets: [{
+                        label: 'Number of Fridges',
+                        data: [34, 28, 22, 18, 15, 39],
+                        backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize charts when page loads
+        $(document).ready(function () {
+            createFridgeStatusChart();
+            createLocationChart();
+        });
        
     </script>
 }
