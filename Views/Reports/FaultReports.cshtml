@@ -1,87 +1,67 @@
-﻿@{
-    ViewData["Title"] = "Fault Management Reports";
-    Layout = "_Layout"; // Use your main layout
+﻿@model FridgeManagementSystem.Controllers.DashboardViewModel
+@{
+    ViewData["Title"] = "Fault Reports Analytics";
+
+    var startDate = ViewBag.StartDate as string;
+    var endDate = ViewBag.EndDate as string;
 }
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-header mb-4">
-                <h1 class="h2">
-                    <i class="fas fa-chart-bar text-primary me-2"></i>Fault Management Reports
-                </h1>
-                <p class="text-muted">Comprehensive analytics and insights for fault management</p>
-            </div>
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Fault Reports Analytics</h1>
+        <div>
+            <a asp-action="Dashboard" class="btn btn-secondary">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a asp-action="Index" class="btn btn-primary">
+                <i class="fas fa-list"></i> View All Faults
+            </a>
         </div>
     </div>
 
     <!-- Date Range Filter -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-calendar-alt me-2"></i>Date Range Filter
-                    </h5>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter"></i> Report Period
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <div class="form-group mr-3 mb-2">
+                    <label for="startDate" class="mr-2">From:</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate" value="@startDate">
                 </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="startDate" class="form-label">Start Date</label>
-                            <input type="date" class="form-control" id="startDate" value="@DateTime.Today.AddDays(-30).ToString("yyyy-MM-dd")">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="endDate" class="form-label">End Date</label>
-                            <input type="date" class="form-control" id="endDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="reportTypeSelect" class="form-label">Report Type</label>
-                            <select class="form-select" id="reportTypeSelect">
-                                <option value="overview">Overview Dashboard</option>
-                                <option value="faulttypes">Fault Type Analysis</option>
-                                <option value="trends">Monthly Trends</option>
-                                <option value="brandanalysis">Brand Analysis</option>
-                                <option value="seasonal">Seasonal Patterns</option>
-                                <option value="technician">Technician Performance</option>
-                                <option value="resolution">Resolution Time Analysis</option>
-                                <option value="faultprone">Fault-Prone Fridges</option>
-                                <option value="status">Status Distribution</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-primary w-100" onclick="loadReport()">
-                                <i class="fas fa-sync-alt me-2"></i>Generate Report
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(7)">Last 7 Days</button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(30)">Last 30 Days</button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(90)">Last 90 Days</button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange(365)">Last Year</button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setCurrentMonth()">This Month</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group mr-3 mb-2">
+                    <label for="endDate" class="mr-2">To:</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate" value="@endDate">
                 </div>
-            </div>
+                <button type="submit" class="btn btn-primary mb-2">
+                    <i class="fas fa-sync-alt"></i> Update Report
+                </button>
+                <a href="@Url.Action("Reports")" class="btn btn-secondary mb-2 ml-2">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            </form>
+            <small class="text-muted">
+                Showing data from @DateTime.Parse(startDate).ToString("MMM dd, yyyy") to @DateTime.Parse(endDate).ToString("MMM dd, yyyy")
+            </small>
         </div>
     </div>
 
     <!-- Summary Cards -->
     <div class="row mb-4">
+        <!-- Total Faults -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Faults
+                                Total Fault Reports
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalFaults">0</div>
-                            <small class="text-muted" id="dateRangeText">Loading...</small>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalFaults</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
@@ -91,16 +71,35 @@
             </div>
         </div>
 
+        <!-- High Priority Faults -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                High Priority
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.HighPriorityFaults</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unattended Faults -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending Faults
+                                Pending Reports
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingFaults">0</div>
-                            <small class="text-muted" id="pendingPercentage">0% of total</small>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.UnattendedFaults</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -110,38 +109,19 @@
             </div>
         </div>
 
+        <!-- Today's Repairs -->
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                High Priority
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Active Repairs
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="highPriorityFaults">0</div>
-                            <small class="text-muted" id="highPriorityPercentage">0% of total</small>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TodaysRepairs</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Avg Resolution (Days)
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="avgResolutionDays">0</div>
-                            <small class="text-muted">Completed faults only</small>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                            <i class="fas fa-tools fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -149,406 +129,278 @@
         </div>
     </div>
 
-    <!-- Report Content Area -->
     <div class="row">
-        <div class="col-12">
-            <div id="reportContent">
-                <!-- Report content will be loaded here dynamically -->
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading report data...</p>
+        <!-- Recent Fault Reports -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-list"></i> Recent Fault Reports
+                    </h6>
+                    <span class="badge badge-primary">Last 10 Reports</span>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentFaults.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Fridge</th>
+                                        <th>Customer</th>
+                                        <th>Fault Type</th>
+                                        <th>Urgency</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var faultReport in Model.RecentFaults)
+                                    {
+                                        <tr>
+                                            <td>@faultReport.ReportDate.ToString("MM/dd/yyyy")</td>
+                                            <td>
+                                                @if (faultReport.Fridge != null)
+                                                {
+                                                    <div>
+                                                        <strong>@faultReport.Fridge.Brand @faultReport.Fridge.Model</strong>
+                                                        <small class="text-muted d-block">SN: @faultReport.Fridge.SerialNumber</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (faultReport.Fridge?.Customer != null)
+                                                {
+                                                    @faultReport.Fridge.Customer.FullName
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@faultReport.FaultType</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetUrgencyBadgeClass(faultReport.UrgencyLevel)">@faultReport.UrgencyLevel</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(faultReport.Status.ToString())">@faultReport.Status</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5 class="text-success">No Fault Reports</h5>
+                            <p class="text-muted">No fault reports found for the selected period.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Sidebar -->
+        <div class="col-lg-4">
+            <!-- Status Distribution -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie"></i> Status Distribution
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @{
+                        var statusGroups = Model.RecentFaults.GroupBy(f => f.Status)
+                        .Select(g => new { Status = g.Key, Count = g.Count() })
+                        .OrderByDescending(g => g.Count);
+                    }
+                    @if (statusGroups.Any())
+                    {
+                        <div class="chart-pie pt-4 pb-2">
+                            @foreach (var group in statusGroups)
+                            {
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="badge @GetStatusBadgeClass(group.Status.ToString())">
+                                            @group.Status
+                                        </span>
+                                        <strong>@group.Count</strong>
+                                    </div>
+                                    <div class="progress mt-1">
+                                        @{
+                                            var percentage = (group.Count * 100) / Math.Max(Model.RecentFaults.Count, 1);
+                                        }
+                                        <div class="progress-bar @GetStatusProgressBarClass(group.Status.ToString())"
+                                             role="progressbar" style="width: @percentage%"
+                                             aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No status data available</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Urgency Distribution -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-exclamation-circle"></i> Urgency Levels
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @{
+                        var urgencyGroups = Model.RecentFaults.GroupBy(f => f.UrgencyLevel)
+                        .Select(g => new { Urgency = g.Key, Count = g.Count() })
+                        .OrderByDescending(g => g.Urgency);
+                    }
+                    @if (urgencyGroups.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var group in urgencyGroups)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span class="badge @GetUrgencyBadgeClass(group.Urgency)">
+                                        @group.Urgency
+                                    </span>
+                                    <span class="font-weight-bold">@group.Count</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No urgency data available</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <a asp-action="Create" class="btn btn-success btn-sm mb-2 w-100">
+                        <i class="fas fa-plus-circle"></i> New Fault Report
+                    </a>
+                    <a asp-action="Index" class="btn btn-primary btn-sm mb-2 w-100">
+                        <i class="fas fa-list"></i> View All Faults
+                    </a>
+                    <a asp-action="Dashboard" class="btn btn-info btn-sm w-100">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="card shadow mt-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-download"></i> Export Reports
+            </h6>
+        </div>
+        <div class="card-body text-center">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-outline-primary w-100">
+                        <i class="fas fa-file-pdf"></i> PDF Report
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-outline-success w-100">
+                        <i class="fas fa-file-excel"></i> Excel Export
+                    </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button class="btn btn-outline-info w-100" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print Report
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+@functions {
+    public string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "inprogress" => "bg-primary",
+            "onhold" => "bg-info",
+            "complete" => "bg-success",
+            "cancelled" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetStatusProgressBarClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "inprogress" => "bg-primary",
+            "onhold" => "bg-info",
+            "complete" => "bg-success",
+            "cancelled" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetUrgencyBadgeClass(UrgencyLevel urgencyLevel)
+    {
+        return urgencyLevel switch
+        {
+            UrgencyLevel.Critical or UrgencyLevel.Emergency => "bg-danger",
+            UrgencyLevel.High => "bg-warning",
+            UrgencyLevel.Medium => "bg-primary",
+            UrgencyLevel.Low => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}
+
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Load initial data
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSummaryData();
-            loadReport();
+        $(document).ready(function() {
+            // Set default date range to last 30 days if not set
+            if (!$('#startDate').val()) {
+                var start = new Date();
+                start.setDate(start.getDate() - 30);
+                document.getElementById('startDate').value = start.toISOString().split('T')[0];
+            }
+
+            if (!$('#endDate').val()) {
+                var end = new Date();
+                document.getElementById('endDate').value = end.toISOString().split('T')[0];
+            }
+
+            // Auto-submit form when dates change
+            $('#startDate, #endDate').change(function() {
+                if ($('#startDate').val() && $('#endDate').val()) {
+                    $('form').submit();
+                }
+            });
         });
-
-        // Date range helper functions
-        function setDateRange(days) {
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(endDate.getDate() - days);
-
-            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
-            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
-            loadSummaryData();
-            loadReport();
-        }
-
-        function setCurrentMonth() {
-            const now = new Date();
-            const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
-            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
-            loadSummaryData();
-            loadReport();
-        }
-
-        // Get current date range parameters
-        function getDateParams() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            return `startDate=${startDate}&endDate=${endDate}`;
-        }
-
-        // Load summary data for cards
-        async function loadSummaryData() {
-            try {
-                const dateParams = getDateParams();
-                const response = await fetch(`/Reports/GetFaultSummaryData?${dateParams}`);
-                const data = await response.json();
-
-                document.getElementById('totalFaults').textContent = data.totalFaults.toLocaleString();
-                document.getElementById('pendingFaults').textContent = data.pendingFaults.toLocaleString();
-                document.getElementById('highPriorityFaults').textContent = data.highPriorityFaults.toLocaleString();
-                document.getElementById('avgResolutionDays').textContent = data.averageResolutionDays.toFixed(1);
-
-                // Calculate percentages
-                const pendingPercentage = data.totalFaults > 0 ? (data.pendingFaults / data.totalFaults * 100).toFixed(1) : 0;
-                const highPriorityPercentage = data.totalFaults > 0 ? (data.highPriorityFaults / data.totalFaults * 100).toFixed(1) : 0;
-
-                document.getElementById('pendingPercentage').textContent = `${pendingPercentage}% of total`;
-                document.getElementById('highPriorityPercentage').textContent = `${highPriorityPercentage}% of total`;
-
-                // Update date range text
-                const start = document.getElementById('startDate').value;
-                const end = document.getElementById('endDate').value;
-                document.getElementById('dateRangeText').textContent = `${start} to ${end}`;
-
-            } catch (error) {
-                console.error('Error loading summary data:', error);
-            }
-        }
-
-        // Load selected report
-        async function loadReport() {
-            const reportType = document.getElementById('reportTypeSelect').value;
-            const dateParams = getDateParams();
-
-            const reportContent = document.getElementById('reportContent');
-            reportContent.innerHTML = `
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Generating ${reportType.replace(/([A-Z])/g, ' $1')} report...</p>
-                </div>
-            `;
-
-            try {
-                switch (reportType) {
-                    case 'overview':
-                        await loadOverviewReport();
-                        break;
-                    case 'faulttypes':
-                        await loadFaultTypeReport();
-                        break;
-                    case 'trends':
-                        await loadTrendsReport();
-                        break;
-                    case 'brandanalysis':
-                        await loadBrandAnalysisReport();
-                        break;
-                    case 'seasonal':
-                        await loadSeasonalReport();
-                        break;
-                    case 'technician':
-                        await loadTechnicianReport();
-                        break;
-                    case 'resolution':
-                        await loadResolutionReport();
-                        break;
-                    case 'faultprone':
-                        await loadFaultProneReport();
-                        break;
-                    case 'status':
-                        await loadStatusReport();
-                        break;
-                    default:
-                        await loadOverviewReport();
-                }
-            } catch (error) {
-                console.error('Error loading report:', error);
-                reportContent.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Error loading report data. Please try again.
-                    </div>
-                `;
-            }
-        }
-
-        // Overview Report
-        async function loadOverviewReport() {
-            const dateParams = getDateParams();
-            const [faultTypeData, urgencyData, statusData] = await Promise.all([
-                fetch(`/Reports/GetFaultTypeDistribution?${dateParams}`).then(r => r.json()),
-                fetch(`/Reports/GetUrgencyDistribution?${dateParams}`).then(r => r.json()),
-                fetch(`/Reports/GetFaultStatusDistribution?${dateParams}`).then(r => r.json())
-            ]);
-
-            const reportContent = document.getElementById('reportContent');
-            reportContent.innerHTML = `
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Showing data from <strong>${document.getElementById('startDate').value}</strong> to <strong>${document.getElementById('endDate').value}</strong>
-                        </div>
-                    </div>
-
-                    <!-- Fault Type Distribution -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="card-title mb-0">
-                                    <i class="fas fa-bug me-2"></i>Fault Type Distribution
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="faultTypeChart" height="300"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Urgency Level Distribution -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="card-title mb-0">
-                                    <i class="fas fa-exclamation me-2"></i>Urgency Level Distribution
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="urgencyChart" height="300"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Status Distribution -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="card-title mb-0">
-                                    <i class="fas fa-tasks me-2"></i>Fault Status Distribution
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="statusChart" height="300"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h6 class="card-title mb-0">
-                                    <i class="fas fa-chart-pie me-2"></i>Quick Statistics
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div id="quickStats">
-                                    <!-- Quick stats will be populated here -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Render charts
-            renderFaultTypeChart(faultTypeData.data || faultTypeData);
-            renderUrgencyChart(urgencyData.data || urgencyData);
-            renderStatusChart(statusData.data || statusData);
-            renderQuickStats(faultTypeData.data || faultTypeData, urgencyData.data || urgencyData, statusData.data || statusData);
-        }
-
-        // Chart rendering functions (keep your existing chart functions, but update data access)
-        function renderFaultTypeChart(data) {
-            const ctx = document.getElementById('faultTypeChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: data.map(item => item.faultType),
-                    datasets: [{
-                        data: data.map(item => item.count),
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = data.reduce((sum, item) => sum + item.count, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return `${label}: ${value} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderUrgencyChart(data) {
-            const ctx = document.getElementById('urgencyChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.map(item => item.urgencyLevel),
-                    datasets: [{
-                        label: 'Number of Faults',
-                        data: data.map(item => item.count),
-                        backgroundColor: [
-                            '#28a745', '#ffc107', '#fd7e14', '#dc3545', '#6f42c1'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderStatusChart(data) {
-            const ctx = document.getElementById('statusChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: data.map(item => item.status),
-                    datasets: [{
-                        data: data.map(item => item.count),
-                        backgroundColor: [
-                            '#6c757d', '#17a2b8', '#28a745', '#ffc107', '#dc3545'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderQuickStats(faultTypeData, urgencyData, statusData) {
-            const mostCommonFault = faultTypeData[0];
-            const highestUrgency = urgencyData.reduce((prev, current) =>
-                (prev.count > current.count) ? prev : current
-            );
-            const pendingStatus = statusData.find(s => s.status === 'Pending');
-            const totalFaults = faultTypeData.reduce((sum, item) => sum + item.count, 0);
-
-            document.getElementById('quickStats').innerHTML = `
-                <div class="mb-3">
-                    <strong>Most Common Fault Type:</strong><br>
-                    <span class="text-primary">${mostCommonFault.faultType}</span>
-                    (${mostCommonFault.count} cases, ${totalFaults > 0 ? (mostCommonFault.count / totalFaults * 100).toFixed(1) : 0}%)
-                </div>
-                <div class="mb-3">
-                    <strong>Highest Urgency Level:</strong><br>
-                    <span class="text-warning">${highestUrgency.urgencyLevel}</span>
-                    (${highestUrgency.count} cases)
-                </div>
-                <div class="mb-3">
-                    <strong>Pending Faults Age:</strong><br>
-                    <span class="text-info">${pendingStatus ? pendingStatus.averageAgeDays.toFixed(1) : '0'} days average</span>
-                </div>
-                <div class="mb-3">
-                    <strong>Total Fault Types:</strong><br>
-                    <span class="text-success">${faultTypeData.length} different types</span>
-                </div>
-            `;
-        }
-
-        // Other report loading functions with date range support
-        async function loadFaultTypeReport() {
-            const dateParams = getDateParams();
-            const response = await fetch(`/Reports/GetFaultTypeDistribution?${dateParams}`);
-            const data = await response.json();
-            // Implement fault type report view
-        }
-
-        async function loadTrendsReport() {
-            const months = 6; // Default to 6 months for trends
-            const response = await fetch(`/Reports/GetFaultTrendsData?months=${months}`);
-            const data = await response.json();
-            // Implement trends report view
-        }
-
-        async function loadBrandAnalysisReport() {
-            const dateParams = getDateParams();
-            const response = await fetch(`/Reports/GetBrandFaultAnalysis?${dateParams}`);
-            const data = await response.json();
-            // Implement brand analysis report view
-        }
-
-        async function loadSeasonalReport() {
-            const year = new Date().getFullYear(); // Current year
-            const response = await fetch(`/Reports/GetSeasonalFaultPatterns?year=${year}`);
-            const data = await response.json();
-            // Implement seasonal report view
-        }
-
-        async function loadTechnicianReport() {
-            const dateParams = getDateParams();
-            const response = await fetch(`/Reports/GetTechnicianPerformance?${dateParams}`);
-            const data = await response.json();
-            // Implement technician report view
-        }
-
-        async function loadResolutionReport() {
-            const dateParams = getDateParams();
-            const response = await fetch(`/Reports/GetResolutionTimeAnalysis?${dateParams}`);
-            const data = await response.json();
-            // Implement resolution report view
-        }
-
-        async function loadFaultProneReport() {
-            const dateParams = getDateParams();
-            const response = await fetch(`/Reports/GetFaultProneFridges?${dateParams}`);
-            const data = await response.json();
-            // Implement fault-prone report view
-        }
-
-        async function loadStatusReport() {
-            const dateParams = getDateParams();
-            const response = await fetch(`/Reports/GetFaultStatusDistribution?${dateParams}`);
-            const data = await response.json();
-            // Implement status report view
-        }
     </script>
 }
