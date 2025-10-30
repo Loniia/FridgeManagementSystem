@@ -5,15 +5,326 @@
     ViewData["Title"] = "Deactivate Location";
 }
 
-<h2>Deactivate Location</h2>
+<style>
+    .deactivate-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 30px;
+    }
 
-<div>
-    <h4>@Model.Address, @Model.City</h4>
-    <p>Are you sure you want to deactivate this location?</p>
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #dc3545;
+    }
+
+    .page-title {
+        color: #dc3545;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .warning-card {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+        border: 2px solid #f5c6cb;
+        border-radius: 15px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .warning-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .warning-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+    }
+
+    .location-details {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 25px 0;
+        border-left: 4px solid #dc3545;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .location-address {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #dc3545;
+        margin-bottom: 10px;
+    }
+
+    .location-full-address {
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .warning-message {
+        font-size: 1.2rem;
+        color: #856404;
+        font-weight: 500;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    .warning-alert {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border: 2px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 25px 0;
+        text-align: left;
+    }
+
+    .warning-alert strong {
+        color: #856404;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .btn-deactivate {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-deactivate::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-deactivate:hover::before {
+        left: 100%;
+    }
+
+    .btn-deactivate:hover {
+        background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        flex: 1;
+    }
+
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .consequences-list {
+        text-align: left;
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin: 25px 0;
+        border: 2px solid #f8d7da;
+    }
+
+    .consequences-list h5 {
+        color: #dc3545;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .consequences-list ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+
+    .consequences-list li {
+        margin-bottom: 8px;
+        color: #495057;
+    }
+
+    .consequences-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .confirmation-text {
+        font-size: 1.1rem;
+        color: #495057;
+        font-style: italic;
+        margin-top: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #6c757d;
+    }
+
+    @@media (max-width: 768px) {
+        .deactivate-container {
+            padding: 20px 15px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .warning-card {
+            padding: 30px 20px;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn-deactivate,
+        .btn-cancel {
+            flex: none;
+            padding: 12px 30px;
+        }
+
+        .location-address {
+            font-size: 1.2rem;
+        }
+
+        .warning-icon {
+            font-size: 3rem;
+        }
+    }
+
+    /* Animation for page load */
+    .warning-card {
+        animation: slideIn 0.6s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="deactivate-container">
+    <div class="page-header">
+        <h2 class="page-title">🚫 Deactivate Location</h2>
+    </div>
+
+    <div class="warning-card">
+        <div class="warning-icon">
+            ⚠️
+        </div>
+        
+        <div class="location-details">
+            <div class="location-address">
+                <i class="fas fa-map-marker-alt"></i> @Model.Address
+            </div>
+            <p class="location-full-address">
+                @Model.City, @Model.Province @Model.PostalCode
+            </p>
+        </div>
+
+        <p class="warning-message">
+            Are you sure you want to deactivate this location?
+        </p>
+
+        <div class="warning-alert">
+            <strong><i class="fas fa-exclamation-triangle"></i> Warning:</strong> 
+            This action will make the location inactive and may affect related records in the system.
+        </div>
+
+        <div class="consequences-list">
+            <h5><i class="fas fa-list-ul"></i> Consequences:</h5>
+            <ul>
+                <li>Location will be marked as inactive</li>
+                <li>May affect associated fridge records</li>
+                <li>Users won't be able to select this location for new assignments</li>
+                <li>Can be reactivated later if needed</li>
+            </ul>
+        </div>
+
+        <p class="confirmation-text">
+            Please confirm that you want to proceed with deactivation.
+        </p>
+
+        <form asp-action="Delete" method="post" class="confirmation-form">
+            <input type="hidden" asp-for="LocationId" />
+            <div class="btn-group">
+                <button type="submit" class="btn-deactivate">
+                    <i class="fas fa-ban"></i> Deactivate Location
+                </button>
+                <a asp-action="Index" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 
-<form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="LocationId" />
-    <button type="submit" class="btn btn-danger">Deactivate</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>

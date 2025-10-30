@@ -5,28 +5,270 @@
     ViewData["Title"] = "Edit Location";
 }
 
-<h2>Edit Location</h2>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="LocationId" />
-    <div class="form-group">
-        <label asp-for="Address" class="control-label"></label>
-        <input asp-for="Address" class="form-control" />
-        <span asp-validation-for="Address" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="City" class="control-label"></label>
-        <input asp-for="City" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Province" class="control-label"></label>
-        <input asp-for="Province" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="PostalCode" class="control-label"></label>
-        <input asp-for="PostalCode" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-success">Update</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+<style>
+    .edit-location-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 30px;
+    }
 
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #007bff;
+    }
+
+    .page-title {
+        color: #007bff;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+
+    .edit-form {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #dee2e6;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: white;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .btn-update {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        flex: 1;
+    }
+
+    .btn-update:hover {
+        background: linear-gradient(135deg, #218838 0%, #1e9e8a 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        flex: 1;
+    }
+
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+        margin: -40px -40px 30px -40px;
+        text-align: center;
+    }
+
+    .form-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+
+    .input-icon {
+        position: relative;
+    }
+
+    .input-icon .form-control {
+        padding-left: 45px;
+    }
+
+    .input-icon i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 5;
+    }
+
+    .validation-summary {
+        background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 25px;
+    }
+
+    @@media (max-width: 768px) {
+        .edit-location-container {
+            padding: 20px 15px;
+        }
+
+        .edit-form {
+            padding: 30px 20px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn-update,
+        .btn-cancel {
+            flex: none;
+        }
+
+        .form-header {
+            margin: -30px -20px 25px -20px;
+            padding: 15px;
+        }
+    }
+
+    /* Animation for form loading */
+    .edit-form {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="edit-location-container">
+    <div class="page-header">
+        <h2 class="page-title">✏️ Edit Location</h2>
+        <p class="page-subtitle">Update the location information below</p>
+    </div>
+
+    <form asp-action="Edit" method="post" class="edit-form">
+        <div class="form-header">
+            <h3><i class="fas fa-map-marker-alt"></i> Location Details</h3>
+        </div>
+        
+        <input type="hidden" asp-for="LocationId" />
+        
+        <div class="form-group">
+            <label asp-for="Address" class="control-label">
+                <i class="fas fa-home"></i> Street Address
+            </label>
+            <input asp-for="Address" class="form-control" placeholder="Enter street address" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="City" class="control-label">
+                <i class="fas fa-city"></i> City
+            </label>
+            <input asp-for="City" class="form-control" placeholder="Enter city" />
+            <span asp-validation-for="City" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Province" class="control-label">
+                <i class="fas fa-map"></i> Province
+            </label>
+            <input asp-for="Province" class="form-control" placeholder="Enter province" />
+            <span asp-validation-for="Province" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="PostalCode" class="control-label">
+                <i class="fas fa-mail-bulk"></i> Postal Code
+            </label>
+            <input asp-for="PostalCode" class="form-control" placeholder="Enter postal code" />
+            <span asp-validation-for="PostalCode" class="text-danger"></span>
+        </div>
+        
+        <div class="btn-group">
+            <button type="submit" class="btn-update">
+                <i class="fas fa-save"></i> Update Location
+            </button>
+            <a asp-action="Index" class="btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+ 

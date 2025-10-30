@@ -5,41 +5,530 @@
     ViewData["Title"] = "Location Details";
 }
 
-<h2>Location Details</h2>
+<style>
+    .details-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+    }
 
-<div>
-    <h4>@Model.Address, @Model.City</h4>
-    <p><strong>Province:</strong> @Model.Province</p>
-    <p><strong>Postal Code:</strong> @Model.PostalCode</p>
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #007bff;
+        background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+    }
+
+    .page-title {
+        color: #007bff;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .location-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .location-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+
+    .location-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .location-icon {
+        font-size: 3rem;
+        color: #007bff;
+        margin-right: 20px;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .location-address {
+        flex: 1;
+    }
+
+    .main-address {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #007bff;
+        margin-bottom: 5px;
+        line-height: 1.2;
+    }
+
+    .location-details {
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .detail-item {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #007bff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+        .detail-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #007bff;
+        margin-bottom: 0;
+    }
+
+    .section-divider {
+        height: 2px;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        margin: 40px 0;
+        border: none;
+        opacity: 0.3;
+    }
+
+    .relationships-section {
+        margin-top: 40px;
+    }
+
+    .section-title {
+        color: #007bff;
+        font-weight: 600;
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .section-title i {
+            font-size: 1.5rem;
+        }
+
+    .relationship-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+        .relationship-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .relationship-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+        .relationship-list li {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            transition: all 0.3s ease;
+        }
+
+            .relationship-list li:hover {
+                background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+                transform: translateX(5px);
+            }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        border: 2px dashed #dee2e6;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        border: none;
+        padding: 12px 35px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #e36407 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+    .btn-back {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        border: none;
+        padding: 12px 35px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-back:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #3d4348 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    .status-active {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+    }
+
+    .status-inactive {
+        background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+        color: #721c24;
+    }
+
+    @@media (max-width: 768px) {
+        .details-container {
+            padding: 20px 15px;
+        }
+
+        .location-card {
+            padding: 30px 20px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .location-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .location-icon {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+
+        .main-address {
+            font-size: 1.5rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .relationship-list {
+            grid-template-columns: 1fr;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Animation for page load */
+    .location-card {
+        animation: slideIn 0.6s ease-out;
+    }
+
+    .relationship-card {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .stat-item {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+</style>
+
+<div class="details-container">
+    <div class="page-header">
+        <h2 class="page-title">📍 Location Details</h2>
+    </div>
+
+    <div class="location-card">
+        <div class="location-header">
+            <div class="location-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="location-address">
+                <h3 class="main-address">@Model.Address</h3>
+                <p class="location-details">@Model.City, @Model.Province @Model.PostalCode</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">@(Model.Customer?.Count ?? 0)</div>
+                <div class="stat-label">Customers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">@(Model.Employee?.Count ?? 0)</div>
+                <div class="stat-label">Employees</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">@(Model.Fridge?.Count ?? 0)</div>
+                <div class="stat-label">Fridges</div>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <div class="detail-item">
+                <div class="detail-label">Address</div>
+                <div class="detail-value">@Model.Address</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">City</div>
+                <div class="detail-value">@Model.City</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Province</div>
+                <div class="detail-value">@Model.Province</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Postal Code</div>
+                <div class="detail-value">@Model.PostalCode</div>
+            </div>
+        </div>
+
+        <hr class="section-divider" />
+
+        <div class="relationships-section">
+            <h4 class="section-title">
+                <i class="fas fa-users"></i> Associated Records
+            </h4>
+
+            <div class="relationship-card">
+                <h5 class="section-title">
+                    <i class="fas fa-user-friends"></i> Customers (@(Model.Customer?.Count ?? 0))
+                </h5>
+                @if (Model.Customer?.Any() == true)
+                {
+                    <ul class="relationship-list">
+                        @foreach (var c in Model.Customer)
+                        {
+                            <li>
+                                <strong>@c.FullName</strong>
+                                <br />
+                                <small class="text-muted">@c.FullName</small>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-user-slash"></i>
+                        <p>No customers associated with this location</p>
+                    </div>
+                }
+            </div>
+
+            <div class="relationship-card">
+                <h5 class="section-title">
+                    <i class="fas fa-briefcase"></i> Employees (@(Model.Employee?.Count ?? 0))
+                </h5>
+                @if (Model.Employee?.Any() == true)
+                {
+                    <ul class="relationship-list">
+                        @foreach (var e in Model.Employee)
+                        {
+                            <li>
+                                <strong>@e.FullName</strong>
+                                <br />
+                                <small class="text-muted">@e.Role</small>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-user-tie"></i>
+                        <p>No employees assigned to this location</p>
+                    </div>
+                }
+            </div>
+
+            <div class="relationship-card">
+                <h5 class="section-title">
+                    <i class="fas fa-refrigerator"></i> Fridges (@(Model.Fridge?.Count ?? 0))
+                </h5>
+                @if (Model.Fridge?.Any() == true)
+                {
+                    <ul class="relationship-list">
+                        @foreach (var f in Model.Fridge)
+                        {
+                            <li>
+                                <strong>Serial: @f.SerialNumber</strong>
+                                <br />
+                                <small class="text-muted">Status: <span class="status-badge @(f.Status?.ToLower() == "active" ? "status-active" : "status-inactive")">@f.Status</span></small>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-snowflake"></i>
+                        <p>No fridges installed at this location</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a asp-action="Edit" asp-route-id="@Model.LocationId" class="btn-edit">
+                <i class="fas fa-edit"></i> Edit Location
+            </a>
+            <a asp-action="Index" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
 </div>
-
-<hr />
-
-<h5>Customers</h5>
-<ul>
-    @foreach (var c in Model.Customer ?? new List<FridgeManagementSystem.Models.Customer>())
-    {
-        <li>@c.FullName (@c.FullName)</li>
-    }
-</ul>
-
-<h5>Employees</h5>
-<ul>
-    @foreach (var e in Model.Employee ?? new List<FridgeManagementSystem.Models.Employee>())
-    {
-        <li>@e.FullName (@e.Role)</li>
-    }
-</ul>
-
-<h5>Fridges</h5>
-<ul>
-    @foreach (var f in Model.Fridge ?? new List<FridgeManagementSystem.Models.Fridge>())
-    {
-        <li>Serial: @f.SerialNumber (Status: @f.Status)</li>
-    }
-</ul>
-
-<p>
-    <a asp-action="Edit" asp-route-id="@Model.LocationId" class="btn btn-warning">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-</p>
