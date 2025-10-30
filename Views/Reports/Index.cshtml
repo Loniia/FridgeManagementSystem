@@ -5,169 +5,384 @@
     Layout = "_Layout";
 }
 
+<style>
+    /* ===== MINIMIZED PROFESSIONAL STYLING ===== */
+
+    /* Remove excessive spacing and reduce sizes */
+    .container-fluid {
+        padding: 10px 15px;
+        background: #f8f9fa;
+    }
+
+    /* Compact header */
+    .header-section {
+        margin-bottom: 15px;
+    }
+
+        .header-section h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+    /* Compact button */
+    .btn-compact {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border-radius: 4px;
+    }
+
+    /* Smaller cards */
+    .card {
+        margin-bottom: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        padding: 10px 15px;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    /* Compact summary cards */
+    .summary-card {
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+        .summary-card .card-title {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .summary-card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .summary-card small {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+    /* Smaller charts */
+    .chart-container {
+        height: 200px;
+        margin: 10px 0;
+    }
+
+    /* Compact tables */
+    .table-sm {
+        font-size: 0.85rem;
+    }
+
+        .table-sm th,
+        .table-sm td {
+            padding: 8px 10px;
+        }
+
+    /* Reduced spacing */
+    .row {
+        margin-bottom: 10px;
+    }
+
+    .mb-2 {
+        margin-bottom: 8px !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 12px !important;
+    }
+
+    .mt-2 {
+        margin-top: 8px !important;
+    }
+
+    /* Smaller section spacing */
+    section {
+        margin-bottom: 20px;
+    }
+
+    /* Compact form elements */
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    /* Professional color scheme */
+    .bg-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+    }
+
+    .bg-success {
+        background: linear-gradient(135deg, #27ae60, #219653) !important;
+    }
+
+    .bg-warning {
+        background: linear-gradient(135deg, #f39c12, #e67e22) !important;
+    }
+
+    .bg-info {
+        background: linear-gradient(135deg, #17a2b8, #138496) !important;
+    }
+
+    .bg-danger {
+        background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    }
+
+    /* Icon sizing */
+    .fas, .fab {
+        font-size: 0.9rem;
+        margin-right: 5px;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .container-fluid
+
+    {
+        padding: 8px 10px;
+    }
+
+    .summary-card {
+        margin-bottom: 8px;
+    }
+
+    .chart-container {
+        height: 150px;
+    }
+
+    }
+</style>
+
 <div class="container-fluid">
-    <!-- Go Back To Dashboard Button -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <a href="https://localhost:7130/Administrator/ManageEmployee/Dashboard" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Go Back To Dashboard
+    <!-- Compact Header Section -->
+    <div class="header-section">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="https://localhost:7130/Administrator/ManageEmployee/Dashboard" class="btn btn-secondary btn-compact">
+                <i class="fas fa-arrow-left"></i>Back to Dashboard
             </a>
+            <h1 class="mb-0">Reports Dashboard</h1>
         </div>
     </div>
-</div>
-<div class="container-fluid">
-    <h1 class="mb-4">Reports Dashboard</h1>
 
-    <div class="container mt-4">
-        <h2 class="text-center mb-4">Maintenance Performance - This Month</h2>
-        <canvas id="maintenanceChart" width="400" height="200"></canvas>
+    <!-- Maintenance Performance - Compact -->
+    <div class="card mb-3">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-chart-bar"></i>Maintenance Performance - This Month
+        </div>
+        <div class="card-body">
+            <canvas id="maintenanceChart" height="120"></canvas>
+        </div>
     </div>
 
-    <!-- SIMPLE FRIDGE MANAGEMENT SECTION -->
-    <section class="mb-5">
+    <!-- Customer Management Reports - Compact -->
+    <section class="mb-4">
         <div class="card">
             <div class="card-header bg-success text-white">
-                <h3 class="card-title mb-0">
-                    <i class="fas fa-refrigerator me-2"></i>Fridge Management Overview
-                </h3>
+                <i class="fas fa-users"></i>Customer Management Reports
             </div>
             <div class="card-body">
-                <!-- Simple Overview Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body text-center">
-                                <i class="fas fa-refrigerator fa-2x mb-2"></i>
-                                <h4 class="card-title">Total Fridges</h4>
-                                <h2 class="mb-0" id="totalFridges">156</h2>
-                                <small>In System</small>
+                <!-- Compact Summary Cards -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">Total Customers</h6>
+                                <h2 id="totalCustomers" class="mb-1">0</h2>
+                                <small>Active & Inactive</small>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body text-center">
-                                <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                <h4 class="card-title">Allocated</h4>
-                                <h2 class="mb-0" id="allocatedFridges">89</h2>
-                                <small>With Customers</small>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">Active Customers</h6>
+                                <h2 id="activeCustomers" class="mb-1">0</h2>
+                                <small>With Allocations</small>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body text-center">
-                                <i class="fas fa-warehouse fa-2x mb-2"></i>
-                                <h4 class="card-title">Available</h4>
-                                <h2 class="mb-0" id="availableFridges">45</h2>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">Total Allocated</h6>
+                                <h2 id="totalAllocated" class="mb-1">0</h2>
+                                <small>Currently Active</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">Available Fridges</h6>
+                                <h2 id="availableFridges" class="mb-1">0</h2>
                                 <small>In Stock</small>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-white bg-info">
-                            <div class="card-body text-center">
-                                <i class="fas fa-users fa-2x mb-2"></i>
-                                <h4 class="card-title">Active Customers</h4>
-                                <h2 class="mb-0" id="activeCustomers">67</h2>
-                                <small>With Fridges</small>
+                </div>
+
+                <!-- Compact Charts Row -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">Customer Distribution by Location</h6>
+                            </div>
+                            <div class="card-body p-2">
+                                <canvas id="locationDistributionChart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">Customer Status</h6>
+                            </div>
+                            <div class="card-body p-2">
+                                <canvas id="customerStatusChart" height="150"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Top Customers and Fridge Status -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
+                <!-- Compact Table -->
+                <div class="row mb-3">
+                    <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-trophy me-2"></i>Top 5 Customers
-                                </h5>
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">Fridge Allocation Summary</h6>
                             </div>
-                            <div class="card-body">
-                                <div id="topCustomersList">
-                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-primary me-3">1</span>
-                                            <div>
-                                                <h6 class="mb-1">ABC Restaurant</h6>
-                                                <small class="text-muted">Downtown</small>
-                                            </div>
-                                        </div>
-                                        <span class="badge bg-success">8 fridges</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-primary me-3">2</span>
-                                            <div>
-                                                <h6 class="mb-1">XYZ Hotel</h6>
-                                                <small class="text-muted">City Center</small>
-                                            </div>
-                                        </div>
-                                        <span class="badge bg-success">6 fridges</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-primary me-3">3</span>
-                                            <div>
-                                                <h6 class="mb-1">City Hospital</h6>
-                                                <small class="text-muted">Medical District</small>
-                                            </div>
-                                        </div>
-                                        <span class="badge bg-success">5 fridges</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-primary me-3">4</span>
-                                            <div>
-                                                <h6 class="mb-1">Tech Campus</h6>
-                                                <small class="text-muted">University Area</small>
-                                            </div>
-                                        </div>
-                                        <span class="badge bg-success">4 fridges</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center p-2">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-primary me-3">5</span>
-                                            <div>
-                                                <h6 class="mb-1">Food Market</h6>
-                                                <small class="text-muted">Shopping Mall</small>
-                                            </div>
-                                        </div>
-                                        <span class="badge bg-success">4 fridges</span>
-                                    </div>
+                            <div class="card-body p-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Status</th>
+                                                <th class="text-end">Count</th>
+                                                <th class="text-end">Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="fridgeAllocationSummary">
+                                            <tr><td colspan="3" class="text-center">Loading data...</td></tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Fridge Status Distribution -->
-                    <div class="col-md-6">
+                <!-- Compact Trends Chart -->
+                <div class="row">
+                    <div class="col-md-12">
                         <div class="card">
-                            <div class="card-header bg-info text-white">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-chart-pie me-2"></i>Fridge Status
-                                </h5>
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">Allocation Trends (Last 6 Months)</h6>
                             </div>
-                            <div class="card-body">
-                                <canvas id="fridgeStatusChart" height="250"></canvas>
+                            <div class="card-body p-2">
+                                <canvas id="allocationTrendsChart" height="80"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fault Management Reports - Compact -->
+    <section class="mb-4">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-exclamation-triangle"></i>Fault Management Reports
+            </div>
+            <div class="card-body">
+                <!-- Compact Fault Summary Cards -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-danger summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">Total Faults</h6>
+                                <h2 id="totalFaults" class="mb-1">0</h2>
+                                <small>All Time</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">Pending Faults</h6>
+                                <h2 id="pendingFaults" class="mb-1">0</h2>
+                                <small>Awaiting Action</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">High Priority</h6>
+                                <h2 id="highPriorityFaults" class="mb-1">0</h2>
+                                <small>Urgent Cases</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success summary-card">
+                            <div class="card-body text-center p-2">
+                                <h6 class="card-title">Avg Resolution</h6>
+                                <h2 id="avgResolutionDays" class="mb-1">0</h2>
+                                <small>Days</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Location Distribution -->
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header bg-warning text-dark">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-map-marker-alt me-2"></i>Fridge Locations
-                                </h5>
+                <!-- Compact Fault Charts -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">Fault Type Distribution</h6>
                             </div>
-                            <div class="card-body">
-                                <canvas id="locationChart" height="150"></canvas>
+                            <div class="card-body p-2">
+                                <canvas id="faultTypeChart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">Urgency Level Distribution</h6>
+                            </div>
+                            <div class="card-body p-2">
+                                <canvas id="faultUrgencyChart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compact Action Card -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-3">
+                                <h6 class="card-title mb-2">Need More Detailed Fault Analysis?</h6>
+                                <p class="card-text mb-2 small">Access comprehensive fault analytics with detailed breakdowns.</p>
+                                <a href="@Url.Action("FaultReports", "Reports")" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-chart-bar"></i>View Detailed Reports
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -176,228 +391,6 @@
         </div>
     </section>
 </div>
-
-<!-- FAULT MANAGEMENT REPORTS SECTION (Keep this unchanged) -->
-<section class="mb-5">
-    <div class="card">
-        <div class="card-header bg-danger text-white">
-            <h3 class="card-title mb-0">
-                <i class="fas fa-exclamation-triangle me-2"></i>Fault Management Reports
-            </h3>
-        </div>
-        <div class="card-body">
-            <!-- Fault Summary Cards -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-danger">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Total Faults</h6>
-                            <h2 id="totalFaults" class="mb-0">0</h2>
-                            <small>All Time</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Pending Faults</h6>
-                            <h2 id="pendingFaults" class="mb-0">0</h2>
-                            <small>Awaiting Action</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">High Priority</h6>
-                            <h2 id="highPriorityFaults" class="mb-0">0</h2>
-                            <small>Urgent Cases</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Avg Resolution</h6>
-                            <h2 id="avgResolutionDays" class="mb-0">0</h2>
-                            <small>Days</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Fault Distribution Charts -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title">Fault Type Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="faultTypeChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title">Urgency Level Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="faultUrgencyChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Monthly Trends -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title">Fault Trends (Last 6 Months)</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="faultTrendsChart" height="120"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Brand Analysis and Status -->
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title">Top Fault-Prone Brands</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="brandFaultChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title">Fault Status</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="faultStatusChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Detailed Reports Link -->
-            <div class="row mt-4">
-                <div class="col-12 text-center">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Need More Detailed Fault Analysis?</h5>
-                            <p class="card-text">Access comprehensive fault analytics with detailed breakdowns, technician performance, and resolution time analysis.</p>
-                            <a href="@Url.Action("FaultReports", "Reports")" class="btn btn-danger btn-lg">
-                                <i class="fas fa-chart-bar me-2"></i>View Detailed Fault Reports
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- MY CUSTOM REPORTS SECTION (Keep this unchanged) -->
-<section class="mb-5">
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <h3 class="card-title mb-0">
-                <i class="fas fa-chart-line me-2"></i>My Custom Reports
-            </h3>
-        </div>
-        <div class="card-body">
-            <!-- Custom Reports Summary Cards -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Total Revenue</h6>
-                            <h2 class="mb-0">$12,450</h2>
-                            <small>Current Month</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Active Projects</h6>
-                            <h2 class="mb-0">15</h2>
-                            <small>In Progress</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Customer Satisfaction</h6>
-                            <h2 class="mb-0">92%</h2>
-                            <small>Average Rating</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-danger">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Pending Tasks</h6>
-                            <h2 class="mb-0">8</h2>
-                            <small>Require Attention</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Custom Charts Row -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title">Monthly Performance</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center p-4">
-                                <p class="text-muted">Performance chart will be displayed here</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title">Project Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center p-4">
-                                <p class="text-muted">Project distribution chart will be displayed here</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Custom Reports -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title">Quarterly Growth Trends</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center p-4">
-                                <p class="text-muted">Growth trends chart will be displayed here</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Custom Reports Actions -->
             <div class="row mt-4">
@@ -416,32 +409,15 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Buttons Row -->
-            <div class="row mb-4">
-                <div class="col-12 d-flex justify-content-end gap-2">
-                    <!-- View All Customers Spending -->
-                    <a asp-controller="Reports" asp-action="AllCustomersSpendingReport"
-                       class="btn btn-info px-3">
-                        View All Customers Spending
-                    </a>
-
-                    <!-- Go Back to Dashboard -->
-                    <a asp-area="Administrator" asp-controller="ManageEmployee" asp-action="Dashboard"
-                       class="btn btn-secondary px-3">
-                        Go Back to Dashboard
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 </section>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        // Maintenance Chart (Keep this unchanged)
+       
+
         var ctx = document.getElementById('maintenanceChart').getContext('2d');
         var chart = new Chart(ctx, {
             type: 'bar',
@@ -450,173 +426,28 @@
                 datasets: [{
                     label: 'Maintenance KPI',
                     data: [
-        @Model.MaintenanceKpi.CompletedThisMonth,
-        @Model.MaintenanceKpi.AvgCompletionDays.ToString("0"),
-        @Model.MaintenanceKpi.SuccessRate.ToString("0"),
-        @Model.MaintenanceKpi.MonthlyRepeatVisits
-                            ],
-                    backgroundColor: [
-                        '#3498db',
-                        '#2ecc71',
-                        '#f1c40f',
-                        '#e74c3c'
-                    ]
+                        @Model.MaintenanceKpi.CompletedThisMonth,
+                        @Model.MaintenanceKpi.AvgCompletionDays.ToString("0"),
+                        @Model.MaintenanceKpi.SuccessRate.ToString("0"),
+                        @Model.MaintenanceKpi.MonthlyRepeatVisits
+                    ],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c']
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
             }
         });
 
-        // =============================================
-        // SIMPLE FRIDGE MANAGEMENT CHARTS
-        // =============================================
-        function createFridgeStatusChart() {
-            const ctx = document.getElementById('fridgeStatusChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Allocated', 'Available', 'Under Maintenance', 'Faulty', 'Scrapped'],
-                    datasets: [{
-                        data: [89, 45, 12, 8, 2],
-                        backgroundColor: [
-                            '#28a745',
-                            '#ffc107',
-                            '#fd7e14',
-                            '#dc3545',
-                            '#6c757d'
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        function createLocationChart() {
-            const ctx = document.getElementById('locationChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Downtown', 'City Center', 'Medical District', 'University Area', 'Shopping Mall', 'Other'],
-                    datasets: [{
-                        label: 'Number of Fridges',
-                        data: [34, 28, 22, 18, 15, 39],
-                        backgroundColor: 'rgba(255, 193, 7, 0.8)',
-                        borderColor: 'rgba(255, 193, 7, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // =============================================
-        // FAULT MANAGEMENT FUNCTIONS (Keep these unchanged)
-        // =============================================
-        async function loadFaultReports() {
-            debugLog('Loading fault reports...');
-            try {
-                const [summaryData, typeData, urgencyData, trendsData, brandData, statusData] = await Promise.all([
-                    tryLoadFaultData('GetFaultSummaryData'),
-                    tryLoadFaultData('GetFaultTypeDistribution'),
-                    tryLoadFaultData('GetUrgencyDistribution'),
-                    tryLoadFaultData('GetFaultTrendsData'),
-                    tryLoadFaultData('GetBrandFaultAnalysis'),
-                    tryLoadFaultData('GetFaultStatusDistribution')
-                ]);
-
-                const faultData = {
-                    summary: summaryData,
-                    faultTypes: typeData,
-                    urgencyLevels: urgencyData,
-                    trends: trendsData,
-                    brands: brandData,
-                    status: statusData
-                };
-
-                await createFaultCharts(faultData);
-
-            } catch (error) {
-                debugLog('Error in loadFaultReports:', error);
-                const sampleData = getSampleFaultData();
-                await createFaultCharts(sampleData);
-            }
-        }
-
-        // ... (Keep all the existing fault management functions as they were)
-
-        // Initialize charts when page loads
-        $(document).ready(function () {
-            createFridgeStatusChart();
-            createLocationChart();
-            loadFaultReports();
-        });
+       
     </script>
 }
-
-<style>
-    .card {
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        border: 1px solid rgba(0, 0, 0, 0.125);
-        margin-bottom: 1rem;
-    }
-
-    .card-header {
-        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-        background-color: #f8f9fa;
-    }
-
-    .table th {
-        border-top: none;
-        font-weight: 600;
-        background-color: #f8f9fa;
-    }
-
-    .card .card-body {
-        padding: 1.25rem;
-    }
-
-    .text-end {
-        text-align: right !important;
-    }
-
-    .alert {
-        margin-bottom: 1rem;
-    }
-
-    /* Simple styling for the new fridge section */
-    .bg-primary {
-        background: linear-gradient(135deg, #3498db, #2980b9) !important;
-    }
-
-    .bg-success {
-        background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
-    }
-
-    .bg-warning {
-        background: linear-gradient(135deg, #f39c12, #e67e22) !important;
-    }
-
-    .bg-info {
-        background: linear-gradient(135deg, #17a2b8, #138496) !important;
-    }
-</style>

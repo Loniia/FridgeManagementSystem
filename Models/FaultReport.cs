@@ -41,7 +41,8 @@ namespace FridgeManagementSystem.Models
 
         public virtual ICollection<RepairSchedule> RepairSchedules { get; set; } = new List<RepairSchedule>();
         public virtual Fault? Fault{ get; set; }
-       
+
+        public ReportedBy ReportSource { get; set; } = ReportedBy.Customer;
         public int? FaultID { get; set; }
     }
 }

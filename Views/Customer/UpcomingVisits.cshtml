@@ -4,6 +4,92 @@
     ViewData["Title"] = "Upcoming Visits";
 }
 
+<style>
+    .list-group {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .list-group-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+        .list-group-item:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            border-color: #007bff;
+        }
+
+        .list-group-item h5 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 8px;
+        }
+
+        .list-group-item p {
+            margin-bottom: 15px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .list-group-item strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .list-group-item .btn-primary {
+            border-radius: 4px;
+            padding: 6px 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .list-group-item .btn-primary:hover {
+                transform: translateY(-1px);
+            }
+
+    .alert-info {
+        border-radius: 6px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h2 {
+        color: #2c3e50;
+        margin-bottom: 25px;
+        font-weight: 700;
+        border-bottom: 3px solid #007bff;
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+    @@media (max-width: 768px) {
+        .list-group-item
+
+    {
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    .list-group-item h5 {
+        font-size: 1.1rem;
+    }
+
+    .list-group-item .btn-primary {
+        width: 100%;
+        text-align: center;
+    }
+
+    }
+</style>
+
 <h2>Upcoming Maintenance Visits</h2>
 
 @if (!Model.Any())
