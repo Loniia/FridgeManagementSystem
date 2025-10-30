@@ -111,7 +111,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 TotalFridges = fridges.Count,
                 Available = fridges.Count(f => f.Status == "Available"),
                 Allocated = fridges.Count(f => f.Status == "Allocated"),
-                Damaged = fridges.Count(f => f.Status == "Damaged"),
+                Returned = fridges.Count(f => f.Status == "Returned"),
                 Scrapped = fridges.Count(f => f.Status == "Scrapped")
             };
         }
