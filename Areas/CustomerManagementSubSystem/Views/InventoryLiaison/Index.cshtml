@@ -57,17 +57,17 @@
 
                 <!-- Quantity and low stock alert -->
                 <td class="@(fridge.Quantity < 5 ? "table-danger fw-bold" : "")">
-                    @fridge.Quantity
-                    @if (fridge.Quantity < 5)
-                    {
-                        <a asp-area="CustomerManagementSubSystem"
-                           asp-controller="InventoryLiaison"
-                           asp-action="CreatePurchaseRequest"
-                           asp-route-fridgeId="@fridge.FridgeId"
-                           class="text-danger fw-bold text-decoration-none ms-2">
-                            ⚠ Low Stock
-                        </a>
-                    }
+                    <a asp-area="CustomerManagementSubSystem"
+                       asp-controller="InventoryLiaison"
+                       asp-action="CreatePurchaseRequest"
+                       asp-route-fridgeId="@fridge.FridgeId"
+                       class="text-decoration-none @(fridge.Quantity < 5 ? "text-danger fw-bold" : "text-primary fw-semibold")">
+                        @fridge.Quantity
+                        @if (fridge.Quantity < 5)
+                        {
+                            <span class="ms-2">⚠ Low Stock</span>
+                        }
+                    </a>
                 </td>
 
                 <td>@(fridge.CustomerName ?? "N/A")</td>
