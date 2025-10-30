@@ -487,12 +487,15 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="notification-bell-container">
-            <a asp-action="Notifications" asp-controller="Customer" class="notification-bell">
-                <i class="fas fa-bell"></i>
+        <div class="notification-bell-container position-fixed top-0 end-0 m-3" style="z-index: 1030;">
+            <a asp-action="Notifications" asp-controller="Customer" class="notification-bell position-relative">
+                <i class="fas fa-bell text-primary" style="font-size: 1.5rem;"></i>
                 @if (ViewBag.UnreadCount > 0)
                 {
-                    <span class="badge">@ViewBag.UnreadCount</span>
+                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle"
+                          style="font-size: 0.65rem; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                        @ViewBag.UnreadCount
+                    </span>
                 }
             </a>
         </div>
@@ -509,23 +512,58 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <div class="filter-label">Search Fridges</div>
-                        <input type="text" name="search" class="form-control" placeholder="Search by brand or model..." value="@ViewData["Search"]" />
+                        <input type="text" name="search" class="form-control"
+                               placeholder="Search by brand or model..."
+                               value="@ViewData["Search"]" />
                     </div>
+
                     <div class="filter-group">
                         <div class="filter-label">Stock Status</div>
                         <select name="stockFilter" class="filter-select" onchange="this.form.submit()">
-                            <option value="all" selected="@(ViewData["StockFilter"]?.ToString() == "all")">All Stock</option>
+                            @if (ViewData["StockFilter"]?.ToString() == "all")
+                            {
+                                <option value="all" selected>All Stock</option>
+                            }
+                            else
+                            {
+                                <option value="all">All Stock</option>
+                            }
+
+                            @if (ViewData["StockFilter"]?.ToString() == "in-stock")
+                            {
+                                <option value="in-stock" selected>In Stock</option>
+                            }
+                            else
+                            {
+                                <option value="in-stock">In Stock</option>
+                            }
+
+                            @if (ViewData["StockFilter"]?.ToString() == "out-of-stock")
+                            {
+                                <option value="out-of-stock" selected>Out of Stock</option>
+                            }
+                            else
+                            {
+                                <option value="out-of-stock">Out of Stock</option>
+                            }
                         </select>
                     </div>
+
                     <div class="filter-group">
-                        <button type="submit" class="search-btn"><i class="fas fa-search"></i> Apply Filters</button>
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i> Apply Filters
+                        </button>
                     </div>
+
                     <div class="filter-group">
-                        <a asp-action="Dashboard" class="reset-btn"><i class="fas fa-refresh"></i> Reset</a>
+                        <a asp-action="Dashboard" class="reset-btn">
+                            <i class="fas fa-refresh"></i> Reset
+                        </a>
                     </div>
                 </div>
             </form>
         </div>
+
 
         <!-- Products Section -->
         <div class="products-section">

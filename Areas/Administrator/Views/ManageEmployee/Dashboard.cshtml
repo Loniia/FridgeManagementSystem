@@ -21,14 +21,15 @@
     <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-outline-danger">
         <i class="bi bi-box-arrow-left"></i> Back to Login
     </a>
-<div class="d-flex align-items-center gap-2">
+<div class="position-fixed top-0 end-0 m-3" style="z-index: 1030;">
     @if (User.IsInRole("Admin"))
     {
         <div class="dropdown">
-            <a class="btn btn-light position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-bell"></i>
+            <a class="btn position-relative p-0" href="#" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: none; border: none;">
+                <i class="fas fa-bell text-primary" style="font-size: 1.5rem;"></i>
                 <span id="adminUnreadCountBadge"
-                      class="badge bg-danger position-absolute top-0 start-100 translate-middle d-none">
+                      class="badge bg-danger position-absolute top-0 start-100 translate-middle d-none"
+                      style="font-size: 0.65rem; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
                 </span>
             </a>
 
@@ -134,7 +135,7 @@
             <div class="card-body text-center">
                 <i class="fas fa-chart-bar fa-2x mb-3"></i>
                 <h5>Reports</h5>
-                <a href="/Reports" class="btn btn-primary">View Dashboard</a>
+                <a href="/Reports" class="btn btn-primary">View </a>
             </div>
         </div>
     </div>
