@@ -25,9 +25,7 @@
             <th>Condition</th>
             <th>Status</th>
             <th>Quantity</th>
-            <th>Customer Name</th>
             <th>Allocation Date</th>
-            <th>Return Date</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -70,11 +68,8 @@
                     </a>
                 </td>
 
-                <td>@(fridge.CustomerName ?? "N/A")</td>
-
                 <!-- ✅ Fix DateOnly? formatting from controller -->
                 <td>@(fridge.AllocationDate.HasValue ? fridge.AllocationDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
-                <td>@(fridge.ReturnDate.HasValue ? fridge.ReturnDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
 
                 <!-- Actions -->
                 <td>
