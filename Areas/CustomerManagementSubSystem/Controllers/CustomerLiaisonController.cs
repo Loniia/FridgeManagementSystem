@@ -183,6 +183,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
             return View();
         }
+
         // POST: CustomerLiaison/Allocate
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -223,24 +224,8 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 return RedirectToAction("ProcessPendingAllocations");
             }
 
-            // Parse user-provided AllocationDate / ReturnDate
-            DateOnly? allocationDateFromUser = null;
-            DateOnly? returnDateFromUser = null;
-
-            if (Request.Form["AllocationDate"].Count > 0 &&
-                DateOnly.TryParse(Request.Form["AllocationDate"], out var parsedDate))
-            {
-                allocationDateFromUser = parsedDate;
-            }
-
-            if (Request.Form["ReturnDate"].Count > 0 &&
-                DateOnly.TryParse(Request.Form["ReturnDate"], out var parsedReturn))
-            {
-                returnDateFromUser = parsedReturn;
-            }
-
-            // Parse quantity to allocate
-            int quantityToAllocate = 1; // default to 1
+            // Parse quantity to allocate (defaults to 1)
+            int quantityToAllocate = 1;
             if (Request.Form["Quantity"].Count > 0 && int.TryParse(Request.Form["Quantity"], out var q))
                 quantityToAllocate = Math.Min(q, remainingToAllocate);
 
@@ -251,29 +236,30 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 return RedirectToAction("ProcessPendingAllocations");
             }
 
-            // Determine allocation date
-            var allocationDate = allocationDateFromUser ?? DateOnly.FromDateTime(DateTime.Now);
+            // ✅ Allocation date logic
+            var allocationDate = DateOnly.FromDateTime(DateTime.Now);
 
-            // Create allocation
+            // ✅ Create allocation
             var allocation = new FridgeAllocation
             {
                 FridgeId = fridge.FridgeId,
                 CustomerID = customerId,
                 OrderItemId = orderItemId,
                 AllocationDate = allocationDate,
-                ReturnDate = allocationDate.AddDays(30), // ✅ always 30 days later
+                ReturnDate = allocationDate.AddDays(30),
                 Status = "Allocated",
                 QuantityAllocated = quantityToAllocate
             };
 
-            // Reduce stock
-            fridge.Quantity -= quantityToAllocate;
+            // ✅ FIX: Actually add to database!
+            _context.FridgeAllocation.Add(allocation);
 
-            // Update fridge status
+            // ✅ Reduce fridge stock
+            fridge.Quantity -= quantityToAllocate;
             fridge.Status = fridge.Quantity == 0 ? "Allocated" : "Available";
             fridge.CustomerID = customerId;
 
-            // Update order progress
+            // ✅ Update order status if fully allocated
             totalAllocated += quantityToAllocate;
             if (totalAllocated >= orderItem.Quantity)
             {
@@ -281,9 +267,10 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 order.OrderProgress = OrderStatus.FridgeAllocated;
             }
 
+            // ✅ Save allocation and updates together
             _context.SaveChanges();
 
-            // Maintenance request
+            // ✅ Create maintenance request
             var existingRequest = _context.MaintenanceRequest
                 .FirstOrDefault(mr => mr.FridgeId == fridge.FridgeId && mr.IsActive && mr.TaskStatus == Models.TaskStatus.Pending);
 
@@ -301,18 +288,17 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 _context.MaintenanceRequest.Add(maintenanceRequest);
                 _context.SaveChanges();
 
-                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated ({quantityToAllocate} unit(s)) to {customer.FullName}. " +
+                TempData["Success"] = $"✅ Fridge '{fridge.Brand} {fridge.Model}' allocated ({quantityToAllocate} unit(s)) to {customer.FullName}. " +
                                       $"A maintenance request has been created.";
             }
             else
             {
-                TempData["Success"] = $"Fridge '{fridge.Brand} {fridge.Model}' allocated ({quantityToAllocate} unit(s)) to {customer.FullName}. " +
+                TempData["Success"] = $"✅ Fridge '{fridge.Brand} {fridge.Model}' allocated ({quantityToAllocate} unit(s)) to {customer.FullName}. " +
                                       $"Existing maintenance request is still pending.";
             }
 
             return RedirectToAction("ProcessPendingAllocations");
         }
-
 
 
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
