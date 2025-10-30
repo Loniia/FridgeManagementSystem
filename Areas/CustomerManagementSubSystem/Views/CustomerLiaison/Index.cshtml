@@ -17,28 +17,6 @@
     </div>
 </form>
 
-<!-- Active/Inactive Filter -->
-<div class="card mb-3">
-    <div class="card-body py-2">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="showInactiveToggle"
-            @(ViewBag.ShowInactive != null && ViewBag.ShowInactive ? "checked" : "")
-                   onchange="toggleInactiveCustomers(this)">
-            <label class="form-check-label" for="showInactiveToggle">
-                Show Inactive Customers
-            </label>
-        </div>
-        <small class="text-muted">When checked, deactivated customers will appear in the list.</small>
-    </div>
-</div>
-
-<script>
-    function toggleInactiveCustomers(checkbox) {
-        const showInactive = checkbox.checked ? 'true' : 'false';
-        window.location.href = `?showInactive=${showInactive}`;
-    }
-</script>
-
 <!-- Customers Table -->
 @if (!Model.Any())
 {
