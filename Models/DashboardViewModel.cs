@@ -7,12 +7,13 @@ using FridgeManagementSystem.ViewModels;
 namespace FridgeManagementSystem.Models
 {
     public class DashboardViewModel
-    { 
-        public int TotalCustomers { get; set; }
-        public int TotalFridges { get; set; }
-        public int TotalAllocatedFridges { get; set; }
-        public int TotalScrappedFridges { get; set; }
-        public int TotalSuppliers { get; set; }
-       
+    {
+        public IEnumerable<Fridge> LowStockFridges { get; set; }
+        public IEnumerable<Customer> NewCustomers { get; set; }
+        public IEnumerable<FridgeAllocation> PendingAllocations { get; set; }
+        public FridgeSummaryViewModel FridgeSummary { get; set; }  
+        public Dictionary<string, IEnumerable<Customer>> CustomersByLocation { get; set; } 
+        public IEnumerable<PurchaseRequest> PendingPurchaseRequests { get; set; }
+        public IEnumerable<MaintenanceRequest> PendingMaintenanceRequests { get; set; }
     }
 }

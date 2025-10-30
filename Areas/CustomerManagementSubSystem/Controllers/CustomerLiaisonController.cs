@@ -713,5 +713,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
             return File(pdfBytes, "application/pdf", $"Customer_{customer.CustomerID}_Allocations.pdf");
         }
+
+
     }
 }
