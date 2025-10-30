@@ -19,16 +19,40 @@ namespace FridgeManagementSystem.Controllers
         {
             _context = context;
         }
-        public async Task <IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             var model = new ReportDashboardViewModel();
 
             // ✅ Load the KPI data
             model.MaintenanceKpi = await GetMonthlyMaintenanceKpi();
+
+            // ----------------------------
+            // YOUR FRIDGE SUBSYSTEM REPORT
+            // ----------------------------
+            model.Received = await _context.Fridge.CountAsync(f => f.Status == "Received");
+            model.Purchased = (int)await _context.PurchaseOrders.SumAsync(po => po.TotalAmount);
+            model.Scrapped = await _context.Fridge.CountAsync(f => f.Status == "Scrapped");
+            model.LowStock = await _context.Fridge.CountAsync(f => f.Quantity <= 5);
+            model.Returned = await _context.Fridge.CountAsync(f => f.Status == "Returned");
+
+            // Top 10 customers by total order amount
+            var topCustomers = await _context.Customers
+                .Include(c => c.Orders)
+                .Select(c => new TopCustomerViewModel
+                {
+                    Name = c.FullName,
+                    TotalAmount = c.Orders.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(c => c.TotalAmount)
+                .Take(10)
+                .ToListAsync();
+
+            model.TopCustomers = topCustomers;
+
             return View(model);
         }
 
-        public  IActionResult FaultReports()
+        public IActionResult FaultReports()
         {
             
             return View();
@@ -79,27 +103,6 @@ namespace FridgeManagementSystem.Controllers
 
             return kpi;
         }
-
-        // ✅ Top Customers
-        [HttpGet]
-        public async Task<IActionResult> GetTopCustomersData()
-        {
-            var topCustomers = await _context.Customers
-                .Select(c => new
-                {
-                    CustomerName = c.FullName,
-                    TotalAllocations = c.FridgeAllocation.Count(a => a.Status == "Allocated"),
-                    ActiveAllocations = c.FridgeAllocation.Count(a => a.Status == "Allocated"),
-                    ReturnedAllocations = c.FridgeAllocation.Count(a => a.Status == "Returned")
-                })
-                .Where(c => c.TotalAllocations > 0)
-                .OrderByDescending(c => c.ActiveAllocations)
-                .Take(8)
-                .ToListAsync();
-
-            return Json(topCustomers);
-        }
-
 
         // ============
         // FAULT MANAGEMENT REPORTS
@@ -396,102 +399,6 @@ namespace FridgeManagementSystem.Controllers
 
             return View(reportModel);
         }
-        
-        //FROM IDAH 
-        // --------------------------
-        // Monthly Dashboard View (Grouped by Month)
-        // --------------------------
-        public async Task<IActionResult> MonthlyDashboard(int? month)
-        {
-            int selectedYear = 2025; // ✅ fixed to 2025 only
-            int selectedMonth = month ?? DateTime.Now.Month;
-            int LowStockThreshold = 5;
 
-            // --------------------------
-            // 1️⃣ Received Fridges
-            // --------------------------
-            var receivedData = _context.Fridge
-                .Where(f => f.IsActive && f.DateAdded.HasValue && f.DateAdded.Value.Year == selectedYear)
-                .GroupBy(f => f.DateAdded.Value.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToList();
-
-            // --------------------------
-            // 2️⃣ Allocated Fridges
-            // --------------------------
-            var allocatedData = _context.FridgeAllocation
-                .Where(a => a.Status == "Allocated" && a.AllocationDate.HasValue && a.AllocationDate.Value.Year == selectedYear)
-                .GroupBy(a => a.AllocationDate.Value.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToList();
-
-            // --------------------------
-            // 3️⃣ Returned Fridges
-            // --------------------------
-            var returnedData = _context.FridgeAllocation
-                .Where(a => a.ReturnDate.HasValue && a.ReturnDate.Value.Year == selectedYear)
-                .GroupBy(a => a.ReturnDate.Value.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToList();
-
-            // --------------------------
-            // 4️⃣ Purchase Requests (Fridge Purchases)
-            // --------------------------
-            var purchaseData = _context.PurchaseRequests
-                .Where(p => p.RequestType == "Fridge Purchase"
-                    && p.RequestDate.HasValue
-                    && p.RequestDate.Value.Year == selectedYear)
-                .GroupBy(p => p.RequestDate.Value.Month)
-                .Select(g => new { Month = g.Key, Count = g.Count() })
-                .ToList();
-
-            // --------------------------
-            // Prepare month labels and counts
-            // --------------------------
-            var months = Enumerable.Range(1, 12)
-                .Select(m => new DateTime(selectedYear, m, 1).ToString("MMMM"))
-                .ToList();
-
-            var receivedCounts = months.Select((m, i) => receivedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-            var allocatedCounts = months.Select((m, i) => allocatedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-            var returnedCounts = months.Select((m, i) => returnedData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-            var purchaseCounts = months.Select((m, i) => purchaseData.FirstOrDefault(d => d.Month == i + 1)?.Count ?? 0).ToList();
-
-            // --------------------------
-            // Color coding for Received (Low Stock)
-            // --------------------------
-            var receivedColors = receivedCounts
-                .Select(c => c < LowStockThreshold
-                    ? "rgba(255, 99, 132, 0.8)"  // 🔴 Low Stock
-                    : "rgba(54, 162, 235, 0.8)") // 🔵 Normal
-                .ToList();
-
-            // --------------------------
-            // Summary Section
-            // --------------------------
-            ViewBag.TotalReceived = receivedCounts.Sum();
-            ViewBag.TotalAllocated = allocatedCounts.Sum();
-            ViewBag.TotalReturned = returnedCounts.Sum();
-            ViewBag.LowStockMonths = receivedCounts.Count(c => c < LowStockThreshold);
-            ViewBag.TotalPurchaseRequests = purchaseCounts.Sum(); // ✅ matches chart data now
-
-            ViewBag.SelectedYear = selectedYear;
-            ViewBag.SelectedMonth = selectedMonth;
-
-            // --------------------------
-            // Build ViewModel
-            // --------------------------
-            var model = new MonthlyDashboardViewModel
-            {
-                Months = months,
-                ReceivedCounts = receivedCounts,
-                ReceivedColors = receivedColors,
-                AllocatedCounts = allocatedCounts,
-                ReturnedCounts = returnedCounts,
-                PurchaseCounts = purchaseCounts
-            };
-
-            return View(model);
-        }
     }
 }
