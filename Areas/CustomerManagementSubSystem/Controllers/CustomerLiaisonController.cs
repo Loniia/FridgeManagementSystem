@@ -34,11 +34,15 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             _logger = logger; // Initialize logger
         }
 
-        //INDEX
+        // --------------------------
+        // INDEX - Show All Customers (Active + Inactive)
+        // --------------------------
         public async Task<IActionResult> Index()
         {
+            // ✅ Get all customers including inactive ones
             var customers = await _customerService.GetAllCustomersWithFridgesAsync();
 
+            // ✅ Map to ViewModel (include Active + Inactive)
             var model = customers.Select(c => new CustomerViewModel
             {
                 CustomerId = c.CustomerID,
@@ -54,7 +58,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                     FridgeId = a.FridgeId,
                     QuantityAllocated = a.QuantityAllocated,
                     AllocationDate = a.AllocationDate,
-                    ReturnDate = a.ReturnDate, // ✅ will now have 30-day return date
+                    ReturnDate = a.ReturnDate, // ✅ keeps 30-day return date logic
                     Status = a.Status,
                     Fridge = new FridgeViewModel
                     {
@@ -66,41 +70,13 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                 }).ToList()
             }).ToList();
 
+            // ✅ Optional: show only Active by default
+            // comment this line out if you want to show ALL by default
+            // model = model.Where(c => c.IsActive).ToList();
+
             return View(model);
         }
 
-
-        // --------------------------
-        // Create Customer
-        // --------------------------
-        public IActionResult Create()
-        {
-            ViewBag.Locations = new SelectList(_context.Locations, "LocationId", "LocationName");
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Customer customer)
-        {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Locations = new SelectList(_context.Locations, "LocationId", "LocationName");
-                return View(customer);
-            }
-
-            customer.IsActive = true;
-            // If the form allows entering a past date
-            customer.RegistrationDate = customer.RegistrationDate != default
-                ? customer.RegistrationDate
-                : DateOnly.FromDateTime(DateTime.Now);
-
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Customer created successfully!";
-            return RedirectToAction(nameof(Index));
-        }
 
         // --------------------------
         // Edit Customer
@@ -145,10 +121,8 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         {
             if (id == null) return NotFound();
 
-            var customer = await _context.Customers
-                                         .FirstOrDefaultAsync(c => c.CustomerID == id && c.IsActive);
-
-            if (customer == null) return NotFound();
+            var customer = await _customerService.GetCustomerDetailsAsync(id.Value);
+            if (customer == null || !customer.IsActive) return NotFound();
 
             return View(customer);
         }
@@ -157,15 +131,18 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int CustomerID)
         {
-            var customer = await _context.Customers.FindAsync(CustomerID);
-            if (customer != null)
+            try
             {
-                customer.IsActive = false;
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Customer deleted successfully!";
+                await _customerService.DeleteCustomerAsync(CustomerID);
+                TempData["SuccessMessage"] = "Customer deactivated successfully!";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting customer {CustomerID}");
+                TempData["ErrorMessage"] = "Error deactivating customer. Please try again.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { showInactive = "true" });
         }
 
         [HttpGet]
@@ -592,39 +569,44 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         }
 
         // --------------------------
-        // Search Customers
+        // Search Customers (Supports Soft Delete)
         // --------------------------
         public async Task<IActionResult> Search(string searchString)
         {
-            var customers = await _customerService.GetAllCustomersWithFridgesAsync(); // ✅ service
+            // ✅ Always get both Active + Inactive customers
+            var customers = await _customerService.GetAllCustomersWithFridgesAsync();
 
+            // ✅ If user searched something
             if (!string.IsNullOrEmpty(searchString))
             {
                 searchString = searchString.ToLower();
+
                 customers = customers
                     .Where(c =>
-                        c.FullName.ToLower().Contains(searchString) ||
-                        c.Email.ToLower().Contains(searchString) ||
-                        c.PhoneNumber.ToLower().Contains(searchString))
+                        (!string.IsNullOrEmpty(c.FullName) && c.FullName.ToLower().Contains(searchString)) ||
+                        (!string.IsNullOrEmpty(c.Email) && c.Email.ToLower().Contains(searchString)) ||
+                        (!string.IsNullOrEmpty(c.PhoneNumber) && c.PhoneNumber.ToLower().Contains(searchString)))
                     .ToList();
             }
 
+            // ✅ Map to ViewModel (show both Active & Inactive)
             var model = customers.Select(c => new CustomerViewModel
             {
                 CustomerId = c.CustomerID,
                 FullNames = c.FullName,
                 LocationId = c.LocationId,
                 PhoneNumber = c.PhoneNumber,
+                Email = c.Email,
                 IsActive = c.IsActive,
                 RegistrationDate = c.RegistrationDate,
                 FridgeAllocations = c.FridgeAllocation.Select(a => new FridgeAllocationViewModel
                 {
                     AllocationID = a.AllocationID,
                     FridgeId = a.FridgeId,
+                    QuantityAllocated = a.QuantityAllocated,
                     AllocationDate = a.AllocationDate,
                     ReturnDate = a.ReturnDate,
                     Status = a.Status,
-                    QuantityAllocated = a.QuantityAllocated,
                     Fridge = new FridgeViewModel
                     {
                         FridgeId = a.FridgeId,
@@ -634,6 +616,9 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
                     }
                 }).ToList()
             }).ToList();
+
+            // ✅ Keep search term in textbox after searching
+            ViewData["CurrentFilter"] = searchString;
 
             return View("Index", model);
         }

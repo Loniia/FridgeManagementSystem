@@ -261,36 +261,43 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
 
 
         // --------------------------
-        // Update Fridge Status
+        // Update Fridge Status (GET)
         // --------------------------
         public async Task<IActionResult> UpdateStatus(int id)
         {
-            var fridge = await _context.Fridge
-                .FindAsync(id);
-
+            var fridge = await _context.Fridge.FindAsync(id);
             if (fridge == null) return NotFound();
 
-            ViewBag.StatusOptions = new SelectList(new List<string> { "Available", "Damaged", "Scrapped" }, fridge.Status);
+            // ✅ Only include the desired statuses
+            ViewBag.StatusOptions = new SelectList(
+                new List<string> { "Available", "Received" },
+                fridge.Status
+            );
+
             return View(fridge);
         }
 
+        // --------------------------
+        // Update Fridge Status (POST)
+        // --------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(Fridge updatedFridge)
         {
-            if (updatedFridge == null || updatedFridge.FridgeId == 0) return NotFound();
+            if (updatedFridge == null || updatedFridge.FridgeId == 0)
+                return NotFound();
 
-            var fridge = await _context.Fridge
-                .FindAsync(updatedFridge.FridgeId);
-
+            var fridge = await _context.Fridge.FindAsync(updatedFridge.FridgeId);
             if (fridge == null) return NotFound();
 
+            // ✅ Just update the status — do not redirect to another form
             fridge.Status = updatedFridge.Status;
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = $"Fridge '{fridge.Brand} {fridge.Model}' status updated to '{fridge.Status}'!";
+            TempData["SuccessMessage"] = $"Fridge '{fridge.Brand} {fridge.Model}' status updated to '{fridge.Status}' successfully!";
             return RedirectToAction(nameof(Index));
         }
+
 
         // --------------------------
         // Check Stock and Auto Create Purchase Request

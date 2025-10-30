@@ -76,6 +76,7 @@ namespace FridgeManagementSystem.Areas.Administrator.Controllers
 
             return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> VerifyCustomer(int customerId)
         {

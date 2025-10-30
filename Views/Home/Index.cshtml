@@ -400,11 +400,11 @@
         <h2 class="section-title">Meet Our Team</h2>
         <div class="row justify-content-center g-4">
             <div class="col-md-3">
-                <div class="team-card">
-                    <img src="~/images/idah1.jpg" class="team-img w-100" alt="Idah Munyai">
-                    <div class="team-card-body">
-                        <h5 class="team-name">Idah Munyai</h5>
-                        <p class="team-role">Customer Manager</p>
+                <div class="card border-0 shadow-sm">
+                   <img src="~/images/idah1.jpg" class="card-img-top rounded-top" alt="Team Member 1">
+                    <div class="card-body">
+                        <h5 class="card-title mb-0">Idah Munyai.</h5>
+                        <p class="text-muted">Customer Manager</p>
                     </div>
                 </div>
             </div>
@@ -510,137 +510,5 @@
 }
 
 
-@* @model BusinessInfo
-@{
-    ViewData["Title"] = "Home";
-    Layout = "_PublicLayout";
-}
 
-<div class="home-container position-relative">
-    <!-- Full background image -->
-    <img src="~/images/HopePage.jpg" alt="Fridge background" class="img-fluid home-image" />
-</div>
-
-@section Styles {
-    <style>
-        .home-container {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            border-radius: 10px;
-        }
-
-        .home-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 10px;
-        }
-    </style>
-}
-<div class="hero-section text-center text-white">
-    <div class="container">
-        <h1 class="display-4 fw-bold mb-4">
-            Welcome to @(Model?.CompanyName ?? "Dynamic Ice Inc")
-        </h1>
-        <p class="lead mb-4">
-            @(Model?.MissionStatement ?? "Your premier solution for fridge management and maintenance")
-        </p>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <p class="mb-4">
-                    @(Model?.CompanyDescription ?? "We provide comprehensive fridge management solutions to keep your business running smoothly.")
-                </p>
-            </div>
-        </div>
-        <div class="mt-4">
-            <a href="#services" class="btn btn-primary btn-lg me-3">Our Services</a>
-            <a asp-action="Contact" class="btn btn-outline-light btn-lg">Contact Us</a>
-        </div>
-    </div>
-</div>
-
-<!-- Services Section -->
-<section id="services" class="py-5 bg-light">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h2>Our Services</h2>
-                <p class="lead">@(Model?.ServicesDescription ?? "Comprehensive fridge management solutions")</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-tools fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Maintenance</h5>
-                        <p class="card-text">Regular maintenance and servicing to keep your fridges running efficiently.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                        <h5 class="card-title">Fault Reporting</h5>
-                        <p class="card-text">Quick and easy fault reporting system with rapid response times.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-headset fa-3x text-success mb-3"></i>
-                        <h5 class="card-title">24/7 Support</h5>
-                        <p class="card-text">Round-the-clock customer support for all your fridge management needs.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Contact Info Section -->
-@if (Model != null)
-{
-    <section class="py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center mb-4">
-                    <h2>Get In Touch</h2>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-md-8 text-center">
-                    <p><i class="fas fa-phone me-2"></i> @Model.Phone</p>
-                    <p><i class="fas fa-envelope me-2"></i> @Model.Email</p>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> @Model.Address</p>
-                </div>
-            </div>
-        </div>
-    </section>
-}
-
-<style>
-    .hero-section {
-        background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/hero-bg.jpg');
-        background-size: cover;
-        background-position: center;
-        padding: 150px 0;
-        border-radius: 10px;
-        margin: 20px;
-    }
-
-    .card {
-        transition: transform 0.3s ease;
-        border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-</style>
- *@
 
