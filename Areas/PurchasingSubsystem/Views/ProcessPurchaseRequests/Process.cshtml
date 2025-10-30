@@ -3,6 +3,30 @@
     ViewData["Title"] = "Process Purchase Request";
 }
 
+<style>
+    .btn-dashboard {
+        background: #4361ee;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+    }
+
+        .btn-dashboard:hover {
+            background: #3a0ca3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            color: white;
+        }
+</style>
+
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -12,7 +36,13 @@
                         <h4 class="mb-0">
                             <i class="bi bi-gear me-2"></i>Process Purchase Request
                         </h4>
-                        <span class="badge bg-light text-dark fs-6">@Model.RequestNumber</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-light text-dark fs-6">@Model.RequestNumber</span>
+                            <!-- Dashboard Button -->
+                            <a asp-area="PurchasingSubsystem" asp-controller="Purchase" asp-action="Index" class="btn-dashboard">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </div>
                     </div>
                 </div>
 

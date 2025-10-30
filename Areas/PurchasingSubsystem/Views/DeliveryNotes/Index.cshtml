@@ -44,6 +44,27 @@
         background: #e3f2fd;
         color: #1565c0;
     }
+
+    .btn-dashboard {
+        background: #4361ee;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-dashboard:hover {
+            background: #3a0ca3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            color: white;
+        }
 </style>
 
 <div class="container-fluid py-4">
@@ -56,6 +77,10 @@
             <p class="text-muted mb-0">All delivery notes for received fridge shipments</p>
         </div>
         <div>
+            <!-- Dashboard Button - Updated to correct Purchasing Dashboard -->
+            <a asp-area="PurchasingSubsystem" asp-controller="Purchase" asp-action="Index" class="btn-dashboard me-2">
+                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+            </a>
             <a asp-controller="PurchaseOrders" asp-action="Index" class="btn btn-outline-primary me-2">
                 <i class="fas fa-arrow-left me-1"></i>Back to POs
             </a>
@@ -117,7 +142,14 @@
                     <i class="fas fa-truck fa-4x text-muted mb-3"></i>
                     <h5 class="text-muted">No Delivery Notes Yet</h5>
                     <p class="text-muted">Delivery notes will appear here once shipments are received.</p>
-                    <a asp-action="Create" class="btn btn-primary">Create First Delivery Note</a>
+                    <div class="mt-3">
+                        <a asp-area="PurchasingSubsystem" asp-controller="Purchase" asp-action="Index" class="btn-dashboard me-2">
+                            <i class="fas fa-tachometer-alt me-1"></i>Go to Dashboard
+                        </a>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Create First Delivery Note
+                        </a>
+                    </div>
                 </div>
             }
             else

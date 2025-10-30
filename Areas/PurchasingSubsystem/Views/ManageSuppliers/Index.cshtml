@@ -1,77 +1,77 @@
 ﻿@model IEnumerable<FridgeManagementSystem.Models.Supplier>
 
-    @{
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Manage Suppliers";
     ViewData["ActivePage"] = "Suppliers";
+}
+
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #5a6fd8;
+        --secondary: #764ba2;
+        --success: #10b759;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --light: #f8fafc;
+        --dark: #1e293b;
+        --gray: #64748b;
     }
 
-    <style>
-        :root {
-            --primary: #667eea;
-            --primary-dark: #5a6fd8;
-            --secondary: #764ba2;
-            --success: #10b759;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --light: #f8fafc;
-            --dark: #1e293b;
-            --gray: #64748b;
+    body {
+        background-color: #f1f5f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        body {
-            background-color: #f1f5f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        padding: 1rem 1.5rem;
+    }
 
-        .dashboard-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--gray);
+    }
 
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-        }
+    .table td {
+        vertical-align: middle;
+        padding: 1rem 0.75rem;
+    }
 
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            }
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
 
-        .card-header {
-            border-radius: 12px 12px 0 0 !important;
-            padding: 1rem 1.5rem;
-        }
-
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gray);
-        }
-
-        .table td {
-            vertical-align: middle;
-            padding: 1rem 0.75rem;
-        }
-
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .btn-group .btn {
-            border-radius: 8px;
-            margin: 0 2px;
-        }
+    .btn-group .btn {
+        border-radius: 8px;
+        margin: 0 2px;
+    }
 
     .btn-go-back {
         background: linear-gradient(145deg, #4a90e2, #357ABD);
@@ -93,114 +93,136 @@
             color: white;
         }
 
+    .btn-dashboard {
+        background: #4361ee;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(67, 97, 238, 0.4);
+    }
 
-        .search-box {
-            position: relative;
-        }
-
-            .search-box input {
-                padding-left: 2.5rem;
-                border-radius: 8px;
-            }
-
-            .search-box i {
-                position: absolute;
-                left: 1rem;
-                top: 50%;
-                transform: translateY(-50%);
-                color: var(--gray);
-            }
-
-        .stats-card {
-            border-left: 4px solid;
-        }
-
-            .stats-card.primary {
-                border-left-color: var(--primary);
-            }
-
-            .stats-card.success {
-                border-left-color: var(--success);
-            }
-
-            .stats-card.warning {
-                border-left-color: var(--warning);
-            }
-
-        .empty-state {
-            padding: 3rem 1rem;
-        }
-
-        .action-btn {
-            width: 36px;
-            height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-
-        .supplier-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
+        .btn-dashboard:hover {
+            background: #3a0ca3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(67, 97, 238, 0.5);
             color: white;
-            margin-right: 12px;
         }
 
-        .pagination .page-link {
+    .search-box {
+        position: relative;
+    }
+
+        .search-box input {
+            padding-left: 2.5rem;
             border-radius: 8px;
-            margin: 0 2px;
-            border: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
             color: var(--gray);
         }
 
-        .pagination .page-item.active .page-link {
-            background-color: var(--primary);
+    .stats-card {
+        border-left: 4px solid;
+    }
+
+        .stats-card.primary {
+            border-left-color: var(--primary);
         }
 
-        .filter-dropdown .dropdown-menu {
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: none;
-            padding: 0.5rem;
+        .stats-card.success {
+            border-left-color: var(--success);
         }
 
-        .filter-dropdown .dropdown-item {
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
+        .stats-card.warning {
+            border-left-color: var(--warning);
         }
 
-            .filter-dropdown .dropdown-item:hover {
-                background-color: #f1f5f9;
-            }
+    .empty-state {
+        padding: 3rem 1rem;
+    }
 
-    </style>
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
 
-    <div class="container-fluid py-4">
-        <!-- Header Section -->
-        <div class="dashboard-header p-4 mb-4 text-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-2">Supplier Management</h1>
-                    <p class="mb-0 opacity-8">Manage all refrigerator suppliers in the system</p>
-                </div>
-            <a asp-area="PurchasingSubsystem" asp-controller="ManageSuppliers" asp-action="Create" class="btn btn-light">
-                <i class="fas fa-plus me-2"></i>Add New Supplier
-            </a>
+    .supplier-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        margin-right: 12px;
+    }
 
-            <a asp-controller="ManageEmployee" asp-action="Dashboard" class="btn btn-go-back">
-                ← Go Back to Dashboard
-            </a>
+    .pagination .page-link {
+        border-radius: 8px;
+        margin: 0 2px;
+        border: none;
+        color: var(--gray);
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary);
+    }
+
+    .filter-dropdown .dropdown-menu {
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: none;
+        padding: 0.5rem;
+    }
+
+    .filter-dropdown .dropdown-item {
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+    }
+
+        .filter-dropdown .dropdown-item:hover {
+            background-color: #f1f5f9;
+        }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="dashboard-header p-4 mb-4 text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-2">Supplier Management</h1>
+                <p class="mb-0 opacity-8">Manage all refrigerator suppliers in the system</p>
+            </div>
+            <div class="d-flex gap-2">
+                <!-- Dashboard Button -->
+                <a asp-area="PurchasingSubsystem" asp-controller="Purchase" asp-action="Index" class="btn-dashboard">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+                <a asp-area="PurchasingSubsystem" asp-controller="ManageSuppliers" asp-action="Create" class="btn btn-light">
+                    <i class="fas fa-plus me-2"></i>Add New Supplier
+                </a>
             </div>
         </div>
+    </div>
 
-        <!-- Success Alert -->
-        @if (TempData["SuccessMessage"] != null)
+    <!-- Success Alert -->
+    @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
             <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
@@ -208,117 +230,117 @@
         </div>
     }
 
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3">
-                <div class="card stats-card primary h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted mb-2">Total Suppliers</h6>
-                                <h3 class="fw-bold mb-0">@Model.Count()</h3>
-                            </div>
-                            <div class="align-self-center">
-                                <span class="badge bg-primary bg-opacity-10 text-primary p-2">
-                                    <i class="fas fa-truck fa-lg"></i>
-                                </span>
-                            </div>
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-muted mb-2">Total Suppliers</h6>
+                            <h3 class="fw-bold mb-0">@Model.Count()</h3>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-3">
-                <div class="card stats-card success h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted mb-2">Active Suppliers</h6>
-                                <h3 class="fw-bold mb-0">@Model.Count(s => s.IsActive)</h3>
-                            </div>
-                            <div class="align-self-center">
-                                <span class="badge bg-success bg-opacity-10 text-success p-2">
-                                    <i class="fas fa-check-circle fa-lg"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-3">
-                <div class="card stats-card warning h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted mb-2">Inactive Suppliers</h6>
-                                <h3 class="fw-bold mb-0">@Model.Count(s => !s.IsActive)</h3>
-                            </div>
-                            <div class="align-self-center">
-                                <span class="badge bg-warning bg-opacity-10 text-warning p-2">
-                                    <i class="fas fa-clock fa-lg"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-3">
-                <div class="card stats-card primary h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted mb-2">With Address</h6>
-                                <h3 class="fw-bold mb-0">@Model.Count(s => !string.IsNullOrEmpty(s.Address))</h3>
-                            </div>
-                            <div class="align-self-center">
-                                <span class="badge bg-primary bg-opacity-10 text-primary p-2">
-                                    <i class="fas fa-map-marker-alt fa-lg"></i>
-                                </span>
-                            </div>
+                        <div class="align-self-center">
+                            <span class="badge bg-primary bg-opacity-10 text-primary p-2">
+                                <i class="fas fa-truck fa-lg"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Main Content Card -->
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-list me-2"></i>All Suppliers
-                </h5>
-                <div class="d-flex">
-                    <div class="search-box me-2">
-                        <i class="fas fa-search"></i>
-                        <input type="text" class="form-control" placeholder="Search suppliers..." id="searchInput">
-                    </div>
-                    <div class="filter-dropdown">
-                        <button class="btn btn-light dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
-                            <i class="fas fa-filter me-1"></i>Filter
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item filter-option" href="#" data-filter="all">All Suppliers</a></li>
-                            <li><a class="dropdown-item filter-option" href="#" data-filter="active">Active Only</a></li>
-                            <li><a class="dropdown-item filter-option" href="#" data-filter="inactive">Inactive</a></li>
-                        </ul>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-muted mb-2">Active Suppliers</h6>
+                            <h3 class="fw-bold mb-0">@Model.Count(s => s.IsActive)</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <span class="badge bg-success bg-opacity-10 text-success p-2">
+                                <i class="fas fa-check-circle fa-lg"></i>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="suppliersTable">
-                        <thead class="table-primary">
-                            <tr>
-                                <th class="border-0">Supplier</th>
-                                <th class="border-0">Contact Person</th>
-                                <th class="border-0">Email</th>
-                                <th class="border-0">Phone</th>
-                                <th class="border-0">Address</th>
-                                <th class="border-0 text-center">Status</th>
-                                <th class="border-0 text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="suppliersTableBody">
-                            @foreach (var item in Model)
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-muted mb-2">Inactive Suppliers</h6>
+                            <h3 class="fw-bold mb-0">@Model.Count(s => !s.IsActive)</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <span class="badge bg-warning bg-opacity-10 text-warning p-2">
+                                <i class="fas fa-clock fa-lg"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-muted mb-2">With Address</h6>
+                            <h3 class="fw-bold mb-0">@Model.Count(s => !string.IsNullOrEmpty(s.Address))</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <span class="badge bg-primary bg-opacity-10 text-primary p-2">
+                                <i class="fas fa-map-marker-alt fa-lg"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-list me-2"></i>All Suppliers
+            </h5>
+            <div class="d-flex">
+                <div class="search-box me-2">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Search suppliers..." id="searchInput">
+                </div>
+                <div class="filter-dropdown">
+                    <button class="btn btn-light dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="all">All Suppliers</a></li>
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="active">Active Only</a></li>
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="inactive">Inactive</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="suppliersTable">
+                    <thead class="table-primary">
+                        <tr>
+                            <th class="border-0">Supplier</th>
+                            <th class="border-0">Contact Person</th>
+                            <th class="border-0">Email</th>
+                            <th class="border-0">Phone</th>
+                            <th class="border-0">Address</th>
+                            <th class="border-0 text-center">Status</th>
+                            <th class="border-0 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suppliersTableBody">
+                        @foreach (var item in Model)
                         {
                             <tr class="supplier-row" data-status="@(item.IsActive ? "active" : "inactive")">
                                 <td>
@@ -347,15 +369,15 @@
                                 <td class="text-center">
                                     @if (item.IsActive)
                                     {
-                                    <span class="status-badge bg-success bg-opacity-10 text-success">
-                                        <i class="fas fa-check-circle me-1"></i>Active
-                                    </span>
+                                        <span class="status-badge bg-success bg-opacity-10 text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Active
+                                        </span>
                                     }
                                     else
                                     {
-                                    <span class="status-badge bg-danger bg-opacity-10 text-danger">
-                                        <i class="fas fa-times-circle me-1"></i>Inactive
-                                    </span>
+                                        <span class="status-badge bg-danger bg-opacity-10 text-danger">
+                                            <i class="fas fa-times-circle me-1"></i>Inactive
+                                        </span>
                                     }
                                 </td>
                                 <td class="text-end">
@@ -376,11 +398,11 @@
                                 </td>
                             </tr>
                         }
-                        </tbody>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
+            </div>
 
-                @if (!Model.Any())
+            @if (!Model.Any())
             {
                 <div class="text-center py-5">
                     <div class="mb-4">
@@ -388,52 +410,57 @@
                     </div>
                     <h5 class="text-muted mb-3">No Suppliers Found</h5>
                     <p class="text-muted mb-4">Get started by adding your first supplier to the system</p>
-                    <a asp-action="Create" class="btn btn-primary px-4">
-                        <i class="fas fa-plus me-2"></i>Add First Supplier
-                    </a>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a asp-area="PurchasingSubsystem" asp-controller="Purchase" asp-action="Index" class="btn-dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Go to Dashboard
+                        </a>
+                        <a asp-action="Create" class="btn btn-primary px-4">
+                            <i class="fas fa-plus me-2"></i>Add First Supplier
+                        </a>
+                    </div>
                 </div>
             }
-            </div>
         </div>
     </div>
+</div>
 
-    @section Scripts {
-        <script>
-            // Search functionality
-            document.getElementById('searchInput').addEventListener('input', function () {
-                const searchTerm = this.value.toLowerCase();
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.supplier-row');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-option').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const filter = this.getAttribute('data-filter');
                 const rows = document.querySelectorAll('.supplier-row');
 
                 rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    if (text.includes(searchTerm)) {
+                    if (filter === 'all') {
                         row.style.display = '';
                     } else {
-                        row.style.display = 'none';
+                        const status = row.getAttribute('data-status');
+                        if (status === filter) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
                     }
                 });
             });
-
-            // Filter functionality
-            document.querySelectorAll('.filter-option').forEach(item => {
-                item.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const filter = this.getAttribute('data-filter');
-                    const rows = document.querySelectorAll('.supplier-row');
-
-                    rows.forEach(row => {
-                        if (filter === 'all') {
-                            row.style.display = '';
-                        } else {
-                            const status = row.getAttribute('data-status');
-                            if (status === filter) {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        }
-                    });
-                });
-            });
-        </script>
-    }
+        });
+    </script>
+}
