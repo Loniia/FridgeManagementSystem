@@ -301,6 +301,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
         }
 
 
+
         private async Task ReloadViewModelData(CustomerAllocationViewModel model)
         {
             _logger.LogInformation("ReloadViewModelData called");
