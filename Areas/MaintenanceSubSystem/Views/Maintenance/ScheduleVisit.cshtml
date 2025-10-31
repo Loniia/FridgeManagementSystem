@@ -361,19 +361,22 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             let calendar;
             let calendarInitialized = false;
 
-            // Button click handler to show modal
-            document.getElementById('checkAvailabilityBtn').addEventListener('click', function() {
-                const modalElement = document.getElementById('availabilityModal');
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-            });
+            const checkBtn = document.getElementById('checkAvailabilityBtn');
+            const modalEl = document.getElementById('availabilityModal');
+            const calendarEl = document.getElementById('calendar');
 
-            // Modal shown event
-            document.getElementById('availabilityModal').addEventListener('shown.bs.modal', function() {
+            if (!checkBtn || !modalEl || !calendarEl) return;
+
+            // Open modal
+            const modal = new bootstrap.Modal(modalEl);
+            checkBtn.addEventListener('click', () => modal.show());
+
+            // Initialize or refetch calendar when modal is shown
+            modalEl.addEventListener('shown.bs.modal', function () {
                 if (!calendarInitialized) {
                     initializeCalendar();
                 } else {
@@ -382,8 +385,6 @@
             });
 
             function initializeCalendar() {
-                const calendarEl = document.getElementById('calendar');
-
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
                     headerToolbar: {
@@ -394,9 +395,12 @@
                     events: {
                         url: '@Url.Action("GetTechnicianSchedule", "Maintenance", new { area = "MaintenanceSubSystem" })',
                         method: 'GET',
-                        failure: function() {
+                        failure: function () {
                             console.error('Failed to fetch events from server');
                             alert('Failed to fetch calendar events from server');
+                        },
+                        success: function (data) {
+                            console.log('Events fetched:', data);
                         }
                     },
                     height: 500,
@@ -410,10 +414,9 @@
                         minute: '2-digit',
                         meridiem: 'short'
                     },
-                    eventContent: function(arg) {
+                    eventContent: function (arg) {
                         const time = arg.event.extendedProps.time;
                         const title = arg.event.title;
-
                         return {
                             html: `
                                 <div class="fc-event-content">
@@ -423,20 +426,18 @@
                             `
                         };
                     },
-                    eventClick: function(info) {
-                        const event = info.event;
-                        const details = event.extendedProps;
-
+                    eventClick: function (info) {
+                        const e = info.event.extendedProps;
                         alert(
                             `Maintenance Visit\n\n` +
-                            `Date: ${details.date}\n` +
-                            `Time: ${details.time}\n` +
-                            `Fridge: ${details.fridge}\n` +
-                            `Customer: ${details.customer}\n` +
-                            `Address: ${details.address}`
+                            `Date: ${e.date}\n` +
+                            `Time: ${e.time}\n` +
+                            `Fridge: ${e.fridge}\n` +
+                            `Customer: ${e.customer}\n` +
+                            `Address: ${e.address}`
                         );
                     },
-                    eventDidMount: function(info) {
+                    eventDidMount: function (info) {
                         if (info.event.extendedProps.customer) {
                             info.el.setAttribute('title',
                                 `Fridge: ${info.event.title}\n` +
@@ -445,12 +446,9 @@
                             );
                         }
                     },
-                    loading: function(isLoading) {
-                        if (isLoading) {
-                            console.log('Loading calendar events...');
-                        } else {
-                            console.log('Calendar events loaded, total events:', calendar.getEvents().length);
-                        }
+                    loading: function (isLoading) {
+                        if (isLoading) console.log('Loading calendar events...');
+                        else console.log('Calendar events loaded, total events:', calendar.getEvents().length);
                     }
                 });
 
@@ -458,7 +456,7 @@
                 calendarInitialized = true;
             }
 
-            // Fill request details (optional)
+            // Optional: Fill request details in form
             const requestsData = @Html.Raw(ViewBag.RequestsJson ?? "[]");
             const requestSelect = document.getElementById('requestSelect');
             const customerNameInput = document.getElementById('customerName');
@@ -479,18 +477,15 @@
             }
 
             if (requestSelect) {
-                requestSelect.addEventListener('change', function() {
+                requestSelect.addEventListener('change', function () {
                     const id = parseInt(this.value) || 0;
                     fillDetailsById(id);
                 });
 
-                // Preselect first request
                 if (requestSelect.options.length > 1 && !requestSelect.value) {
                     requestSelect.selectedIndex = 1;
                     const initialId = parseInt(requestSelect.value);
-                    if (!isNaN(initialId)) {
-                        fillDetailsById(initialId);
-                    }
+                    if (!isNaN(initialId)) fillDetailsById(initialId);
                 }
             }
         });
