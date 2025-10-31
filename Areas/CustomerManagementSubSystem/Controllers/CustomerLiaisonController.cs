@@ -568,6 +568,7 @@ namespace FridgeManagementSystem.Areas.CustomerManagementSubSystem.Controllers
             return View(viewModel);
         }
 
+
         // --------------------------
         // Search Customers (Supports Soft Delete)
         // --------------------------
