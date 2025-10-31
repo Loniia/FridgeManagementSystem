@@ -5,9 +5,6 @@
 }
 
 <style>
-    /* ------------------- Your Existing Styling (unchanged) ------------------- */
-    /* ... all your styles remain exactly as before ... */
-
     /* Hero Section */
     .hero-section {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -53,38 +50,29 @@
         </div>
     </div>
 
-    <!-- ===================== HERO SECTION (LOGO + TAGLINE) ===================== -->
+    <!-- Hero Section -->
     <div class="hero-section">
         <img src="~/images/logo.jpg" alt="Dynamic Ice Inc Logo" />
         <h2>Dynamic Ice Inc</h2>
         <p>Keeping Cool, Keeping Control — Revolutionizing Beverage Refrigeration</p>
     </div>
 
-    <!-- ===================== DYNAMIC ICE INC BUSINESS OVERVIEW ===================== -->
+    <!-- Business Overview -->
     <div class="card mb-4">
         <div class="card-header">
             <h5 class="card-title mb-0">Welcome to Dynamic Ice Inc</h5>
         </div>
         <div class="card-body">
             <p style="line-height:1.8; color:#2c3e50;">
-                <strong>Dynamic Ice Inc</strong> is a forward-thinking company specializing in providing
-                refrigeration solutions for beverage manufacturers and distributors. Founded on
-                <strong>10 February 2025</strong>, our mission is to revolutionize the traditional methods of
-                managing beverage refrigeration assets through innovation and technology.
+                <strong>Dynamic Ice Inc</strong> is a forward-thinking company specializing in providing refrigeration solutions for beverage manufacturers and distributors. Founded on <strong>10 February 2025</strong>, our mission is to revolutionize the traditional methods of managing beverage refrigeration assets through innovation and technology.
             </p>
 
             <p style="line-height:1.8; color:#2c3e50;">
-                We provide and manage fridges for retailers, spaza shops, and shebeens across South Africa,
-                ensuring that beverages remain perfectly chilled while empowering our customers with data-driven insights
-                into fridge performance, maintenance, and inventory.
+                We provide and manage fridges for retailers, spaza shops, and shebeens across South Africa, ensuring that beverages remain perfectly chilled while empowering our customers with data-driven insights into fridge performance, maintenance, and inventory.
             </p>
 
             <p style="line-height:1.8; color:#2c3e50;">
-                As part of the <strong>ONT3010 3rd Year Project</strong>, we developed the
-                <strong>Fridge Management System (FMS)</strong> — a powerful web-based platform that enhances
-                operational efficiency, automates communication, and integrates key business operations
-                such as customer management, fridge tracking, fault reporting, maintenance scheduling,
-                and supplier purchasing.
+                As part of the <strong>ONT3010 3rd Year Project</strong>, we developed the <strong>Fridge Management System (FMS)</strong> — a powerful web-based platform that enhances operational efficiency, automates communication, and integrates key business operations such as customer management, fridge tracking, fault reporting, maintenance scheduling, and supplier purchasing.
             </p>
 
             <h6 class="mt-4" style="font-weight:600;">🧩 Our System Subsystems</h6>
@@ -98,9 +86,7 @@
 
             <h6 class="mt-4" style="font-weight:600;">🎯 Our Vision</h6>
             <p style="line-height:1.8; color:#2c3e50;">
-                Dynamic Ice Inc aims to become a leader in digital refrigeration management by integrating
-                smart systems that minimize downtime, optimize maintenance efficiency, and improve
-                transparency between suppliers, technicians, and customers.
+                Dynamic Ice Inc aims to become a leader in digital refrigeration management by integrating smart systems that minimize downtime, optimize maintenance efficiency, and improve transparency between suppliers, technicians, and customers.
             </p>
 
             <blockquote class="blockquote mt-3" style="font-style:italic; color:#764ba2;">
@@ -108,8 +94,8 @@
             </blockquote>
         </div>
     </div>
-    <!-- ===================== END BUSINESS OVERVIEW ===================== -->
-    <!-- ===================== EXISTING CONTENT ===================== -->
+
+    <!-- Existing Content -->
     <div class="row">
         <!-- Main Content Column -->
         <div class="col-lg-8">
@@ -133,7 +119,7 @@
                     </div>
                     <div class="info-row row">
                         <div class="col-sm-4 info-label">Year Founded</div>
-                        <div class="col-sm-8 info-value">@Model.YearFounded</div>
+                        <div class="col-sm-8 info-value">2025</div>
                     </div>
                 </div>
             </div>
@@ -188,7 +174,6 @@
                 <div class="card-body">
                     <div class="logo-container">
                         <img src="~/images/logo.jpg" alt="Company Logo" class="logo-img">
-                        <p class="mt-2 mb-0 text-muted">Upload your logo at <code>wwwroot/images/logo.jpg</code></p>
                     </div>
                 </div>
             </div>
@@ -238,20 +223,14 @@
                     <h5 class="card-title mb-0">Registration Details</h5>
                 </div>
                 <div class="card-body">
-                    @if (!string.IsNullOrEmpty(Model.RegistrationNumber))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Registration #</strong>
-                            <span class="info-value">@Model.RegistrationNumber</span>
-                        </div>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.TaxNumber))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Tax Number</strong>
-                            <span class="info-value">@Model.TaxNumber</span>
-                        </div>
-                    }
+                    <div class="contact-item">
+                        <strong class="info-label d-block mb-1">Registration #</strong>
+                        <span class="info-value">1234567890</span> <!-- Example Registration Number -->
+                    </div>
+                    <div class="contact-item">
+                        <strong class="info-label d-block mb-1">Tax Number</strong>
+                        <span class="info-value">TAX987654321</span> <!-- Example Tax Number -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -267,544 +246,3 @@
         });
     });
 </script>
-
-
-@* @model BusinessInfo
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Business Information";
-}
-
-<style>
-    /* Custom Card Styling */
-    .card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        margin-bottom: 1.5rem;
-    }
-
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        }
-
-    .card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-        letter-spacing: 0.5px;
-        border: none;
-        padding: 15px 20px;
-        position: relative;
-    }
-
-        .card-header:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: rgba(255,255,255,0.3);
-        }
-
-    .card-body {
-        padding: 25px;
-        background: #fff;
-    }
-
-    /* Button Styling */
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 12px 25px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        }
-
-    .btn-outline-secondary {
-        border: 2px solid #6c757d;
-        border-radius: 8px;
-        padding: 12px 25px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-        .btn-outline-secondary:hover {
-            background: #6c757d;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-
-    /* Header Styling */
-    h1 {
-        color: #2c3e50;
-        font-weight: 700;
-        position: relative;
-        margin-bottom: 0;
-    }
-
-        h1:after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 2px;
-        }
-
-    /* Alert Styling */
-    .alert {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        font-weight: 500;
-    }
-
-    .alert-success {
-        background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        color: #155724;
-        border-left: 4px solid #28a745;
-    }
-
-    .alert-danger {
-        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-        color: #721c24;
-        border-left: 4px solid #dc3545;
-    }
-
-    /* Info Row Styling */
-    .info-row {
-        padding: 12px 0;
-        border-bottom: 1px solid #f1f3f4;
-        transition: all 0.3s ease;
-    }
-
-        .info-row:hover {
-            background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
-            border-radius: 8px;
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-    .info-label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .info-value {
-        color: #2c3e50;
-        font-weight: 500;
-        font-size: 1rem;
-    }
-
-    /* Logo Styling */
-    .logo-container {
-        background: linear-gradient(135deg, #f8f9ff, #e9ecef);
-        border-radius: 12px;
-        padding: 2rem;
-        text-align: center;
-        transition: all 0.3s ease;
-    }
-
-        .logo-container:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.15);
-        }
-
-    .logo-img {
-        max-height: 120px;
-        max-width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-    }
-
-        .logo-img:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-
-    /* Social Media Buttons */
-    .social-btn {
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        flex: 1;
-        min-width: 120px;
-        text-align: center;
-    }
-
-    .btn-facebook {
-        background: linear-gradient(135deg, #3b5998, #4a6fbe);
-        color: white;
-    }
-
-        .btn-facebook:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(59, 89, 152, 0.4);
-            background: linear-gradient(135deg, #4a6fbe, #3b5998);
-            color: white;
-        }
-
-    .btn-linkedin {
-        background: linear-gradient(135deg, #0077b5, #00a0dc);
-        color: white;
-    }
-
-        .btn-linkedin:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.4);
-            background: linear-gradient(135deg, #00a0dc, #0077b5);
-            color: white;
-        }
-
-    .btn-twitter {
-        background: linear-gradient(135deg, #1da1f2, #3aa1f3);
-        color: white;
-    }
-
-        .btn-twitter:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(29, 161, 242, 0.4);
-            background: linear-gradient(135deg, #3aa1f3, #1da1f2);
-            color: white;
-        }
-
-    /* Contact Info Styling */
-    .contact-item {
-        padding: 10px 0;
-        border-bottom: 1px solid #f1f3f4;
-        transition: all 0.3s ease;
-    }
-
-        .contact-item:hover {
-            background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
-            border-radius: 8px;
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-
-        .contact-item:last-child {
-            border-bottom: none;
-        }
-
-    /* Animation */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .card {
-        animation: fadeInUp 0.6s ease forwards;
-    }
-
-        .card:nth-child(2) {
-            animation-delay: 0.1s;
-        }
-
-        .card:nth-child(3) {
-            animation-delay: 0.2s;
-        }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .card-body {
-            padding: 20px;
-        }
-
-        .btn-primary, .btn-outline-secondary {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .social-btn {
-            min-width: 100px;
-            font-size: 0.8rem;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-        }
-
-        .logo-container {
-            padding: 1.5rem;
-        }
-    }
-
-    /* Website Link Styling */
-    .website-link {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border-bottom: 2px solid transparent;
-    }
-
-        .website-link:hover {
-            color: #764ba2;
-            border-bottom: 2px solid #764ba2;
-        }
-</style>
-
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <h1>Business Information</h1>
-        <div class="d-flex gap-2">
-            <a asp-action="Manage" class="btn btn-primary">Edit Business Info</a>
-            <a asp-action="About" target="_blank" class="btn btn-outline-secondary">View Public Page</a>
-        </div>
-    </div>
-
-    <!-- Success/Error Messages -->
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    <div class="row">
-        <!-- Main Content Column -->
-        <div class="col-lg-8">
-            <!-- Company Overview -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Company Overview</h5>
-                </div>
-                <div class="card-body">
-                    <div class="info-row row">
-                        <div class="col-sm-4 info-label">Company Name</div>
-                        <div class="col-sm-8 info-value">@Model.CompanyName</div>
-                    </div>
-                    <div class="info-row row">
-                        <div class="col-sm-4 info-label">Industry</div>
-                        <div class="col-sm-8 info-value">@Model.Industry</div>
-                    </div>
-                    <div class="info-row row">
-                        <div class="col-sm-4 info-label">Business Type</div>
-                        <div class="col-sm-8 info-value">@Model.BusinessType</div>
-                    </div>
-                    <div class="info-row row">
-                        <div class="col-sm-4 info-label">Year Founded</div>
-                        <div class="col-sm-8 info-value">@Model.YearFounded</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Company Description -->
-            @if (!string.IsNullOrEmpty(Model.CompanyDescription))
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">About Us</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text" style="line-height: 1.8; color: #495057;">@Model.CompanyDescription</p>
-                    </div>
-                </div>
-            }
-
-            <!-- Mission & Values -->
-            @if (!string.IsNullOrEmpty(Model.MissionStatement))
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Mission Statement</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text" style="line-height: 1.8; color: #495057; font-style: italic;">@Model.MissionStatement</p>
-                    </div>
-                </div>
-            }
-
-            <!-- Services -->
-            @if (!string.IsNullOrEmpty(Model.ServicesDescription))
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">What We Do</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text" style="line-height: 1.8; color: #495057;">@Model.ServicesDescription</p>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Sidebar Column -->
-        <div class="col-lg-4">
-            <!-- Logo -->
-            @if (!string.IsNullOrEmpty(Model.LogoUrl))
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Company Logo</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="logo-container">
-                            <img src="@Model.LogoUrl" alt="Company Logo" class="logo-img">
-                        </div>
-                    </div>
-                </div>
-            }
-
-            <!-- Contact Information -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Contact Information</h5>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(Model.Address))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Address</strong>
-                            <span class="info-value">@Model.Address</span>
-                        </div>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.Phone))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Phone</strong>
-                            <span class="info-value">@Model.Phone</span>
-                        </div>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.Email))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Email</strong>
-                            <span class="info-value">@Model.Email</span>
-                        </div>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.Website))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Website</strong>
-                            <span class="info-value">
-                                <a href="@Model.Website" target="_blank" class="website-link">@Model.Website</a>
-                            </span>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Registration Details -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Registration Details</h5>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(Model.RegistrationNumber))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Registration #</strong>
-                            <span class="info-value">@Model.RegistrationNumber</span>
-                        </div>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.TaxNumber))
-                    {
-                        <div class="contact-item">
-                            <strong class="info-label d-block mb-1">Tax Number</strong>
-                            <span class="info-value">@Model.TaxNumber</span>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Social Media -->
-            @if (!string.IsNullOrEmpty(Model.FacebookUrl) || !string.IsNullOrEmpty(Model.LinkedInUrl) || !string.IsNullOrEmpty(Model.TwitterUrl))
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Social Media</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap gap-2">
-                            @if (!string.IsNullOrEmpty(Model.FacebookUrl))
-                            {
-                                <a href="@Model.FacebookUrl" target="_blank" class="social-btn btn-facebook">
-                                    <i class="bi bi-facebook me-1"></i>Facebook
-                                </a>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.LinkedInUrl))
-                            {
-                                <a href="@Model.LinkedInUrl" target="_blank" class="social-btn btn-linkedin">
-                                    <i class="bi bi-linkedin me-1"></i>LinkedIn
-                                </a>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.TwitterUrl))
-                            {
-                                <a href="@Model.TwitterUrl" target="_blank" class="social-btn btn-twitter">
-                                    <i class="bi bi-twitter me-1"></i>Twitter
-                                </a>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add hover effects to cards
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', function () {
-                this.style.transform = 'translateY(-5px)';
-            });
-
-            card.addEventListener('mouseleave', function () {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-
-        // Add smooth scrolling for alerts
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.style.transition = 'all 0.3s ease';
-        });
-    });
-</script> *@
