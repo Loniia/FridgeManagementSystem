@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FridgeManagementSystem.Migrations
 {
     [DbContext(typeof(FridgeDbContext))]
-    [Migration("20251027110327_FixSupplierColumnMapping")]
-    partial class FixSupplierColumnMapping
+    [Migration("20251030235804_Final")]
+    partial class Final
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -386,7 +386,8 @@ namespace FridgeManagementSystem.Migrations
 
                     b.Property<string>("Note")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("CustomerNoteId");
 
@@ -657,6 +658,9 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<DateTime>("ReportDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ReportSource")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -697,7 +701,7 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int?>("CustomerID")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("DateAdded")
+                    b.Property<DateOnly?>("DateAdded")
                         .HasColumnType("date");
 
                     b.Property<DateTime>("DeliveryDate")
@@ -746,7 +750,7 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int>("SupplierID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedDate")
+                    b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("WarrantyExpiry")
@@ -775,7 +779,8 @@ namespace FridgeManagementSystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllocationID"));
 
-                    b.Property<DateOnly>("AllocationDate")
+                    b.Property<DateOnly?>("AllocationDate")
+                        .IsRequired()
                         .HasColumnType("date");
 
                     b.Property<int>("CustomerID")
@@ -820,7 +825,7 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<int>("FridgeID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("LastUpdated")
+                    b.Property<DateTime?>("LastUpdated")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Quantity")
@@ -935,7 +940,7 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("RequestDate")
+                    b.Property<DateTime?>("RequestDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("TaskStatus")
@@ -1085,14 +1090,15 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime>("OrderDate")
+                    b.Property<DateTime?>("OrderDate")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<int>("OrderProgress")
                         .HasMaxLength(50)
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("PaymentDate")
+                    b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PaymentMethod")
@@ -1312,7 +1318,8 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateOnly>("RequestDate")
+                    b.Property<DateOnly?>("RequestDate")
+                        .IsRequired()
                         .HasColumnType("date");
 
                     b.Property<string>("RequestNumber")
@@ -1374,7 +1381,8 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("SupplierID")
+                    b.Property<int?>("SupplierID")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("QuotationID");
@@ -1410,10 +1418,7 @@ namespace FridgeManagementSystem.Migrations
                     b.Property<DateTime?>("DiagnosisDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("Employee")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FaultID")
+                    b.Property<int?>("FaultID")
                         .HasColumnType("int");
 
                     b.Property<int>("FaultReportId")
@@ -1462,8 +1467,6 @@ namespace FridgeManagementSystem.Migrations
 
                     b.HasKey("RepairID");
 
-                    b.HasIndex("Employee");
-
                     b.HasIndex("FaultID");
 
                     b.HasIndex("FaultReportId");
@@ -1507,7 +1510,7 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("SupplierID")
+                    b.Property<int?>("SupplierID")
                         .HasColumnType("int");
 
                     b.HasKey("RFQID");
@@ -1560,7 +1563,8 @@ namespace FridgeManagementSystem.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateOnly>("ScrapDate")
+                    b.Property<DateOnly?>("ScrapDate")
+                        .IsRequired()
                         .HasColumnType("date");
 
                     b.HasKey("FridgeID");
@@ -1835,7 +1839,7 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.DeliveryNote", b =>
                 {
-                    b.HasOne("FridgeManagementSystem.Models.PurchaseOrder", "purchaseOrder")
+                    b.HasOne("FridgeManagementSystem.Models.PurchaseOrder", "PurchaseOrder")
                         .WithMany()
                         .HasForeignKey("PurchaseOrderId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1847,9 +1851,9 @@ namespace FridgeManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Supplier");
+                    b.Navigation("PurchaseOrder");
 
-                    b.Navigation("purchaseOrder");
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.Employee", b =>
@@ -2148,15 +2152,9 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.RepairSchedule", b =>
                 {
-                    b.HasOne("FridgeManagementSystem.Models.Employee", "FaultTechnician")
-                        .WithMany()
-                        .HasForeignKey("Employee");
-
                     b.HasOne("FridgeManagementSystem.Models.Fault", null)
                         .WithMany("RepairSchedules")
-                        .HasForeignKey("FaultID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .HasForeignKey("FaultID");
 
                     b.HasOne("FridgeManagementSystem.Models.FaultReport", "FaultReport")
                         .WithMany("RepairSchedules")
@@ -2172,8 +2170,6 @@ namespace FridgeManagementSystem.Migrations
 
                     b.Navigation("FaultReport");
 
-                    b.Navigation("FaultTechnician");
-
                     b.Navigation("Fridge");
                 });
 
@@ -2187,9 +2183,7 @@ namespace FridgeManagementSystem.Migrations
 
                     b.HasOne("FridgeManagementSystem.Models.Supplier", "Supplier")
                         .WithMany()
-                        .HasForeignKey("SupplierID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .HasForeignKey("SupplierID");
 
                     b.Navigation("PurchaseRequest");
 
@@ -2360,8 +2354,7 @@ namespace FridgeManagementSystem.Migrations
 
             modelBuilder.Entity("FridgeManagementSystem.Models.MaintenanceRequest", b =>
                 {
-                    b.Navigation("MaintenanceVisit")
-                        .IsRequired();
+                    b.Navigation("MaintenanceVisit");
                 });
 
             modelBuilder.Entity("FridgeManagementSystem.Models.MaintenanceVisit", b =>
