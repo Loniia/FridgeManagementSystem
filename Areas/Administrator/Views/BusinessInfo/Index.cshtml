@@ -5,6 +5,277 @@
 }
 
 <style>
+    /* ------------------- Your Existing Styling (unchanged) ------------------- */
+    /* ... all your styles remain exactly as before ... */
+
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.2);
+        margin-bottom: 2rem;
+    }
+
+        .hero-section img {
+            max-width: 180px;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-section h2 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.1rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+    /* Overview List */
+    .overview-list li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1>Business Information</h1>
+        <div class="d-flex gap-2">
+            <a asp-action="Manage" class="btn btn-primary">Edit Business Info</a>
+            <a asp-action="About" target="_blank" class="btn btn-outline-secondary">View Public Page</a>
+        </div>
+    </div>
+
+    <!-- ===================== HERO SECTION (LOGO + TAGLINE) ===================== -->
+    <div class="hero-section">
+        <img src="~/images/logo.jpg" alt="Dynamic Ice Inc Logo" />
+        <h2>Dynamic Ice Inc</h2>
+        <p>Keeping Cool, Keeping Control — Revolutionizing Beverage Refrigeration</p>
+    </div>
+
+    <!-- ===================== DYNAMIC ICE INC BUSINESS OVERVIEW ===================== -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Welcome to Dynamic Ice Inc</h5>
+        </div>
+        <div class="card-body">
+            <p style="line-height:1.8; color:#2c3e50;">
+                <strong>Dynamic Ice Inc</strong> is a forward-thinking company specializing in providing
+                refrigeration solutions for beverage manufacturers and distributors. Founded on
+                <strong>10 February 2025</strong>, our mission is to revolutionize the traditional methods of
+                managing beverage refrigeration assets through innovation and technology.
+            </p>
+
+            <p style="line-height:1.8; color:#2c3e50;">
+                We provide and manage fridges for retailers, spaza shops, and shebeens across South Africa,
+                ensuring that beverages remain perfectly chilled while empowering our customers with data-driven insights
+                into fridge performance, maintenance, and inventory.
+            </p>
+
+            <p style="line-height:1.8; color:#2c3e50;">
+                As part of the <strong>ONT3010 3rd Year Project</strong>, we developed the
+                <strong>Fridge Management System (FMS)</strong> — a powerful web-based platform that enhances
+                operational efficiency, automates communication, and integrates key business operations
+                such as customer management, fridge tracking, fault reporting, maintenance scheduling,
+                and supplier purchasing.
+            </p>
+
+            <h6 class="mt-4" style="font-weight:600;">🧩 Our System Subsystems</h6>
+            <ul class="overview-list" style="line-height:1.8; color:#2c3e50;">
+                <li><strong>Administration Subsystem:</strong> Core of operations managing customers, employees, and fridge locations.</li>
+                <li><strong>Customer Management Subsystem:</strong> Manages customer data, fridge allocations, and inventory tracking.</li>
+                <li><strong>Fridge Fault Subsystem:</strong> Handles fault reports, technician scheduling, and repair tracking.</li>
+                <li><strong>Fridge Maintenance Subsystem:</strong> Manages service records and maintenance scheduling for optimal performance.</li>
+                <li><strong>Purchasing Subsystem:</strong> Streamlines supplier management and procurement processes.</li>
+            </ul>
+
+            <h6 class="mt-4" style="font-weight:600;">🎯 Our Vision</h6>
+            <p style="line-height:1.8; color:#2c3e50;">
+                Dynamic Ice Inc aims to become a leader in digital refrigeration management by integrating
+                smart systems that minimize downtime, optimize maintenance efficiency, and improve
+                transparency between suppliers, technicians, and customers.
+            </p>
+
+            <blockquote class="blockquote mt-3" style="font-style:italic; color:#764ba2;">
+                “Keeping Cool, Keeping Control — Dynamic Ice Inc.”
+            </blockquote>
+        </div>
+    </div>
+    <!-- ===================== END BUSINESS OVERVIEW ===================== -->
+    <!-- ===================== EXISTING CONTENT ===================== -->
+    <div class="row">
+        <!-- Main Content Column -->
+        <div class="col-lg-8">
+            <!-- Company Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Company Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-row row">
+                        <div class="col-sm-4 info-label">Company Name</div>
+                        <div class="col-sm-8 info-value">@Model.CompanyName</div>
+                    </div>
+                    <div class="info-row row">
+                        <div class="col-sm-4 info-label">Industry</div>
+                        <div class="col-sm-8 info-value">@Model.Industry</div>
+                    </div>
+                    <div class="info-row row">
+                        <div class="col-sm-4 info-label">Business Type</div>
+                        <div class="col-sm-8 info-value">@Model.BusinessType</div>
+                    </div>
+                    <div class="info-row row">
+                        <div class="col-sm-4 info-label">Year Founded</div>
+                        <div class="col-sm-8 info-value">@Model.YearFounded</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Description -->
+            @if (!string.IsNullOrEmpty(Model.CompanyDescription))
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">About Us</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" style="line-height: 1.8; color: #495057;">@Model.CompanyDescription</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Mission & Values -->
+            @if (!string.IsNullOrEmpty(Model.MissionStatement))
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Mission Statement</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" style="line-height: 1.8; color: #495057; font-style: italic;">@Model.MissionStatement</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Services -->
+            @if (!string.IsNullOrEmpty(Model.ServicesDescription))
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">What We Do</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" style="line-height: 1.8; color: #495057;">@Model.ServicesDescription</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar Column -->
+        <div class="col-lg-4">
+            <!-- Logo -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Company Logo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="logo-container">
+                        <img src="~/images/logo.jpg" alt="Company Logo" class="logo-img">
+                        <p class="mt-2 mb-0 text-muted">Upload your logo at <code>wwwroot/images/logo.jpg</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Address))
+                    {
+                        <div class="contact-item">
+                            <strong class="info-label d-block mb-1">Address</strong>
+                            <span class="info-value">@Model.Address</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Phone))
+                    {
+                        <div class="contact-item">
+                            <strong class="info-label d-block mb-1">Phone</strong>
+                            <span class="info-value">@Model.Phone</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Email))
+                    {
+                        <div class="contact-item">
+                            <strong class="info-label d-block mb-1">Email</strong>
+                            <span class="info-value">@Model.Email</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Website))
+                    {
+                        <div class="contact-item">
+                            <strong class="info-label d-block mb-1">Website</strong>
+                            <span class="info-value">
+                                <a href="@Model.Website" target="_blank" class="website-link">@Model.Website</a>
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Registration Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Registration Details</h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.RegistrationNumber))
+                    {
+                        <div class="contact-item">
+                            <strong class="info-label d-block mb-1">Registration #</strong>
+                            <span class="info-value">@Model.RegistrationNumber</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.TaxNumber))
+                    {
+                        <div class="contact-item">
+                            <strong class="info-label d-block mb-1">Tax Number</strong>
+                            <span class="info-value">@Model.TaxNumber</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function () { this.style.transform = 'translateY(-5px)'; });
+            card.addEventListener('mouseleave', function () { this.style.transform = 'translateY(0)'; });
+        });
+    });
+</script>
+
+
+@* @model BusinessInfo
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Business Information";
+}
+
+<style>
     /* Custom Card Styling */
     .card {
         border: none;
@@ -536,4 +807,4 @@
             alert.style.transition = 'all 0.3s ease';
         });
     });
-</script>
+</script> *@
