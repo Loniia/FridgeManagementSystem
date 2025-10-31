@@ -12,8 +12,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace FridgeManagementSystem.Controllers
 {
-    [Route("Reports")]
-    [ApiController]
+    
+    
     public class ReportsController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -24,8 +24,7 @@ namespace FridgeManagementSystem.Controllers
         }
 
         [HttpGet]
-        [Route("")]
-        [Route("Index")]
+       
         public async Task<IActionResult> Index()
         {
             var model = new ReportDashboardViewModel();
@@ -139,7 +138,7 @@ namespace FridgeManagementSystem.Controllers
         // ============
 
         [HttpGet]
-        [Route("GetFaultSummaryData")]
+        
         public async Task<IActionResult> GetFaultSummaryData(DateTime? startDate, DateTime? endDate)
         {
             try
@@ -180,7 +179,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Urgency Distribution with Route
         [HttpGet]
-        [Route("GetUrgencyDistribution")]
+        
         public async Task<IActionResult> GetUrgencyDistribution(DateTime? startDate, DateTime? endDate)
         {
             try
@@ -219,7 +218,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Fault Type Distribution with Date Range and Route
         [HttpGet]
-        [Route("GetFaultTypeDistribution")]
+        
         public async Task<IActionResult> GetFaultTypeDistribution(DateTime? startDate, DateTime? endDate)
         {
             // Default to last 30 days if no dates provided
@@ -245,7 +244,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Monthly Fault Trends with Route
         [HttpGet]
-        [Route("GetFaultTrendsData")]
+        
         public async Task<IActionResult> GetFaultTrendsData(int months = 6)
         {
             var startDate = DateTime.Today.AddMonths(-months);
@@ -284,7 +283,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Brand Fault Analysis with Date Range and Route
         [HttpGet]
-        [Route("GetBrandFaultAnalysis")]
+        
         public async Task<IActionResult> GetBrandFaultAnalysis(DateTime? startDate, DateTime? endDate)
         {
             // Default to last 30 days if no dates provided
@@ -320,7 +319,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Seasonal Fault Patterns with Route
         [HttpGet]
-        [Route("GetSeasonalFaultPatterns")]
+       
         public async Task<IActionResult> GetSeasonalFaultPatterns(int year = 0)
         {
             var targetYear = year > 0 ? year : DateTime.Now.Year;
@@ -351,7 +350,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Technician Performance with Date Range and Route
         [HttpGet]
-        [Route("GetTechnicianPerformance")]
+        
         public async Task<IActionResult> GetTechnicianPerformance(DateTime? startDate, DateTime? endDate)
         {
             // Default to last 30 days if no dates provided
@@ -383,7 +382,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Resolution Time Analysis with Date Range and Route
         [HttpGet]
-        [Route("GetResolutionTimeAnalysis")]
+       
         public async Task<IActionResult> GetResolutionTimeAnalysis(DateTime? startDate, DateTime? endDate)
         {
             // Default to last 30 days if no dates provided
@@ -419,7 +418,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Top Fault-Prone Fridges with Date Range and Route
         [HttpGet]
-        [Route("GetFaultProneFridges")]
+       
         public async Task<IActionResult> GetFaultProneFridges(DateTime? startDate, DateTime? endDate)
         {
             // Default to last 30 days if no dates provided
@@ -456,7 +455,7 @@ namespace FridgeManagementSystem.Controllers
 
         // ✅ Fault Status Distribution with Date Range and Route
         [HttpGet]
-        [Route("GetFaultStatusDistribution")]
+        
         public async Task<IActionResult> GetFaultStatusDistribution(DateTime? startDate, DateTime? endDate)
         {
             // Default to last 30 days if no dates provided
@@ -480,7 +479,7 @@ namespace FridgeManagementSystem.Controllers
         }
 
         [HttpGet]
-        [Route("FaultReports")]
+       
         public async Task<IActionResult> FaultReports(DateTime? startDate, DateTime? endDate)
         {
             // Default to last 30 days if no dates provided
@@ -520,8 +519,7 @@ namespace FridgeManagementSystem.Controllers
         //Customer Report side
         //=================
         [HttpGet]
-        [Route("AllCustomersSpendingReport")]
-        [Authorize(Roles = "Admin")]
+        
         public async Task<IActionResult> AllCustomersSpendingReport()
         {
             var customers = await _context.Customers
