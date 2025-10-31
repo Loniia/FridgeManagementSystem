@@ -136,11 +136,47 @@
     .loading {
         opacity: 0.6;
         pointer-events: none;
+        position: relative;
     }
+
+        .loading::after {
+            content: "Loading...";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            z-index: 1000;
+        }
 
     .spinner-sm {
         width: 0.9rem;
         height: 0.9rem;
+    }
+
+    .date-range-selector {
+        background: #f8f9fa;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    .refresh-btn {
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+
+        .refresh-btn:hover {
+            transform: rotate(180deg);
+        }
+
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 10px;
     }
 
     @@media (max-width: 768px) {
@@ -175,13 +211,53 @@
                 <i class="fas fa-arrow-left"></i>Back to Dashboard
             </a>
             <h1 class="mb-0">Reports Dashboard</h1>
+            <div>
+                <button class="btn btn-outline-primary btn-compact refresh-btn" onclick="refreshAllCharts()" title="Refresh Data">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
         </div>
+    </div>
+
+    <!-- Date Range Selector -->
+    <div class="date-range-selector">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" id="startDate" class="form-control form-control-sm" value="@DateTime.Today.AddDays(-30).ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" id="endDate" class="form-control form-control-sm" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary btn-sm" onclick="applyDateRange()">
+                            <i class="fas fa-filter"></i> Apply Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <small class="text-muted" id="dateRangeDisplay">Last 30 days</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="globalLoading">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <small class="ms-2">Loading report data...</small>
     </div>
 
     <!-- Maintenance Performance - Compact -->
     <div class="card mb-3">
-        <div class="card-header bg-info text-white">
-            <i class="fas fa-chart-bar"></i>Maintenance Performance - This Month
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-chart-bar"></i> Maintenance Performance - This Month</span>
+            <small>@DateTime.Now.ToString("MMMM yyyy")</small>
         </div>
         <div class="card-body">
             <canvas id="maintenanceChart" height="120"></canvas>
@@ -198,8 +274,9 @@
                 <!-- Fridges Overview Chart Only -->
                 <div class="col-12 mb-3">
                     <div class="card">
-                        <div class="card-header py-2">
+                        <div class="card-header py-2 d-flex justify-content-between align-items-center">
                             <h6 class="card-title mb-0">Fridges Overview</h6>
+                            <small class="text-muted">Real-time Status</small>
                         </div>
                         <div class="card-body p-2 d-flex justify-content-center">
                             <canvas id="fridgeChart" height="300" style="max-width:100%;"></canvas>
@@ -213,8 +290,9 @@
     <!-- Top 10 Customers Table in its own section -->
     <section class="mb-4">
         <div class="card">
-            <div class="card-header bg-success text-white">
-                <i class="fas fa-users"></i> Top 10 Customers
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-users"></i> Top 10 Customers</span>
+                <small>By Total Spending</small>
             </div>
             <div class="card-body p-2 table-responsive">
                 <table class="table table-sm table-striped table-bordered mb-0">
@@ -223,6 +301,7 @@
                             <th>#</th>
                             <th>Customer Name</th>
                             <th>Total Amount</th>
+                            <th>Orders</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -232,12 +311,22 @@
                                 <td>@(i + 1)</td>
                                 <td>@Model.TopCustomers[i].Name</td>
                                 <td>@Model.TopCustomers[i].TotalAmount.ToString("C")</td>
+                                <td>
+                                    <span class="badge bg-primary">@Model.TopCustomers[i].TotalAmount.ToString("N0")</span>
+                                </td>
+                            </tr>
+                        }
+                        @if (Model.TopCustomers.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No customer data available</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
         </div>
+
         <!-- Custom Reports Actions -->
         <div class="row mt-4">
             <div class="col-12 text-center">
@@ -245,10 +334,10 @@
                     <div class="card-body">
                         <h5 class="card-title">Custom Report Actions</h5>
                         <p class="card-text">Generate custom reports and export data for further analysis.</p>
-                        <button class="btn btn-info me-2">
-                            <i class="fas fa-download me-2"></i>Export Report
+                        <button class="btn btn-info me-2" onclick="exportReport('pdf')">
+                            <i class="fas fa-download me-2"></i>Export PDF
                         </button>
-                        <button class="btn btn-outline-info">
+                        <button class="btn btn-outline-info" onclick="exportReport('excel')">
                             <i class="fas fa-plus me-2"></i>Create Custom Report
                         </button>
                     </div>
@@ -266,11 +355,12 @@
         </div>
     </section>
 
-    <!-- Fault Management Reports - Compact (Like Customer & Maintenance Sections) -->
+    <!-- Fault Management Reports - Compact -->
     <section class="mb-4">
         <div class="card">
-            <div class="card-header bg-danger text-white">
-                <i class="fas fa-exclamation-triangle"></i>Fault Management Report
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-exclamation-triangle"></i> Fault Management Report</span>
+                <small id="faultDateRange">Last 30 days</small>
             </div>
             <div class="card-body p-2">
                 <!-- Fault Summary Cards -->
@@ -279,7 +369,7 @@
                         <div class="card text-white bg-danger summary-card">
                             <div class="card-body text-center p-2">
                                 <h6 class="card-title">Total Faults</h6>
-                                <h2 id="totalFaults" class="mb-1">0</h2>
+                                <h2 id="totalFaults" class="mb-1">@Model.TotalFaultsCount</h2>
                                 <small>All Time</small>
                             </div>
                         </div>
@@ -288,7 +378,7 @@
                         <div class="card text-white bg-warning summary-card">
                             <div class="card-body text-center p-2">
                                 <h6 class="card-title">Pending Faults</h6>
-                                <h2 id="pendingFaults" class="mb-1">0</h2>
+                                <h2 id="pendingFaults" class="mb-1">@Model.PendingFaultsCount</h2>
                                 <small>Awaiting Action</small>
                             </div>
                         </div>
@@ -297,7 +387,7 @@
                         <div class="card text-white bg-primary summary-card">
                             <div class="card-body text-center p-2">
                                 <h6 class="card-title">High Priority</h6>
-                                <h2 id="highPriorityFaults" class="mb-1">0</h2>
+                                <h2 id="highPriorityFaults" class="mb-1">@Model.HighPriorityFaultsCount</h2>
                                 <small>Urgent Cases</small>
                             </div>
                         </div>
@@ -305,9 +395,9 @@
                     <div class="col-md-3">
                         <div class="card text-white bg-success summary-card">
                             <div class="card-body text-center p-2">
-                                <h6 class="card-title">Avg Resolution</h6>
-                                <h2 id="avgResolutionDays" class="mb-1">0</h2>
-                                <small>Days</small>
+                                <h6 class="card-title">Resolved</h6>
+                                <h2 id="resolvedFaults" class="mb-1">@Model.ResolvedFaultsCount</h2>
+                                <small>Completed</small>
                             </div>
                         </div>
                     </div>
@@ -317,8 +407,11 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header py-2">
+                            <div class="card-header py-2 d-flex justify-content-between align-items-center">
                                 <h6 class="card-title mb-0">Fault Type Distribution</h6>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="loadFaultTypeDistribution()" title="Refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
                             </div>
                             <div class="card-body p-2">
                                 <canvas id="faultTypeChart" height="200"></canvas>
@@ -327,11 +420,68 @@
                     </div>
                     <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header py-2">
+                            <div class="card-header py-2 d-flex justify-content-between align-items-center">
                                 <h6 class="card-title mb-0">Urgency Level Distribution</h6>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="loadUrgencyDistribution()" title="Refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
                             </div>
                             <div class="card-body p-2">
                                 <canvas id="faultUrgencyChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Faults Table -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">Recent Fault Reports</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Fridge</th>
+                                                <th>Customer</th>
+                                                <th>Fault Type</th>
+                                                <th>Urgency</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var fault in Model.RecentFaults)
+                                            {
+                                                <tr>
+                                                    <td>@fault.ReportDate.ToString("MMM dd, yyyy")</td>
+                                                    <td>@fault.Fridge?.Brand @fault.Fridge?.Model</td>
+                                                    <td>@fault.Fridge?.Customer?.FullName</td>
+                                                    <td><span class="badge bg-secondary">@fault.FaultType</span></td>
+                                                    <td>
+                                                        <span class="badge @GetUrgencyBadgeClass(fault.UrgencyLevel)">
+                                                            @fault.UrgencyLevel
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge @GetStatusBadgeClass(fault.Status)">
+                                                            @fault.Status
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            @if (Model.RecentFaults.Count == 0)
+                                            {
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">No recent faults</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -345,7 +495,7 @@
                                 <h6 class="card-title mb-2">Need Detailed Fault Analysis?</h6>
                                 <p class="card-text mb-2 small">Access comprehensive fault analytics with detailed breakdowns.</p>
                                 <a href="@Url.Action("FaultReports", "Reports")" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-chart-bar"></i>View Detailed Reports
+                                    <i class="fas fa-chart-bar"></i> View Detailed Reports
                                 </a>
                             </div>
                         </div>
@@ -356,70 +506,177 @@
     </section>
 </div>
 
+@functions {
+    public string GetUrgencyBadgeClass(UrgencyLevel urgency)
+    {
+        return urgency switch
+        {
+            UrgencyLevel.Emergency => "bg-danger",
+            UrgencyLevel.Critical => "bg-danger",
+            UrgencyLevel.High => "bg-warning",
+            UrgencyLevel.Medium => "bg-info",
+            UrgencyLevel.Low => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetStatusBadgeClass(FridgeManagementSystem.Models.TaskStatus status)
+    {
+        return status switch
+        {
+            FridgeManagementSystem.Models.TaskStatus.Pending => "bg-warning",
+            FridgeManagementSystem.Models.TaskStatus.InProgress => "bg-info",
+            FridgeManagementSystem.Models.TaskStatus.Complete => "bg-success",
+            FridgeManagementSystem.Models.TaskStatus.Cancelled => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Global variables
+        let currentStartDate = '@DateTime.Today.AddDays(-30).ToString("yyyy-MM-dd")';
+        let currentEndDate = '@DateTime.Today.ToString("yyyy-MM-dd")';
+
         // Initialize charts when page loads
         $(document).ready(function () {
+            initializeDatePickers();
             createFridgeStatusChart();
             loadFaultSummaryData();
             loadFaultTypeDistribution();
             loadUrgencyDistribution();
         });
 
+        // Date range functionality
+        function initializeDatePickers() {
+            const today = new Date().toISOString().split('T')[0];
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+            $('#startDate').val(thirtyDaysAgoStr);
+            $('#endDate').val(today);
+
+            currentStartDate = thirtyDaysAgoStr;
+            currentEndDate = today;
+        }
+
+        function applyDateRange() {
+            const startDate = $('#startDate').val();
+            const endDate = $('#endDate').val();
+
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Start date cannot be after end date');
+                return;
+            }
+
+            currentStartDate = startDate;
+            currentEndDate = endDate;
+
+            // Update display
+            const start = new Date(startDate).toLocaleDateString();
+            const end = new Date(endDate).toLocaleDateString();
+            $('#dateRangeDisplay').text(`${start} - ${end}`);
+            $('#faultDateRange').text(`${start} - ${end}`);
+
+            // Reload fault data with new date range
+            showLoading();
+            loadFaultSummaryData();
+            loadFaultTypeDistribution();
+            loadUrgencyDistribution();
+        }
+
+        function refreshAllCharts() {
+            showLoading();
+            loadFaultSummaryData();
+            loadFaultTypeDistribution();
+            loadUrgencyDistribution();
+        }
+
+        function showLoading() {
+            $('#globalLoading').show();
+            setTimeout(() => {
+                $('#globalLoading').hide();
+            }, 1000);
+        }
+
         // ===== FAULT REPORTS DATA FETCHING =====
 
-        // Load fault summary data for cards
         async function loadFaultSummaryData() {
             try {
-                const response = await fetch('/Reports/GetFaultSummaryData');
+                const url = `@Url.Action("GetFaultSummaryData", "Reports")?startDate=${currentStartDate}&endDate=${currentEndDate}`;
+                const response = await fetch(url);
+
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const data = await response.json();
 
+                if (data.success === false) {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
                 // Update summary cards
-                document.getElementById('totalFaults').textContent = data.totalFaults.toLocaleString();
-                document.getElementById('pendingFaults').textContent = data.pendingFaults.toLocaleString();
-                document.getElementById('highPriorityFaults').textContent = data.highPriorityFaults.toLocaleString();
-                document.getElementById('avgResolutionDays').textContent = data.averageResolutionDays.toFixed(1);
+                document.getElementById('totalFaults').textContent = data.totalFaults?.toLocaleString() || '0';
+                document.getElementById('pendingFaults').textContent = data.pendingFaults?.toLocaleString() || '0';
+                document.getElementById('highPriorityFaults').textContent = data.highPriorityFaults?.toLocaleString() || '0';
+                document.getElementById('avgResolutionDays').textContent = data.averageResolutionDays?.toFixed(1) || '0';
 
             } catch (error) {
                 console.error('Error loading fault summary data:', error);
-                // Set fallback values
-                document.getElementById('totalFaults').textContent = '0';
-                document.getElementById('pendingFaults').textContent = '0';
-                document.getElementById('highPriorityFaults').textContent = '0';
-                document.getElementById('avgResolutionDays').textContent = '0';
+                showError('Failed to load fault summary data');
             }
         }
 
-        // Load fault type distribution chart
         async function loadFaultTypeDistribution() {
             try {
-                const response = await fetch('/Reports/GetFaultTypeDistribution');
+                const url = `@Url.Action("GetFaultTypeDistribution", "Reports")?startDate=${currentStartDate}&endDate=${currentEndDate}`;
+                const response = await fetch(url);
+
                 if (!response.ok) throw new Error('Network response was not ok');
 
-                const data = await response.json();
-                renderFaultTypeChart(data.data || data);
+                const result = await response.json();
+                const data = result.data || result;
+
+                if (data.success === false) {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
+                renderFaultTypeChart(data);
 
             } catch (error) {
                 console.error('Error loading fault type distribution:', error);
                 renderFaultTypeChart([]);
+                showError('Failed to load fault type distribution');
             }
         }
 
-        // Load urgency level distribution chart
         async function loadUrgencyDistribution() {
             try {
-                const response = await fetch('/Reports/GetUrgencyDistribution');
+                const url = `@Url.Action("GetUrgencyDistribution", "Reports")?startDate=${currentStartDate}&endDate=${currentEndDate}`;
+                const response = await fetch(url);
+
                 if (!response.ok) throw new Error('Network response was not ok');
 
-                const data = await response.json();
-                renderUrgencyChart(data.data || data);
+                const result = await response.json();
+                const data = result.data || result;
+
+                if (data.success === false) {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
+                renderUrgencyChart(data);
 
             } catch (error) {
                 console.error('Error loading urgency distribution:', error);
                 renderUrgencyChart([]);
+                showError('Failed to load urgency distribution');
             }
         }
 
@@ -436,7 +693,11 @@
 
             // If no data, show empty state
             if (!data || data.length === 0) {
-                ctx.getContext('2d').fillText('No data available', 10, 10);
+                const context = ctx.getContext('2d');
+                context.fillStyle = '#6c757d';
+                context.font = '12px Arial';
+                context.textAlign = 'center';
+                context.fillText('No data available for selected date range', ctx.width / 2, ctx.height / 2);
                 return;
             }
 
@@ -448,7 +709,8 @@
                         data: data.map(item => item.count),
                         backgroundColor: [
                             '#e74c3c', '#3498db', '#f39c12', '#2ecc71',
-                            '#9b59b6', '#1abc9c', '#34495e', '#f1c40f'
+                            '#9b59b6', '#1abc9c', '#34495e', '#f1c40f',
+                            '#e67e22', '#16a085', '#8e44ad', '#2c3e50'
                         ],
                         borderWidth: 1,
                         borderColor: '#fff'
@@ -464,6 +726,17 @@
                                 boxWidth: 12,
                                 font: {
                                     size: 9
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
                                 }
                             }
                         }
@@ -484,7 +757,11 @@
 
             // If no data, show empty state
             if (!data || data.length === 0) {
-                ctx.getContext('2d').fillText('No data available', 10, 10);
+                const context = ctx.getContext('2d');
+                context.fillStyle = '#6c757d';
+                context.font = '12px Arial';
+                context.textAlign = 'center';
+                context.fillText('No data available for selected date range', ctx.width / 2, ctx.height / 2);
                 return;
             }
 
@@ -525,6 +802,10 @@
                                     size: 9
                                 },
                                 precision: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Number of Faults'
                             }
                         },
                         x: {
@@ -532,6 +813,10 @@
                                 font: {
                                     size: 9
                                 }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Urgency Level'
                             }
                         }
                     }
@@ -550,8 +835,8 @@
                     label: 'Maintenance KPI',
                     data: [
         @Model.MaintenanceKpi.CompletedThisMonth,
-        @Model.MaintenanceKpi.AvgCompletionDays.ToString("0"),
-        @Model.MaintenanceKpi.SuccessRate.ToString("0"),
+        @Model.MaintenanceKpi.AvgCompletionDays.ToString("0.0"),
+        @Model.MaintenanceKpi.SuccessRate.ToString("0.0"),
         @Model.MaintenanceKpi.MonthlyRepeatVisits
                     ],
                     backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c']
@@ -561,10 +846,36 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true }
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'KPI Values'
+                        }
+                    }
                 },
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    if (context.dataIndex === 2) { // Success Rate
+                                        label += context.parsed.y.toFixed(1) + '%';
+                                    } else if (context.dataIndex === 1) { // Avg Days
+                                        label += context.parsed.y.toFixed(1) + ' days';
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                }
+                                return label;
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -598,13 +909,39 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { display: true },
-                        title: { display: true, text: 'Fridges Overview' }
+                        title: {
+                            display: true,
+                            text: 'Fridges Overview - Current Status'
+                        }
                     },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Status Categories'
+                            }
+                        }
                     }
                 }
             });
+        }
+
+        // Utility functions
+        function exportReport(format) {
+            alert(`Export functionality for ${format.toUpperCase()} would be implemented here`);
+            // Implementation for export would go here
+        }
+
+        function showError(message) {
+            // You could implement a toast notification here
+            console.error('Error:', message);
         }
     </script>
 }

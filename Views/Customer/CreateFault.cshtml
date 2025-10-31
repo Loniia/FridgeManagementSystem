@@ -108,17 +108,13 @@
                                 </div>
 
                                 <!-- Fault Type -->
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label asp-for="FaultType" class="form-label">Fault Type *</label>
-                                        <input asp-for="FaultType" class="form-control"
-                                               placeholder="e.g., Not Cooling, Loud Noise, Water Leak" />
-                                        <span asp-validation-for="FaultType" class="text-danger"></span>
-                                        <small class="form-text text-muted">
-                                            <i class="fas fa-info-circle"></i>
-                                            Describe the type of fault (e.g., Not Cooling, Loud Noise, Water Leak)
-                                        </small>
-                                    </div>
+                                <div class="form-group mb-3">
+                                    <label asp-for="FaultType" class="form-label">Fault Type *</label>
+                                    <select asp-for="FaultType" class="form-select"
+                                            asp-items="Html.GetEnumSelectList<FaultType>()">
+                                        <option value="">-- Select Fault Type --</option>
+                                    </select>
+                                    <span asp-validation-for="FaultType" class="text-danger"></span>
                                 </div>
 
                                 <!-- Fault Description -->
