@@ -392,7 +392,9 @@
                         right: 'dayGridMonth,timeGridWeek,timeGridDay'
                     },
                     events: {
-                        url: '/MaintenanceSubSystem/Maintenance/GetTechnicianSchedule',
+                       url: url: '@Url.Action("GetTechnicianSchedule", "Maintenance", new { area = "MaintenanceSubSystem" })',
+
+
 
                         method: 'GET',
                         success: function(data) {
