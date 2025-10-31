@@ -373,8 +373,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     $(document).ready(function () {
@@ -403,34 +403,41 @@
                 newTime = newTime + ":00";
             }
 
-    $.post('@Url.Action("RescheduleVisit", "Maintenance", new { area = "MaintenanceSubSystem" })',
-        { visitId: visitId, newDate: newDate, newTime: newTime })
-        .done(function (res) {
-            if (res.success) {
-                location.reload();
-            } else {
-                alert(res.message || "Something went wrong.");
-            }
-        })
-        .fail(function (xhr, status, error) {
-            alert("Request failed: " + error);
+            $.post('@Url.Action("RescheduleVisit", "Maintenance", new { area = "MaintenanceSubSystem" })',
+                { visitId: visitId, newDate: newDate, newTime: newTime })
+                .done(function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message || "Something went wrong.");
+                    }
+                })
+                .fail(function (xhr, status, error) {
+                    alert("Request failed: " + error);
+                });
         });
 
-    $.post('@Url.Action("CancelVisit", "Maintenance", new { area = "MaintenanceSubSystem" })',
-        { visitId: visitId })
-        .done(function (res) {
-            if (res.success) {
-                $('#visit-' + visitId).fadeOut(300, function () {
-                    $(this).remove();
+        // Cancel visit
+        $('.cancel-btn').click(function () {
+            var visitId = $(this).data('id');
+
+            if (!confirm("Are you sure you want to cancel this visit?")) return;
+
+            $.post('@Url.Action("CancelVisit", "Maintenance", new { area = "MaintenanceSubSystem" })',
+                { visitId: visitId })
+                .done(function (res) {
+                    if (res.success) {
+                        $('#visit-' + visitId).fadeOut(300, function () {
+                            $(this).remove();
+                        });
+                    } else {
+                        alert(res.message);
+                    }
+                })
+                .fail(function (xhr, status, error) {
+                    alert("Request failed: " + error);
                 });
-            } else {
-                alert(res.message);
-            }
-        })
-        .fail(function (xhr, status, error) {
-            alert("Request failed: " + error);
         });
-        
     });
 </script>
 
