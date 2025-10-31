@@ -779,6 +779,7 @@ namespace FridgeManagementSystem.Controllers
             {
                 FridgeOptions = await GetCustomerFridgesAsync(),
                 PriorityOptions = GetPriorityOptions()
+                // FaultType is not preset - user will select from dropdown
             };
 
             // If fridgeId is provided AND belongs to customer
@@ -793,7 +794,6 @@ namespace FridgeManagementSystem.Controllers
                     ViewBag.HasPreselectedFridge = true;
                     ViewBag.SelectedFridgeInfo = $"{selectedFridge.Brand} {selectedFridge.Model} - {selectedFridge.FridgeType}";
 
-                    // Optional: Add order context if orderId is provided
                     if (orderId.HasValue)
                     {
                         ViewBag.OrderContext = $" (from Order #{orderId.Value})";
@@ -801,7 +801,6 @@ namespace FridgeManagementSystem.Controllers
                 }
                 else
                 {
-                    // Fridge doesn't belong to customer or doesn't exist
                     ViewBag.HasPreselectedFridge = false;
                     TempData["WarningMessage"] = "The selected fridge was not found in your account.";
                 }
@@ -816,7 +815,7 @@ namespace FridgeManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel, DateTime? reportDate) // <-- added optional reportDate
+        public async Task<IActionResult> CreateFault(CreateFaultViewModel viewModel, DateTime? reportDate)
         {
             if (!ModelState.IsValid)
             {
@@ -848,8 +847,8 @@ namespace FridgeManagementSystem.Controllers
                 {
                     FridgeId = viewModel.FridgeId,
                     FaultDescription = viewModel.FaultDescription,
-                    FaultType = viewModel.FaultType,
-                    ReportDate = reportDateToUse, // <-- updated
+                    FaultType = viewModel.FaultType, // ✅ Now using the selected value from dropdown
+                    ReportDate = reportDateToUse,
                     UrgencyLevel = MapPriorityToUrgency(viewModel.Priority),
                     Status = TaskStatus.Pending,
                 };
