@@ -99,7 +99,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        @if (item.Fridge.Status == "Allocated")
+                                        @if (item.Fridge.Status == "Available")
                                         {
                                             <!-- In your Order History view -->
                                             <a href="@Url.Action("CreateFault", "Customer", new { fridgeId = item.FridgeId, orderId = item.OrderId })"
