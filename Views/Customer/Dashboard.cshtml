@@ -587,7 +587,8 @@
 
                         <div class="product-card @(!isInStock ? "dimmed" : "")">
                             <span class="badge-stock @(isInStock ? "badge-in-stock" : "badge-out-of-stock")">@fridgeVm.Status</span>
-                            <img src="@Url.Content(fridgeVm.ImageUrl)" class="product-image" alt="@fridgeVm.Brand @fridgeVm.Model" />
+                            <img src="@Url.Content("~" + fridgeVm.ImageUrl)" class="product-image" alt="@fridgeVm.Brand @fridgeVm.Model" />
+
                             <div class="card-body">
                                 <h5 class="product-title">@fridgeVm.Brand @fridgeVm.Model</h5>
                                 <p class="text-muted mb-2">@fridgeVm.FridgeType</p>

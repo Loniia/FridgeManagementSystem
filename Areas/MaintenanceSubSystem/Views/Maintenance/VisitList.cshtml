@@ -403,40 +403,34 @@
                 newTime = newTime + ":00";
             }
 
-            $.post('/MaintenanceSubSystem/Maintenance/RescheduleVisit',
-                { visitId: visitId, newDate: newDate, newTime: newTime })
-                .done(function (res) {
-                    if (res.success) {
-                        location.reload();
-                    } else {
-                        alert(res.message || "Something went wrong.");
-                    }
-                })
-                .fail(function (xhr, status, error) {
-                    alert("Request failed: " + error);
-                });
+    $.post('@Url.Action("RescheduleVisit", "Maintenance", new { area = "MaintenanceSubSystem" })',
+        { visitId: visitId, newDate: newDate, newTime: newTime })
+        .done(function (res) {
+            if (res.success) {
+                location.reload();
+            } else {
+                alert(res.message || "Something went wrong.");
+            }
+        })
+        .fail(function (xhr, status, error) {
+            alert("Request failed: " + error);
         });
 
-        // Cancel visit
-        $('.cancel-btn').click(function () {
-            if (!confirm("Are you sure you want to cancel this visit?")) return;
-
-            var visitId = $(this).data('id');
-
-            $.post('/MaintenanceSubSystem/Maintenance/CancelVisit', { visitId: visitId })
-                .done(function (res) {
-                    if (res.success) {
-                        $('#visit-' + visitId).fadeOut(300, function () {
-                            $(this).remove();
-                        });
-                    } else {
-                        alert(res.message);
-                    }
-                })
-                .fail(function (xhr, status, error) {
-                    alert("Request failed: " + error);
+    $.post('@Url.Action("CancelVisit", "Maintenance", new { area = "MaintenanceSubSystem" })',
+        { visitId: visitId })
+        .done(function (res) {
+            if (res.success) {
+                $('#visit-' + visitId).fadeOut(300, function () {
+                    $(this).remove();
                 });
+            } else {
+                alert(res.message);
+            }
+        })
+        .fail(function (xhr, status, error) {
+            alert("Request failed: " + error);
         });
+        
     });
 </script>
 
