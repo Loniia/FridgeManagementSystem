@@ -171,7 +171,7 @@
     <!-- Compact Header Section -->
     <div class="header-section">
         <div class="d-flex justify-content-between align-items-center">
-            <a href="https://localhost:7130/Administrator/ManageEmployee/Dashboard" class="btn btn-secondary btn-compact">
+            <a href="@Url.Action("Dashboard", "ManageEmployee", new { area = "Administrator" })" class="btn btn-secondary btn-compact">
                 <i class="fas fa-arrow-left"></i>Back to Dashboard
             </a>
             <h1 class="mb-0">Reports Dashboard</h1>
@@ -259,7 +259,7 @@
         <!-- Customer Spending Report Button -->
         <div class="row mt-3">
             <div class="col-12 text-center">
-                <a asp-controller="Reports" asp-action="AllCustomersSpendingReport" class="btn btn-primary btn-sm">
+                <a href="@Url.Action("AllCustomersSpendingReport", "Reports")" class="btn btn-primary btn-sm">
                     <i class="fas fa-users me-2"></i> View Customer Spending Report
                 </a>
             </div>

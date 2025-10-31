@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 namespace FridgeManagementSystem.Controllers
 {
+    [Route("Reports")]
+    [ApiController]
     public class ReportsController : Controller
     {
         private readonly FridgeDbContext _context;
@@ -19,6 +21,9 @@ namespace FridgeManagementSystem.Controllers
         {
             _context = context;
         }
+        [HttpGet]
+        [Route("")]
+        [Route("Index")]
         public async Task<IActionResult> Index()
         {
             var model = new ReportDashboardViewModel();
@@ -133,10 +138,8 @@ namespace FridgeManagementSystem.Controllers
         // ============
         // FAULT MANAGEMENT REPORTS WITH DATE RANGE SUPPORT
         // ============
-
-        // ✅ Fault Summary Data with Date Range
-        // ✅ Fault Summary Data with Date Range
-        // ✅ SIMPLE FIX - Fault Summary Data
+        [HttpGet]
+        [Route("GetFaultSummaryData")]
         [HttpGet]
         public async Task<IActionResult> GetFaultSummaryData(DateTime? startDate, DateTime? endDate)
         {
@@ -468,7 +471,8 @@ namespace FridgeManagementSystem.Controllers
             return Json(new { Data = statusData, DateRange = new { StartDate = startDate, EndDate = endDate } });
         }
 
-   
+        [HttpGet]
+        [Route("FaultReports")]
         public async Task<IActionResult> FaultReports(DateTime? startDate, DateTime? endDate)
         {
 
@@ -508,6 +512,8 @@ namespace FridgeManagementSystem.Controllers
         //=================
         //Customer Report side
         //=================
+        [HttpGet]
+        [Route("AllCustomersSpendingReport")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AllCustomersSpendingReport()
         {
