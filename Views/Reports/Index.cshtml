@@ -372,7 +372,7 @@
         // Load fault summary data for cards
         async function loadFaultSummaryData() {
             try {
-                const response = await fetch('/Reports/GetFaultSummaryData');
+                const response = await fetch('@Url.Action("GetFaultSummaryData", "Reports")')
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const data = await response.json();
@@ -396,7 +396,7 @@
         // Load fault type distribution chart
         async function loadFaultTypeDistribution() {
             try {
-                const response = await fetch('/Reports/GetFaultTypeDistribution');
+                const response = await fetch('@Url.Action("GetFaultSummaryData", "Reports")')
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const data = await response.json();
@@ -411,7 +411,8 @@
         // Load urgency level distribution chart
         async function loadUrgencyDistribution() {
             try {
-                const response = await fetch('/Reports/GetUrgencyDistribution');
+                const response = await fetch('@Url.Action("GetUrgencyDistribution", "Reports")')
+
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const data = await response.json();
