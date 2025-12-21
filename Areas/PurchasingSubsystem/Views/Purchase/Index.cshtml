@@ -470,7 +470,7 @@
                     <p>Request, compare and manage supplier quotations for procurement needs.</p>
                 </div>
 
-                <!-- Delivery Notes -->
+@*                 <!-- Delivery Notes -->
                 <div class="action-card action-4" onclick="location.href='@Url.Action("Index", "DeliveryNotes", new { area = "PurchasingSubsystem" })'">
                     <div class="action-icon">
                         <i class="fas fa-truck-loading"></i>
@@ -478,7 +478,7 @@
                     <h3>Delivery Notes</h3>
                     <p>Track deliveries, create delivery notes and verify received goods.</p>
                 </div>
-
+ *@
                 <!-- Suppliers -->
                 <div class="action-card action-5" onclick="location.href='@Url.Action("Index", "ManageSuppliers", new { area = "PurchasingSubsystem" })'">
                     <div class="action-icon">
@@ -487,18 +487,6 @@
                     <h3>Manage Suppliers</h3>
                     <p>Add new suppliers, view supplier directory and manage contracts.</p>
                 </div>
-
-                <!-- Create New Order -->
-                <div class="action-card action-6" onclick="location.href='@Url.Action("Create", "PurchaseOrders", new { area = "PurchasingSubsystem" })'">
-                    <div class="action-icon">
-                        <i class="fas fa-plus-circle"></i>
-                    </div>
-                    <h3>Create New Order</h3>
-                    <p>Quickly create a new purchase order for immediate procurement needs.</p>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         // Set active nav link
